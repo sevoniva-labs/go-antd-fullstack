@@ -27,7 +27,7 @@ type Store interface {
 }
 
 func New(ctx context.Context, c appcfg.Storage) (Store, error) {
-	switch c.Provider {
+	switch normalizeStorageProvider(c.Provider) {
 	case "local", "":
 		if err := os.MkdirAll(c.LocalRoot, 0o750); err != nil {
 			return nil, err
@@ -85,6 +85,19 @@ func (l *local) Provider() string           { return "local" }
 type s3Store struct {
 	client *s3.Client
 	bucket string
+}
+
+func normalizeStorageProvider(value string) string {
+	p := strings.ToLower(strings.TrimSpace(value))
+	if p == "" {
+		return "local"
+	}
+	switch p {
+	case "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
+		return "s3"
+	default:
+		return p
+	}
 }
 
 func newS3(ctx context.Context, c appcfg.Storage) (Store, error) {

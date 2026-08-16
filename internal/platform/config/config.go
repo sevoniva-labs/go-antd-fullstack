@@ -119,7 +119,7 @@ type Search struct {
 }
 
 type Storage struct {
-	Provider      string `yaml:"provider"` // local | s3
+	Provider      string `yaml:"provider"` // local | s3 | s3-compatible/minio/oss/cos/ceph
 	LocalRoot     string `yaml:"local_root"`
 	Endpoint      string `yaml:"endpoint"`
 	Region        string `yaml:"region"`
@@ -402,6 +402,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Storage.TLSCertFile, "FORGE_STORAGE_TLS_CERT_FILE")
 	overrideString(&cfg.Storage.TLSKeyFile, "FORGE_STORAGE_TLS_KEY_FILE")
 	overrideString(&cfg.Storage.TLSServerName, "FORGE_STORAGE_TLS_SERVER_NAME")
+	cfg.Storage.Provider = normalizeStorageProvider(cfg.Storage.Provider)
 
 	overrideString(&cfg.Discovery.Provider, "FORGE_DISCOVERY_PROVIDER")
 	overrideCSV(&cfg.Discovery.Servers, "FORGE_NACOS_SERVERS")
@@ -458,6 +459,18 @@ func ApplyEnvironment(cfg *Config) {
 	overrideBool(&cfg.Compliance.DisableDebugEndpoints, "FORGE_DISABLE_DEBUG_ENDPOINTS")
 }
 
+func normalizeStorageProvider(value string) string {
+	v := strings.ToLower(strings.TrimSpace(value))
+	switch v {
+	case "", "local":
+		return "local"
+	case "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
+		return "s3"
+	default:
+		return v
+	}
+}
+
 func (c Config) Validate() error {
 	var errs []string
 	switch c.Database.Provider {
@@ -499,14 +512,14 @@ func (c Config) Validate() error {
 		errs = append(errs, "search.urls required when search is enabled")
 	}
 	switch c.Storage.Provider {
-	case "local", "s3":
+	case "local", "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
 	default:
-		errs = append(errs, "storage.provider must be local|s3")
+		errs = append(errs, "storage.provider must be local|s3 (s3-compatible aliases: s3-compatible/minio/oss/cos/ceph)")
 	}
-	if c.Storage.Provider == "s3" && c.Storage.Bucket == "" {
+	if normalizeStorageProvider(c.Storage.Provider) == "s3" && c.Storage.Bucket == "" {
 		errs = append(errs, "storage.bucket required for s3")
 	}
-	if c.Storage.Provider == "local" && strings.TrimSpace(c.Storage.LocalRoot) == "" {
+	if normalizeStorageProvider(c.Storage.Provider) == "local" && strings.TrimSpace(c.Storage.LocalRoot) == "" {
 		errs = append(errs, "storage.local_root required for local storage")
 	}
 	switch c.Discovery.Provider {

@@ -22,6 +22,9 @@
 | Search | OpenSearch | Built-in | REST-compatible adapter，目标版本仍需兼容测试 |
 | Storage | Local | Built-in | 单实例/开发 |
 | Storage | S3-compatible | Built-in | AWS S3 SDK；兼容 MinIO、S3 兼容对象存储协议（COS/OSS/R2/Ceph/CloudStack 等）按实际版本验证 |
+
+`FORGE_STORAGE_PROVIDER` 支持别名：`s3`, `s3-compatible`, `minio`, `oss`, `cos`, `ceph`, `ceph-rgw`，启动时会统一归一化为 `s3`（大小写不敏感，带下划线/短横线兼容）。
+
 | Config Center | Nacos | Built-in | 启动拉取 + Watch API |
 | Service Registry | Nacos | Built-in | register/deregister/health |
 | Crypto | Standard | Built-in | SHA-256 + AES-GCM |
