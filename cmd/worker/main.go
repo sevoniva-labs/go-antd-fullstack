@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/sevoniva-labs/forge/internal/app/audit"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
 	"github.com/sevoniva-labs/forge/internal/platform/idempotency"
@@ -51,10 +52,27 @@ func run(ctx context.Context) error {
 	}
 	box := outbox.New(db)
 	idem := idempotency.New(db)
+	auditWriter := audit.NewWriter(db)
 	poll := time.NewTicker(time.Second)
 	defer poll.Stop()
 	gc := time.NewTicker(time.Hour)
 	defer gc.Stop()
+	auditGC := time.NewTicker(24 * time.Hour)
+	defer auditGC.Stop()
+	runAuditRetention := func() {
+		if cfg.Compliance.AuditRetentionDays <= 0 {
+			return
+		}
+		if n, err := auditWriter.PurgeExpired(ctx, cfg.Compliance.AuditRetentionDays); err != nil && !errors.Is(err, context.Canceled) {
+			log.Error("audit log retention gc", "err", err, "retention_days", cfg.Compliance.AuditRetentionDays)
+		} else if n > 0 {
+			log.Info("audit logs purged", "deleted", n, "retention_days", cfg.Compliance.AuditRetentionDays)
+		}
+	}
+	runAuditRetention()
+	if cfg.Compliance.NetworkLogRetentionDays > 0 {
+		log.Info("network log retention is enforced by your log platform in this scaffold; app retention config kept for policy control")
+	}
 	for {
 		select {
 		case <-ctx.Done():
@@ -63,6 +81,8 @@ func run(ctx context.Context) error {
 			if err := idem.PurgeExpired(ctx); err != nil && !errors.Is(err, context.Canceled) {
 				log.Error("idempotency gc", "err", err)
 			}
+		case <-auditGC.C:
+			runAuditRetention()
 		case <-poll.C:
 			n, err := box.PublishBatch(ctx, bus, 100)
 			if err != nil && !errors.Is(err, context.Canceled) {

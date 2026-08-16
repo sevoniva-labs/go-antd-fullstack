@@ -22,27 +22,33 @@ services:
       retries: 20
     volumes: ["redis_data:/data"]
 
-  minio:
-    image: ${MINIO_IMAGE:-minio/minio:latest}
+  s3:
+    image: ${S3_IMAGE:-minio/minio:latest}
     command: server /data --console-address :9001
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+      MINIO_ROOT_USER: ${FORGE_STORAGE_ACCESS_KEY:?set FORGE_STORAGE_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${FORGE_STORAGE_SECRET_KEY:?set FORGE_STORAGE_SECRET_KEY in .env}
     ports: ["9001:9001"]
-    volumes: ["minio_data:/data"]
+    volumes: ["s3_data:/data"]
 
-  minio-init:
-    image: ${MINIO_MC_IMAGE:-minio/mc:latest}
+  s3-init:
+    image: ${S3_MC_IMAGE:-minio/mc:latest}
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
-    depends_on:
-      - minio
+      FORGE_STORAGE_ENDPOINT: ${FORGE_STORAGE_ENDPOINT:-http://s3:9000}
+      FORGE_STORAGE_BUCKET: ${FORGE_STORAGE_BUCKET:-forge}
+      MINIO_ROOT_USER: ${FORGE_STORAGE_ACCESS_KEY:?set FORGE_STORAGE_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${FORGE_STORAGE_SECRET_KEY:?set FORGE_STORAGE_SECRET_KEY in .env}
+      S3_BUCKET_AUTO_CREATE: ${S3_BUCKET_AUTO_CREATE:-true}
+    depends_on: [s3]
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
-        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done;
-        mc mb --ignore-existing local/forge
+        if [ "${S3_BUCKET_AUTO_CREATE:-true}" != "true" ]; then
+          echo "S3 bucket auto-create disabled. Ensure bucket exists on target storage endpoint."
+          exit 0
+        fi
+        until mc alias set local ${FORGE_STORAGE_ENDPOINT:-http://s3:9000} "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done;
+        mc mb --ignore-existing local/$$FORGE_STORAGE_BUCKET
     restart: "no"
 
   forge:
@@ -53,8 +59,14 @@ services:
       FORGE_CONFIG: /app/config.yaml
       FORGE_DATABASE_DSN: postgres://forge:forge_dev@postgres:5432/forge?sslmode=disable
       FORGE_REDIS_ADDRESS: redis:6379
-      FORGE_STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
-      FORGE_STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+      FORGE_STORAGE_PROVIDER: s3
+      FORGE_STORAGE_ENDPOINT: ${FORGE_STORAGE_ENDPOINT:-http://s3:9000}
+      FORGE_STORAGE_REGION: ${FORGE_STORAGE_REGION:-us-east-1}
+      FORGE_STORAGE_BUCKET: ${FORGE_STORAGE_BUCKET:-forge}
+      FORGE_STORAGE_PATH_STYLE: ${FORGE_STORAGE_PATH_STYLE:-true}
+      FORGE_STORAGE_TLS: ${FORGE_STORAGE_TLS:-false}
+      FORGE_STORAGE_ACCESS_KEY: ${FORGE_STORAGE_ACCESS_KEY:?set FORGE_STORAGE_ACCESS_KEY in .env}
+      FORGE_STORAGE_SECRET_KEY: ${FORGE_STORAGE_SECRET_KEY:?set FORGE_STORAGE_SECRET_KEY in .env}
       FORGE_CRYPTO_KEY: ${FORGE_CRYPTO_KEY:?set FORGE_CRYPTO_KEY in .env}
       FORGE_SECURE_COOKIES: "false"
       FORGE_PUBLIC_URL: http://localhost:8080
@@ -63,9 +75,9 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
-      minio-init: { condition: service_completed_successfully }
+      s3-init: { condition: service_completed_successfully }
 
 volumes:
   postgres_data:
   redis_data:
-  minio_data:
+  s3_data:

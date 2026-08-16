@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  go:
+    name: Go + API checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Go format check
+        run: |
+          files=$(find cmd internal api -name '*.go')
+          if [ -z "$files" ]; then
+            exit 0
+          fi
+          unformatted=$(gofmt -l $files)
+          if [ -n "$unformatted" ]; then
+            echo "Go files need formatting:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: Go vet
+        run: go vet ./...
+      - name: Go tests
+        run: go test ./...
+      - name: OpenAPI lint
+        run: npx --yes @redocly/cli lint api/openapi.yaml
+      - name: Error code contract check
+        run: python3 scripts/check-error-codes.py
+      - name: Gosec
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec ./...
+      - name: Govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install frontend dependencies
+        working-directory: web
+        run: npm install
+      - name: Frontend lint
+        working-directory: web
+        run: npm run lint
+      - name: Frontend typecheck
+        working-directory: web
+        run: npm run typecheck
+      - name: Frontend unit tests
+        working-directory: web
+        run: npm run test
+      - name: Frontend build
+        working-directory: web
+        run: npm run build
+
+  image-and-helm:
+    name: Container + Helm checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: azure/setup-helm@v4
+      - name: Build image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -f deploy/docker/Dockerfile \
+            -t forge-ci:${{ github.sha }} \
+            .
+      - name: Helm lint
+        run: helm lint deploy/helm/forge
+      - name: Helm template
+        run: helm template forge deploy/helm/forge -f deploy/helm/forge/values.yaml >/tmp/forge-rendered.yaml

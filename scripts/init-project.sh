@@ -27,4 +27,4 @@ for p in root.rglob('*'):
 PY2
 
 echo "Initialized project: $APP_NAME ($MODULE)"
-echo "Next: cp .env.example .env && update secrets, then make compose-up"
+echo "Next: cp .env.example .env, fill secrets (including bootstrap + storage credentials), then make compose-up"

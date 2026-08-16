@@ -118,10 +118,10 @@ docker compose -f deploy/compose/minimal.yaml up -d --build
 # MySQL
 docker compose -f deploy/compose/mysql.yaml up -d --build
 
-# PostgreSQL + Redis + MinIO
+# PostgreSQL + Redis + S3-compatible 对象存储（例如 MinIO/COS/OSS 等）
 docker compose -f deploy/compose/standard.yaml up -d --build
 
-# PostgreSQL + Redis + Kafka + Elasticsearch + MinIO + Worker
+# PostgreSQL + Redis + Kafka + Elasticsearch + S3-compatible 对象存储（例如 MinIO/COS/OSS 等）+ Worker
 docker compose -f deploy/compose/full.yaml up -d --build
 
 # 本地 Nacos 3 辅助环境

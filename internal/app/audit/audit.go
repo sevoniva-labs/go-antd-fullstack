@@ -67,6 +67,24 @@ func (w *Writer) List(ctx context.Context, orgID string, limit int) ([]Event, er
 	return out, rows.Err()
 }
 
+// PurgeExpired deletes audit events older than retentionDays.
+// If retentionDays <= 0, it is treated as no-op for explicit keep-all mode.
+func (w *Writer) PurgeExpired(ctx context.Context, retentionDays int) (int64, error) {
+	if retentionDays <= 0 {
+		return 0, nil
+	}
+	cutoff := time.Now().UTC().AddDate(0, 0, -retentionDays)
+	res, err := w.db.ExecContext(ctx, w.db.Rebind(`DELETE FROM audit_logs WHERE occurred_at < ?`), cutoff)
+	if err != nil {
+		return 0, err
+	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return c, nil
+}
+
 func nullIfEmpty(v string) any {
 	if v == "" {
 		return nil

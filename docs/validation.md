@@ -27,17 +27,22 @@ Run once after cloning/generating a real project:
 ```bash
 go mod tidy
 go vet ./...
-go test -race ./...
+go test ./...
 cd web
 npm install
 npm run lint
+npm run typecheck
+npm run test
 npm run build
 cd ..
+
 python3 scripts/check-error-codes.py
 docker build -f deploy/docker/Dockerfile .
 helm lint deploy/helm/forge
-helm template forge deploy/helm/forge >/tmp/forge-rendered.yaml
+helm template forge deploy/helm/forge -f deploy/helm/forge/values.yaml >/tmp/forge-rendered.yaml
 ```
+
+CI in this repo also tracks these checks in `.github/workflows/ci.yml` for each push/PR.
 
 Then commit `go.sum` and the chosen frontend lockfile so dependency resolution becomes reproducible. The supplied CI/security/release workflows add OpenAPI lint, multi-architecture image builds, dependency vulnerability checks, SAST-style Go checks, secret scanning, Trivy, CycloneDX SBOM, BuildKit provenance/SBOM attestations and a Cosign signing baseline.
 

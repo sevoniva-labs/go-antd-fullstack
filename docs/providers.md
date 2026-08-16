@@ -21,7 +21,7 @@
 | Search | Elasticsearch | Built-in | REST adapter |
 | Search | OpenSearch | Built-in | REST-compatible adapter，目标版本仍需兼容测试 |
 | Storage | Local | Built-in | 单实例/开发 |
-| Storage | S3-compatible | Built-in | AWS S3 SDK；MinIO/COS/OSS/R2 按实际 S3 兼容性验证 |
+| Storage | S3-compatible | Built-in | AWS S3 SDK；兼容 MinIO、S3 兼容对象存储协议（COS/OSS/R2/Ceph/CloudStack 等）按实际版本验证 |
 | Config Center | Nacos | Built-in | 启动拉取 + Watch API |
 | Service Registry | Nacos | Built-in | register/deregister/health |
 | Crypto | Standard | Built-in | SHA-256 + AES-GCM |

@@ -1,0 +1,32 @@
+.DS_Store
+Thumbs.db
+
+# Go build artifacts
+/bin/
+/tmp/
+*.test
+
+
+# Frontend build artifacts
+/web/dist/
+/web/node_modules/
+/web/.next/
+
+
+# Logs / runtime artifacts
+*.log
+coverage/
+coverage.out
+
+# Editor/IDE/project files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.iml
+
+# Environment files
+.env
+
+# Optional local Kubernetes/Helm outputs
+*.tgz

@@ -8,11 +8,14 @@
 
 - `minimal.yaml`：PostgreSQL + API
 - `mysql.yaml`：MySQL + API
-- `standard.yaml`：PostgreSQL + Redis + MinIO
-- `full.yaml`：PostgreSQL + Redis + Kafka + Elasticsearch + MinIO + Worker
+- `standard.yaml`：PostgreSQL + Redis + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）
+- `full.yaml`：PostgreSQL + Redis + Kafka + Elasticsearch + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）+ Worker
 - `oceanbase-external.yaml`：外部 OceanBase MySQL mode
 - `nacos-dev.yaml`：本地 Nacos 3 开发辅助，不是生产 Nacos 集群模板
 - `observability-dev.yaml`：本地 Prometheus/OTel Collector 辅助
+
+如果使用外部 S3 兼容对象存储并由平台统一创建 bucket，可在 compose 使用前设置
+`S3_BUCKET_AUTO_CREATE=false`（标准/全量场景都支持），避免 `mc` 在非 MinIO 平台执行初始化导致启动阻塞。
 
 Compose 只用于开发/验证。生产中间件建议使用组织已有 HA 服务，不把开发 Compose 直接搬进生产。
 
