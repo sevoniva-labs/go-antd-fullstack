@@ -1,11 +1,13 @@
-import { EyeOutlined } from '@ant-design/icons'
+import { ExportOutlined, EyeOutlined } from '@ant-design/icons'
 import type { ProColumns } from '@ant-design/pro-components'
-import { Button, Descriptions, Tag, Typography } from 'antd'
+import { App, Button, Descriptions, InputNumber, Radio, Space, Tag, Typography } from 'antd'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/api'
 import { queryKeys } from '../api/queryKeys'
 import type { AuditEvent } from '../api/types'
+import { can } from '../auth/access'
+import { useMe } from '../auth/useMe'
 import { CopyText } from '../components/data-display/CopyText'
 import { SensitiveText } from '../components/data-display/SensitiveText'
 import { StatusTag } from '../components/data-display/StatusTag'
@@ -16,7 +18,13 @@ import { AppProTable } from '../components/table/AppProTable'
 
 export function AuditLogsPage() {
   const [detail, setDetail] = useState<AuditEvent | null>(null)
+  const { message } = App.useApp()
+  const me = useMe().data
+  const canExport = can(me, 'system.audit.export')
   const query = useQuery({ queryKey: queryKeys.auditLogs, queryFn: api.auditLogs, refetchInterval: 30_000 })
+  const [limit, setLimit] = useState<number>(2000)
+  const [format, setFormat] = useState<'json' | 'csv'>('json')
+  const [exporting, setExporting] = useState(false)
   const columns: ProColumns<AuditEvent>[] = [
     { title: '时间', dataIndex: 'occurred_at', valueType: 'dateTime', width: 180 },
     { title: '结果', dataIndex: 'result', width: 100, render: (_, row) => <StatusTag value={row.result} /> },
@@ -30,6 +38,30 @@ export function AuditLogsPage() {
   ]
   if (query.isError) return <AppPageContainer title="审计日志"><ErrorState error={query.error} onRetry={() => void query.refetch()} /></AppPageContainer>
 
+  const exportAuditLogs = async () => {
+    if (!canExport) return
+    try {
+      setExporting(true)
+      const safeLimit = Math.min(5000, Math.max(1, limit))
+      const result = await api.exportAuditLogs({ format, limit: safeLimit })
+      const defaultFilename = `audit-logs-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15)}.${format}`
+      const link = document.createElement('a')
+      const blobUrl = URL.createObjectURL(result.blob)
+      link.href = blobUrl
+      link.download = result.filename || defaultFilename
+      link.rel = 'noopener'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(blobUrl)
+      message.success(`审计日志导出成功：${link.download}`)
+    } catch (error) {
+      message.error((error as Error).message || '导出审计日志失败')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <AppPageContainer title="审计日志" subTitle="记录登录、账号、角色、Token、会话等关键安全与管理操作；运行日志由集中日志平台采集。">
       <AppProTable<AuditEvent>
@@ -38,6 +70,31 @@ export function AuditLogsPage() {
         dataSource={query.data?.items || []}
         loading={query.isLoading}
         search={false}
+        toolBarRender={() => [
+          <Space key="audit-export" size={12} wrap>
+            <InputNumber
+              value={limit}
+              min={1}
+              max={5000}
+              placeholder="导出条数"
+              style={{ width: 140 }}
+              onChange={(value) => setLimit(typeof value === 'number' ? value : 2000)}
+            />
+            <Radio.Group value={format} onChange={(e) => setFormat(e.target.value as 'json' | 'csv')}>
+              <Radio value="json">JSON</Radio>
+              <Radio value="csv">CSV</Radio>
+            </Radio.Group>
+            <Button
+              type="primary"
+              icon={<ExportOutlined />}
+              loading={exporting}
+              disabled={!canExport}
+              onClick={() => void exportAuditLogs()}
+            >
+              导出
+            </Button>
+          </Space>,
+        ]}
         options={{ reload: () => query.refetch() }}
       />
       <DetailDrawer title="审计详情" open={Boolean(detail)} onClose={() => setDetail(null)}>
