@@ -28,7 +28,12 @@ export interface Organization {
   id: string
   org_key: string
   name: string
+  status: string
+  description: string
+  max_users: number
+  max_active_sessions: number
   created_at: string
+  updated_at: string
 }
 
 export interface Permission {
@@ -88,6 +93,20 @@ export interface ReadinessCheck {
 export interface Readiness {
   status: 'UP' | 'DOWN'
   checks: ReadinessCheck[]
+}
+
+export interface SecurityPolicy {
+  password_min_length: number
+  password_require_upper: boolean
+  password_require_lower: boolean
+  password_require_digit: boolean
+  password_require_symbol: boolean
+  password_history: number
+  password_max_age_days: number
+  login_max_failures: number
+  login_lock_duration_seconds: number
+  session_ttl_seconds: number
+  max_active_sessions: number
 }
 
 export interface AuditEvent {

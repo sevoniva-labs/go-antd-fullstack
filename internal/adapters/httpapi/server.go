@@ -1,8 +1,11 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net"
@@ -10,6 +13,7 @@ import (
 	"net/http/pprof"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,6 +21,7 @@ import (
 
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
+	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/cache"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
@@ -89,6 +94,9 @@ func New(d Dependencies) *Server {
 		r.Delete("/api/v1/api-tokens/{tokenID}", s.revokeAPIToken)
 		r.Route("/api/v1/admin", func(r chi.Router) {
 			r.Get("/organization", requirePermissions("system.organization.read")(http.HandlerFunc(s.getOrganization)))
+			r.Patch("/organization", requirePermissions("system.organization.manage")(http.HandlerFunc(s.updateOrganization)))
+			r.Get("/security-config", requirePermissions("system.config.read")(http.HandlerFunc(s.getSecurityConfig)))
+			r.Put("/security-config", requirePermissions("system.security.manage")(http.HandlerFunc(s.updateSecurityConfig)))
 			r.Get("/roles", requirePermissions("system.role.read")(http.HandlerFunc(s.listRoles)))
 			r.Get("/permissions", requirePermissions("system.role.read")(http.HandlerFunc(s.listPermissions)))
 			r.Put("/roles/{roleKey}/permissions", requirePermissions("system.role.manage")(http.HandlerFunc(s.updateRolePermissions)))
@@ -101,6 +109,7 @@ func New(d Dependencies) *Server {
 			r.Get("/sessions", requirePermissions("system.session.read")(http.HandlerFunc(s.listSessions)))
 			r.Delete("/sessions/{sessionID}", requirePermissions("system.session.revoke")(http.HandlerFunc(s.revokeSession)))
 			r.Get("/audit-logs", requirePermissions("system.audit.read")(http.HandlerFunc(s.listAuditLogs)))
+			r.Get("/audit-logs/export", requirePermissions("system.audit.export")(http.HandlerFunc(s.exportAuditLogs)))
 		})
 	})
 	if s.metrics != nil && s.cfg.Observability.MetricsEnabled {
@@ -308,6 +317,122 @@ func (s *Server) getOrganization(w http.ResponseWriter, r *http.Request) {
 	httpx.Success(w, 200, item, RequestID(r), TraceID(r))
 }
 
+type updateOrganizationRequest struct {
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	Status            string `json:"status"`
+	MaxUsers          int    `json:"max_users"`
+	MaxActiveSessions int    `json:"max_active_sessions"`
+}
+
+func (s *Server) updateOrganization(w http.ResponseWriter, r *http.Request) {
+	p := Principal(r)
+	var req updateOrganizationRequest
+	if err := httpx.DecodeJSON(w, r, 128<<10, &req); err != nil {
+		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
+		return
+	}
+	item, err := s.identity.UpdateOrganization(r.Context(), p.OrganizationID, identity.Organization{
+		Name:         req.Name,
+		Description:  req.Description,
+		Status:       req.Status,
+		MaxUsers:     req.MaxUsers,
+		MaxSessions:  req.MaxActiveSessions,
+	})
+	if err != nil {
+		switch {
+		case strings.Contains(err.Error(), "invalid organization"):
+			httpx.Error(w, 400, "INVALID_ORGANIZATION", "组织参数不合法", RequestID(r), TraceID(r))
+		default:
+			s.log.Error("update organization failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			httpx.Error(w, 500, "INTERNAL", "更新组织信息失败", RequestID(r), TraceID(r))
+		}
+		return
+	}
+	if s.audit != nil {
+		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "organization.update", ResourceType: "organization", ResourceID: item.ID, ClientIP: s.clientIP(r), Details: map[string]any{
+			"name":               req.Name,
+			"description":        req.Description,
+			"status":             req.Status,
+			"max_users":          req.MaxUsers,
+			"max_active_sessions": req.MaxActiveSessions,
+		}})
+	}
+	httpx.Success(w, 200, item, RequestID(r), TraceID(r))
+}
+
+func (s *Server) getSecurityConfig(w http.ResponseWriter, r *http.Request) {
+	p := Principal(r)
+	policy, err := s.identity.SecurityPolicy(r.Context(), p.OrganizationID)
+	if err != nil {
+		s.log.Error("get security config failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		httpx.Error(w, 500, "INTERNAL", "查询安全配置失败", RequestID(r), TraceID(r))
+		return
+	}
+	httpx.Success(w, 200, policy, RequestID(r), TraceID(r))
+}
+
+type updateSecurityConfigRequest struct {
+	PasswordMinLength       int   `json:"password_min_length"`
+	PasswordRequireUpper     bool  `json:"password_require_upper"`
+	PasswordRequireLower     bool  `json:"password_require_lower"`
+	PasswordRequireDigit     bool  `json:"password_require_digit"`
+	PasswordRequireSymbol    bool  `json:"password_require_symbol"`
+	PasswordHistory         int   `json:"password_history"`
+	PasswordMaxAgeDays      int   `json:"password_max_age_days"`
+	LoginMaxFailures        int   `json:"login_max_failures"`
+	LoginLockDurationSeconds int64 `json:"login_lock_duration_seconds"`
+	SessionTTLSeconds       int64 `json:"session_ttl_seconds"`
+	MaxConcurrentSessions   int   `json:"max_active_sessions"`
+}
+
+func (s *Server) updateSecurityConfig(w http.ResponseWriter, r *http.Request) {
+	p := Principal(r)
+	var req updateSecurityConfigRequest
+	if err := httpx.DecodeJSON(w, r, 128<<10, &req); err != nil {
+		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
+		return
+	}
+	policy, err := s.identity.UpdateSecurityPolicy(r.Context(), p.OrganizationID, p.UserID, domain.SecurityPolicy{
+		PasswordMinLength:       req.PasswordMinLength,
+		PasswordRequireUpper:    req.PasswordRequireUpper,
+		PasswordRequireLower:    req.PasswordRequireLower,
+		PasswordRequireDigit:    req.PasswordRequireDigit,
+		PasswordRequireSymbol:   req.PasswordRequireSymbol,
+		PasswordHistory:         req.PasswordHistory,
+		PasswordMaxAgeDays:      req.PasswordMaxAgeDays,
+		LoginMaxFailures:        req.LoginMaxFailures,
+		LoginLockDurationSeconds: req.LoginLockDurationSeconds,
+		SessionTTLSeconds:       req.SessionTTLSeconds,
+		MaxConcurrentSessions:   req.MaxConcurrentSessions,
+	})
+	if err != nil {
+		if errors.Is(err, appidentity.ErrInvalidSecurityPolicy) {
+			httpx.Error(w, 400, "INVALID_SECURITY_CONFIG", "安全配置参数不合法", RequestID(r), TraceID(r))
+			return
+		}
+		s.log.Error("update security config failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		httpx.Error(w, 500, "INTERNAL", "更新安全配置失败", RequestID(r), TraceID(r))
+		return
+	}
+	if s.audit != nil {
+		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.config.update", ResourceType: "security", ResourceID: "policy", ClientIP: s.clientIP(r), Details: map[string]any{
+			"password_min_length":        req.PasswordMinLength,
+			"password_require_upper":     req.PasswordRequireUpper,
+			"password_require_lower":     req.PasswordRequireLower,
+			"password_require_digit":     req.PasswordRequireDigit,
+			"password_require_symbol":    req.PasswordRequireSymbol,
+			"password_history":           req.PasswordHistory,
+			"password_max_age_days":      req.PasswordMaxAgeDays,
+			"login_max_failures":         req.LoginMaxFailures,
+			"login_lock_duration_seconds": req.LoginLockDurationSeconds,
+			"session_ttl_seconds":        req.SessionTTLSeconds,
+			"max_active_sessions":        req.MaxConcurrentSessions,
+		}})
+	}
+	httpx.Success(w, 200, policy, RequestID(r), TraceID(r))
+}
+
 func (s *Server) listRoles(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	items, err := s.identity.ListRoles(r.Context(), p.OrganizationID)
@@ -508,6 +633,97 @@ func (s *Server) listAuditLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.Success(w, 200, map[string]any{"items": items}, RequestID(r), TraceID(r))
+}
+
+func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
+	p := Principal(r)
+	format := strings.TrimSpace(strings.ToLower(r.URL.Query().Get("format")))
+	if format == "" {
+		format = "json"
+	}
+	if format != "json" && format != "csv" {
+		httpx.Error(w, 400, "INVALID_REQUEST", "export format only supports json or csv", RequestID(r), TraceID(r))
+		return
+	}
+
+	limit := 200
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		v, err := strconv.Atoi(raw)
+		if err != nil || v <= 0 {
+			httpx.Error(w, 400, "INVALID_REQUEST", "limit must be positive integer", RequestID(r), TraceID(r))
+			return
+		}
+		limit = v
+	}
+
+	items, err := s.audit.List(r.Context(), p.OrganizationID, limit)
+	if err != nil {
+		s.log.Error("export audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
+		return
+	}
+	filename := "audit-logs-" + time.Now().UTC().Format("20060102-150405") + "." + format
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+
+	switch format {
+	case "csv":
+		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+		var buf bytes.Buffer
+		cw := csv.NewWriter(&buf)
+		_ = cw.Write([]string{
+			"id",
+			"occurred_at",
+			"request_id",
+			"organization_id",
+			"actor_id",
+			"actor_name",
+			"action",
+			"resource_type",
+			"resource_id",
+			"result",
+			"client_ip",
+			"details",
+		})
+		for _, item := range items {
+			details, _ := json.Marshal(item.Details)
+			_ = cw.Write([]string{
+				item.ID,
+				item.OccurredAt.UTC().Format(time.RFC3339Nano),
+				item.RequestID,
+				item.OrganizationID,
+				item.ActorID,
+				item.ActorName,
+				item.Action,
+				item.ResourceType,
+				item.ResourceID,
+				item.Result,
+				item.ClientIP,
+				string(details),
+			})
+		}
+		cw.Flush()
+		if err := cw.Error(); err != nil {
+			s.log.Error("write csv audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(buf.Bytes())
+	default:
+		data, err := json.Marshal(items)
+		if err != nil {
+			s.log.Error("encode json audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
+
+	if s.audit != nil {
+		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "audit.export", ResourceType: "audit_log", ClientIP: s.clientIP(r), Details: map[string]any{"format": format, "limit": limit}})
+	}
 }
 
 func (s *Server) organizationID(ctx context.Context, key string) (string, error) {

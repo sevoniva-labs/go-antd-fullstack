@@ -1,4 +1,4 @@
-import { apiFetch } from './client'
+import { apiDownload, apiFetch, type DownloadResult } from './client'
 import type {
   ApiToken,
   AuditEvent,
@@ -6,6 +6,7 @@ import type {
   Permission,
   Principal,
   Readiness,
+  SecurityPolicy,
   Role,
   SessionInfo,
   SystemInfo,
@@ -29,6 +30,16 @@ export const api = {
   readiness: () => apiFetch<Readiness>('/system/ready'),
 
   organization: () => apiFetch<Organization>('/admin/organization'),
+  updateOrganization: (payload: {
+    name: string
+    description: string
+    status: 'ACTIVE' | 'DISABLED'
+    max_users: number
+    max_active_sessions: number
+  }) => apiFetch<Organization>('/admin/organization', { method: 'PATCH', body: JSON.stringify(payload) }),
+  securityConfig: () => apiFetch<SecurityPolicy>('/admin/security-config'),
+  updateSecurityConfig: (payload: SecurityPolicy) =>
+    apiFetch<SecurityPolicy>('/admin/security-config', { method: 'PUT', body: JSON.stringify(payload) }),
   users: () => apiFetch<{ items: User[] }>('/admin/users'),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
@@ -50,4 +61,12 @@ export const api = {
   revokeSession: (sessionId: string) => apiFetch<void>(`/admin/sessions/${sessionId}`, { method: 'DELETE' }),
 
   auditLogs: () => apiFetch<{ items: AuditEvent[] }>('/admin/audit-logs'),
+  exportAuditLogs: (params?: { format?: 'json' | 'csv'; limit?: number }): Promise<DownloadResult> => {
+    const q = new URLSearchParams()
+    const format = params?.format ?? 'json'
+    q.set('format', format)
+    if (params?.limit !== undefined) q.set('limit', String(params.limit))
+    const query = q.toString()
+    return apiDownload(`/admin/audit-logs/export${query ? `?${query}` : ''}`)
+  },
 }

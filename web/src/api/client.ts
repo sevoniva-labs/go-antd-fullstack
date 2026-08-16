@@ -84,3 +84,58 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (envelope.code !== '000000') throw new ApiError(response.status, envelope as ApiEnvelope<unknown>)
   return envelope.data
 }
+
+export interface DownloadResult {
+  blob: Blob
+  filename?: string
+  contentType?: string
+}
+
+function downloadFilename(response: Response): string | undefined {
+  const raw = response.headers.get('Content-Disposition')
+  if (!raw) return undefined
+  const match = raw.match(/filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i)
+  if (!match) return undefined
+  return decodeURIComponent(match[1] || match[2] || '')
+}
+
+export async function apiDownload(path: string, init: RequestInit = {}): Promise<DownloadResult> {
+  const method = (init.method ?? 'GET').toUpperCase()
+  const headers = new Headers(init.headers)
+  headers.set('Accept', '*/*')
+  if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrf = csrfToken()
+    if (csrf) headers.set('X-CSRF-Token', csrf)
+  }
+
+  const response = await fetch(endpoint(path), {
+    ...init,
+    method,
+    headers,
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    const text = await response.text()
+    let envelope: ApiEnvelope<unknown> | undefined
+    if (text) {
+      try {
+        envelope = JSON.parse(text) as ApiEnvelope<unknown>
+      } catch {
+        envelope = undefined
+      }
+    }
+    const error = new ApiError(response.status, envelope)
+    throw error
+  }
+
+  const blob = await response.blob()
+  return {
+    blob,
+    filename: downloadFilename(response),
+    contentType: response.headers.get('Content-Type') ?? undefined,
+  }
+}

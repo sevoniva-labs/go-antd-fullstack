@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"strconv"
 	"time"
 
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
@@ -23,7 +24,18 @@ var ErrInvalidRole = errors.New("invalid role")
 var ErrInvalidLoginName = errors.New("invalid login name")
 var ErrPasswordPolicy = errors.New("password policy violation")
 var ErrPasswordReused = errors.New("password was used recently")
+var ErrInvalidSecurityPolicy = errors.New("invalid security policy")
 var ErrLastSystemAdmin = repository.ErrLastSystemAdmin
+
+type resolvedPolicy struct {
+	passwordPolicy password.Policy
+	sessionTTL     time.Duration
+	maxFailures    int
+	lockDuration   time.Duration
+	maxAge         time.Duration
+	history        int
+	maxConcurrent  int
+}
 
 type Options struct {
 	MinLength     int
@@ -61,7 +73,7 @@ func NewService(repo *repository.IdentityRepo, opt Options) *Service {
 var basePermissions = []struct{ Key, Name string }{
 	{"system.user.read", "查看用户"}, {"system.user.create", "创建用户"}, {"system.user.update", "修改用户"}, {"system.user.role.manage", "分配用户角色"},
 	{"system.role.read", "查看角色权限"}, {"system.role.manage", "管理角色权限"},
-	{"system.organization.read", "查看组织信息"},
+	{"system.organization.read", "查看组织信息"}, {"system.organization.manage", "管理组织信息"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
 	{"system.audit.read", "查看审计日志"}, {"system.audit.export", "导出审计日志"},
 	{"system.config.read", "查看系统配置"}, {"system.security.manage", "管理安全配置"},
@@ -85,7 +97,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.session.read", "system.session.revoke", "system.audit.read", "system.config.read"} {
+	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.organization.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
@@ -96,10 +108,10 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 		}
 	}
 	if admin == "" {
-		return nil
+		return s.finalizeBootstrapDefaults(ctx, orgID)
 	}
 	if _, err = s.repo.UserByLogin(ctx, orgID, admin); err == nil {
-		return nil
+		return s.finalizeBootstrapDefaults(ctx, orgID)
 	} else if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
@@ -121,12 +133,260 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 		}
 		return s.repo.GrantRole(ctx, existing.User.ID, "system_admin")
 	}
-	return s.repo.GrantRole(ctx, u.ID, "system_admin")
+	if err = s.repo.GrantRole(ctx, u.ID, "system_admin"); err != nil {
+		return err
+	}
+	return s.finalizeBootstrapDefaults(ctx, orgID)
 }
+
+func (s *Service) enforceOrganizationActive(ctx context.Context, orgID string) error {
+	org, err := s.repo.OrganizationByID(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	if strings.ToUpper(org.Status) != "ACTIVE" {
+		return ErrDisabled
+	}
+	return nil
+}
+
+func (s *Service) defaultPolicy() resolvedPolicy {
+	return resolvedPolicy{
+		passwordPolicy: s.policy,
+		sessionTTL:     s.sessionTTL,
+		maxFailures:    s.maxFailures,
+		lockDuration:   s.lockDuration,
+		maxAge:         s.maxAge,
+		history:        s.history,
+		maxConcurrent:  0,
+	}
+}
+
+func (s *Service) resolveSecurityPolicy(ctx context.Context, orgID string) (resolvedPolicy, error) {
+	out := s.defaultPolicy()
+	if orgID == "" {
+		return out, nil
+	}
+	settings, err := s.repo.SecuritySettings(ctx, orgID)
+	if err != nil {
+		return resolvedPolicy{}, err
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordMinLength]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed < 1 {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_min_length", ErrInvalidSecurityPolicy)
+		}
+		out.passwordPolicy.MinLength = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordRequireUpper]); v != "" {
+		parsed, parseErr := strconv.ParseBool(v)
+		if parseErr != nil {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_require_upper", ErrInvalidSecurityPolicy)
+		}
+		out.passwordPolicy.RequireUpper = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordRequireLower]); v != "" {
+		parsed, parseErr := strconv.ParseBool(v)
+		if parseErr != nil {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_require_lower", ErrInvalidSecurityPolicy)
+		}
+		out.passwordPolicy.RequireLower = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordRequireDigit]); v != "" {
+		parsed, parseErr := strconv.ParseBool(v)
+		if parseErr != nil {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_require_digit", ErrInvalidSecurityPolicy)
+		}
+		out.passwordPolicy.RequireDigit = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordRequireSymbol]); v != "" {
+		parsed, parseErr := strconv.ParseBool(v)
+		if parseErr != nil {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_require_symbol", ErrInvalidSecurityPolicy)
+		}
+		out.passwordPolicy.RequireSymbol = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordHistory]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed < 0 {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_history", ErrInvalidSecurityPolicy)
+		}
+		out.history = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingPasswordMaxAgeDays]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed < 0 {
+			return resolvedPolicy{}, fmt.Errorf("%w: password_max_age_days", ErrInvalidSecurityPolicy)
+		}
+		out.maxAge = time.Duration(parsed) * 24 * time.Hour
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingLoginMaxFailures]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed < 0 {
+			return resolvedPolicy{}, fmt.Errorf("%w: login_max_failures", ErrInvalidSecurityPolicy)
+		}
+		out.maxFailures = parsed
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingLoginLockDurationSec]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed < 0 {
+			return resolvedPolicy{}, fmt.Errorf("%w: login_lock_duration_seconds", ErrInvalidSecurityPolicy)
+		}
+		out.lockDuration = time.Duration(parsed) * time.Second
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingSessionTTLSeconds]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed <= 0 {
+			return resolvedPolicy{}, fmt.Errorf("%w: session_ttl_seconds", ErrInvalidSecurityPolicy)
+		}
+		out.sessionTTL = time.Duration(parsed) * time.Second
+	}
+	if v := strings.TrimSpace(settings[domain.SecuritySettingMaxConcurrentSessions]); v != "" {
+		parsed, parseErr := strconv.Atoi(v)
+		if parseErr != nil || parsed < 0 {
+			return resolvedPolicy{}, fmt.Errorf("%w: max_active_sessions", ErrInvalidSecurityPolicy)
+		}
+		out.maxConcurrent = parsed
+	}
+	return out, nil
+}
+
+func (s *Service) finalizeBootstrapDefaults(ctx context.Context, orgID string) error {
+	policy := s.defaultPolicy()
+	existing, err := s.repo.SecuritySettings(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	changes := map[string]string{
+		domain.SecuritySettingPasswordMinLength:     strconv.Itoa(policy.passwordPolicy.MinLength),
+		domain.SecuritySettingPasswordRequireUpper:    strconv.FormatBool(policy.passwordPolicy.RequireUpper),
+		domain.SecuritySettingPasswordRequireLower:    strconv.FormatBool(policy.passwordPolicy.RequireLower),
+		domain.SecuritySettingPasswordRequireDigit:    strconv.FormatBool(policy.passwordPolicy.RequireDigit),
+		domain.SecuritySettingPasswordRequireSymbol:   strconv.FormatBool(policy.passwordPolicy.RequireSymbol),
+		domain.SecuritySettingPasswordHistory:         strconv.Itoa(policy.history),
+		domain.SecuritySettingPasswordMaxAgeDays:      strconv.Itoa(int(policy.maxAge.Hours()) / 24),
+		domain.SecuritySettingLoginMaxFailures:        strconv.Itoa(policy.maxFailures),
+		domain.SecuritySettingLoginLockDurationSec:    strconv.FormatInt(int64(policy.lockDuration.Seconds()), 10),
+		domain.SecuritySettingSessionTTLSeconds:       strconv.FormatInt(int64(policy.sessionTTL.Seconds()), 10),
+		domain.SecuritySettingMaxConcurrentSessions:   strconv.Itoa(policy.maxConcurrent),
+	}
+	for key := range changes {
+		if _, ok := existing[key]; ok {
+			delete(changes, key)
+		}
+	}
+	if len(changes) == 0 {
+		return nil
+	}
+	return s.repo.SetSecuritySettings(ctx, orgID, "system", changes)
+}
+
+func (s *Service) SecurityPolicy(ctx context.Context, orgID string) (domain.SecurityPolicy, error) {
+	policy, err := s.resolveSecurityPolicy(ctx, orgID)
+	if err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	return domain.SecurityPolicy{
+		PasswordMinLength:       policy.passwordPolicy.MinLength,
+		PasswordRequireUpper:    policy.passwordPolicy.RequireUpper,
+		PasswordRequireLower:    policy.passwordPolicy.RequireLower,
+		PasswordRequireDigit:    policy.passwordPolicy.RequireDigit,
+		PasswordRequireSymbol:   policy.passwordPolicy.RequireSymbol,
+		PasswordHistory:         policy.history,
+		PasswordMaxAgeDays:      int(policy.maxAge.Hours()) / 24,
+		LoginMaxFailures:        policy.maxFailures,
+		LoginLockDurationSeconds: int64(policy.lockDuration.Seconds()),
+		SessionTTLSeconds:       int64(policy.sessionTTL.Seconds()),
+		MaxConcurrentSessions:   policy.maxConcurrent,
+	}, nil
+}
+
+func (s *Service) UpdateSecurityPolicy(ctx context.Context, orgID, updatedBy string, policy domain.SecurityPolicy) (domain.SecurityPolicy, error) {
+	if policy.PasswordMinLength < 1 {
+		return domain.SecurityPolicy{}, fmt.Errorf("%w: password_min_length", ErrInvalidSecurityPolicy)
+	}
+	if policy.PasswordHistory < 0 || policy.PasswordMaxAgeDays < 0 || policy.LoginMaxFailures < 0 || policy.LoginLockDurationSeconds < 0 || policy.MaxConcurrentSessions < 0 || policy.SessionTTLSeconds <= 0 {
+		return domain.SecurityPolicy{}, fmt.Errorf("%w: invalid security policy", ErrInvalidSecurityPolicy)
+	}
+	payload := map[string]string{
+		domain.SecuritySettingPasswordMinLength:     strconv.Itoa(policy.PasswordMinLength),
+		domain.SecuritySettingPasswordRequireUpper:    strconv.FormatBool(policy.PasswordRequireUpper),
+		domain.SecuritySettingPasswordRequireLower:    strconv.FormatBool(policy.PasswordRequireLower),
+		domain.SecuritySettingPasswordRequireDigit:    strconv.FormatBool(policy.PasswordRequireDigit),
+		domain.SecuritySettingPasswordRequireSymbol:   strconv.FormatBool(policy.PasswordRequireSymbol),
+		domain.SecuritySettingPasswordHistory:         strconv.Itoa(policy.PasswordHistory),
+		domain.SecuritySettingPasswordMaxAgeDays:      strconv.Itoa(policy.PasswordMaxAgeDays),
+		domain.SecuritySettingLoginMaxFailures:        strconv.Itoa(policy.LoginMaxFailures),
+		domain.SecuritySettingLoginLockDurationSec:    strconv.FormatInt(policy.LoginLockDurationSeconds, 10),
+		domain.SecuritySettingSessionTTLSeconds:       strconv.FormatInt(policy.SessionTTLSeconds, 10),
+		domain.SecuritySettingMaxConcurrentSessions:   strconv.Itoa(policy.MaxConcurrentSessions),
+	}
+	if err := s.repo.SetSecuritySettings(ctx, orgID, updatedBy, payload); err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	return s.SecurityPolicy(ctx, orgID)
+}
+
+func (s *Service) UpdateOrganization(ctx context.Context, orgID string, req domain.Organization) (domain.Organization, error) {
+	if req.Name = strings.TrimSpace(req.Name); req.Name == "" {
+		return domain.Organization{}, fmt.Errorf("invalid organization name")
+	}
+	if req.Status == "" {
+		existing, err := s.repo.OrganizationByID(ctx, orgID)
+		if err != nil {
+			return domain.Organization{}, err
+		}
+		req.Status = existing.Status
+	}
+	req.Status = strings.ToUpper(req.Status)
+	if req.Status != "ACTIVE" && req.Status != "DISABLED" {
+		return domain.Organization{}, fmt.Errorf("invalid organization status")
+	}
+	if req.MaxUsers < 0 || req.MaxSessions < 0 {
+		return domain.Organization{}, fmt.Errorf("invalid organization value")
+	}
+	return s.repo.UpdateOrganization(ctx, orgID, req)
+}
+
+func (s *Service) enforceMaxConcurrentSessions(ctx context.Context, userID string, maxSessions int) error {
+	if maxSessions <= 0 {
+		return nil
+	}
+	ids, err := s.repo.ListUserSessionIDs(ctx, userID)
+	if err != nil {
+		return err
+	}
+	excess := len(ids) - maxSessions
+	if excess <= 0 {
+		return nil
+	}
+	for i := 0; i < excess; i++ {
+		if err := s.repo.DeleteSessionByID(ctx, ids[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Service) passwordExpiredAt(t time.Time, maxAge time.Duration) bool {
+	return maxAge > 0 && !t.IsZero() && time.Since(t) > maxAge
+}
+
 func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (domain.Principal, string, string, time.Time, error) {
 	row, err := s.repo.UserByLogin(ctx, orgID, strings.TrimSpace(login))
 	if err != nil {
 		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
+	}
+	org, err := s.repo.OrganizationByID(ctx, row.User.OrganizationID)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	if strings.ToUpper(org.Status) != "ACTIVE" {
+		return domain.Principal{}, "", "", time.Time{}, ErrDisabled
+	}
+	policy, err := s.resolveSecurityPolicy(ctx, row.User.OrganizationID)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
 	}
 	if row.User.Status != "ACTIVE" {
 		return domain.Principal{}, "", "", time.Time{}, ErrDisabled
@@ -135,7 +395,7 @@ func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (
 		return domain.Principal{}, "", "", *row.User.LockedUntil, ErrLocked
 	}
 	if !s.hasher.Verify(raw, row.PasswordHash) {
-		_ = s.repo.RecordLoginFailure(ctx, row.User.ID, s.maxFailures, s.lockDuration)
+		_ = s.repo.RecordLoginFailure(ctx, row.User.ID, policy.maxFailures, policy.lockDuration)
 		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
 	}
 	_ = s.repo.ResetLoginFailure(ctx, row.User.ID)
@@ -147,12 +407,16 @@ func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (
 	if err != nil {
 		return domain.Principal{}, "", "", time.Time{}, err
 	}
-	expires := time.Now().UTC().Add(s.sessionTTL)
+	expires := time.Now().UTC().Add(policy.sessionTTL)
 	sessionID, err := s.repo.CreateSession(ctx, row.User.ID, hashToken(token), expires, ip, ua)
 	if err != nil {
 		return domain.Principal{}, "", "", time.Time{}, err
 	}
-	mustChange := row.User.MustChangePassword || s.passwordExpired(row.User.PasswordChangedAt)
+	if err := s.enforceMaxConcurrentSessions(ctx, row.User.ID, policy.maxConcurrent); err != nil {
+		_ = s.repo.DeleteSessionByID(ctx, sessionID)
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	mustChange := row.User.MustChangePassword || s.passwordExpiredAt(row.User.PasswordChangedAt, policy.maxAge)
 	p := domain.Principal{Type: "USER", UserID: row.User.ID, OrganizationID: row.User.OrganizationID, LoginName: row.User.LoginName, DisplayName: row.User.DisplayName, Roles: row.User.Roles, Permissions: row.User.Permissions, MustChangePassword: mustChange, SessionID: sessionID, PasswordChangedAt: row.User.PasswordChangedAt}
 	return p, token, csrf, expires, nil
 }
@@ -161,13 +425,26 @@ func (s *Service) Authenticate(ctx context.Context, token string) (domain.Princi
 		return domain.Principal{}, sql.ErrNoRows
 	}
 	p, err := s.repo.PrincipalBySessionHash(ctx, hashToken(token))
-	if err == nil && s.passwordExpired(p.PasswordChangedAt) {
-		p.MustChangePassword = true
+	if err == nil {
+		org, e := s.repo.OrganizationByID(ctx, p.OrganizationID)
+		if e != nil {
+			return domain.Principal{}, e
+		}
+		if strings.ToUpper(org.Status) != "ACTIVE" {
+			return domain.Principal{}, ErrDisabled
+		}
+		policy, policyErr := s.resolveSecurityPolicy(ctx, p.OrganizationID)
+		if policyErr != nil {
+			return domain.Principal{}, policyErr
+		}
+		if s.passwordExpiredAt(p.PasswordChangedAt, policy.maxAge) {
+			p.MustChangePassword = true
+		}
 	}
 	return p, err
 }
 func (s *Service) passwordExpired(t time.Time) bool {
-	return s.maxAge > 0 && !t.IsZero() && time.Since(t) > s.maxAge
+	return s.passwordExpiredAt(t, s.maxAge)
 }
 func (s *Service) Logout(ctx context.Context, token string) error {
 	if token == "" {
@@ -179,6 +456,12 @@ func (s *Service) ListUsers(ctx context.Context, orgID string) ([]domain.User, e
 	return s.repo.ListUsers(ctx, orgID, 200)
 }
 func (s *Service) CreateUser(ctx context.Context, orgID, login, display, raw string, roles []string) (domain.User, error) {
+	if _, err := s.repo.OrganizationByID(ctx, orgID); err != nil {
+		return domain.User{}, err
+	}
+	if err := s.enforceOrganizationActive(ctx, orgID); err != nil {
+		return domain.User{}, err
+	}
 	login = strings.TrimSpace(login)
 	display = strings.TrimSpace(display)
 	if login == "" || len(login) > 120 {
@@ -193,7 +476,11 @@ func (s *Service) CreateUser(ctx context.Context, orgID, login, display, raw str
 			return domain.User{}, ErrInvalidRole
 		}
 	}
-	if err := s.policy.Validate(raw); err != nil {
+	policy, err := s.resolveSecurityPolicy(ctx, orgID)
+	if err != nil {
+		return domain.User{}, err
+	}
+	if err := policy.passwordPolicy.Validate(raw); err != nil {
 		return domain.User{}, fmt.Errorf("%w: %v", ErrPasswordPolicy, err)
 	}
 	h, err := s.hasher.Hash(raw)
@@ -203,7 +490,18 @@ func (s *Service) CreateUser(ctx context.Context, orgID, login, display, raw str
 	return s.repo.CreateUserWithRoles(ctx, orgID, login, display, h, true, roles)
 }
 func (s *Service) ChangePassword(ctx context.Context, userID, sessionID, current, next string) error {
-	if err := s.policy.Validate(next); err != nil {
+	user, err := s.repo.UserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	policy, err := s.resolveSecurityPolicy(ctx, user.OrganizationID)
+	if err != nil {
+		return err
+	}
+	if err := s.enforceOrganizationActive(ctx, user.OrganizationID); err != nil {
+		return err
+	}
+	if err := policy.passwordPolicy.Validate(next); err != nil {
 		return fmt.Errorf("%w: %v", ErrPasswordPolicy, err)
 	}
 	currentHash, err := s.repo.PasswordHashByID(ctx, userID)
@@ -216,8 +514,8 @@ func (s *Service) ChangePassword(ctx context.Context, userID, sessionID, current
 	if s.hasher.Verify(next, currentHash) {
 		return ErrPasswordReused
 	}
-	if s.history > 0 {
-		history, err := s.repo.PasswordHistory(ctx, userID, s.history)
+	if policy.history > 0 {
+		history, err := s.repo.PasswordHistory(ctx, userID, policy.history)
 		if err != nil {
 			return err
 		}
@@ -251,7 +549,11 @@ func (s *Service) CreateAPIToken(ctx context.Context, userID, name string, scope
 	if err != nil {
 		return domain.APIToken{}, "", err
 	}
-	if u.MustChangePassword || s.passwordExpired(u.PasswordChangedAt) {
+	policy, err := s.resolveSecurityPolicy(ctx, u.OrganizationID)
+	if err != nil {
+		return domain.APIToken{}, "", err
+	}
+	if u.MustChangePassword || s.passwordExpiredAt(u.PasswordChangedAt, policy.maxAge) {
 		return domain.APIToken{}, "", ErrPasswordPolicy
 	}
 	allowed := map[string]struct{}{}
@@ -306,7 +608,18 @@ func (s *Service) AuthenticateAPIToken(ctx context.Context, raw string) (domain.
 	if err != nil {
 		return domain.Principal{}, ErrInvalidCredentials
 	}
-	if p.MustChangePassword || s.passwordExpired(p.PasswordChangedAt) {
+	org, err := s.repo.OrganizationByID(ctx, p.OrganizationID)
+	if err != nil {
+		return domain.Principal{}, ErrInvalidCredentials
+	}
+	if strings.ToUpper(org.Status) != "ACTIVE" {
+		return domain.Principal{}, ErrInvalidCredentials
+	}
+	policy, err := s.resolveSecurityPolicy(ctx, p.OrganizationID)
+	if err != nil {
+		return domain.Principal{}, ErrInvalidCredentials
+	}
+	if p.MustChangePassword || s.passwordExpiredAt(p.PasswordChangedAt, policy.maxAge) {
 		return domain.Principal{}, ErrInvalidCredentials
 	}
 	return p, nil
@@ -412,7 +725,14 @@ func (s *Service) UnlockUser(ctx context.Context, orgID, userID string) error {
 }
 
 func (s *Service) AdminResetPassword(ctx context.Context, orgID, userID, next string) error {
-	if err := s.policy.Validate(next); err != nil {
+	if err := s.enforceOrganizationActive(ctx, orgID); err != nil {
+		return err
+	}
+	policy, err := s.resolveSecurityPolicy(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	if err := policy.passwordPolicy.Validate(next); err != nil {
 		return fmt.Errorf("%w: %v", ErrPasswordPolicy, err)
 	}
 	user, err := s.repo.UserByID(ctx, userID)
@@ -428,6 +748,17 @@ func (s *Service) AdminResetPassword(ctx context.Context, orgID, userID, next st
 	}
 	if s.hasher.Verify(next, currentHash) {
 		return ErrPasswordReused
+	}
+	if policy.history > 0 {
+		history, err := s.repo.PasswordHistory(ctx, userID, policy.history)
+		if err != nil {
+			return err
+		}
+		for _, old := range history {
+			if s.hasher.Verify(next, old) {
+				return ErrPasswordReused
+			}
+		}
 	}
 	nextHash, err := s.hasher.Hash(next)
 	if err != nil {

@@ -39,8 +39,11 @@ func (w *Writer) Write(ctx context.Context, e Event) error {
 }
 
 func (w *Writer) List(ctx context.Context, orgID string, limit int) ([]Event, error) {
-	if limit <= 0 || limit > 500 {
+	if limit <= 0 {
 		limit = 200
+	}
+	if limit > 5000 {
+		limit = 5000
 	}
 	rows, err := w.db.QueryContext(ctx, w.db.Rebind(`SELECT id,occurred_at,request_id,organization_id,actor_id,actor_name,action,resource_type,resource_id,result,client_ip,details_json FROM audit_logs WHERE organization_id=? ORDER BY occurred_at DESC LIMIT ?`), orgID, limit)
 	if err != nil {

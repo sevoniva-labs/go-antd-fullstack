@@ -148,6 +148,45 @@ paths:
         '200': { $ref: '#/components/responses/Success' }
         '401': { $ref: '#/components/responses/Error' }
         '403': { $ref: '#/components/responses/Error' }
+    patch:
+      operationId: updateOrganization
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateOrganizationRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/security-config:
+    get:
+      operationId: getSecurityConfig
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+    put:
+      operationId: updateSecurityConfig
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SecurityPolicy' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
   /admin/roles:
     get:
       operationId: listRoles
@@ -298,6 +337,27 @@ paths:
         '200': { $ref: '#/components/responses/Success' }
         '401': { $ref: '#/components/responses/Error' }
         '403': { $ref: '#/components/responses/Error' }
+  /admin/audit-logs/export:
+    get:
+      operationId: exportAuditLogs
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { in: query, name: format, required: false, schema: { type: string, enum: [json, csv], default: json } }
+        - { in: query, name: limit, required: false, schema: { type: integer, minimum: 1, maximum: 5000 } }
+      responses:
+        '200':
+          description: 导出的审计日志
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: object, additionalProperties: true }
+            text/csv:
+              schema: { type: string, format: binary }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
 components:
   securitySchemes:
     cookieAuth: { type: apiKey, in: cookie, name: forge_session }
@@ -400,6 +460,43 @@ components:
       required: [status]
       properties:
         status: { type: string, enum: [ACTIVE, DISABLED] }
+    UpdateOrganizationRequest:
+      type: object
+      additionalProperties: false
+      required: [name, status]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 500 }
+        status: { type: string, enum: [ACTIVE, DISABLED] }
+        max_users: { type: integer, minimum: 0 }
+        max_active_sessions: { type: integer, minimum: 0 }
+    SecurityPolicy:
+      type: object
+      additionalProperties: false
+      required:
+        - password_min_length
+        - password_require_upper
+        - password_require_lower
+        - password_require_digit
+        - password_require_symbol
+        - password_history
+        - password_max_age_days
+        - login_max_failures
+        - login_lock_duration_seconds
+        - session_ttl_seconds
+        - max_active_sessions
+      properties:
+        password_min_length: { type: integer, minimum: 1 }
+        password_require_upper: { type: boolean }
+        password_require_lower: { type: boolean }
+        password_require_digit: { type: boolean }
+        password_require_symbol: { type: boolean }
+        password_history: { type: integer, minimum: 0 }
+        password_max_age_days: { type: integer, minimum: 0 }
+        login_max_failures: { type: integer, minimum: 0 }
+        login_lock_duration_seconds: { type: integer, minimum: 0 }
+        session_ttl_seconds: { type: integer, minimum: 1 }
+        max_active_sessions: { type: integer, minimum: 0 }
     ResetUserPasswordRequest:
       type: object
       additionalProperties: false

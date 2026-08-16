@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,6 +18,8 @@ type IdentityRepo struct{ db *database.DB }
 var ErrLastSystemAdmin = errors.New("cannot remove or disable the last active system administrator")
 
 func NewIdentityRepo(db *database.DB) *IdentityRepo { return &IdentityRepo{db: db} }
+
+func (r *IdentityRepo) dbProvider() string { return r.db.Provider }
 
 type userRow struct {
 	User         identity.User
@@ -33,7 +36,8 @@ func (r *IdentityRepo) EnsureOrganization(ctx context.Context, key, name string)
 		return "", err
 	}
 	id = uuid.NewString()
-	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO organizations(id,org_key,name,created_at) VALUES(?,?,?,?)`), id, key, name, time.Now().UTC())
+	now := time.Now().UTC()
+	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO organizations(id,org_key,name,status,description,max_users,max_active_sessions,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)`), id, key, name, "ACTIVE", "", 0, 0, now, now)
 	if err == nil {
 		return id, nil
 	}
@@ -423,9 +427,82 @@ func (r *IdentityRepo) PrincipalByAPITokenHash(ctx context.Context, hash string)
 
 func (r *IdentityRepo) OrganizationByID(ctx context.Context, orgID string) (identity.Organization, error) {
 	var out identity.Organization
-	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,org_key,name,created_at FROM organizations WHERE id=?`), orgID).
-		Scan(&out.ID, &out.Key, &out.Name, &out.CreatedAt)
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,org_key,name,status,description,max_users,max_active_sessions,created_at,updated_at FROM organizations WHERE id=?`), orgID).
+		Scan(&out.ID, &out.Key, &out.Name, &out.Status, &out.Description, &out.MaxUsers, &out.MaxSessions, &out.CreatedAt, &out.UpdatedAt)
 	return out, err
+}
+
+func (r *IdentityRepo) UpdateOrganization(ctx context.Context, orgID string, req identity.Organization) (identity.Organization, error) {
+	if req.Status != "ACTIVE" && req.Status != "DISABLED" {
+		return identity.Organization{}, errors.New("invalid organization status")
+	}
+	if req.Name = strings.TrimSpace(req.Name); req.Name == "" {
+		return identity.Organization{}, errors.New("invalid organization name")
+	}
+	if req.Description = strings.TrimSpace(req.Description); req.Description == "" {
+		req.Description = ""
+	}
+	if _, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE organizations SET name=?,description=?,status=?,max_users=?,max_active_sessions=?,updated_at=? WHERE id=?`), req.Name, req.Description, req.Status, req.MaxUsers, req.MaxSessions, time.Now().UTC(), orgID); err != nil {
+		return identity.Organization{}, err
+	}
+	return r.OrganizationByID(ctx, orgID)
+}
+
+func (r *IdentityRepo) ListUserSessionIDs(ctx context.Context, userID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id FROM sessions WHERE user_id=? AND expires_at>? ORDER BY created_at ASC`), userID, time.Now().UTC())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) SecuritySettings(ctx context.Context, orgID string) (map[string]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT setting_key,setting_value FROM system_settings WHERE organization_id=?`), orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make(map[string]string)
+	for rows.Next() {
+		var key, value string
+		if err := rows.Scan(&key, &value); err != nil {
+			return nil, err
+		}
+		out[key] = value
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) SetSecuritySettings(ctx context.Context, orgID, updatedBy string, values map[string]string) error {
+	if len(values) == 0 {
+		return nil
+	}
+	now := time.Now().UTC()
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		upsert := `INSERT INTO system_settings(organization_id,setting_key,setting_value,updated_at,updated_by) VALUES(?,?,?,?,?)
+			ON CONFLICT (organization_id, setting_key) DO UPDATE
+			SET setting_value=EXCLUDED.setting_value,updated_at=EXCLUDED.updated_at,updated_by=EXCLUDED.updated_by`
+		if r.dbProvider() != "postgres" {
+			upsert = `INSERT INTO system_settings(organization_id,setting_key,setting_value,updated_at,updated_by) VALUES(?,?,?,?,?)
+				ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value),updated_at=VALUES(updated_at),updated_by=VALUES(updated_by)`
+		}
+		q := r.db.Rebind(upsert)
+		for key, value := range values {
+			if _, err := tx.ExecContext(q, orgID, key, value, now, updatedBy); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *IdentityRepo) ListPermissions(ctx context.Context) ([]identity.Permission, error) {
