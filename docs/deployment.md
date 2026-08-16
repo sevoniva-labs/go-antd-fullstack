@@ -1,0 +1,65 @@
+# Deployment
+
+## Binary / systemd
+
+`deploy/systemd/forge.service` 提供 non-root、ProtectSystem、PrivateTmp 等基础加固。生产建议 Secret 文件 `0600`、应用目录只读、独立数据目录，并由反向代理/API 网关或应用自身 TLS 终止 HTTPS。
+
+## Docker Compose
+
+- `minimal.yaml`：PostgreSQL + API
+- `mysql.yaml`：MySQL + API
+- `standard.yaml`：PostgreSQL + Redis + MinIO
+- `full.yaml`：PostgreSQL + Redis + Kafka + Elasticsearch + MinIO + Worker
+- `oceanbase-external.yaml`：外部 OceanBase MySQL mode
+- `nacos-dev.yaml`：本地 Nacos 3 开发辅助，不是生产 Nacos 集群模板
+- `observability-dev.yaml`：本地 Prometheus/OTel Collector 辅助
+
+Compose 只用于开发/验证。生产中间件建议使用组织已有 HA 服务，不把开发 Compose 直接搬进生产。
+
+## Kubernetes / Helm
+
+Chart：`deploy/helm/forge`。
+
+内置：non-root、read-only root filesystem、drop ALL capability、RuntimeDefault seccomp、startup/readiness/liveness、rolling update、HPA、PDB、NetworkPolicy、ServiceMonitor、API/Worker 分离、External Secret 引用、可选 PVC。
+
+### 多副本前置条件
+
+Chart 默认 `replicaCount=1` 是刻意的：Local Storage 与 Memory Cache 都不是集群共享状态。生产开启多副本/HPA 前至少：
+
+1. Storage 改为 S3-compatible；
+2. Cache 改为 Redis（限流/锁跨 Pod）；
+3. Database 使用外部 HA 实例；
+4. 如果启用消息发布，开启 Worker 并验证 Outbox；
+5. 配置反亲和/TopologySpread 和 PDB；
+6. 将 NetworkPolicy egress 从开放兼容模式收紧到 DNS/DB/Redis/MQ/Search/S3/Nacos 等明确目标。
+
+### Secret
+
+生产优先：
+
+```yaml
+secretEnv:
+  existingSecret: forge-production-secrets
+```
+
+该 Secret 建议由 External Secrets、Secrets Store CSI、Vault/KMS/组织密码平台维护，而不是把明文 Secret 写入 Helm values/Git。
+
+### Xinchuang
+
+```bash
+helm upgrade --install forge deploy/helm/forge \
+  -f deploy/helm/forge/values.yaml \
+  -f deploy/helm/forge/values-xinchuang.yaml
+```
+
+`values-xinchuang.yaml` 提供 OceanBase/Redis/Nacos/GM/S3 的组合样例以及 Pod IP 注册 Nacos 的 downward API 配置；真实麒麟/UOS/ARM/LoongArch/国产数据库组合必须进入兼容验证矩阵。
+
+## 生产数据库迁移
+
+Helm 默认 `FORGE_DATABASE_AUTO_MIGRATE=false`。生产不要让每个 API Pod 在启动时并发执行 schema migration。推荐发布顺序：
+
+```text
+备份/恢复点确认 → forge-migrate 一次性任务 → schema 校验 → API/Worker 滚动发布 → smoke test
+```
+
+容器镜像同时包含 `/app/forge-migrate`。发布流水线可使用与应用相同的 Config/Secret 执行该命令；失败时应阻断后续 rollout。涉及不可向后兼容的 DDL，项目还应采用 expand/migrate/contract 等兼容发布策略，不把破坏性 DDL 与新代码同时强切。

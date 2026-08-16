@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    environment:
+      POSTGRES_DB: forge
+      POSTGRES_USER: forge
+      POSTGRES_PASSWORD: forge_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forge -d forge"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:8-alpine}
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes: ["redis_data:/data"]
+
+  minio:
+    image: ${MINIO_IMAGE:-minio/minio:latest}
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+    ports: ["9001:9001"]
+    volumes: ["minio_data:/data"]
+
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-minio/mc:latest}
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+    depends_on:
+      - minio
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done;
+        mc mb --ignore-existing local/forge
+    restart: "no"
+
+  forge:
+    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    ports: ["8080:8080"]
+    volumes: ["../../configs/standard.yaml:/app/config.yaml:ro"]
+    environment:
+      FORGE_CONFIG: /app/config.yaml
+      FORGE_DATABASE_DSN: postgres://forge:forge_dev@postgres:5432/forge?sslmode=disable
+      FORGE_REDIS_ADDRESS: redis:6379
+      FORGE_STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      FORGE_STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+      FORGE_CRYPTO_KEY: ${FORGE_CRYPTO_KEY:?set FORGE_CRYPTO_KEY in .env}
+      FORGE_SECURE_COOKIES: "false"
+      FORGE_PUBLIC_URL: http://localhost:8080
+      FORGE_BOOTSTRAP_ADMIN: ${FORGE_BOOTSTRAP_ADMIN:-admin}
+      FORGE_BOOTSTRAP_PASSWORD: ${FORGE_BOOTSTRAP_PASSWORD:?set FORGE_BOOTSTRAP_PASSWORD in .env}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      minio-init: { condition: service_completed_successfully }
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "forge.fullname" . }}
+  labels:
+    {{- include "forge.selectorLabels" . | nindent 4 }}
+data:
+  FORGE_APP_NAME: {{ .Values.config.appName | quote }}
+  FORGE_ENV: {{ .Values.config.environment | quote }}
+  FORGE_REGION: {{ .Values.config.region | quote }}
+  FORGE_ZONE: {{ .Values.config.zone | quote }}
+  FORGE_PUBLIC_URL: {{ .Values.config.publicURL | quote }}
+  FORGE_WEB_DIR: {{ .Values.config.webDir | quote }}
+
+  FORGE_DATABASE_PROVIDER: {{ .Values.config.databaseProvider | quote }}
+  FORGE_DATABASE_MAX_OPEN_CONNS: {{ .Values.config.databaseMaxOpenConns | quote }}
+  FORGE_DATABASE_MAX_IDLE_CONNS: {{ .Values.config.databaseMaxIdleConns | quote }}
+  FORGE_DATABASE_MAX_LIFETIME: {{ .Values.config.databaseMaxLifetime | quote }}
+  FORGE_DATABASE_QUERY_TIMEOUT: {{ .Values.config.databaseQueryTimeout | quote }}
+  FORGE_DATABASE_AUTO_MIGRATE: {{ .Values.config.databaseAutoMigrate | quote }}
+
+  FORGE_CACHE_PROVIDER: {{ .Values.config.cacheProvider | quote }}
+  FORGE_REDIS_MODE: {{ .Values.config.redisMode | quote }}
+  FORGE_REDIS_ADDRESSES: {{ .Values.config.redisAddresses | quote }}
+  FORGE_REDIS_MASTER_NAME: {{ .Values.config.redisMasterName | quote }}
+  FORGE_REDIS_TLS: {{ .Values.config.redisTLS | quote }}
+  FORGE_REDIS_TLS_CA_FILE: {{ .Values.config.redisTLSCAFile | quote }}
+  FORGE_REDIS_TLS_CERT_FILE: {{ .Values.config.redisTLSCertFile | quote }}
+  FORGE_REDIS_TLS_KEY_FILE: {{ .Values.config.redisTLSKeyFile | quote }}
+  FORGE_REDIS_TLS_SERVER_NAME: {{ .Values.config.redisTLSServerName | quote }}
+  FORGE_CACHE_DEFAULT_TTL: {{ .Values.config.cacheDefaultTTL | quote }}
+
+  FORGE_MESSAGING_PROVIDER: {{ .Values.config.messagingProvider | quote }}
+  FORGE_KAFKA_BROKERS: {{ .Values.config.kafkaBrokers | quote }}
+  FORGE_KAFKA_CLIENT_ID: {{ .Values.config.kafkaClientID | quote }}
+  FORGE_KAFKA_TLS: {{ .Values.config.kafkaTLS | quote }}
+  FORGE_KAFKA_TLS_CA_FILE: {{ .Values.config.kafkaTLSCAFile | quote }}
+  FORGE_KAFKA_TLS_CERT_FILE: {{ .Values.config.kafkaTLSCertFile | quote }}
+  FORGE_KAFKA_TLS_KEY_FILE: {{ .Values.config.kafkaTLSKeyFile | quote }}
+  FORGE_KAFKA_TLS_SERVER_NAME: {{ .Values.config.kafkaTLSServerName | quote }}
+  FORGE_ROCKETMQ_ENDPOINT: {{ .Values.config.rocketmqEndpoint | quote }}
+  FORGE_ROCKETMQ_GROUP: {{ .Values.config.rocketmqGroup | quote }}
+  FORGE_ROCKETMQ_NAMESPACE: {{ .Values.config.rocketmqNamespace | quote }}
+  FORGE_ROCKETMQ_TOPICS: {{ .Values.config.rocketmqTopics | quote }}
+
+  FORGE_SEARCH_PROVIDER: {{ .Values.config.searchProvider | quote }}
+  FORGE_SEARCH_URLS: {{ .Values.config.searchURLs | quote }}
+  FORGE_SEARCH_TLS: {{ .Values.config.searchTLS | quote }}
+  FORGE_SEARCH_TLS_CA_FILE: {{ .Values.config.searchTLSCAFile | quote }}
+  FORGE_SEARCH_TLS_CERT_FILE: {{ .Values.config.searchTLSCertFile | quote }}
+  FORGE_SEARCH_TLS_KEY_FILE: {{ .Values.config.searchTLSKeyFile | quote }}
+  FORGE_SEARCH_TLS_SERVER_NAME: {{ .Values.config.searchTLSServerName | quote }}
+
+  FORGE_STORAGE_PROVIDER: {{ .Values.config.storageProvider | quote }}
+  FORGE_STORAGE_LOCAL_ROOT: {{ .Values.config.storageLocalRoot | quote }}
+  FORGE_STORAGE_ENDPOINT: {{ .Values.config.storageEndpoint | quote }}
+  FORGE_STORAGE_REGION: {{ .Values.config.storageRegion | quote }}
+  FORGE_STORAGE_BUCKET: {{ .Values.config.storageBucket | quote }}
+  FORGE_STORAGE_PATH_STYLE: {{ .Values.config.storagePathStyle | quote }}
+  FORGE_STORAGE_TLS: {{ .Values.config.storageTLS | quote }}
+  FORGE_STORAGE_TLS_CA_FILE: {{ .Values.config.storageTLSCAFile | quote }}
+  FORGE_STORAGE_TLS_CERT_FILE: {{ .Values.config.storageTLSCertFile | quote }}
+  FORGE_STORAGE_TLS_KEY_FILE: {{ .Values.config.storageTLSKeyFile | quote }}
+  FORGE_STORAGE_TLS_SERVER_NAME: {{ .Values.config.storageTLSServerName | quote }}
+
+  FORGE_DISCOVERY_PROVIDER: {{ .Values.config.discoveryProvider | quote }}
+  FORGE_DISCOVERY_SERVICE_NAME: {{ .Values.config.discoveryServiceName | quote }}
+  FORGE_DISCOVERY_ADVERTISE_IP: {{ .Values.config.discoveryAdvertiseIP | quote }}
+  FORGE_DISCOVERY_ADVERTISE_PORT: {{ .Values.config.discoveryAdvertisePort | quote }}
+  FORGE_NACOS_SERVERS: {{ .Values.config.nacosServers | quote }}
+  FORGE_NACOS_NAMESPACE: {{ .Values.config.nacosNamespace | quote }}
+  FORGE_NACOS_GROUP: {{ .Values.config.nacosGroup | quote }}
+  FORGE_NACOS_CLUSTER: {{ .Values.config.nacosCluster | quote }}
+  FORGE_REMOTE_CONFIG_PROVIDER: {{ .Values.config.remoteConfigProvider | quote }}
+  FORGE_NACOS_CONFIG_GROUP: {{ .Values.config.nacosConfigGroup | quote }}
+  FORGE_NACOS_CONFIG_DATA_ID: {{ .Values.config.nacosConfigDataID | quote }}
+  FORGE_REMOTE_CONFIG_FAIL_FAST: {{ .Values.config.remoteConfigFailFast | quote }}
+
+  FORGE_SESSION_TTL: {{ .Values.config.sessionTTL | quote }}
+  FORGE_PASSWORD_MIN_LENGTH: {{ .Values.config.passwordMinLength | quote }}
+  FORGE_PASSWORD_REQUIRE_UPPER: {{ .Values.config.passwordRequireUpper | quote }}
+  FORGE_PASSWORD_REQUIRE_LOWER: {{ .Values.config.passwordRequireLower | quote }}
+  FORGE_PASSWORD_REQUIRE_DIGIT: {{ .Values.config.passwordRequireDigit | quote }}
+  FORGE_PASSWORD_REQUIRE_SYMBOL: {{ .Values.config.passwordRequireSymbol | quote }}
+  FORGE_PASSWORD_HISTORY: {{ .Values.config.passwordHistory | quote }}
+  FORGE_PASSWORD_MAX_AGE_DAYS: {{ .Values.config.passwordMaxAgeDays | quote }}
+  FORGE_LOGIN_MAX_FAILURES: {{ .Values.config.loginMaxFailures | quote }}
+  FORGE_LOGIN_LOCK_DURATION: {{ .Values.config.loginLockDuration | quote }}
+  FORGE_CRYPTO_PROVIDER: {{ .Values.config.cryptoProvider | quote }}
+  FORGE_CRYPTO_KEY_VERSION: {{ .Values.config.cryptoKeyVersion | quote }}
+  FORGE_SECURE_COOKIES: {{ .Values.config.secureCookies | quote }}
+  FORGE_SAME_SITE: {{ .Values.config.sameSite | quote }}
+  FORGE_ALLOWED_ORIGINS: {{ .Values.config.allowedOrigins | quote }}
+  FORGE_TRUSTED_PROXIES: {{ .Values.config.trustedProxies | quote }}
+
+  FORGE_LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  FORGE_LOG_FORMAT: {{ .Values.config.logFormat | quote }}
+  FORGE_METRICS_ENABLED: {{ .Values.config.metricsEnabled | quote }}
+  FORGE_METRICS_PATH: {{ .Values.config.metricsPath | quote }}
+  FORGE_TRACING_ENABLED: {{ .Values.config.tracingEnabled | quote }}
+  FORGE_OTLP_ENDPOINT: {{ .Values.config.otlpEndpoint | quote }}
+  FORGE_PPROF_ENABLED: {{ .Values.config.pprofEnabled | quote }}
+
+  FORGE_DEPENDENCY_TIMEOUT: {{ .Values.config.dependencyTimeout | quote }}
+  FORGE_RETRY_MAX_ATTEMPTS: {{ .Values.config.retryMaxAttempts | quote }}
+  FORGE_RETRY_BASE_DELAY: {{ .Values.config.retryBaseDelay | quote }}
+  FORGE_CIRCUIT_FAILURE_THRESHOLD: {{ .Values.config.circuitFailureThreshold | quote }}
+  FORGE_CIRCUIT_OPEN_DURATION: {{ .Values.config.circuitOpenDuration | quote }}
+  FORGE_BULKHEAD_CONCURRENCY: {{ .Values.config.bulkheadConcurrency | quote }}
+
+  FORGE_COMPLIANCE_PROFILE: {{ .Values.config.complianceProfile | quote }}
+  FORGE_AUDIT_RETENTION_DAYS: {{ .Values.config.auditRetentionDays | quote }}
+  FORGE_NETWORK_LOG_RETENTION_DAYS: {{ .Values.config.networkLogRetentionDays | quote }}
+  FORGE_SENSITIVE_DATA_MASKING: {{ .Values.config.sensitiveDataMasking | quote }}
+  FORGE_DISABLE_DEBUG_ENDPOINTS: {{ .Values.config.disableDebugEndpoints | quote }}

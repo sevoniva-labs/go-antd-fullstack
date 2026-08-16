@@ -1,0 +1,416 @@
+openapi: 3.1.0
+info:
+  title: Sevoniva Forge API
+  version: 0.2.0
+  description: |
+    企业级 Go + React 应用基础框架核心契约。所有 JSON 响应使用统一 Envelope；
+    HTTP status 表达传输语义，六位 code 表达稳定应用语义。浏览器 Cookie 写请求需要 CSRF；
+    服务身份可使用 Bearer API Token，并同时受账号 RBAC 与 Token scope 约束。
+servers: [{ url: /api/v1 }]
+paths:
+  /system/health:
+    get:
+      operationId: health
+      tags: [System]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+  /system/ready:
+    get:
+      operationId: readiness
+      tags: [System]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '503': { $ref: '#/components/responses/Success' }
+  /system/info:
+    get:
+      operationId: systemInfo
+      tags: [System]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '423': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [Auth]
+      security: [{ cookieAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/RequiredCsrfToken' }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /auth/password:
+    patch:
+      operationId: changePassword
+      tags: [Auth]
+      security: [{ cookieAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/RequiredCsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /me:
+    get:
+      operationId: me
+      tags: [Auth]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+  /api-tokens:
+    get:
+      operationId: listApiTokens
+      tags: [Identity]
+      security: [{ cookieAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+    post:
+      operationId: createApiToken
+      tags: [Identity]
+      security: [{ cookieAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/RequiredCsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateApiTokenRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /api-tokens/{tokenID}:
+    delete:
+      operationId: revokeApiToken
+      tags: [Identity]
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/RequiredCsrfToken' }
+        - in: path
+          name: tokenID
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '404': { $ref: '#/components/responses/Error' }
+  /admin/users:
+    get:
+      operationId: listUsers
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+    post:
+      operationId: createUser
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/CsrfToken' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /admin/organization:
+    get:
+      operationId: getOrganization
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/roles:
+    get:
+      operationId: listRoles
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/permissions:
+    get:
+      operationId: listPermissions
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/roles/{roleKey}/permissions:
+    put:
+      operationId: updateRolePermissions
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+        - in: path
+          name: roleKey
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateRolePermissionsRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/users/{userID}/roles:
+    patch:
+      operationId: updateUserRoles
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+        - in: path
+          name: userID
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRolesRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /admin/users/{userID}/status:
+    patch:
+      operationId: updateUserStatus
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+        - in: path
+          name: userID
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserStatusRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /admin/users/{userID}/unlock:
+    post:
+      operationId: unlockUser
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+        - in: path
+          name: userID
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /admin/users/{userID}/reset-password:
+    post:
+      operationId: resetUserPassword
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+        - in: path
+          name: userID
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResetUserPasswordRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /admin/sessions:
+    get:
+      operationId: listSessions
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /admin/sessions/{sessionID}:
+    delete:
+      operationId: revokeSession
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/CsrfToken' }
+        - in: path
+          name: sessionID
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /admin/audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [Admin]
+      security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    cookieAuth: { type: apiKey, in: cookie, name: forge_session }
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: ForgeApiToken }
+  parameters:
+    CsrfToken:
+      in: header
+      name: X-CSRF-Token
+      required: false
+      schema: { type: string }
+      description: 使用 Cookie Session 的写请求必填；Bearer Token 请求不使用 CSRF。
+    RequiredCsrfToken:
+      in: header
+      name: X-CSRF-Token
+      required: true
+      schema: { type: string }
+      description: Cookie Session 写请求的双提交 CSRF token。
+  responses:
+    Success:
+      description: Unified success envelope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+    Error:
+      description: Unified stable error envelope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+  schemas:
+    Envelope:
+      type: object
+      required: [code, message, data, timestamp]
+      properties:
+        code:
+          type: string
+          pattern: '^[0-9]{6}$'
+          description: 000000 success; 10xxxx request; 20xxxx security; 30xxxx conflict; 40xxxx dependency; 50xxxx business; 90xxxx platform.
+        message: { type: string }
+        data: {}
+        error: { type: string, description: Stable symbolic error identifier. }
+        request_id: { type: string }
+        trace_id: { type: string }
+        timestamp: { type: string, format: date-time }
+        field_errors:
+          type: array
+          items: { $ref: '#/components/schemas/FieldError' }
+    FieldError:
+      type: object
+      required: [path, code]
+      properties:
+        path: { type: string }
+        code: { type: string }
+        message: { type: string }
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [login_name, password]
+      properties:
+        organization: { type: string, default: default }
+        login_name: { type: string, minLength: 1, maxLength: 120 }
+        password: { type: string, format: password }
+    ChangePasswordRequest:
+      type: object
+      additionalProperties: false
+      required: [current_password, new_password]
+      properties:
+        current_password: { type: string, format: password }
+        new_password: { type: string, format: password, minLength: 12 }
+    CreateUserRequest:
+      type: object
+      additionalProperties: false
+      required: [login_name, display_name, password]
+      properties:
+        login_name: { type: string, minLength: 1, maxLength: 120 }
+        display_name: { type: string, maxLength: 200 }
+        password: { type: string, format: password, minLength: 12 }
+        roles:
+          type: array
+          items: { type: string, enum: [system_admin, security_admin, auditor, user] }
+    UpdateRolePermissionsRequest:
+      type: object
+      additionalProperties: false
+      required: [permissions]
+      properties:
+        permissions:
+          type: array
+          items: { type: string }
+    UpdateUserRolesRequest:
+      type: object
+      additionalProperties: false
+      required: [roles]
+      properties:
+        roles:
+          type: array
+          minItems: 1
+          items: { type: string }
+    UpdateUserStatusRequest:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: { type: string, enum: [ACTIVE, DISABLED] }
+    ResetUserPasswordRequest:
+      type: object
+      additionalProperties: false
+      required: [password]
+      properties:
+        password: { type: string, format: password, minLength: 12 }
+    CreateApiTokenRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        scopes: { type: array, items: { type: string } }
+        expires_days: { type: integer, minimum: 1, maximum: 365, default: 90 }

@@ -1,0 +1,34 @@
+[Unit]
+Description=Sevoniva Forge Background Worker
+After=network-online.target forge.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=forge
+Group=forge
+WorkingDirectory=/opt/forge
+Environment=FORGE_CONFIG=/etc/forge/config.yaml
+EnvironmentFile=-/etc/forge/forge.env
+ExecStart=/opt/forge/forge-worker
+Restart=on-failure
+RestartSec=5
+UMask=0027
+LimitNOFILE=65535
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target

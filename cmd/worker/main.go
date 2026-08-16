@@ -1,0 +1,75 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/sevoniva-labs/forge/internal/platform/config"
+	"github.com/sevoniva-labs/forge/internal/platform/database"
+	"github.com/sevoniva-labs/forge/internal/platform/idempotency"
+	"github.com/sevoniva-labs/forge/internal/platform/logx"
+	"github.com/sevoniva-labs/forge/internal/platform/messaging"
+	"github.com/sevoniva-labs/forge/internal/platform/outbox"
+)
+
+var version = "0.2.0-dev"
+
+func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := run(ctx); err != nil {
+		slog.Error("worker stopped", "err", err)
+		os.Exit(1)
+	}
+}
+func run(ctx context.Context) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	log := logx.New(cfg.Observability.LogLevel, cfg.Observability.LogFormat, cfg.App.Name+"-worker", cfg.App.Environment, version)
+	slog.SetDefault(log)
+	db, err := database.Open(ctx, cfg.Database)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	bus, err := messaging.New(cfg.Messaging)
+	if err != nil {
+		return err
+	}
+	defer bus.Close()
+	if bus.Provider() == "disabled" {
+		log.Info("outbox worker disabled because messaging provider is disabled")
+		<-ctx.Done()
+		return nil
+	}
+	box := outbox.New(db)
+	idem := idempotency.New(db)
+	poll := time.NewTicker(time.Second)
+	defer poll.Stop()
+	gc := time.NewTicker(time.Hour)
+	defer gc.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-gc.C:
+			if err := idem.PurgeExpired(ctx); err != nil && !errors.Is(err, context.Canceled) {
+				log.Error("idempotency gc", "err", err)
+			}
+		case <-poll.C:
+			n, err := box.PublishBatch(ctx, bus, 100)
+			if err != nil && !errors.Is(err, context.Canceled) {
+				log.Error("outbox publish", "err", err)
+			} else if n > 0 {
+				log.Info("outbox published", "count", n)
+			}
+		}
+	}
+}

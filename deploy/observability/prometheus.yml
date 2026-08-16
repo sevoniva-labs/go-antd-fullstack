@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: forge
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["forge:8080"]

@@ -1,0 +1,215 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1f2329;
+  background: #f5f7fa;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; min-height: 100%; margin: 0; }
+body { min-width: 320px; }
+button, input, select, textarea { font: inherit; }
+
+.center-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.forge-layout .ant-pro-layout-bg-list {
+  opacity: .32;
+}
+.forge-layout .ant-layout-header {
+  border-bottom: 1px solid rgba(5, 5, 5, .06);
+}
+.forge-layout .ant-layout-sider {
+  border-right: 1px solid rgba(5, 5, 5, .06);
+}
+.forge-layout .ant-pro-sider-logo {
+  border-bottom: 1px solid rgba(5, 5, 5, .06);
+}
+.forge-layout .ant-pro-page-container-children-container {
+  padding-inline: 24px;
+  padding-block-end: 24px;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  background: linear-gradient(135deg, #0958d9 0%, var(--forge-primary, #1677ff) 58%, #69b1ff 100%);
+  box-shadow: 0 6px 18px rgba(22, 119, 255, .28);
+}
+.brand-logo-image {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.environment-badge {
+  font-weight: 700;
+  letter-spacing: .06em;
+  margin-inline-end: 0;
+}
+.user-trigger {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background .2s ease;
+}
+.user-trigger:hover { background: rgba(0, 0, 0, .04); }
+.user-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+
+.page-tabs {
+  margin: -8px 0 12px;
+  padding: 0 24px;
+  background: var(--forge-tabs-bg, transparent);
+}
+.page-tabs .ant-tabs-nav { margin-bottom: 0; }
+.page-tabs .ant-tabs-tab {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.quick-entry {
+  cursor: pointer;
+  border-radius: 10px;
+  padding-inline: 12px !important;
+  transition: background .2s ease, transform .2s ease;
+}
+.quick-entry:hover {
+  background: rgba(22, 119, 255, .06);
+  transform: translateX(2px);
+}
+.quick-entry .ant-list-item-meta-avatar {
+  color: var(--forge-primary, #1677ff);
+  font-size: 18px;
+}
+.baseline-card { height: 100%; }
+
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(420px, 1.05fr) minmax(420px, .95fr);
+  background: #f5f7fa;
+}
+.login-visual {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(48px, 7vw, 96px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #fff;
+  background:
+    radial-gradient(circle at 15% 18%, rgba(255,255,255,.18), transparent 24%),
+    radial-gradient(circle at 78% 80%, rgba(105,177,255,.28), transparent 32%),
+    linear-gradient(145deg, #061d4f 0%, #0b3b8f 48%, var(--forge-primary, #1677ff) 100%);
+}
+.login-visual::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  right: -180px;
+  top: -130px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 50px rgba(255,255,255,.025),
+    0 0 0 110px rgba(255,255,255,.018);
+}
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: absolute;
+  top: 42px;
+  left: clamp(48px, 7vw, 96px);
+}
+.login-brand .brand-mark {
+  background: rgba(255,255,255,.16);
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+}
+.login-brand .ant-typography { color: #fff; margin: 0; }
+.login-hero-title.ant-typography {
+  color: #fff;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: 1.12;
+  letter-spacing: -.04em;
+  max-width: 720px;
+  margin-bottom: 24px;
+}
+.login-hero-copy.ant-typography {
+  color: rgba(255,255,255,.78);
+  font-size: 16px;
+  line-height: 1.8;
+  max-width: 680px;
+}
+.login-capabilities {
+  margin-top: 18px;
+  color: rgba(255,255,255,.9);
+}
+.login-capabilities .anticon { margin-right: 8px; }
+.login-env {
+  position: absolute;
+  bottom: 40px;
+  left: clamp(48px, 7vw, 96px);
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: rgba(255,255,255,.55);
+  text-transform: uppercase;
+}
+.login-form-side {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(22,119,255,.07), transparent 30%),
+    #f8fafc;
+}
+.login-card {
+  width: min(100%, 500px);
+  padding: 18px 22px 12px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .10);
+}
+.login-card-heading { margin-bottom: 28px; }
+.login-card-heading .ant-typography { margin-bottom: 4px; }
+.login-security-tip { margin-top: 24px; margin-bottom: 0 !important; font-size: 12px; }
+
+@media (max-width: 960px) {
+  .login-shell { grid-template-columns: 1fr; }
+  .login-visual { display: none; }
+  .login-form-side { padding: 24px; }
+  .user-name { display: none; }
+  .page-tabs { padding-inline: 12px; }
+  .forge-layout .ant-pro-page-container-children-container { padding-inline: 12px; }
+}
+
+.metric-card { height: 100%; }
+.search-toolbar { margin-bottom: 16px; }
+.search-toolbar-filters,
+.search-toolbar-actions { min-width: 0; }
+.form-section + .form-section { margin-top: 24px; }
+.form-section-heading { display: flex; flex-direction: column; gap: 4px; }
+
+.app-footer { text-align: center; color: rgba(127, 127, 127, .72); padding: 12px 24px 20px; font-size: 12px; }
+.global-search-shortcut { margin-inline-start: 6px; font-size: 11px; opacity: .68; }
+@media (max-width: 1180px) {
+  .global-search-label,
+  .global-search-shortcut { display: none; }
+}
+html[data-theme='dark'] body { background: #0b1220; color: rgba(255,255,255,.88); }
+html[data-theme='dark'] .forge-layout .ant-layout-header,
+html[data-theme='dark'] .forge-layout .ant-layout-sider,
+html[data-theme='dark'] .forge-layout .ant-pro-sider-logo { border-color: rgba(255,255,255,.08); }
+html[data-theme='dark'] .user-trigger:hover { background: rgba(255,255,255,.08); }

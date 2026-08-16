@@ -1,0 +1,106 @@
+export interface Principal {
+  principal_type: 'USER' | 'TOKEN'
+  user_id: string
+  organization_id: string
+  login_name: string
+  display_name: string
+  roles: string[]
+  permissions?: string[]
+  scopes?: string[]
+  must_change_password: boolean
+}
+
+export interface User {
+  id: string
+  organization_id: string
+  login_name: string
+  display_name: string
+  status: string
+  must_change_password: boolean
+  locked_until?: string
+  created_at: string
+  updated_at: string
+  roles: string[]
+  permissions?: string[]
+}
+
+export interface Organization {
+  id: string
+  org_key: string
+  name: string
+  created_at: string
+}
+
+export interface Permission {
+  id: string
+  permission_key: string
+  name: string
+  created_at: string
+}
+
+export interface Role {
+  id: string
+  role_key: string
+  name: string
+  permissions: Permission[]
+  created_at: string
+}
+
+export interface SessionInfo {
+  id: string
+  user_id: string
+  login_name: string
+  display_name: string
+  expires_at: string
+  created_at: string
+  last_seen_at: string
+  client_ip: string
+  user_agent: string
+  current: boolean
+}
+
+export interface ApiToken {
+  id: string
+  name: string
+  prefix: string
+  scopes: string[]
+  expires_at?: string
+  last_used_at?: string
+  created_at: string
+}
+
+export interface SystemInfo {
+  application: string
+  environment: string
+  version: string
+  providers: Record<string, string>
+  compliance_profile?: string
+}
+
+export interface ReadinessCheck {
+  name: string
+  provider: string
+  status: 'UP' | 'DOWN'
+  error?: string
+  duration_ms: number
+}
+
+export interface Readiness {
+  status: 'UP' | 'DOWN'
+  checks: ReadinessCheck[]
+}
+
+export interface AuditEvent {
+  id: string
+  occurred_at: string
+  request_id: string
+  organization_id?: string
+  actor_id?: string
+  actor_name?: string
+  action: string
+  resource_type?: string
+  resource_id?: string
+  result: string
+  client_ip?: string
+  details?: Record<string, unknown>
+}

@@ -1,0 +1,18 @@
+# OceanBase MySQL-compatible mode example.
+# This file intentionally connects Forge to an existing OceanBase endpoint instead of pinning
+# a database image. Set FORGE_DATABASE_DSN to the target cluster/tenant DSN.
+services:
+  forge:
+    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    ports: ["8080:8080"]
+    volumes: ["../../configs/xinchuang.yaml:/app/config.yaml:ro"]
+    environment:
+      FORGE_CONFIG: /app/config.yaml
+      FORGE_DATABASE_PROVIDER: oceanbase
+      FORGE_DATABASE_DSN: ${FORGE_DATABASE_DSN:?set OceanBase MySQL-mode DSN}
+      FORGE_CRYPTO_PROVIDER: gm
+      FORGE_CRYPTO_KEY: ${FORGE_CRYPTO_KEY:?set encryption key}
+      FORGE_SECURE_COOKIES: ${FORGE_SECURE_COOKIES:-false}
+      FORGE_PUBLIC_URL: ${FORGE_PUBLIC_URL:-http://localhost:8080}
+      FORGE_BOOTSTRAP_ADMIN: ${FORGE_BOOTSTRAP_ADMIN:-admin}
+      FORGE_BOOTSTRAP_PASSWORD: ${FORGE_BOOTSTRAP_PASSWORD:?set bootstrap password}

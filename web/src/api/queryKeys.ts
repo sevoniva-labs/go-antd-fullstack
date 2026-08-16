@@ -1,0 +1,12 @@
+export const queryKeys = {
+  me: ['me'] as const,
+  users: ['users'] as const,
+  roles: ['roles'] as const,
+  permissions: ['permissions'] as const,
+  organization: ['organization'] as const,
+  sessions: ['sessions'] as const,
+  auditLogs: ['audit-logs'] as const,
+  apiTokens: ['api-tokens'] as const,
+  systemInfo: ['system-info'] as const,
+  readiness: ['readiness'] as const,
+}

@@ -1,0 +1,634 @@
+package config
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"gopkg.in/yaml.v3"
+)
+
+// Config is the complete runtime configuration. Secrets use yaml:"-" and are
+// populated only from environment variables or *_FILE references.
+type Config struct {
+	App           App           `yaml:"app"`
+	Server        Server        `yaml:"server"`
+	Database      Database      `yaml:"database"`
+	Cache         Cache         `yaml:"cache"`
+	Messaging     Messaging     `yaml:"messaging"`
+	Search        Search        `yaml:"search"`
+	Storage       Storage       `yaml:"storage"`
+	Discovery     Discovery     `yaml:"discovery"`
+	RemoteConfig  RemoteConfig  `yaml:"remote_config"`
+	Security      Security      `yaml:"security"`
+	Observability Observability `yaml:"observability"`
+	Resilience    Resilience    `yaml:"resilience"`
+	Compliance    Compliance    `yaml:"compliance"`
+	Features      Features      `yaml:"features"`
+}
+
+type App struct {
+	Name        string `yaml:"name"`
+	Environment string `yaml:"environment"`
+	Region      string `yaml:"region"`
+	Zone        string `yaml:"zone"`
+}
+
+type Server struct {
+	ListenAddr       string        `yaml:"listen_addr"`
+	PublicURL        string        `yaml:"public_url"`
+	WebDir           string        `yaml:"web_dir"`
+	ReadTimeout      time.Duration `yaml:"read_timeout"`
+	WriteTimeout     time.Duration `yaml:"write_timeout"`
+	IdleTimeout      time.Duration `yaml:"idle_timeout"`
+	ShutdownTimeout  time.Duration `yaml:"shutdown_timeout"`
+	MaxBodyBytes     int64         `yaml:"max_body_bytes"`
+	TLSEnabled       bool          `yaml:"tls_enabled"`
+	TLSCertFile      string        `yaml:"tls_cert_file"`
+	TLSKeyFile       string        `yaml:"tls_key_file"`
+	TLSClientCAFile  string        `yaml:"tls_client_ca_file"`
+	RequireClientTLS bool          `yaml:"require_client_tls"`
+}
+
+type Database struct {
+	Provider     string        `yaml:"provider"` // postgres | mysql | oceanbase
+	DSN          string        `yaml:"-"`
+	MaxOpenConns int           `yaml:"max_open_conns"`
+	MaxIdleConns int           `yaml:"max_idle_conns"`
+	MaxLifetime  time.Duration `yaml:"max_lifetime"`
+	QueryTimeout time.Duration `yaml:"query_timeout"`
+	AutoMigrate  bool          `yaml:"auto_migrate"`
+	ReadOnlyDSN  string        `yaml:"-"`
+}
+
+type Cache struct {
+	Provider      string        `yaml:"provider"` // disabled | memory | redis
+	Mode          string        `yaml:"mode"`     // standalone | sentinel | cluster
+	Addresses     []string      `yaml:"addresses"`
+	MasterName    string        `yaml:"master_name"`
+	Username      string        `yaml:"-"`
+	Password      string        `yaml:"-"`
+	DB            int           `yaml:"db"`
+	Prefix        string        `yaml:"prefix"`
+	TTL           time.Duration `yaml:"default_ttl"`
+	TLS           bool          `yaml:"tls"`
+	TLSCAFile     string        `yaml:"tls_ca_file"`
+	TLSCertFile   string        `yaml:"tls_cert_file"`
+	TLSKeyFile    string        `yaml:"tls_key_file"`
+	TLSServerName string        `yaml:"tls_server_name"`
+}
+
+type Messaging struct {
+	Provider string `yaml:"provider"` // disabled | kafka | rocketmq
+
+	// Kafka
+	Brokers       []string `yaml:"brokers"`
+	ClientID      string   `yaml:"client_id"`
+	Username      string   `yaml:"-"`
+	Password      string   `yaml:"-"`
+	TLS           bool     `yaml:"tls"`
+	TLSCAFile     string   `yaml:"tls_ca_file"`
+	TLSCertFile   string   `yaml:"tls_cert_file"`
+	TLSKeyFile    string   `yaml:"tls_key_file"`
+	TLSServerName string   `yaml:"tls_server_name"`
+
+	// RocketMQ 5.x gRPC integration profile. The root module keeps the bus
+	// contract vendor-neutral; the official client adapter lives under
+	// integrations/rocketmq to avoid forcing the SDK on minimal builds.
+	RocketMQEndpoint  string   `yaml:"rocketmq_endpoint"`
+	RocketMQGroup     string   `yaml:"rocketmq_group"`
+	RocketMQNamespace string   `yaml:"rocketmq_namespace"`
+	RocketMQTopics    []string `yaml:"rocketmq_topics"`
+	RocketMQAccessKey string   `yaml:"-"`
+	RocketMQSecretKey string   `yaml:"-"`
+}
+
+type Search struct {
+	Provider      string   `yaml:"provider"` // disabled | elasticsearch | opensearch
+	URLs          []string `yaml:"urls"`
+	Username      string   `yaml:"-"`
+	Password      string   `yaml:"-"`
+	TLS           bool     `yaml:"tls"`
+	TLSCAFile     string   `yaml:"tls_ca_file"`
+	TLSCertFile   string   `yaml:"tls_cert_file"`
+	TLSKeyFile    string   `yaml:"tls_key_file"`
+	TLSServerName string   `yaml:"tls_server_name"`
+}
+
+type Storage struct {
+	Provider      string `yaml:"provider"` // local | s3
+	LocalRoot     string `yaml:"local_root"`
+	Endpoint      string `yaml:"endpoint"`
+	Region        string `yaml:"region"`
+	Bucket        string `yaml:"bucket"`
+	AccessKey     string `yaml:"-"`
+	SecretKey     string `yaml:"-"`
+	PathStyle     bool   `yaml:"path_style"`
+	TLS           bool   `yaml:"tls"`
+	TLSCAFile     string `yaml:"tls_ca_file"`
+	TLSCertFile   string `yaml:"tls_cert_file"`
+	TLSKeyFile    string `yaml:"tls_key_file"`
+	TLSServerName string `yaml:"tls_server_name"`
+}
+
+type Discovery struct {
+	Provider      string            `yaml:"provider"` // disabled | nacos
+	Servers       []string          `yaml:"servers"`
+	Namespace     string            `yaml:"namespace"`
+	Group         string            `yaml:"group"`
+	Cluster       string            `yaml:"cluster"`
+	ServiceName   string            `yaml:"service_name"`
+	AdvertiseIP   string            `yaml:"advertise_ip"`
+	AdvertisePort uint64            `yaml:"advertise_port"`
+	Weight        float64           `yaml:"weight"`
+	Metadata      map[string]string `yaml:"metadata"`
+	Username      string            `yaml:"-"`
+	Password      string            `yaml:"-"`
+}
+
+type RemoteConfig struct {
+	Provider  string   `yaml:"provider"` // disabled | nacos
+	Servers   []string `yaml:"servers"`
+	Namespace string   `yaml:"namespace"`
+	Group     string   `yaml:"group"`
+	DataID    string   `yaml:"data_id"`
+	FailFast  bool     `yaml:"fail_fast"`
+	Username  string   `yaml:"-"`
+	Password  string   `yaml:"-"`
+}
+
+type Security struct {
+	SessionTTL        time.Duration `yaml:"session_ttl"`
+	SecureCookies     bool          `yaml:"secure_cookies"`
+	SameSite          string        `yaml:"same_site"`
+	PasswordMinLength int           `yaml:"password_min_length"`
+	PasswordUpper     bool          `yaml:"password_require_upper"`
+	PasswordLower     bool          `yaml:"password_require_lower"`
+	PasswordDigit     bool          `yaml:"password_require_digit"`
+	PasswordSymbol    bool          `yaml:"password_require_symbol"`
+	PasswordHistory   int           `yaml:"password_history"`
+	PasswordMaxAgeDay int           `yaml:"password_max_age_days"`
+	LoginMaxFailures  int           `yaml:"login_max_failures"`
+	LoginLockDuration time.Duration `yaml:"login_lock_duration"`
+	CryptoProvider    string        `yaml:"crypto_provider"` // standard | gm
+	CryptoKey         string        `yaml:"-"`
+	CryptoKeyVersion  string        `yaml:"crypto_key_version"`
+	AllowedOrigins    []string      `yaml:"allowed_origins"`
+	TrustedProxies    []string      `yaml:"trusted_proxies"`
+}
+
+type Observability struct {
+	LogLevel       string `yaml:"log_level"`
+	LogFormat      string `yaml:"log_format"`
+	MetricsEnabled bool   `yaml:"metrics_enabled"`
+	MetricsPath    string `yaml:"metrics_path"`
+	TracingEnabled bool   `yaml:"tracing_enabled"`
+	OTLPEndpoint   string `yaml:"otlp_endpoint"`
+	PprofEnabled   bool   `yaml:"pprof_enabled"`
+}
+
+type Resilience struct {
+	DependencyTimeout       time.Duration `yaml:"dependency_timeout"`
+	RetryMaxAttempts        int           `yaml:"retry_max_attempts"`
+	RetryBaseDelay          time.Duration `yaml:"retry_base_delay"`
+	CircuitFailureThreshold int           `yaml:"circuit_failure_threshold"`
+	CircuitOpenDuration     time.Duration `yaml:"circuit_open_duration"`
+	BulkheadConcurrency     int           `yaml:"bulkhead_concurrency"`
+}
+
+type Compliance struct {
+	Profile                 string `yaml:"profile"` // standard | mlps3 | financial
+	AuditRetentionDays      int    `yaml:"audit_retention_days"`
+	NetworkLogRetentionDays int    `yaml:"network_log_retention_days"`
+	SensitiveDataMasking    bool   `yaml:"sensitive_data_masking"`
+	DisableDebugEndpoints   bool   `yaml:"disable_debug_endpoints"`
+}
+
+type Features struct {
+	Flags map[string]bool `yaml:"flags"`
+}
+
+func Default() Config {
+	return Config{
+		App: App{Name: "Sevoniva Forge", Environment: "development"},
+		Server: Server{
+			ListenAddr: ":8080", PublicURL: "http://localhost:8080", WebDir: "./web/dist",
+			ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
+			ShutdownTimeout: 15 * time.Second, MaxBodyBytes: 8 << 20,
+		},
+		Database:     Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: true},
+		Cache:        Cache{Provider: "memory", Mode: "standalone", Prefix: "forge:", TTL: 10 * time.Minute},
+		Messaging:    Messaging{Provider: "disabled", ClientID: "forge"},
+		Search:       Search{Provider: "disabled"},
+		Storage:      Storage{Provider: "local", LocalRoot: "./data"},
+		Discovery:    Discovery{Provider: "disabled", Group: "DEFAULT_GROUP", Cluster: "DEFAULT", Weight: 1, Metadata: map[string]string{}},
+		RemoteConfig: RemoteConfig{Provider: "disabled", Group: "DEFAULT_GROUP"},
+		Security: Security{
+			SessionTTL: 12 * time.Hour, SameSite: "lax", PasswordMinLength: 12,
+			PasswordUpper: true, PasswordLower: true, PasswordDigit: true, PasswordSymbol: true,
+			PasswordHistory: 5, PasswordMaxAgeDay: 90, LoginMaxFailures: 5, LoginLockDuration: 30 * time.Minute,
+			CryptoProvider: "standard", CryptoKeyVersion: "v1",
+		},
+		Observability: Observability{LogLevel: "info", LogFormat: "json", MetricsEnabled: true, MetricsPath: "/metrics"},
+		Resilience:    Resilience{DependencyTimeout: 10 * time.Second, RetryMaxAttempts: 3, RetryBaseDelay: 100 * time.Millisecond, CircuitFailureThreshold: 5, CircuitOpenDuration: 30 * time.Second, BulkheadConcurrency: 100},
+		Compliance:    Compliance{Profile: "standard", AuditRetentionDays: 365, NetworkLogRetentionDays: 183, SensitiveDataMasking: true, DisableDebugEndpoints: true},
+		Features:      Features{Flags: map[string]bool{}},
+	}
+}
+
+// Load reads optional YAML, applies secret/env overrides, and validates.
+// FORGE_CONFIG points to the local bootstrap YAML.
+func Load() (Config, error) {
+	cfg := Default()
+	if p := strings.TrimSpace(os.Getenv("FORGE_CONFIG")); p != "" {
+		b, err := os.ReadFile(p)
+		if err != nil {
+			return cfg, fmt.Errorf("config read: %w", err)
+		}
+		if err := yaml.Unmarshal(b, &cfg); err != nil {
+			return cfg, fmt.Errorf("config parse: %w", err)
+		}
+	}
+	ApplyEnvironment(&cfg)
+	if err := cfg.Validate(); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+// LoadForMigration loads only the local/bootstrap configuration and validates
+// the database subset. It intentionally ignores service discovery, messaging,
+// search and other runtime-only requirements so a release migration job can run
+// before application Pods are started. Database secrets still must come from
+// environment variables or *_FILE.
+func LoadForMigration() (Config, error) {
+	cfg := Default()
+	if p := strings.TrimSpace(os.Getenv("FORGE_CONFIG")); p != "" {
+		b, err := os.ReadFile(p)
+		if err != nil {
+			return cfg, fmt.Errorf("config read: %w", err)
+		}
+		if err := yaml.Unmarshal(b, &cfg); err != nil {
+			return cfg, fmt.Errorf("config parse: %w", err)
+		}
+	}
+	ApplyEnvironment(&cfg)
+	if err := cfg.ValidateDatabase(); err != nil {
+		return cfg, err
+	}
+	return cfg, nil
+}
+
+func (c Config) ValidateDatabase() error {
+	var errs []string
+	switch c.Database.Provider {
+	case "postgres", "mysql", "oceanbase":
+	default:
+		errs = append(errs, "database.provider must be postgres|mysql|oceanbase")
+	}
+	if c.Database.DSN == "" {
+		errs = append(errs, "FORGE_DATABASE_DSN is required")
+	}
+	if c.Database.MaxOpenConns < 1 || c.Database.MaxIdleConns < 0 || c.Database.MaxIdleConns > c.Database.MaxOpenConns {
+		errs = append(errs, "database pool settings are invalid")
+	}
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "; "))
+	}
+	return nil
+}
+
+// MergeYAML overlays non-secret remote configuration on an existing Config.
+// Fields tagged yaml:"-" remain environment/file-only.
+func MergeYAML(cfg *Config, raw []byte) error {
+	if len(strings.TrimSpace(string(raw))) == 0 {
+		return nil
+	}
+	if err := yaml.Unmarshal(raw, cfg); err != nil {
+		return fmt.Errorf("remote config parse: %w", err)
+	}
+	ApplyEnvironment(cfg) // local secret/env always wins over remote config
+	return cfg.Validate()
+}
+
+// ApplyEnvironment makes deployment/runtime values authoritative over YAML/Nacos.
+func ApplyEnvironment(cfg *Config) {
+	cfg.Database.DSN = secret("FORGE_DATABASE_DSN")
+	cfg.Database.ReadOnlyDSN = secret("FORGE_DATABASE_READONLY_DSN")
+	cfg.Cache.Username = secret("FORGE_REDIS_USERNAME")
+	cfg.Cache.Password = secret("FORGE_REDIS_PASSWORD")
+	cfg.Messaging.Username = secret("FORGE_KAFKA_USERNAME")
+	cfg.Messaging.Password = secret("FORGE_KAFKA_PASSWORD")
+	cfg.Messaging.RocketMQAccessKey = secret("FORGE_ROCKETMQ_ACCESS_KEY")
+	cfg.Messaging.RocketMQSecretKey = secret("FORGE_ROCKETMQ_SECRET_KEY")
+	cfg.Search.Username = secret("FORGE_SEARCH_USERNAME")
+	cfg.Search.Password = secret("FORGE_SEARCH_PASSWORD")
+	cfg.Storage.AccessKey = secret("FORGE_STORAGE_ACCESS_KEY")
+	cfg.Storage.SecretKey = secret("FORGE_STORAGE_SECRET_KEY")
+	cfg.Discovery.Username = secret("FORGE_NACOS_USERNAME")
+	cfg.Discovery.Password = secret("FORGE_NACOS_PASSWORD")
+	cfg.RemoteConfig.Username = secret("FORGE_NACOS_USERNAME")
+	cfg.RemoteConfig.Password = secret("FORGE_NACOS_PASSWORD")
+	cfg.Security.CryptoKey = secret("FORGE_CRYPTO_KEY")
+
+	overrideString(&cfg.App.Name, "FORGE_APP_NAME")
+	overrideString(&cfg.App.Environment, "FORGE_ENV")
+	overrideString(&cfg.App.Region, "FORGE_REGION")
+	overrideString(&cfg.App.Zone, "FORGE_ZONE")
+
+	overrideString(&cfg.Server.ListenAddr, "FORGE_SERVER_LISTEN")
+	overrideString(&cfg.Server.PublicURL, "FORGE_PUBLIC_URL")
+	overrideString(&cfg.Server.WebDir, "FORGE_WEB_DIR")
+	overrideBool(&cfg.Server.TLSEnabled, "FORGE_TLS_ENABLED")
+	overrideString(&cfg.Server.TLSCertFile, "FORGE_TLS_CERT_FILE")
+	overrideString(&cfg.Server.TLSKeyFile, "FORGE_TLS_KEY_FILE")
+	overrideString(&cfg.Server.TLSClientCAFile, "FORGE_TLS_CLIENT_CA_FILE")
+	overrideBool(&cfg.Server.RequireClientTLS, "FORGE_TLS_REQUIRE_CLIENT_CERT")
+
+	overrideString(&cfg.Database.Provider, "FORGE_DATABASE_PROVIDER")
+	overrideInt(&cfg.Database.MaxOpenConns, "FORGE_DATABASE_MAX_OPEN_CONNS")
+	overrideInt(&cfg.Database.MaxIdleConns, "FORGE_DATABASE_MAX_IDLE_CONNS")
+	overrideDuration(&cfg.Database.MaxLifetime, "FORGE_DATABASE_MAX_LIFETIME")
+	overrideDuration(&cfg.Database.QueryTimeout, "FORGE_DATABASE_QUERY_TIMEOUT")
+	overrideBool(&cfg.Database.AutoMigrate, "FORGE_DATABASE_AUTO_MIGRATE")
+
+	overrideString(&cfg.Cache.Provider, "FORGE_CACHE_PROVIDER")
+	overrideString(&cfg.Cache.Mode, "FORGE_REDIS_MODE")
+	overrideCSV(&cfg.Cache.Addresses, "FORGE_REDIS_ADDRESSES")
+	// backward-compatible singular address
+	if v := strings.TrimSpace(os.Getenv("FORGE_REDIS_ADDRESS")); v != "" {
+		cfg.Cache.Addresses = []string{v}
+	}
+	overrideString(&cfg.Cache.MasterName, "FORGE_REDIS_MASTER_NAME")
+	overrideBool(&cfg.Cache.TLS, "FORGE_REDIS_TLS")
+	overrideString(&cfg.Cache.TLSCAFile, "FORGE_REDIS_TLS_CA_FILE")
+	overrideString(&cfg.Cache.TLSCertFile, "FORGE_REDIS_TLS_CERT_FILE")
+	overrideString(&cfg.Cache.TLSKeyFile, "FORGE_REDIS_TLS_KEY_FILE")
+	overrideString(&cfg.Cache.TLSServerName, "FORGE_REDIS_TLS_SERVER_NAME")
+	overrideDuration(&cfg.Cache.TTL, "FORGE_CACHE_DEFAULT_TTL")
+
+	overrideString(&cfg.Messaging.Provider, "FORGE_MESSAGING_PROVIDER")
+	overrideCSV(&cfg.Messaging.Brokers, "FORGE_KAFKA_BROKERS")
+	overrideString(&cfg.Messaging.ClientID, "FORGE_KAFKA_CLIENT_ID")
+	overrideBool(&cfg.Messaging.TLS, "FORGE_KAFKA_TLS")
+	overrideString(&cfg.Messaging.TLSCAFile, "FORGE_KAFKA_TLS_CA_FILE")
+	overrideString(&cfg.Messaging.TLSCertFile, "FORGE_KAFKA_TLS_CERT_FILE")
+	overrideString(&cfg.Messaging.TLSKeyFile, "FORGE_KAFKA_TLS_KEY_FILE")
+	overrideString(&cfg.Messaging.TLSServerName, "FORGE_KAFKA_TLS_SERVER_NAME")
+	overrideString(&cfg.Messaging.RocketMQEndpoint, "FORGE_ROCKETMQ_ENDPOINT")
+	overrideString(&cfg.Messaging.RocketMQGroup, "FORGE_ROCKETMQ_GROUP")
+	overrideString(&cfg.Messaging.RocketMQNamespace, "FORGE_ROCKETMQ_NAMESPACE")
+	overrideCSV(&cfg.Messaging.RocketMQTopics, "FORGE_ROCKETMQ_TOPICS")
+
+	overrideString(&cfg.Search.Provider, "FORGE_SEARCH_PROVIDER")
+	overrideCSV(&cfg.Search.URLs, "FORGE_SEARCH_URLS")
+	overrideBool(&cfg.Search.TLS, "FORGE_SEARCH_TLS")
+	overrideString(&cfg.Search.TLSCAFile, "FORGE_SEARCH_TLS_CA_FILE")
+	overrideString(&cfg.Search.TLSCertFile, "FORGE_SEARCH_TLS_CERT_FILE")
+	overrideString(&cfg.Search.TLSKeyFile, "FORGE_SEARCH_TLS_KEY_FILE")
+	overrideString(&cfg.Search.TLSServerName, "FORGE_SEARCH_TLS_SERVER_NAME")
+
+	overrideString(&cfg.Storage.Provider, "FORGE_STORAGE_PROVIDER")
+	overrideString(&cfg.Storage.Endpoint, "FORGE_STORAGE_ENDPOINT")
+	overrideString(&cfg.Storage.Region, "FORGE_STORAGE_REGION")
+	overrideString(&cfg.Storage.Bucket, "FORGE_STORAGE_BUCKET")
+	overrideString(&cfg.Storage.LocalRoot, "FORGE_STORAGE_LOCAL_ROOT")
+	overrideBool(&cfg.Storage.PathStyle, "FORGE_STORAGE_PATH_STYLE")
+	overrideBool(&cfg.Storage.TLS, "FORGE_STORAGE_TLS")
+	overrideString(&cfg.Storage.TLSCAFile, "FORGE_STORAGE_TLS_CA_FILE")
+	overrideString(&cfg.Storage.TLSCertFile, "FORGE_STORAGE_TLS_CERT_FILE")
+	overrideString(&cfg.Storage.TLSKeyFile, "FORGE_STORAGE_TLS_KEY_FILE")
+	overrideString(&cfg.Storage.TLSServerName, "FORGE_STORAGE_TLS_SERVER_NAME")
+
+	overrideString(&cfg.Discovery.Provider, "FORGE_DISCOVERY_PROVIDER")
+	overrideCSV(&cfg.Discovery.Servers, "FORGE_NACOS_SERVERS")
+	overrideString(&cfg.Discovery.Namespace, "FORGE_NACOS_NAMESPACE")
+	overrideString(&cfg.Discovery.Group, "FORGE_NACOS_GROUP")
+	overrideString(&cfg.Discovery.Cluster, "FORGE_NACOS_CLUSTER")
+	overrideString(&cfg.Discovery.ServiceName, "FORGE_DISCOVERY_SERVICE_NAME")
+	overrideString(&cfg.Discovery.AdvertiseIP, "FORGE_DISCOVERY_ADVERTISE_IP")
+	overrideUint64(&cfg.Discovery.AdvertisePort, "FORGE_DISCOVERY_ADVERTISE_PORT")
+
+	overrideString(&cfg.RemoteConfig.Provider, "FORGE_REMOTE_CONFIG_PROVIDER")
+	overrideCSV(&cfg.RemoteConfig.Servers, "FORGE_NACOS_SERVERS")
+	overrideString(&cfg.RemoteConfig.Namespace, "FORGE_NACOS_NAMESPACE")
+	overrideString(&cfg.RemoteConfig.Group, "FORGE_NACOS_CONFIG_GROUP")
+	overrideString(&cfg.RemoteConfig.DataID, "FORGE_NACOS_CONFIG_DATA_ID")
+	overrideBool(&cfg.RemoteConfig.FailFast, "FORGE_REMOTE_CONFIG_FAIL_FAST")
+
+	overrideDuration(&cfg.Security.SessionTTL, "FORGE_SESSION_TTL")
+	overrideInt(&cfg.Security.PasswordMinLength, "FORGE_PASSWORD_MIN_LENGTH")
+	overrideBool(&cfg.Security.PasswordUpper, "FORGE_PASSWORD_REQUIRE_UPPER")
+	overrideBool(&cfg.Security.PasswordLower, "FORGE_PASSWORD_REQUIRE_LOWER")
+	overrideBool(&cfg.Security.PasswordDigit, "FORGE_PASSWORD_REQUIRE_DIGIT")
+	overrideBool(&cfg.Security.PasswordSymbol, "FORGE_PASSWORD_REQUIRE_SYMBOL")
+	overrideInt(&cfg.Security.PasswordHistory, "FORGE_PASSWORD_HISTORY")
+	overrideInt(&cfg.Security.PasswordMaxAgeDay, "FORGE_PASSWORD_MAX_AGE_DAYS")
+	overrideInt(&cfg.Security.LoginMaxFailures, "FORGE_LOGIN_MAX_FAILURES")
+	overrideDuration(&cfg.Security.LoginLockDuration, "FORGE_LOGIN_LOCK_DURATION")
+	overrideString(&cfg.Security.CryptoProvider, "FORGE_CRYPTO_PROVIDER")
+	overrideString(&cfg.Security.CryptoKeyVersion, "FORGE_CRYPTO_KEY_VERSION")
+	overrideBool(&cfg.Security.SecureCookies, "FORGE_SECURE_COOKIES")
+	overrideString(&cfg.Security.SameSite, "FORGE_SAME_SITE")
+	overrideCSV(&cfg.Security.AllowedOrigins, "FORGE_ALLOWED_ORIGINS")
+	overrideCSV(&cfg.Security.TrustedProxies, "FORGE_TRUSTED_PROXIES")
+
+	overrideString(&cfg.Observability.LogLevel, "FORGE_LOG_LEVEL")
+	overrideString(&cfg.Observability.LogFormat, "FORGE_LOG_FORMAT")
+	overrideString(&cfg.Observability.MetricsPath, "FORGE_METRICS_PATH")
+	overrideString(&cfg.Observability.OTLPEndpoint, "FORGE_OTLP_ENDPOINT")
+	overrideBool(&cfg.Observability.TracingEnabled, "FORGE_TRACING_ENABLED")
+	overrideBool(&cfg.Observability.MetricsEnabled, "FORGE_METRICS_ENABLED")
+	overrideBool(&cfg.Observability.PprofEnabled, "FORGE_PPROF_ENABLED")
+
+	overrideDuration(&cfg.Resilience.DependencyTimeout, "FORGE_DEPENDENCY_TIMEOUT")
+	overrideInt(&cfg.Resilience.RetryMaxAttempts, "FORGE_RETRY_MAX_ATTEMPTS")
+	overrideDuration(&cfg.Resilience.RetryBaseDelay, "FORGE_RETRY_BASE_DELAY")
+	overrideInt(&cfg.Resilience.CircuitFailureThreshold, "FORGE_CIRCUIT_FAILURE_THRESHOLD")
+	overrideDuration(&cfg.Resilience.CircuitOpenDuration, "FORGE_CIRCUIT_OPEN_DURATION")
+	overrideInt(&cfg.Resilience.BulkheadConcurrency, "FORGE_BULKHEAD_CONCURRENCY")
+
+	overrideString(&cfg.Compliance.Profile, "FORGE_COMPLIANCE_PROFILE")
+	overrideInt(&cfg.Compliance.AuditRetentionDays, "FORGE_AUDIT_RETENTION_DAYS")
+	overrideInt(&cfg.Compliance.NetworkLogRetentionDays, "FORGE_NETWORK_LOG_RETENTION_DAYS")
+	overrideBool(&cfg.Compliance.SensitiveDataMasking, "FORGE_SENSITIVE_DATA_MASKING")
+	overrideBool(&cfg.Compliance.DisableDebugEndpoints, "FORGE_DISABLE_DEBUG_ENDPOINTS")
+}
+
+func (c Config) Validate() error {
+	var errs []string
+	switch c.Database.Provider {
+	case "postgres", "mysql", "oceanbase":
+	default:
+		errs = append(errs, "database.provider must be postgres|mysql|oceanbase")
+	}
+	if c.Database.DSN == "" {
+		errs = append(errs, "FORGE_DATABASE_DSN is required")
+	}
+	switch c.Cache.Provider {
+	case "disabled", "memory", "redis":
+	default:
+		errs = append(errs, "cache.provider must be disabled|memory|redis")
+	}
+	if c.Cache.Provider == "redis" && len(c.Cache.Addresses) == 0 {
+		errs = append(errs, "cache.addresses is required for redis")
+	}
+	if c.Cache.Mode != "" && c.Cache.Mode != "standalone" && c.Cache.Mode != "sentinel" && c.Cache.Mode != "cluster" {
+		errs = append(errs, "cache.mode must be standalone|sentinel|cluster")
+	}
+	switch c.Messaging.Provider {
+	case "disabled", "kafka", "rocketmq":
+	default:
+		errs = append(errs, "messaging.provider must be disabled|kafka|rocketmq")
+	}
+	if c.Messaging.Provider == "kafka" && len(c.Messaging.Brokers) == 0 {
+		errs = append(errs, "messaging.brokers required for kafka")
+	}
+	if c.Messaging.Provider == "rocketmq" && c.Messaging.RocketMQEndpoint == "" {
+		errs = append(errs, "messaging.rocketmq_endpoint required for rocketmq")
+	}
+	switch c.Search.Provider {
+	case "disabled", "elasticsearch", "opensearch":
+	default:
+		errs = append(errs, "search.provider must be disabled|elasticsearch|opensearch")
+	}
+	if c.Search.Provider != "disabled" && len(c.Search.URLs) == 0 {
+		errs = append(errs, "search.urls required when search is enabled")
+	}
+	switch c.Storage.Provider {
+	case "local", "s3":
+	default:
+		errs = append(errs, "storage.provider must be local|s3")
+	}
+	if c.Storage.Provider == "s3" && c.Storage.Bucket == "" {
+		errs = append(errs, "storage.bucket required for s3")
+	}
+	if c.Storage.Provider == "local" && strings.TrimSpace(c.Storage.LocalRoot) == "" {
+		errs = append(errs, "storage.local_root required for local storage")
+	}
+	switch c.Discovery.Provider {
+	case "disabled", "nacos":
+	default:
+		errs = append(errs, "discovery.provider must be disabled|nacos")
+	}
+	if c.Discovery.Provider == "nacos" {
+		if len(c.Discovery.Servers) == 0 {
+			errs = append(errs, "discovery.servers required for nacos")
+		}
+		if c.Discovery.AdvertiseIP == "" || c.Discovery.AdvertisePort == 0 {
+			errs = append(errs, "nacos discovery requires advertise_ip and advertise_port")
+		}
+	}
+	switch c.RemoteConfig.Provider {
+	case "disabled", "nacos":
+	default:
+		errs = append(errs, "remote_config.provider must be disabled|nacos")
+	}
+	if c.RemoteConfig.Provider == "nacos" && (len(c.RemoteConfig.Servers) == 0 || c.RemoteConfig.DataID == "") {
+		errs = append(errs, "nacos remote config requires servers and data_id")
+	}
+	if c.Security.PasswordMinLength < 8 {
+		errs = append(errs, "security.password_min_length must be >= 8")
+	}
+	if c.Security.PasswordHistory < 0 || c.Security.PasswordHistory > 24 {
+		errs = append(errs, "security.password_history must be 0..24")
+	}
+	switch c.Security.CryptoProvider {
+	case "standard", "gm":
+	default:
+		errs = append(errs, "security.crypto_provider must be standard|gm")
+	}
+	if strings.EqualFold(c.Security.SameSite, "none") && !c.Security.SecureCookies {
+		errs = append(errs, "security.same_site=none requires secure_cookies=true")
+	}
+
+	for name, pair := range map[string][2]string{
+		"redis":   {c.Cache.TLSCertFile, c.Cache.TLSKeyFile},
+		"kafka":   {c.Messaging.TLSCertFile, c.Messaging.TLSKeyFile},
+		"search":  {c.Search.TLSCertFile, c.Search.TLSKeyFile},
+		"storage": {c.Storage.TLSCertFile, c.Storage.TLSKeyFile},
+	} {
+		if (pair[0] == "") != (pair[1] == "") {
+			errs = append(errs, name+" tls_cert_file and tls_key_file must be configured together")
+		}
+	}
+	if c.Server.ListenAddr == "" {
+		errs = append(errs, "server.listen_addr is required")
+	}
+	if c.Server.TLSEnabled && (c.Server.TLSCertFile == "" || c.Server.TLSKeyFile == "") {
+		errs = append(errs, "tls enabled requires tls_cert_file and tls_key_file")
+	}
+	if c.Server.RequireClientTLS && c.Server.TLSClientCAFile == "" {
+		errs = append(errs, "client mTLS requires tls_client_ca_file")
+	}
+	if c.Observability.MetricsEnabled && !strings.HasPrefix(c.Observability.MetricsPath, "/") {
+		errs = append(errs, "observability.metrics_path must start with /")
+	}
+	if c.Resilience.RetryMaxAttempts < 1 || c.Resilience.CircuitFailureThreshold < 1 || c.Resilience.BulkheadConcurrency < 1 {
+		errs = append(errs, "resilience values must be positive")
+	}
+	if c.Compliance.NetworkLogRetentionDays < 183 && (c.Compliance.Profile == "mlps3" || c.Compliance.Profile == "financial") {
+		errs = append(errs, "mlps3/financial profile requires network_log_retention_days >= 183")
+	}
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "; "))
+	}
+	return nil
+}
+
+func secret(key string) string {
+	if p := strings.TrimSpace(os.Getenv(key + "_FILE")); p != "" {
+		b, err := os.ReadFile(p)
+		if err == nil {
+			return strings.TrimSpace(string(b))
+		}
+	}
+	return strings.TrimSpace(os.Getenv(key))
+}
+func overrideString(dst *string, key string) {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		*dst = v
+	}
+}
+func overrideCSV(dst *[]string, key string) {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		parts := strings.Split(v, ",")
+		*dst = (*dst)[:0]
+		for _, p := range parts {
+			if x := strings.TrimSpace(p); x != "" {
+				*dst = append(*dst, x)
+			}
+		}
+	}
+}
+func overrideBool(dst *bool, key string) {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		if b, e := strconv.ParseBool(v); e == nil {
+			*dst = b
+		}
+	}
+}
+func overrideInt(dst *int, key string) {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		if n, e := strconv.Atoi(v); e == nil {
+			*dst = n
+		}
+	}
+}
+func overrideDuration(dst *time.Duration, key string) {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		if d, e := time.ParseDuration(v); e == nil {
+			*dst = d
+		}
+	}
+}
+func overrideUint64(dst *uint64, key string) {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+		if n, e := strconv.ParseUint(v, 10, 64); e == nil {
+			*dst = n
+		}
+	}
+}

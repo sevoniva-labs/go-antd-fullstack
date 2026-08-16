@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: forge
+      MYSQL_USER: forge
+      MYSQL_PASSWORD: forge_dev
+      MYSQL_ROOT_PASSWORD: root_dev
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - mysql_data:/var/lib/mysql
+  forge:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    ports: ["8080:8080"]
+    environment:
+      FORGE_CONFIG: /app/config.yaml
+      FORGE_DATABASE_PROVIDER: mysql
+      FORGE_DATABASE_DSN: forge:forge_dev@tcp(mysql:3306)/forge?parseTime=true&charset=utf8mb4
+      FORGE_CRYPTO_KEY: ${FORGE_CRYPTO_KEY:?set FORGE_CRYPTO_KEY in .env}
+      FORGE_BOOTSTRAP_ADMIN: ${FORGE_BOOTSTRAP_ADMIN:-admin}
+      FORGE_BOOTSTRAP_PASSWORD: ${FORGE_BOOTSTRAP_PASSWORD:?set FORGE_BOOTSTRAP_PASSWORD in .env}
+    depends_on:
+      mysql:
+        condition: service_healthy
+volumes:
+  mysql_data:

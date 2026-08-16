@@ -1,0 +1,21 @@
+window.__FORGE_CONFIG__ = {
+  appName: 'Sevoniva Forge',
+  appShortName: 'Forge',
+  description: 'Enterprise Go + React Application Foundation',
+  environment: 'DEV',
+  apiBaseUrl: '/api/v1',
+  localLoginEnabled: true,
+  showOrganizationField: false,
+  defaultOrganization: 'default',
+  oidcLoginUrl: '',
+  helpUrl: '',
+  logoUrl: '',
+  primaryColor: '#1677FF',
+  defaultTheme: 'light',
+  compactMode: false,
+  layoutMode: 'mix',
+  pageTabs: true,
+  showEnvironmentBadge: true,
+  componentPlayground: true,
+  footerText: ''
+}
