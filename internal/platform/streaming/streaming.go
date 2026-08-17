@@ -21,9 +21,10 @@ import (
 )
 
 const (
-	maxRecordBytes = 16 << 20
-	maxHeaderCount = 64
-	maxHeaderBytes = 32 << 10
+	maxRecordBytes     = 16 << 20
+	maxHeaderCount     = 64
+	maxHeaderBytes     = 32 << 10
+	maxHeaderNameBytes = 128
 )
 
 type Record struct {
@@ -127,8 +128,11 @@ func prepareRecord(ctx context.Context, record Record) (Record, map[string]strin
 	total := 0
 	for rawName, value := range record.Headers {
 		name := strings.ToLower(strings.TrimSpace(rawName))
-		if name == "" || !utf8.ValidString(name) || !utf8.ValidString(value) {
+		if !validHeaderName(name) || !utf8.ValidString(value) {
 			return Record{}, nil, fmt.Errorf("streaming: invalid header %q", rawName)
+		}
+		if _, exists := headers[name]; exists {
+			return Record{}, nil, fmt.Errorf("streaming: duplicate normalized header %q", name)
 		}
 		total += len(name) + len(value)
 		if total > maxHeaderBytes {
@@ -145,4 +149,23 @@ func prepareRecord(ctx context.Context, record Record) (Record, map[string]strin
 	record.Key = append([]byte(nil), record.Key...)
 	record.Value = append([]byte(nil), record.Value...)
 	return record, headers, nil
+}
+
+func validHeaderName(name string) bool {
+	if name == "" || len(name) > maxHeaderNameBytes {
+		return false
+	}
+	for i := range len(name) {
+		c := name[i]
+		if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') {
+			continue
+		}
+		switch c {
+		case '!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~':
+			continue
+		default:
+			return false
+		}
+	}
+	return true
 }

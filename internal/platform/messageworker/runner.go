@@ -20,6 +20,8 @@ import (
 
 type Handler func(context.Context, *sql.Tx, messaging.Message) error
 
+const emptyReceiveDelay = 100 * time.Millisecond
+
 type Runner struct {
 	consumer messaging.Consumer
 	tx       transactioner
@@ -80,6 +82,12 @@ func (r *Runner) Run(ctx context.Context) error {
 			continue
 		}
 		receiveFailures = 0
+		if len(deliveries) == 0 {
+			if err := waitContext(ctx, emptyReceiveDelay); err != nil {
+				return nil
+			}
+			continue
+		}
 		for _, delivery := range deliveries {
 			if err := r.process(ctx, delivery); err != nil && ctx.Err() == nil {
 				r.logger.Error("message processing failed", "provider", r.consumer.Provider(), "group", r.consumer.Group(),
