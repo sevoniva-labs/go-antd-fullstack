@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./modules": "./src/modules.ts",
     "./audit-logs": "./src/pages/AuditLogs.tsx",
+    "./departments": "./src/pages/Departments.tsx",
     "./organization": "./src/pages/Organization.tsx",
     "./permissions": "./src/pages/Permissions.tsx",
     "./roles": "./src/pages/Roles.tsx",

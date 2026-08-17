@@ -4,6 +4,7 @@ export const queryKeys = {
   roles: ['roles'] as const,
   permissions: ['permissions'] as const,
   organization: ['organization'] as const,
+  departments: ['departments'] as const,
   securityConfig: ['security-config'] as const,
   sessions: ['sessions'] as const,
   auditLogs: ['audit-logs'] as const,

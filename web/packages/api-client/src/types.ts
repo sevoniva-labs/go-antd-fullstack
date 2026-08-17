@@ -36,6 +36,18 @@ export interface Organization {
   updated_at: string
 }
 
+export interface Department {
+  id: string
+  organization_id: string
+  parent_id?: string
+  department_key: string
+  name: string
+  status: 'ACTIVE' | 'DISABLED'
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Permission {
   id: string
   permission_key: string

@@ -2,6 +2,7 @@ import { apiDownload, apiFetch, type DownloadResult } from './client'
 import type {
   ApiToken,
   AuditEvent,
+  Department,
   Organization,
   Permission,
   Principal,
@@ -37,6 +38,20 @@ export const api = {
     max_users: number
     max_active_sessions: number
   }) => apiFetch<Organization>('/admin/organization', { method: 'PATCH', body: JSON.stringify(payload) }),
+  departments: () => apiFetch<{ items: Department[] }>('/admin/departments'),
+  createDepartment: (payload: {
+    department_key: string
+    name: string
+    parent_id?: string
+    status: 'ACTIVE' | 'DISABLED'
+    sort_order: number
+  }) => apiFetch<Department>('/admin/departments', { method: 'POST', body: JSON.stringify(payload) }),
+  updateDepartment: (departmentId: string, payload: {
+    name: string
+    parent_id?: string
+    status: 'ACTIVE' | 'DISABLED'
+    sort_order: number
+  }) => apiFetch<Department>(`/admin/departments/${encodeURIComponent(departmentId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   securityConfig: () => apiFetch<SecurityPolicy>('/admin/security-config'),
   updateSecurityConfig: (payload: SecurityPolicy) =>
     apiFetch<SecurityPolicy>('/admin/security-config', { method: 'PUT', body: JSON.stringify(payload) }),

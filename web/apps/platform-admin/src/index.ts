@@ -1,6 +1,7 @@
 export * from './modules'
 export * from './pages/AuditLogs'
 export * from './pages/Organization'
+export * from './pages/Departments'
 export * from './pages/Permissions'
 export * from './pages/Roles'
 export * from './pages/Security'

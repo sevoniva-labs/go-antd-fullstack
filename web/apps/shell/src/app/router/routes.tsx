@@ -6,6 +6,7 @@ import {
   FileProtectOutlined,
   KeyOutlined,
   LockOutlined,
+  PartitionOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   TeamOutlined,
@@ -25,6 +26,7 @@ const UsersPage = lazy(() => import('@forge/platform-admin/users').then((m) => (
 const RolesPage = lazy(() => import('@forge/platform-admin/roles').then((m) => ({ default: m.RolesPage })))
 const PermissionsPage = lazy(() => import('@forge/platform-admin/permissions').then((m) => ({ default: m.PermissionsPage })))
 const OrganizationPage = lazy(() => import('@forge/platform-admin/organization').then((m) => ({ default: m.OrganizationPage })))
+const DepartmentsPage = lazy(() => import('@forge/platform-admin/departments').then((m) => ({ default: m.DepartmentsPage })))
 const SessionsPage = lazy(() => import('@forge/platform-admin/sessions').then((m) => ({ default: m.SessionsPage })))
 const AuditLogsPage = lazy(() => import('@forge/platform-admin/audit-logs').then((m) => ({ default: m.AuditLogsPage })))
 const SecurityPage = lazy(() => import('@forge/platform-admin/security').then((m) => ({ default: m.SecurityPage })))
@@ -49,6 +51,7 @@ const platformAdminComponents: Record<PlatformAdminModuleKey, LazyExoticComponen
   roles: RolesPage,
   permissions: PermissionsPage,
   organization: OrganizationPage,
+  departments: DepartmentsPage,
   security: SecurityPage,
   sessions: SessionsPage,
   'audit-logs': AuditLogsPage,
@@ -60,6 +63,7 @@ const platformAdminIcons: Record<PlatformAdminModuleKey, ReactNode> = {
   roles: <UserSwitchOutlined />,
   permissions: <FileProtectOutlined />,
   organization: <ApartmentOutlined />,
+  departments: <PartitionOutlined />,
   security: <SafetyCertificateOutlined />,
   sessions: <LockOutlined />,
   'audit-logs': <AuditOutlined />,
