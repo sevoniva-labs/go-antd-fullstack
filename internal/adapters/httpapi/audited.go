@@ -13,18 +13,25 @@ import (
 var errReliableAuditUnavailable = errors.New("reliable audit unavailable")
 
 func (s *Server) audited(ctx context.Context, event *audit.Event, operation func(context.Context) error) error {
-	if s.db == nil || s.audit == nil {
+	if s.db == nil {
 		return errReliableAuditUnavailable
 	}
 	return s.db.WithinTx(ctx, func(txCtx context.Context) error {
 		if err := operation(txCtx); err != nil {
 			return err
 		}
-		if err := s.audit.Write(txCtx, *event); err != nil {
-			return fmt.Errorf("%w: %v", errReliableAuditUnavailable, err)
-		}
-		return nil
+		return s.writeAudit(txCtx, *event)
 	})
+}
+
+func (s *Server) writeAudit(ctx context.Context, event audit.Event) error {
+	if s.audit == nil {
+		return errReliableAuditUnavailable
+	}
+	if err := s.audit.Write(ctx, event); err != nil {
+		return fmt.Errorf("%w: %v", errReliableAuditUnavailable, err)
+	}
+	return nil
 }
 
 func (s *Server) rejectAuditFailure(w http.ResponseWriter, r *http.Request, err error) bool {

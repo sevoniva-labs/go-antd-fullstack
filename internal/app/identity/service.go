@@ -447,10 +447,14 @@ func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (
 		return domain.Principal{}, "", "", *row.User.LockedUntil, ErrLocked
 	}
 	if !s.hasher.Verify(raw, row.PasswordHash) {
-		_ = s.repo.RecordLoginFailure(ctx, row.User.ID, policy.maxFailures, policy.lockDuration)
+		if err := s.repo.RecordLoginFailure(ctx, row.User.ID, policy.maxFailures, policy.lockDuration); err != nil {
+			return domain.Principal{}, "", "", time.Time{}, err
+		}
 		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
 	}
-	_ = s.repo.ResetLoginFailure(ctx, row.User.ID)
+	if err := s.repo.ResetLoginFailure(ctx, row.User.ID); err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
 	token, err := randomToken(32)
 	if err != nil {
 		return domain.Principal{}, "", "", time.Time{}, err

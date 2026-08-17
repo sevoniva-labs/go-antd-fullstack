@@ -180,41 +180,72 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	}
 	orgID, err := s.organizationID(r.Context(), req.Organization)
 	if err != nil {
-		httpx.Error(w, 401, "INVALID_CREDENTIALS", "用户名或密码错误", RequestID(r), TraceID(r))
-		if s.audit != nil {
-			_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: orgID, ActorName: req.LoginName, Action: "auth.login", Result: "FAILED", ClientIP: s.clientIP(r)})
+		if auditErr := s.writeAudit(r.Context(), audit.Event{RequestID: RequestID(r), ActorName: req.LoginName, Action: "auth.login", Result: "FAILED", ClientIP: s.clientIP(r)}); auditErr != nil {
+			s.rejectAuditFailure(w, r, auditErr)
+			return
 		}
+		httpx.Error(w, 401, "INVALID_CREDENTIALS", "用户名或密码错误", RequestID(r), TraceID(r))
 		return
 	}
-	p, token, csrf, expires, err := s.identity.Login(r.Context(), orgID, req.LoginName, req.Password, s.clientIP(r), limitString(r.UserAgent(), 512))
-	if err != nil {
+	var p domain.Principal
+	var token, csrf string
+	var expires time.Time
+	var loginErr error
+	txErr := s.db.WithinTx(r.Context(), func(ctx context.Context) error {
+		p, token, csrf, expires, loginErr = s.identity.Login(ctx, orgID, req.LoginName, req.Password, s.clientIP(r), limitString(r.UserAgent(), 512))
+		if loginErr != nil && !isExpectedLoginFailure(loginErr) {
+			return loginErr
+		}
+		event := audit.Event{RequestID: RequestID(r), OrganizationID: orgID, ActorName: req.LoginName, Action: "auth.login", Result: "FAILED", ClientIP: s.clientIP(r)}
+		if loginErr == nil {
+			event.ActorID = p.UserID
+			event.ActorName = p.LoginName
+			event.Result = "SUCCESS"
+		}
+		return s.writeAudit(ctx, event)
+	})
+	if txErr != nil {
+		if s.rejectAuditFailure(w, r, txErr) {
+			return
+		}
+		s.log.Error("login transaction failed", "err", txErr, "request_id", RequestID(r), "trace_id", TraceID(r))
+		httpx.Error(w, http.StatusInternalServerError, "INTERNAL", "登录服务暂不可用", RequestID(r), TraceID(r))
+		return
+	}
+	if loginErr != nil {
 		code, msg := 401, "用户名或密码错误"
-		if errors.Is(err, appidentity.ErrLocked) {
+		if errors.Is(loginErr, appidentity.ErrLocked) {
 			code = 423
 			msg = "账号已锁定，请稍后再试"
 		}
 		httpx.Error(w, code, "LOGIN_FAILED", msg, RequestID(r), TraceID(r))
-		if s.audit != nil {
-			_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: orgID, ActorName: req.LoginName, Action: "auth.login", Result: "FAILED", ClientIP: s.clientIP(r)})
-		}
 		return
 	}
 	setCookies(w, token, csrf, expires, s.secureCookies, s.cfg.Security.SameSite)
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "auth.login", Result: "SUCCESS", ClientIP: s.clientIP(r)})
-	}
 	httpx.Success(w, 200, p, RequestID(r), TraceID(r))
 }
 func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
+	token := ""
 	if c, e := r.Cookie(sessionCookie); e == nil {
-		_ = s.identity.Logout(r.Context(), c.Value)
+		token = c.Value
+	}
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "auth.logout", ClientIP: s.clientIP(r)}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.Logout(ctx, token)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
+		httpx.Error(w, http.StatusInternalServerError, "LOGOUT_FAILED", "退出登录失败", RequestID(r), TraceID(r))
+		return
 	}
 	clearCookies(w, s.secureCookies)
-	if p != nil && s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "auth.logout", ClientIP: s.clientIP(r)})
-	}
 	httpx.Success(w, http.StatusOK, nil, RequestID(r), TraceID(r))
+}
+
+func isExpectedLoginFailure(err error) bool {
+	return errors.Is(err, appidentity.ErrInvalidCredentials) || errors.Is(err, appidentity.ErrLocked) || errors.Is(err, appidentity.ErrDisabled)
 }
 func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	httpx.Success(w, 200, Principal(r), RequestID(r), TraceID(r))
@@ -698,8 +729,17 @@ func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
 		limit = v
 	}
 
-	items, err := s.audit.List(r.Context(), p.OrganizationID, limit)
+	var items []audit.Event
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "audit.export", ResourceType: "audit_log", ClientIP: s.clientIP(r), Details: map[string]any{"format": format, "limit": limit}}
+	err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		var err error
+		items, err = s.audit.List(ctx, p.OrganizationID, limit)
+		return err
+	})
 	if err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		s.log.Error("export audit logs failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 		httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
 		return
@@ -761,10 +801,6 @@ func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(data)
-	}
-
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "audit.export", ResourceType: "audit_log", ClientIP: s.clientIP(r), Details: map[string]any{"format": format, "limit": limit}})
 	}
 }
 
