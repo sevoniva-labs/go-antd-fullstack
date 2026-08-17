@@ -1,0 +1,69 @@
+package csrf
+
+import (
+	"context"
+	"crypto/subtle"
+	"net/http"
+	"strings"
+
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
+	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
+	"github.com/sevoniva-labs/forge/internal/platform/authn"
+)
+
+const csrfCookieName = "forge_csrf"
+
+var protectedOperations = map[string]struct{}{
+	forgev1.OperationIdentityServiceLogout:                {},
+	forgev1.OperationIdentityServiceChangePassword:        {},
+	forgev1.OperationIdentityServiceCreateApiToken:        {},
+	forgev1.OperationIdentityServiceRevokeApiToken:        {},
+	forgev1.OperationPlatformServiceCreateUser:            {},
+	forgev1.OperationPlatformServiceUpdateOrganization:    {},
+	forgev1.OperationPlatformServiceUpdateSecurityPolicy:  {},
+	forgev1.OperationPlatformServiceUpdateRolePermissions: {},
+	forgev1.OperationPlatformServiceUpdateUserRoles:       {},
+	forgev1.OperationPlatformServiceUpdateUserStatus:      {},
+	forgev1.OperationPlatformServiceUnlockUser:            {},
+	forgev1.OperationPlatformServiceResetUserPassword:     {},
+	forgev1.OperationPlatformServiceRevokeSession:         {},
+	forgev1.OperationPlatformServiceExportAuditLogs:       {},
+}
+
+func Server() middleware.Middleware {
+	return func(next middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req any) (any, error) {
+			tr, ok := transport.FromServerContext(ctx)
+			if !ok {
+				return nil, kratoserrors.Forbidden("CSRF_MISMATCH", "transport context is required")
+			}
+			if _, protected := protectedOperations[tr.Operation()]; !protected {
+				return next(ctx, req)
+			}
+			principal, authenticated := authn.Principal(ctx)
+			if !authenticated {
+				return nil, kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication is required")
+			}
+			if strings.EqualFold(principal.Type, "TOKEN") {
+				return next(ctx, req)
+			}
+			headerToken := strings.TrimSpace(tr.RequestHeader().Get("X-CSRF-Token"))
+			cookieToken := cookieValue(tr.RequestHeader().Get("Cookie"), csrfCookieName)
+			if headerToken == "" || cookieToken == "" || subtle.ConstantTimeCompare([]byte(headerToken), []byte(cookieToken)) != 1 {
+				return nil, kratoserrors.Forbidden("CSRF_MISMATCH", "CSRF validation failed")
+			}
+			return next(ctx, req)
+		}
+	}
+}
+
+func cookieValue(raw, name string) string {
+	request := &http.Request{Header: http.Header{"Cookie": []string{raw}}}
+	cookie, err := request.Cookie(name)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(cookie.Value)
+}

@@ -20,6 +20,10 @@ func Server(rules map[string][]string) middleware.Middleware {
 			if !ok {
 				return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "transport context is required")
 			}
+			principal, authenticated := authn.Principal(ctx)
+			if authenticated && principal.MustChangePassword && !allowedBeforePasswordChange(tr.Operation()) {
+				return nil, kratoserrors.Forbidden("PASSWORD_CHANGE_REQUIRED", "password change is required")
+			}
 			required, registered := rules[tr.Operation()]
 			if !registered {
 				if strings.HasPrefix(tr.Operation(), platformOperationPrefix) {
@@ -27,12 +31,22 @@ func Server(rules map[string][]string) middleware.Middleware {
 				}
 				return next(ctx, req)
 			}
-			principal, authenticated := authn.Principal(ctx)
 			if !authenticated || !principal.HasPermission(required...) {
 				return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "permission denied")
 			}
 			return next(ctx, req)
 		}
+	}
+}
+
+func allowedBeforePasswordChange(operation string) bool {
+	switch operation {
+	case forgev1.OperationIdentityServiceGetCurrentUser,
+		forgev1.OperationIdentityServiceChangePassword,
+		forgev1.OperationIdentityServiceLogout:
+		return true
+	default:
+		return false
 	}
 }
 
