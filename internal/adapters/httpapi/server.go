@@ -282,7 +282,7 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	u, err := s.identity.CreateUser(r.Context(), p.OrganizationID, req.LoginName, req.DisplayName, req.Password, req.Roles)
+	u, err := s.identity.CreateUser(r.Context(), *p, p.OrganizationID, req.LoginName, req.DisplayName, req.Password, req.Roles)
 	if err != nil {
 		code, msg, status := "CREATE_USER_FAILED", "创建用户失败", http.StatusBadRequest
 		switch {
@@ -292,6 +292,8 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 			code, msg = "INVALID_LOGIN_NAME", "登录名不合法"
 		case errors.Is(err, appidentity.ErrPasswordPolicy):
 			code, msg = "PASSWORD_POLICY_VIOLATION", "初始密码不符合安全策略"
+		case errors.Is(err, appidentity.ErrGrantCeiling):
+			code, msg, status = "GRANT_CEILING_EXCEEDED", "不能授予超出当前账号权限范围的角色", http.StatusForbidden
 		case strings.Contains(strings.ToLower(err.Error()), "duplicate"), strings.Contains(strings.ToLower(err.Error()), "unique"):
 			code, msg, status = "LOGIN_NAME_CONFLICT", "登录名已存在", http.StatusConflict
 		default:
@@ -464,10 +466,12 @@ func (s *Server) updateRolePermissions(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.UpdateRolePermissions(r.Context(), p.OrganizationID, roleKey, req.Permissions); err != nil {
+	if err := s.identity.UpdateRolePermissions(r.Context(), *p, p.OrganizationID, roleKey, req.Permissions); err != nil {
 		code, msg, status := "ROLE_PERMISSION_UPDATE_FAILED", "角色权限更新失败", http.StatusBadRequest
 		if errors.Is(err, appidentity.ErrInvalidRole) {
 			code, msg = "INVALID_ROLE", "角色或权限不合法"
+		} else if errors.Is(err, appidentity.ErrGrantCeiling) {
+			code, msg, status = "GRANT_CEILING_EXCEEDED", "不能修改超出当前账号权限范围的角色权限", http.StatusForbidden
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
@@ -494,7 +498,7 @@ func (s *Server) updateUserRoles(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.UpdateUserRoles(r.Context(), p.OrganizationID, userID, req.Roles); err != nil {
+	if err := s.identity.UpdateUserRoles(r.Context(), *p, p.OrganizationID, userID, req.Roles); err != nil {
 		code, msg, status := "USER_ROLE_UPDATE_FAILED", "用户角色更新失败", http.StatusBadRequest
 		if errors.Is(err, appidentity.ErrInvalidRole) {
 			code, msg = "INVALID_ROLE", "角色不合法"
@@ -502,6 +506,8 @@ func (s *Server) updateUserRoles(w http.ResponseWriter, r *http.Request) {
 			code, msg, status = "LAST_SYSTEM_ADMIN", "至少保留一个启用状态的系统管理员", http.StatusConflict
 		} else if errors.Is(err, sql.ErrNoRows) {
 			code, msg, status = "NOT_FOUND", "用户不存在", http.StatusNotFound
+		} else if errors.Is(err, appidentity.ErrGrantCeiling) {
+			code, msg, status = "GRANT_CEILING_EXCEEDED", "不能修改超出当前账号权限范围的角色", http.StatusForbidden
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return

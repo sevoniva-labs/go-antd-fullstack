@@ -8,8 +8,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
@@ -21,6 +21,7 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 var ErrLocked = errors.New("account locked")
 var ErrDisabled = errors.New("account disabled")
 var ErrInvalidRole = errors.New("invalid role")
+var ErrGrantCeiling = errors.New("grant ceiling exceeded")
 var ErrInvalidLoginName = errors.New("invalid login name")
 var ErrPasswordPolicy = errors.New("password policy violation")
 var ErrPasswordReused = errors.New("password was used recently")
@@ -259,16 +260,16 @@ func (s *Service) finalizeBootstrapDefaults(ctx context.Context, orgID string) e
 	}
 	changes := map[string]string{
 		domain.SecuritySettingPasswordMinLength:     strconv.Itoa(policy.passwordPolicy.MinLength),
-		domain.SecuritySettingPasswordRequireUpper:    strconv.FormatBool(policy.passwordPolicy.RequireUpper),
-		domain.SecuritySettingPasswordRequireLower:    strconv.FormatBool(policy.passwordPolicy.RequireLower),
-		domain.SecuritySettingPasswordRequireDigit:    strconv.FormatBool(policy.passwordPolicy.RequireDigit),
-		domain.SecuritySettingPasswordRequireSymbol:   strconv.FormatBool(policy.passwordPolicy.RequireSymbol),
-		domain.SecuritySettingPasswordHistory:         strconv.Itoa(policy.history),
-		domain.SecuritySettingPasswordMaxAgeDays:      strconv.Itoa(int(policy.maxAge.Hours()) / 24),
-		domain.SecuritySettingLoginMaxFailures:        strconv.Itoa(policy.maxFailures),
-		domain.SecuritySettingLoginLockDurationSec:    strconv.FormatInt(int64(policy.lockDuration.Seconds()), 10),
-		domain.SecuritySettingSessionTTLSeconds:       strconv.FormatInt(int64(policy.sessionTTL.Seconds()), 10),
-		domain.SecuritySettingMaxConcurrentSessions:   strconv.Itoa(policy.maxConcurrent),
+		domain.SecuritySettingPasswordRequireUpper:  strconv.FormatBool(policy.passwordPolicy.RequireUpper),
+		domain.SecuritySettingPasswordRequireLower:  strconv.FormatBool(policy.passwordPolicy.RequireLower),
+		domain.SecuritySettingPasswordRequireDigit:  strconv.FormatBool(policy.passwordPolicy.RequireDigit),
+		domain.SecuritySettingPasswordRequireSymbol: strconv.FormatBool(policy.passwordPolicy.RequireSymbol),
+		domain.SecuritySettingPasswordHistory:       strconv.Itoa(policy.history),
+		domain.SecuritySettingPasswordMaxAgeDays:    strconv.Itoa(int(policy.maxAge.Hours()) / 24),
+		domain.SecuritySettingLoginMaxFailures:      strconv.Itoa(policy.maxFailures),
+		domain.SecuritySettingLoginLockDurationSec:  strconv.FormatInt(int64(policy.lockDuration.Seconds()), 10),
+		domain.SecuritySettingSessionTTLSeconds:     strconv.FormatInt(int64(policy.sessionTTL.Seconds()), 10),
+		domain.SecuritySettingMaxConcurrentSessions: strconv.Itoa(policy.maxConcurrent),
 	}
 	for key := range changes {
 		if _, ok := existing[key]; ok {
@@ -287,17 +288,17 @@ func (s *Service) SecurityPolicy(ctx context.Context, orgID string) (domain.Secu
 		return domain.SecurityPolicy{}, err
 	}
 	return domain.SecurityPolicy{
-		PasswordMinLength:       policy.passwordPolicy.MinLength,
-		PasswordRequireUpper:    policy.passwordPolicy.RequireUpper,
-		PasswordRequireLower:    policy.passwordPolicy.RequireLower,
-		PasswordRequireDigit:    policy.passwordPolicy.RequireDigit,
-		PasswordRequireSymbol:   policy.passwordPolicy.RequireSymbol,
-		PasswordHistory:         policy.history,
-		PasswordMaxAgeDays:      int(policy.maxAge.Hours()) / 24,
-		LoginMaxFailures:        policy.maxFailures,
+		PasswordMinLength:        policy.passwordPolicy.MinLength,
+		PasswordRequireUpper:     policy.passwordPolicy.RequireUpper,
+		PasswordRequireLower:     policy.passwordPolicy.RequireLower,
+		PasswordRequireDigit:     policy.passwordPolicy.RequireDigit,
+		PasswordRequireSymbol:    policy.passwordPolicy.RequireSymbol,
+		PasswordHistory:          policy.history,
+		PasswordMaxAgeDays:       int(policy.maxAge.Hours()) / 24,
+		LoginMaxFailures:         policy.maxFailures,
 		LoginLockDurationSeconds: int64(policy.lockDuration.Seconds()),
-		SessionTTLSeconds:       int64(policy.sessionTTL.Seconds()),
-		MaxConcurrentSessions:   policy.maxConcurrent,
+		SessionTTLSeconds:        int64(policy.sessionTTL.Seconds()),
+		MaxConcurrentSessions:    policy.maxConcurrent,
 	}, nil
 }
 
@@ -310,16 +311,16 @@ func (s *Service) UpdateSecurityPolicy(ctx context.Context, orgID, updatedBy str
 	}
 	payload := map[string]string{
 		domain.SecuritySettingPasswordMinLength:     strconv.Itoa(policy.PasswordMinLength),
-		domain.SecuritySettingPasswordRequireUpper:    strconv.FormatBool(policy.PasswordRequireUpper),
-		domain.SecuritySettingPasswordRequireLower:    strconv.FormatBool(policy.PasswordRequireLower),
-		domain.SecuritySettingPasswordRequireDigit:    strconv.FormatBool(policy.PasswordRequireDigit),
-		domain.SecuritySettingPasswordRequireSymbol:   strconv.FormatBool(policy.PasswordRequireSymbol),
-		domain.SecuritySettingPasswordHistory:         strconv.Itoa(policy.PasswordHistory),
-		domain.SecuritySettingPasswordMaxAgeDays:      strconv.Itoa(policy.PasswordMaxAgeDays),
-		domain.SecuritySettingLoginMaxFailures:        strconv.Itoa(policy.LoginMaxFailures),
-		domain.SecuritySettingLoginLockDurationSec:    strconv.FormatInt(policy.LoginLockDurationSeconds, 10),
-		domain.SecuritySettingSessionTTLSeconds:       strconv.FormatInt(policy.SessionTTLSeconds, 10),
-		domain.SecuritySettingMaxConcurrentSessions:   strconv.Itoa(policy.MaxConcurrentSessions),
+		domain.SecuritySettingPasswordRequireUpper:  strconv.FormatBool(policy.PasswordRequireUpper),
+		domain.SecuritySettingPasswordRequireLower:  strconv.FormatBool(policy.PasswordRequireLower),
+		domain.SecuritySettingPasswordRequireDigit:  strconv.FormatBool(policy.PasswordRequireDigit),
+		domain.SecuritySettingPasswordRequireSymbol: strconv.FormatBool(policy.PasswordRequireSymbol),
+		domain.SecuritySettingPasswordHistory:       strconv.Itoa(policy.PasswordHistory),
+		domain.SecuritySettingPasswordMaxAgeDays:    strconv.Itoa(policy.PasswordMaxAgeDays),
+		domain.SecuritySettingLoginMaxFailures:      strconv.Itoa(policy.LoginMaxFailures),
+		domain.SecuritySettingLoginLockDurationSec:  strconv.FormatInt(policy.LoginLockDurationSeconds, 10),
+		domain.SecuritySettingSessionTTLSeconds:     strconv.FormatInt(policy.SessionTTLSeconds, 10),
+		domain.SecuritySettingMaxConcurrentSessions: strconv.Itoa(policy.MaxConcurrentSessions),
 	}
 	if err := s.repo.SetSecuritySettings(ctx, orgID, updatedBy, payload); err != nil {
 		return domain.SecurityPolicy{}, err
@@ -455,7 +456,10 @@ func (s *Service) Logout(ctx context.Context, token string) error {
 func (s *Service) ListUsers(ctx context.Context, orgID string) ([]domain.User, error) {
 	return s.repo.ListUsers(ctx, orgID, 200)
 }
-func (s *Service) CreateUser(ctx context.Context, orgID, login, display, raw string, roles []string) (domain.User, error) {
+func (s *Service) CreateUser(ctx context.Context, actor domain.Principal, orgID, login, display, raw string, roles []string) (domain.User, error) {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return domain.User{}, err
+	}
 	if _, err := s.repo.OrganizationByID(ctx, orgID); err != nil {
 		return domain.User{}, err
 	}
@@ -475,6 +479,9 @@ func (s *Service) CreateUser(ctx context.Context, orgID, login, display, raw str
 		if _, ok := allowed[r]; !ok {
 			return domain.User{}, ErrInvalidRole
 		}
+	}
+	if err := enforceRoleMutation(actor, nil, roles); err != nil {
+		return domain.User{}, err
 	}
 	policy, err := s.resolveSecurityPolicy(ctx, orgID)
 	if err != nil {
@@ -637,7 +644,10 @@ func (s *Service) ListPermissions(ctx context.Context) ([]domain.Permission, err
 	return s.repo.ListPermissions(ctx)
 }
 
-func (s *Service) UpdateRolePermissions(ctx context.Context, orgID, roleKey string, permissionKeys []string) error {
+func (s *Service) UpdateRolePermissions(ctx context.Context, actor domain.Principal, orgID, roleKey string, permissionKeys []string) error {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return err
+	}
 	roleKey = strings.TrimSpace(roleKey)
 	if roleKey == "" || roleKey == "system_admin" {
 		return ErrInvalidRole
@@ -663,10 +673,35 @@ func (s *Service) UpdateRolePermissions(ctx context.Context, orgID, roleKey stri
 		seen[key] = struct{}{}
 		clean = append(clean, key)
 	}
+	roles, err := s.repo.ListRoles(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	var current []string
+	found := false
+	for _, role := range roles {
+		if role.Key != roleKey {
+			continue
+		}
+		found = true
+		for _, permission := range role.Permissions {
+			current = append(current, permission.Key)
+		}
+		break
+	}
+	if !found {
+		return ErrInvalidRole
+	}
+	if err := enforcePermissionMutation(actor, roleKey, current, clean); err != nil {
+		return err
+	}
 	return s.repo.ReplaceRolePermissions(ctx, orgID, roleKey, clean)
 }
 
-func (s *Service) UpdateUserRoles(ctx context.Context, orgID, userID string, roleKeys []string) error {
+func (s *Service) UpdateUserRoles(ctx context.Context, actor domain.Principal, orgID, userID string, roleKeys []string) error {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return err
+	}
 	if len(roleKeys) == 0 {
 		roleKeys = []string{"user"}
 	}
@@ -691,7 +726,83 @@ func (s *Service) UpdateUserRoles(ctx context.Context, orgID, userID string, rol
 		seen[key] = struct{}{}
 		clean = append(clean, key)
 	}
+	target, err := s.repo.UserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if target.OrganizationID != orgID {
+		return ErrGrantCeiling
+	}
+	if err := enforceRoleMutation(actor, target.Roles, clean); err != nil {
+		return err
+	}
 	return s.repo.ReplaceUserRoles(ctx, orgID, userID, clean)
+}
+
+func authorizeGrantActor(actor domain.Principal, orgID string) error {
+	if actor.Type != "USER" || actor.UserID == "" || actor.OrganizationID == "" || actor.OrganizationID != orgID {
+		return ErrGrantCeiling
+	}
+	return nil
+}
+
+func enforceRoleMutation(actor domain.Principal, current, next []string) error {
+	if contains(actor.Roles, "system_admin") {
+		return nil
+	}
+	for _, key := range changedValues(current, next) {
+		if !contains(actor.Roles, key) {
+			return ErrGrantCeiling
+		}
+	}
+	return nil
+}
+
+func enforcePermissionMutation(actor domain.Principal, roleKey string, current, next []string) error {
+	if contains(actor.Roles, "system_admin") {
+		return nil
+	}
+	if !contains(actor.Roles, roleKey) {
+		return ErrGrantCeiling
+	}
+	for _, key := range changedValues(current, next) {
+		if !contains(actor.Permissions, key) {
+			return ErrGrantCeiling
+		}
+	}
+	return nil
+}
+
+func changedValues(current, next []string) []string {
+	before := make(map[string]struct{}, len(current))
+	after := make(map[string]struct{}, len(next))
+	for _, value := range current {
+		before[value] = struct{}{}
+	}
+	for _, value := range next {
+		after[value] = struct{}{}
+	}
+	changed := make([]string, 0)
+	for value := range before {
+		if _, ok := after[value]; !ok {
+			changed = append(changed, value)
+		}
+	}
+	for value := range after {
+		if _, ok := before[value]; !ok {
+			changed = append(changed, value)
+		}
+	}
+	return changed
+}
+
+func contains(values []string, wanted string) bool {
+	for _, value := range values {
+		if value == wanted {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Service) ListSessions(ctx context.Context, orgID, currentSessionID string) ([]domain.Session, error) {
