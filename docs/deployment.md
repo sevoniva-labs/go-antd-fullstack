@@ -58,7 +58,7 @@ helm upgrade --install forge deploy/helm/forge \
   -f deploy/helm/forge/values-xinchuang.yaml
 ```
 
-`values-xinchuang.yaml` 提供 OceanBase/Redis/Nacos/GM/S3 的组合样例以及 Pod IP 注册 Nacos 的 downward API 配置；真实麒麟/UOS/ARM/LoongArch/国产数据库组合必须进入兼容验证矩阵。
+`values-xinchuang.yaml` 提供 OceanBase/Redis/Nacos Config/GM/S3 的组合样例。Kubernetes 内服务发现固定使用 Service/DNS，不再把 Pod 重复注册到 Nacos；非 Kubernetes 环境可显式启用 Nacos Registry。真实麒麟/UOS/ARM/LoongArch/国产数据库组合必须进入兼容验证矩阵。
 
 ## 生产数据库迁移
 

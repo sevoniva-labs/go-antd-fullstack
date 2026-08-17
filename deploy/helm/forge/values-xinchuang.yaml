@@ -64,10 +64,9 @@ config:
   storagePathStyle: "true"
   storageTLS: "true"
 
-  discoveryProvider: nacos
-  discoveryServiceName: forge-http
-  discoveryGRPCServiceName: forge-grpc
-  discoveryAdvertiseGRPCPort: "9090"
+  # Kubernetes uses Service/DNS for discovery. Nacos remains the configuration
+  # center; non-Kubernetes profiles may explicitly enable Nacos registration.
+  discoveryProvider: disabled
   nacosServers: "https://nacos.internal.example:8848"
   nacosGroup: FORGE
   nacosCluster: DEFAULT
@@ -90,14 +89,6 @@ config:
 
 worker:
   enabled: true
-
-# Nacos registration needs the routable Pod IP. If your network model requires
-# NodeIP/VIP/service address, override this according to the platform topology.
-extraEnv:
-  - name: FORGE_DISCOVERY_ADVERTISE_IP
-    valueFrom:
-      fieldRef:
-        fieldPath: status.podIP
 
 nodeSelector:
   kubernetes.io/os: linux

@@ -28,6 +28,7 @@ DB | Cache | Business MQ | Streaming | Search | Storage | Crypto | Observability
 5. `internal/bootstrap` 是唯一主要 composition root；`cmd/server` 保持极薄。
 6. 可选中间件默认 Disabled/Memory Provider，不能成为启动硬依赖。
 7. RocketMQ 是业务消息默认实现；Kafka 只实现独立 Streaming 端口，两者不互相降级或替代。
+8. Kubernetes 使用 Service/DNS 服务发现，Nacos 只承担配置中心；非 Kubernetes 环境才启用 Nacos Registry，禁止双注册。
 
 ## 新业务模块推荐结构
 
