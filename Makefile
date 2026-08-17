@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -18,6 +18,8 @@ help:
 	@echo "  make migrate       Run one-shot database migrations"
 	@echo "  make web-dev       Run frontend"
 	@echo "  make web-budget    Enforce production frontend bundle budgets"
+	@echo "  make web-e2e-install-cn  Install validated Linux ARM64 Chromium from npmmirror"
+	@echo "  make ci-web-e2e    Run frontend gates and production browser E2E"
 	@echo "  make test          Run Go tests"
 	@echo "  make contract      Check API error-code contract"
 	@echo "  make check         Format, vet, test, contract, frontend lint/build"
@@ -62,6 +64,9 @@ web-build:
 
 web-budget:
 	node scripts/check-web-bundle-budget.mjs
+
+web-e2e-install-cn:
+	$(PNPM) --filter @forge/e2e e2e:install:cn
 
 contract:
 	python3 scripts/check-error-codes.py
@@ -139,6 +144,11 @@ ci-web: ci-policy web-install web-api-check
 	$(PNPM) -r --if-present run typecheck
 	$(PNPM) -r --if-present run test
 	$(PNPM) -r --if-present run build
+	node scripts/check-web-bundle-budget.mjs
+
+ci-web-e2e: ci-web
+	$(PNPM) --filter @forge/e2e e2e
+	node scripts/check-web-bundle-budget.mjs
 
 ci-deploy: ci-policy
 	bash scripts/check-observability-policy.sh
