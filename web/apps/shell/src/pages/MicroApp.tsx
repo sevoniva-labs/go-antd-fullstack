@@ -21,6 +21,10 @@ import {
 import { isProductionEnvironment, runtimeConfig } from '../app/config/runtime'
 import { useThemeMode } from '../app/providers/ThemeModeProvider'
 import { shellEventHub } from '../microapps/event-hub'
+import {
+  assertProductionWujieApproval,
+  isProductionWujieApprovalError,
+} from '../microapps/production-policy'
 import { manifestKeyStore } from '../microapps/trust-store'
 
 function enabledFeatureFlags(): ReadonlySet<string> {
@@ -63,13 +67,19 @@ export function MicroAppPage() {
         shellOrigin: window.location.origin,
         keyStore: manifestKeyStore,
       })
-      return authorizeManifestReleaseSet({
+      const releaseSet = authorizeManifestReleaseSet({
         verifiedManifest: verified,
         validation: {
           shellOrigin: window.location.origin,
           production: isProductionEnvironment(),
         },
       })
+      assertProductionWujieApproval({
+        production: import.meta.env.PROD || isProductionEnvironment(),
+        buildTimeApproved: import.meta.env.VITE_WUJIE_PRODUCTION_APPROVED === 'true',
+        runtimes: [releaseSet.primary.runtime, releaseSet.rollback?.runtime],
+      })
+      return releaseSet
     },
   })
 
@@ -147,11 +157,14 @@ export function MicroAppPage() {
     return <div style={{ padding: 48, textAlign: 'center' }}><Spin size="large" /></div>
   }
   if (releaseQuery.isError || !releaseSet) {
+    const approvalRequired = isProductionWujieApprovalError(releaseQuery.error)
     return (
       <Result
         status="error"
-        title="微应用清单验证失败"
-        subTitle="清单加载、信任密钥或签名校验未通过，系统已拒绝启动。"
+        title={approvalRequired ? 'Wujie 生产运行尚未批准' : '微应用清单验证失败'}
+        subTitle={approvalRequired
+          ? '该签名发布包含 Wujie 运行时，但当前制品未经过构建期安全批准，系统已拒绝启动。'
+          : '清单加载、信任密钥或签名校验未通过，系统已拒绝启动。'}
       />
     )
   }
