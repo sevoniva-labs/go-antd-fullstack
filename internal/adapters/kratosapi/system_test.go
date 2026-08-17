@@ -8,12 +8,11 @@ import (
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/health"
-	"google.golang.org/grpc/metadata"
 )
 
 func TestSystemHealthAndReadiness(t *testing.T) {
 	cfg := config.Default()
-	svc := NewSystemService(cfg, "test", nil, []health.Check{
+	svc := NewSystemService(cfg, "test", []health.Check{
 		{Name: "database", Provider: "postgres", Ping: func(context.Context) error { return nil }},
 		{Name: "cache", Provider: "redis", Ping: func(context.Context) error { return errors.New("unavailable") }},
 	}, map[string]string{"database": "postgres"})
@@ -32,12 +31,8 @@ func TestSystemHealthAndReadiness(t *testing.T) {
 }
 
 func TestSystemInfoRequiresBearerAuthentication(t *testing.T) {
-	svc := NewSystemService(config.Default(), "test", nil, nil, nil)
+	svc := NewSystemService(config.Default(), "test", nil, nil)
 	if _, err := svc.GetSystemInfo(context.Background(), &forgev1.GetSystemInfoRequest{}); err == nil {
 		t.Fatal("system info accepted an unauthenticated request")
-	}
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer machine-token"))
-	if token := bearerToken(ctx); token != "machine-token" {
-		t.Fatalf("bearer token = %q", token)
 	}
 }

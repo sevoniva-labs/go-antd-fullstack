@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
@@ -19,6 +20,7 @@ import (
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
+	"github.com/sevoniva-labs/forge/internal/platform/authn"
 	"github.com/sevoniva-labs/forge/internal/platform/cache"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
@@ -203,7 +205,16 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		"database": cfg.Database.Provider, "cache": c.Provider(), "messaging": bus.Provider(),
 		"search": se.Provider(), "storage": st.Provider(), "discovery": reg.Provider(),
 	}
-	systemService := kratosapi.NewSystemService(cfg, opts.Version, identitySvc, checks, providers)
+	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
+	authMiddleware := selector.Server(authn.Server(identitySvc)).Match(func(_ context.Context, operation string) bool {
+		switch operation {
+		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
+			return false
+		default:
+			return true
+		}
+	}).Build()
+	grpcOpts = append(grpcOpts, kgrpc.Middleware(authMiddleware))
 	grpcServer := kgrpc.NewServer(grpcOpts...)
 	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
 	runtime := kratos.New(
