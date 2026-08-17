@@ -14,3 +14,16 @@ func TestUserRoleChangePayloadIsDeterministic(t *testing.T) {
 		t.Fatalf("userRoleChangePayload() payload = %s", payload)
 	}
 }
+
+func TestRoleDataScopePayloadIsDeterministic(t *testing.T) {
+	departments, payload, err := roleDataScopePayload("DEPARTMENT_AND_CHILDREN", []string{"dept-b", " dept-a ", "dept-b"})
+	if err != nil {
+		t.Fatalf("roleDataScopePayload() error = %v", err)
+	}
+	if len(departments) != 2 || departments[0] != "dept-a" || departments[1] != "dept-b" {
+		t.Fatalf("roleDataScopePayload() departments = %#v", departments)
+	}
+	if payload != `{"data_scope":"DEPARTMENT_AND_CHILDREN","department_ids":["dept-a","dept-b"]}` {
+		t.Fatalf("roleDataScopePayload() payload = %s", payload)
+	}
+}

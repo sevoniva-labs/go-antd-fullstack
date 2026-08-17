@@ -394,14 +394,30 @@ func (s *PlatformService) UpdateRolePermissions(ctx context.Context, req *forgev
 	if err != nil {
 		return nil, err
 	}
-	event := newAuditEvent(ctx, principal, "role.permissions.update", "role", req.GetRoleKey(), map[string]any{"permissions": req.GetPermissions()})
+	permissions, payload, err := stringSetPayload("permissions", req.GetPermissions())
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	event := newAuditEvent(ctx, principal, "role.permissions.update", "role", req.GetRoleKey(), map[string]any{"permissions": permissions, "approval_id": req.GetApprovalId()})
 	err = s.audited(ctx, event, func(txCtx context.Context) error {
-		return s.identity.UpdateRolePermissions(txCtx, principal, principal.OrganizationID, req.GetRoleKey(), req.GetPermissions())
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "ROLE_PERMISSION_CHANGE",
+			Action:      "role.permissions.update",
+			Resource:    "role",
+			ResourceID:  req.GetRoleKey(),
+			PayloadJSON: payload,
+		}); executionErr != nil {
+			return executionErr
+		}
+		return s.identity.UpdateRolePermissions(txCtx, principal, principal.OrganizationID, req.GetRoleKey(), permissions)
 	})
 	if err != nil {
 		return nil, serviceError(err)
 	}
-	return &forgev1.UpdateRolePermissionsResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), Permissions: req.GetPermissions()}}, nil
+	return &forgev1.UpdateRolePermissionsResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), Permissions: permissions}}, nil
 }
 
 func (s *PlatformService) UpdateRoleDataScope(ctx context.Context, req *forgev1.UpdateRoleDataScopeRequest) (*forgev1.UpdateRoleDataScopeResponse, error) {
@@ -409,14 +425,30 @@ func (s *PlatformService) UpdateRoleDataScope(ctx context.Context, req *forgev1.
 	if err != nil {
 		return nil, err
 	}
-	event := newAuditEvent(ctx, principal, "role.data_scope.update", "role", req.GetRoleKey(), map[string]any{"data_scope": req.GetDataScope(), "department_count": len(req.GetDepartmentIds())})
+	departmentIDs, payload, err := roleDataScopePayload(req.GetDataScope(), req.GetDepartmentIds())
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	event := newAuditEvent(ctx, principal, "role.data_scope.update", "role", req.GetRoleKey(), map[string]any{"data_scope": req.GetDataScope(), "department_count": len(departmentIDs), "approval_id": req.GetApprovalId()})
 	err = s.audited(ctx, event, func(txCtx context.Context) error {
-		return s.identity.UpdateRoleDataScope(txCtx, principal, principal.OrganizationID, req.GetRoleKey(), req.GetDataScope(), req.GetDepartmentIds())
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "ROLE_DATA_SCOPE_CHANGE",
+			Action:      "role.data_scope.update",
+			Resource:    "role",
+			ResourceID:  req.GetRoleKey(),
+			PayloadJSON: payload,
+		}); executionErr != nil {
+			return executionErr
+		}
+		return s.identity.UpdateRoleDataScope(txCtx, principal, principal.OrganizationID, req.GetRoleKey(), req.GetDataScope(), departmentIDs)
 	})
 	if err != nil {
 		return nil, serviceError(err)
 	}
-	return &forgev1.UpdateRoleDataScopeResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), DataScope: req.GetDataScope(), DataScopeDepartmentIds: req.GetDepartmentIds()}}, nil
+	return &forgev1.UpdateRoleDataScopeResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), DataScope: req.GetDataScope(), DataScopeDepartmentIds: departmentIDs}}, nil
 }
 
 func (s *PlatformService) UpdateUserRoles(ctx context.Context, req *forgev1.UpdateUserRolesRequest) (*forgev1.UpdateUserRolesResponse, error) {
@@ -742,23 +774,39 @@ func serviceError(err error) error {
 }
 
 func userRoleChangePayload(roleKeys []string) ([]string, string, error) {
-	unique := make(map[string]struct{}, len(roleKeys))
-	for _, roleKey := range roleKeys {
-		roleKey = strings.TrimSpace(roleKey)
-		if roleKey != "" {
-			unique[roleKey] = struct{}{}
+	return stringSetPayload("roles", roleKeys)
+}
+
+func stringSetPayload(key string, values []string) ([]string, string, error) {
+	unique := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			unique[value] = struct{}{}
 		}
 	}
-	roles := make([]string, 0, len(unique))
-	for roleKey := range unique {
-		roles = append(roles, roleKey)
+	normalized := make([]string, 0, len(unique))
+	for value := range unique {
+		normalized = append(normalized, value)
 	}
-	sort.Strings(roles)
-	payload, err := json.Marshal(map[string]any{"roles": roles})
+	sort.Strings(normalized)
+	payload, err := json.Marshal(map[string]any{key: normalized})
 	if err != nil {
 		return nil, "", err
 	}
-	return roles, string(payload), nil
+	return normalized, string(payload), nil
+}
+
+func roleDataScopePayload(dataScope string, departmentIDs []string) ([]string, string, error) {
+	departments, _, err := stringSetPayload("department_ids", departmentIDs)
+	if err != nil {
+		return nil, "", err
+	}
+	payload, err := json.Marshal(map[string]any{"data_scope": strings.TrimSpace(dataScope), "department_ids": departments})
+	if err != nil {
+		return nil, "", err
+	}
+	return departments, string(payload), nil
 }
 
 func internalError(error) error {

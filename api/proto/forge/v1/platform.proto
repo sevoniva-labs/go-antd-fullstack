@@ -882,6 +882,7 @@ message ListPermissionsResponse {
 message UpdateRolePermissionsRequest {
   string role_key = 1;
   repeated string permissions = 2;
+  string approval_id = 3;
 }
 message UpdateRolePermissionsResponse {
   Role role = 1;
@@ -891,6 +892,7 @@ message UpdateRoleDataScopeRequest {
   string role_key = 1;
   string data_scope = 2;
   repeated string department_ids = 3;
+  string approval_id = 4;
 }
 message UpdateRoleDataScopeResponse {
   Role role = 1;

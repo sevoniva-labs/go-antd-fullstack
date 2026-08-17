@@ -2075,6 +2075,7 @@ type UpdateRolePermissionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoleKey       string                 `protobuf:"bytes,1,opt,name=role_key,json=roleKey,proto3" json:"role_key,omitempty"`
 	Permissions   []string               `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,3,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2121,6 +2122,13 @@ func (x *UpdateRolePermissionsRequest) GetPermissions() []string {
 		return x.Permissions
 	}
 	return nil
+}
+
+func (x *UpdateRolePermissionsRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
 }
 
 type UpdateRolePermissionsResponse struct {
@@ -2172,6 +2180,7 @@ type UpdateRoleDataScopeRequest struct {
 	RoleKey       string                 `protobuf:"bytes,1,opt,name=role_key,json=roleKey,proto3" json:"role_key,omitempty"`
 	DataScope     string                 `protobuf:"bytes,2,opt,name=data_scope,json=dataScope,proto3" json:"data_scope,omitempty"`
 	DepartmentIds []string               `protobuf:"bytes,3,rep,name=department_ids,json=departmentIds,proto3" json:"department_ids,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,4,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2225,6 +2234,13 @@ func (x *UpdateRoleDataScopeRequest) GetDepartmentIds() []string {
 		return x.DepartmentIds
 	}
 	return nil
+}
+
+func (x *UpdateRoleDataScopeRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
 }
 
 type UpdateRoleDataScopeResponse struct {
@@ -3150,17 +3166,21 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\x05roles\x18\x01 \x03(\v2\x0e.forge.v1.RoleR\x05roles\"\x18\n" +
 	"\x16ListPermissionsRequest\"Q\n" +
 	"\x17ListPermissionsResponse\x126\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x14.forge.v1.PermissionR\vpermissions\"[\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x14.forge.v1.PermissionR\vpermissions\"|\n" +
 	"\x1cUpdateRolePermissionsRequest\x12\x19\n" +
 	"\brole_key\x18\x01 \x01(\tR\aroleKey\x12 \n" +
-	"\vpermissions\x18\x02 \x03(\tR\vpermissions\"C\n" +
+	"\vpermissions\x18\x02 \x03(\tR\vpermissions\x12\x1f\n" +
+	"\vapproval_id\x18\x03 \x01(\tR\n" +
+	"approvalId\"C\n" +
 	"\x1dUpdateRolePermissionsResponse\x12\"\n" +
-	"\x04role\x18\x01 \x01(\v2\x0e.forge.v1.RoleR\x04role\"}\n" +
+	"\x04role\x18\x01 \x01(\v2\x0e.forge.v1.RoleR\x04role\"\x9e\x01\n" +
 	"\x1aUpdateRoleDataScopeRequest\x12\x19\n" +
 	"\brole_key\x18\x01 \x01(\tR\aroleKey\x12\x1d\n" +
 	"\n" +
 	"data_scope\x18\x02 \x01(\tR\tdataScope\x12%\n" +
-	"\x0edepartment_ids\x18\x03 \x03(\tR\rdepartmentIds\"A\n" +
+	"\x0edepartment_ids\x18\x03 \x03(\tR\rdepartmentIds\x12\x1f\n" +
+	"\vapproval_id\x18\x04 \x01(\tR\n" +
+	"approvalId\"A\n" +
 	"\x1bUpdateRoleDataScopeResponse\x12\"\n" +
 	"\x04role\x18\x01 \x01(\v2\x0e.forge.v1.RoleR\x04role\"h\n" +
 	"\x16UpdateUserRolesRequest\x12\x17\n" +

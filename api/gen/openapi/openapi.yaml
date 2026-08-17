@@ -1940,6 +1940,8 @@ components:
                     type: array
                     items:
                         type: string
+                approvalId:
+                    type: string
         forge.v1.UpdateRoleDataScopeResponse:
             type: object
             properties:
@@ -1954,6 +1956,8 @@ components:
                     type: array
                     items:
                         type: string
+                approvalId:
+                    type: string
         forge.v1.UpdateRolePermissionsResponse:
             type: object
             properties:
