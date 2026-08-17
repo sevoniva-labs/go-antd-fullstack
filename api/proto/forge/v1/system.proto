@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package forge.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1";
+
+// SystemService exposes liveness, readiness, and immutable build metadata.
+service SystemService {
+  // Health reports process liveness without checking remote dependencies.
+  rpc Health(HealthRequest) returns (HealthResponse) {
+    option (google.api.http) = {get: "/api/v1/system/health"};
+  }
+
+  // Readiness reports whether required dependencies can serve traffic.
+  rpc Readiness(ReadinessRequest) returns (ReadinessResponse) {
+    option (google.api.http) = {get: "/api/v1/system/ready"};
+  }
+
+  // GetSystemInfo returns authenticated runtime and provider metadata.
+  rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {
+    option (google.api.http) = {get: "/api/v1/system/info"};
+  }
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  string service = 2;
+  string version = 3;
+}
+
+message ReadinessRequest {}
+
+message DependencyStatus {
+  string name = 1;
+  string status = 2;
+  string message = 3;
+}
+
+message ReadinessResponse {
+  string status = 1;
+  repeated DependencyStatus dependencies = 2;
+}
+
+message GetSystemInfoRequest {}
+
+message GetSystemInfoResponse {
+  string service = 1;
+  string version = 2;
+  string environment = 3;
+  string region = 4;
+  string zone = 5;
+  map<string, string> providers = 6;
+}

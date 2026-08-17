@@ -1,0 +1,13 @@
+version: v2
+modules:
+  - path: api/proto
+    lint:
+      use:
+        - STANDARD
+        - UNARY_RPC
+      ignore:
+        - api/proto/google
+      disallow_comment_ignores: true
+breaking:
+  use:
+    - WIRE_JSON

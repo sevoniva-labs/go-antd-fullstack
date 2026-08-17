@@ -7,8 +7,9 @@ NPM_REGISTRY ?= https://registry.npmmirror.com
 PNPM = corepack pnpm
 GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
+PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http
 
-.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract proto-tools proto-lint proto-generate proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -21,6 +22,7 @@ help:
 	@echo "  make check         Format, vet, test, contract, frontend lint/build"
 	@echo "  make verify        Run the complete required CI verification gate"
 	@echo "  make release-evidence  Scan, sign, and verify an internal digest image"
+	@echo "  make proto-check     Lint and regenerate the Buf API contracts"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
 
@@ -54,6 +56,33 @@ web-build:
 contract:
 	python3 scripts/check-error-codes.py
 
+proto-tools: $(PROTO_TOOLS)
+
+.tools/bin/buf: tools/go.mod tools/go.sum
+	mkdir -p .tools/bin
+	$(GO_ENV) go build -modfile=tools/go.mod -o .tools/bin/buf github.com/bufbuild/buf/cmd/buf
+
+.tools/bin/protoc-gen-go: tools/go.mod tools/go.sum
+	mkdir -p .tools/bin
+	$(GO_ENV) go build -modfile=tools/go.mod -o .tools/bin/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
+
+.tools/bin/protoc-gen-go-grpc: tools/go.mod tools/go.sum
+	mkdir -p .tools/bin
+	$(GO_ENV) go build -modfile=tools/go.mod -o .tools/bin/protoc-gen-go-grpc google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+.tools/bin/protoc-gen-go-http: tools/go.mod tools/go.sum
+	mkdir -p .tools/bin
+	$(GO_ENV) go build -modfile=tools/go.mod -o .tools/bin/protoc-gen-go-http github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
+
+proto-lint: proto-tools
+	.tools/bin/buf lint
+
+proto-generate: proto-tools
+	.tools/bin/buf generate --path api/proto/forge
+
+proto-check: proto-lint
+	bash scripts/check-generated-proto.sh
+
 build: web-build
 	mkdir -p bin
 	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$${VERSION:-dev}" -o bin/forge ./cmd/server
@@ -72,7 +101,7 @@ ci-policy:
 	bash scripts/check-ci-policy.sh
 	bash scripts/check-container-policy.sh
 
-ci-go: ci-policy contract
+ci-go: ci-policy contract proto-check
 	$(GO_ENV) go mod verify
 	@test -z "$$(gofmt -l $$(find cmd internal -name '*.go'))" || (echo "Go files need formatting" >&2; gofmt -l $$(find cmd internal -name '*.go'); exit 1)
 	$(GO_ENV) go vet ./...

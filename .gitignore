@@ -11,6 +11,7 @@ Thumbs.db
 /web/dist/
 /.evidence/
 __pycache__/
+/.tools/
 /web/node_modules/
 /web/.next/
 
