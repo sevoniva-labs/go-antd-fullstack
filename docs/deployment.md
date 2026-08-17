@@ -32,7 +32,7 @@ Chart 默认 `replicaCount=1` 是刻意的：Local Storage 与 Memory Cache 都�
 1. Storage 改为 S3-compatible；
 2. Cache 改为 Redis（限流/锁跨 Pod）；
 3. Database 使用外部 HA 实例；
-4. 如果启用消息发布，开启 Worker 并验证 Outbox；
+4. 如果启用消息发布，开启 Worker 并验证本地可靠消息表；
 5. 配置反亲和/TopologySpread 和 PDB；
 6. 将 NetworkPolicy egress 从开放兼容模式收紧到 DNS/DB/Redis/MQ/Search/S3/Nacos 等明确目标。
 

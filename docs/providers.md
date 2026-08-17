@@ -15,8 +15,8 @@
 | Distributed | Rate limit | Built-in | Redis 原子计数；Memory 为本机语义 |
 | Distributed | Lock / Scheduler lock | Built-in | Redis SET NX + compare-delete |
 | Messaging | Kafka | Built-in | franz-go |
-| Messaging | RocketMQ 5.x | Adapter slot | 官方 SDK 接入位，未安装时显式启动失败 |
-| Reliability | Transactional Outbox | Built-in | DB 事务内写事件，Worker 租约恢复；at-least-once |
+| Messaging | RocketMQ 5.x | Built-in default | Apache 官方 gRPC SDK；TLS/mTLS、ACL、Topic 白名单 |
+| Reliability | 本地可靠消息表 | Built-in | 与业务事务同库写入，Worker 租约恢复；at-least-once |
 | Reliability | Idempotency | Built-in | DB 记录 request hash/result state |
 | Search | Elasticsearch | Built-in | REST adapter |
 | Search | OpenSearch | Built-in | REST-compatible adapter，目标版本仍需兼容测试 |

@@ -15,7 +15,7 @@ import (
 	"github.com/sevoniva-labs/forge/internal/platform/idempotency"
 	"github.com/sevoniva-labs/forge/internal/platform/logx"
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
-	"github.com/sevoniva-labs/forge/internal/platform/outbox"
+	"github.com/sevoniva-labs/forge/internal/platform/reliablemsg"
 )
 
 var version = "0.2.0-dev"
@@ -46,11 +46,11 @@ func run(ctx context.Context) error {
 	}
 	defer bus.Close()
 	if bus.Provider() == "disabled" {
-		log.Info("outbox worker disabled because messaging provider is disabled")
+		log.Info("reliable-message worker disabled because messaging provider is disabled")
 		<-ctx.Done()
 		return nil
 	}
-	box := outbox.New(db)
+	messages := reliablemsg.New(db)
 	idem := idempotency.New(db)
 	auditWriter := audit.NewWriter(db)
 	poll := time.NewTicker(time.Second)
@@ -84,11 +84,11 @@ func run(ctx context.Context) error {
 		case <-auditGC.C:
 			runAuditRetention()
 		case <-poll.C:
-			n, err := box.PublishBatch(ctx, bus, 100)
+			n, err := messages.PublishBatch(ctx, bus, 100)
 			if err != nil && !errors.Is(err, context.Canceled) {
-				log.Error("outbox publish", "err", err)
+				log.Error("reliable message publish", "err", err)
 			} else if n > 0 {
-				log.Info("outbox published", "count", n)
+				log.Info("reliable message published", "count", n)
 			}
 		}
 	}

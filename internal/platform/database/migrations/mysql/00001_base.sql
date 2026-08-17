@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS idempotency_records (
   KEY idx_idem_expiry (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS outbox_events (
+CREATE TABLE IF NOT EXISTS reliable_messages (
   id varchar(36) PRIMARY KEY,
   organization_id varchar(36) NULL,
   topic varchar(200) NOT NULL,
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS outbox_events (
   created_at timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   published_at timestamp(6) NULL,
   last_error varchar(1000) NOT NULL DEFAULT '',
-  KEY idx_outbox_pending (status, next_attempt_at, created_at)
+  KEY idx_reliable_messages_pending (status, next_attempt_at, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS feature_flags (
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 
 -- +goose Down
 DROP TABLE IF EXISTS feature_flags;
-DROP TABLE IF EXISTS outbox_events;
+DROP TABLE IF EXISTS reliable_messages;
 DROP TABLE IF EXISTS idempotency_records;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS api_tokens;

@@ -30,7 +30,7 @@ Forge 在应用工程层重点参考以下现行/常用规范体系：
 | API | 统一 6 位返回码、HTTP 状态、request_id、trace_id、字段错误模型 |
 | 数据保护 | AES-GCM；GM profile 提供 SM3/SM4-GCM；敏感字段脱敏工具 |
 | 机器调用 | Bearer API Token 只存哈希、scope 限制、可撤销 |
-| 可靠集成 | 幂等记录、Transactional Outbox、Worker 发布 |
+| 可靠集成 | 幂等记录、本地可靠消息表、Worker 发布 |
 | 多实例 | Redis 原子限流、分布式锁；无 Redis 时明确为单实例语义 |
 | 配置中心 | Nacos 配置拉取/监听接口；本地 Secret/环境变量最终优先 |
 | 注册发现 | Nacos 注册、注销、健康探测 |

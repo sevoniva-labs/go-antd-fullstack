@@ -14,7 +14,7 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 help:
 	@echo "Sevoniva Forge"
 	@echo "  make run           Run API server"
-	@echo "  make worker        Run outbox/background worker"
+	@echo "  make worker        Run reliable-message/background worker"
 	@echo "  make migrate       Run one-shot database migrations"
 	@echo "  make web-dev       Run frontend"
 	@echo "  make test          Run Go tests"

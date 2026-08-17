@@ -119,8 +119,8 @@ CREATE TABLE IF NOT EXISTS idempotency_records (
 );
 CREATE INDEX IF NOT EXISTS idx_idem_expiry ON idempotency_records(expires_at);
 
--- Transactional outbox foundation for reliable integration events.
-CREATE TABLE IF NOT EXISTS outbox_events (
+-- Local reliable-message table committed atomically with business state.
+CREATE TABLE IF NOT EXISTS reliable_messages (
   id varchar(36) PRIMARY KEY,
   organization_id varchar(36) NULL,
   topic varchar(200) NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS outbox_events (
   published_at timestamptz NULL,
   last_error varchar(1000) NOT NULL DEFAULT ''
 );
-CREATE INDEX IF NOT EXISTS idx_outbox_pending ON outbox_events(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS idx_reliable_messages_pending ON reliable_messages(status, next_attempt_at, created_at);
 
 CREATE TABLE IF NOT EXISTS feature_flags (
   organization_id varchar(36) NOT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 
 -- +goose Down
 DROP TABLE IF EXISTS feature_flags;
-DROP TABLE IF EXISTS outbox_events;
+DROP TABLE IF EXISTS reliable_messages;
 DROP TABLE IF EXISTS idempotency_records;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS api_tokens;

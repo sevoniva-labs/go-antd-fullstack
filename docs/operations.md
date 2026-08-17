@@ -7,7 +7,7 @@
 - 数据库使用高可用服务并明确连接故障切换策略。
 - `cache.provider=redis`，跨 Pod 限流、锁使用 Redis；不要用 Memory Provider 承担集群一致性。
 - 文件改为 S3-compatible 对象存储；Local Provider 仅适合单实例或共享存储已明确的场景。
-- 异步事件通过 Outbox + Worker；Worker 多副本依赖数据库原子 claim，PROCESSING 使用租约避免进程崩溃后永久卡死。交付语义为 at-least-once，消费者必须按事件 ID/业务幂等键去重。
+- 异步事件通过本地可靠消息表 + Worker；Worker 多副本依赖数据库原子 claim，PROCESSING 使用租约避免进程崩溃后永久卡死。交付语义为 at-least-once，消费者必须按事件 ID/业务幂等键去重。
 - Ingress/网关健康检查使用 readiness，而不是仅使用进程 liveness。
 
 ## 备份与灾备

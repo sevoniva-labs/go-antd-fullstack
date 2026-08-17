@@ -44,7 +44,7 @@
 | Object storage | ✅ | Local / S3-compatible |
 | Nacos | ✅ | Config Center + Registry/Discovery |
 | Idempotency | ✅ | DB-backed request reservation/result state |
-| Transactional Outbox | ✅ | 事务内事件 + Worker 租约恢复；at-least-once，消费者需幂等 |
+| 本地可靠消息表 | ✅ | 与业务事务同库提交 + Worker 租约恢复；at-least-once，消费者需幂等 |
 | Scheduler lock | ✅ | Redis 分布式锁/Memory 单机锁 |
 | Resilience | ✅ | timeout/retry/circuit breaker/bulkhead primitives |
 | Feature flag | ✅ | DB-backed primitive |
@@ -76,7 +76,7 @@ React / Ant Design
 ┌──────────────────────────────────────────────┐
 │ Platform / Providers                         │
 │ DB  Cache  MQ  Search  Storage  Nacos        │
-│ Crypto  Secrets  Lock  Idempotency  Outbox   │
+│ Crypto  Secrets  Lock  Idempotency  Reliable Message   │
 │ Logs  Metrics  Tracing  Health  Resilience   │
 └──────────────────────────────────────────────┘
 ```
@@ -85,7 +85,7 @@ React / Ant Design
 
 ```text
 cmd/server            API 进程
-cmd/worker            Outbox/后台任务进程
+cmd/worker            本地可靠消息发布/后台任务进程
 cmd/migrate           发布流水线一次性数据库迁移
 internal/domain       领域模型
 internal/app          应用服务
@@ -138,7 +138,7 @@ Helm 默认 `replicaCount=1`，这是为了避免 Local Storage/Memory Cache 被
 - 外部 HA PostgreSQL/MySQL/OceanBase
 - Redis（跨 Pod 限流/锁）
 - S3-compatible 对象存储
-- Worker + Outbox（如启用消息）
+- Worker + 本地可靠消息表（如启用消息）
 - `FORGE_DATABASE_AUTO_MIGRATE=false`，发布前由 `/app/forge-migrate` 串行迁移
 - PDB + TopologySpread/AntiAffinity
 - 外部 Secret / KMS/HSM

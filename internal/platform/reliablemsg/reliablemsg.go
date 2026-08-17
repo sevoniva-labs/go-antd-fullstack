@@ -1,4 +1,4 @@
-package outbox
+package reliablemsg
 
 import (
 	"context"
@@ -27,10 +27,10 @@ type Store struct{ db *database.DB }
 func New(db *database.DB) *Store { return &Store{db: db} }
 
 // EnqueueTx must be called inside the same business transaction as the state
-// mutation. This is the transactional-outbox guarantee boundary.
+// mutation. This is the local reliable-message atomicity boundary.
 func EnqueueTx(ctx context.Context, db *database.DB, tx *sql.Tx, e Event) (string, error) {
 	if e.Topic == "" || e.Type == "" {
-		return "", errors.New("outbox: topic and type required")
+		return "", errors.New("reliable message: topic and type required")
 	}
 	if e.ID == "" {
 		e.ID = uuid.NewString()
@@ -43,7 +43,7 @@ func EnqueueTx(ctx context.Context, db *database.DB, tx *sql.Tx, e Event) (strin
 	if err != nil {
 		return "", err
 	}
-	_, err = tx.ExecContext(ctx, db.Rebind(`INSERT INTO outbox_events(id,organization_id,topic,event_key,event_type,payload_json,headers_json,status,attempts,next_attempt_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`), e.ID, nullIfEmpty(e.OrganizationID), e.Topic, e.Key, e.Type, string(payload), string(headers), "PENDING", 0, time.Now().UTC(), time.Now().UTC())
+	_, err = tx.ExecContext(ctx, db.Rebind(`INSERT INTO reliable_messages(id,organization_id,topic,event_key,event_type,payload_json,headers_json,status,attempts,next_attempt_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`), e.ID, nullIfEmpty(e.OrganizationID), e.Topic, e.Key, e.Type, string(payload), string(headers), "PENDING", 0, time.Now().UTC(), time.Now().UTC())
 	return e.ID, err
 }
 func (s *Store) Enqueue(ctx context.Context, e Event) (string, error) {
@@ -61,7 +61,7 @@ func (s *Store) pending(ctx context.Context, limit int) ([]pending, error) {
 	if limit <= 0 || limit > 500 {
 		limit = 100
 	}
-	rows, err := s.db.QueryContext(ctx, s.db.Rebind(`SELECT id,topic,event_key,payload_json,attempts FROM outbox_events WHERE status='PENDING' AND next_attempt_at<=? ORDER BY created_at LIMIT ?`), time.Now().UTC(), limit)
+	rows, err := s.db.QueryContext(ctx, s.db.Rebind(`SELECT id,topic,event_key,payload_json,attempts FROM reliable_messages WHERE status='PENDING' AND next_attempt_at<=? ORDER BY created_at LIMIT ?`), time.Now().UTC(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -82,12 +82,12 @@ const processingLease = 5 * time.Minute
 func (s *Store) recoverExpiredClaims(ctx context.Context) error {
 	// Reuse next_attempt_at as the PROCESSING lease deadline. If a worker dies
 	// after claiming an event, another worker can recover it after the lease.
-	_, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE outbox_events SET status='PENDING' WHERE status='PROCESSING' AND next_attempt_at<=?`), time.Now().UTC())
+	_, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE reliable_messages SET status='PENDING' WHERE status='PROCESSING' AND next_attempt_at<=?`), time.Now().UTC())
 	return err
 }
 
 func (s *Store) claim(ctx context.Context, id string) (bool, error) {
-	res, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE outbox_events SET status='PROCESSING',next_attempt_at=? WHERE id=? AND status='PENDING'`), time.Now().UTC().Add(processingLease), id)
+	res, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE reliable_messages SET status='PROCESSING',next_attempt_at=? WHERE id=? AND status='PENDING'`), time.Now().UTC().Add(processingLease), id)
 	if err != nil {
 		return false, err
 	}
@@ -95,7 +95,7 @@ func (s *Store) claim(ctx context.Context, id string) (bool, error) {
 	return n == 1, nil
 }
 func (s *Store) published(ctx context.Context, id string) error {
-	_, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE outbox_events SET status='PUBLISHED',published_at=?,last_error='' WHERE id=?`), time.Now().UTC(), id)
+	_, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE reliable_messages SET status='PUBLISHED',published_at=?,last_error='' WHERE id=?`), time.Now().UTC(), id)
 	return err
 }
 func (s *Store) retry(ctx context.Context, p pending, publishErr error) error {
@@ -109,7 +109,7 @@ func (s *Store) retry(ctx context.Context, p pending, publishErr error) error {
 	if len(msg) > 1000 {
 		msg = msg[:1000]
 	}
-	_, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE outbox_events SET status=?,attempts=?,next_attempt_at=?,last_error=? WHERE id=?`), status, attempts, time.Now().UTC().Add(delay), msg, p.ID)
+	_, err := s.db.ExecContext(ctx, s.db.Rebind(`UPDATE reliable_messages SET status=?,attempts=?,next_attempt_at=?,last_error=? WHERE id=?`), status, attempts, time.Now().UTC().Add(delay), msg, p.ID)
 	return err
 }
 func (s *Store) PublishBatch(ctx context.Context, bus messaging.Bus, limit int) (int, error) {

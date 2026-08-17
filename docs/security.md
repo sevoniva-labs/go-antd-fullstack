@@ -46,7 +46,7 @@
 
 - Redis Provider 时登录限流/分布式锁跨 Pod 生效；Memory Provider 只用于单实例语义。
 - 幂等记录避免关键写操作重复执行；业务需在具体 endpoint 显式应用。
-- Transactional Outbox 避免 DB 已提交但消息未发送/相反的双写不一致。
+- 本地可靠消息表与业务状态在同一数据库事务提交，避免数据库与远端消息双写不一致。
 - 依赖提供 timeout/retry/circuit/bulkhead primitive；业务必须按“只对幂等操作安全重试”的原则使用。
 
 ## Secret
