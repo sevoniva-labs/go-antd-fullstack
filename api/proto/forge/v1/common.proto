@@ -71,6 +71,18 @@ message UserGroup {
   google.protobuf.Timestamp updated_at = 11;
 }
 
+message UserAssignment {
+  string id = 1;
+  string organization_id = 2;
+  string user_id = 3;
+  string department_id = 4;
+  string position_id = 5;
+  bool primary = 6;
+  google.protobuf.Timestamp valid_from = 7;
+  google.protobuf.Timestamp valid_until = 8;
+  google.protobuf.Timestamp created_at = 9;
+}
+
 message SecurityPolicy {
   int64 password_min_length = 1;
   bool password_require_upper = 2;

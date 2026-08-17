@@ -32,6 +32,8 @@ const (
 	PlatformService_UpdateUserGroup_FullMethodName        = "/forge.v1.PlatformService/UpdateUserGroup"
 	PlatformService_UpdateUserGroupMembers_FullMethodName = "/forge.v1.PlatformService/UpdateUserGroupMembers"
 	PlatformService_UpdateUserGroupRoles_FullMethodName   = "/forge.v1.PlatformService/UpdateUserGroupRoles"
+	PlatformService_ListUserAssignments_FullMethodName    = "/forge.v1.PlatformService/ListUserAssignments"
+	PlatformService_ReplaceUserAssignments_FullMethodName = "/forge.v1.PlatformService/ReplaceUserAssignments"
 	PlatformService_GetOrganization_FullMethodName        = "/forge.v1.PlatformService/GetOrganization"
 	PlatformService_UpdateOrganization_FullMethodName     = "/forge.v1.PlatformService/UpdateOrganization"
 	PlatformService_GetSecurityPolicy_FullMethodName      = "/forge.v1.PlatformService/GetSecurityPolicy"
@@ -66,6 +68,8 @@ type PlatformServiceClient interface {
 	UpdateUserGroup(ctx context.Context, in *UpdateUserGroupRequest, opts ...grpc.CallOption) (*UpdateUserGroupResponse, error)
 	UpdateUserGroupMembers(ctx context.Context, in *UpdateUserGroupMembersRequest, opts ...grpc.CallOption) (*UpdateUserGroupMembersResponse, error)
 	UpdateUserGroupRoles(ctx context.Context, in *UpdateUserGroupRolesRequest, opts ...grpc.CallOption) (*UpdateUserGroupRolesResponse, error)
+	ListUserAssignments(ctx context.Context, in *ListUserAssignmentsRequest, opts ...grpc.CallOption) (*ListUserAssignmentsResponse, error)
+	ReplaceUserAssignments(ctx context.Context, in *ReplaceUserAssignmentsRequest, opts ...grpc.CallOption) (*ReplaceUserAssignmentsResponse, error)
 	GetOrganization(ctx context.Context, in *GetOrganizationRequest, opts ...grpc.CallOption) (*GetOrganizationResponse, error)
 	UpdateOrganization(ctx context.Context, in *UpdateOrganizationRequest, opts ...grpc.CallOption) (*UpdateOrganizationResponse, error)
 	GetSecurityPolicy(ctx context.Context, in *GetSecurityPolicyRequest, opts ...grpc.CallOption) (*GetSecurityPolicyResponse, error)
@@ -215,6 +219,26 @@ func (c *platformServiceClient) UpdateUserGroupRoles(ctx context.Context, in *Up
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateUserGroupRolesResponse)
 	err := c.cc.Invoke(ctx, PlatformService_UpdateUserGroupRoles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) ListUserAssignments(ctx context.Context, in *ListUserAssignmentsRequest, opts ...grpc.CallOption) (*ListUserAssignmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserAssignmentsResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListUserAssignments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) ReplaceUserAssignments(ctx context.Context, in *ReplaceUserAssignmentsRequest, opts ...grpc.CallOption) (*ReplaceUserAssignmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReplaceUserAssignmentsResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ReplaceUserAssignments_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -388,6 +412,8 @@ type PlatformServiceServer interface {
 	UpdateUserGroup(context.Context, *UpdateUserGroupRequest) (*UpdateUserGroupResponse, error)
 	UpdateUserGroupMembers(context.Context, *UpdateUserGroupMembersRequest) (*UpdateUserGroupMembersResponse, error)
 	UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error)
+	ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error)
+	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*UpdateOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
@@ -451,6 +477,12 @@ func (UnimplementedPlatformServiceServer) UpdateUserGroupMembers(context.Context
 }
 func (UnimplementedPlatformServiceServer) UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUserGroupRoles not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListUserAssignments not implemented")
+}
+func (UnimplementedPlatformServiceServer) ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplaceUserAssignments not implemented")
 }
 func (UnimplementedPlatformServiceServer) GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrganization not implemented")
@@ -748,6 +780,42 @@ func _PlatformService_UpdateUserGroupRoles_Handler(srv interface{}, ctx context.
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlatformServiceServer).UpdateUserGroupRoles(ctx, req.(*UpdateUserGroupRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_ListUserAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListUserAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListUserAssignments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListUserAssignments(ctx, req.(*ListUserAssignmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_ReplaceUserAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplaceUserAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ReplaceUserAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ReplaceUserAssignments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ReplaceUserAssignments(ctx, req.(*ReplaceUserAssignmentsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1080,6 +1148,14 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserGroupRoles",
 			Handler:    _PlatformService_UpdateUserGroupRoles_Handler,
+		},
+		{
+			MethodName: "ListUserAssignments",
+			Handler:    _PlatformService_ListUserAssignments_Handler,
+		},
+		{
+			MethodName: "ReplaceUserAssignments",
+			Handler:    _PlatformService_ReplaceUserAssignments_Handler,
 		},
 		{
 			MethodName: "GetOrganization",

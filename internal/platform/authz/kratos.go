@@ -65,6 +65,8 @@ func PlatformRules() map[string][]string {
 		forgev1.OperationPlatformServiceUpdateUserGroup:        {"system.user_group.manage"},
 		forgev1.OperationPlatformServiceUpdateUserGroupMembers: {"system.user_group.manage"},
 		forgev1.OperationPlatformServiceUpdateUserGroupRoles:   {"system.user_group.manage"},
+		forgev1.OperationPlatformServiceListUserAssignments:    {"system.user.assignment.read"},
+		forgev1.OperationPlatformServiceReplaceUserAssignments: {"system.user.assignment.manage"},
 		forgev1.OperationPlatformServiceGetOrganization:        {"system.organization.read"},
 		forgev1.OperationPlatformServiceUpdateOrganization:     {"system.organization.manage"},
 		forgev1.OperationPlatformServiceGetSecurityPolicy:      {"system.config.read"},

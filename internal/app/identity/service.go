@@ -32,6 +32,7 @@ var ErrInteractiveSessionRequired = errors.New("interactive user session require
 var ErrInvalidDepartment = errors.New("invalid department")
 var ErrInvalidPosition = errors.New("invalid position")
 var ErrInvalidUserGroup = errors.New("invalid user group")
+var ErrInvalidUserAssignment = errors.New("invalid user assignment")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -88,6 +89,7 @@ func NewService(repo *repository.IdentityRepo, opt Options) *Service {
 
 var basePermissions = []struct{ Key, Name string }{
 	{"system.user.read", "查看用户"}, {"system.user.create", "创建用户"}, {"system.user.update", "修改用户"}, {"system.user.role.manage", "分配用户角色"},
+	{"system.user.assignment.read", "查看用户任职"}, {"system.user.assignment.manage", "管理用户任职"},
 	{"system.role.read", "查看角色权限"}, {"system.role.manage", "管理角色权限"},
 	{"system.organization.read", "查看组织信息"}, {"system.organization.manage", "管理组织信息"},
 	{"system.department.read", "查看部门"}, {"system.department.manage", "管理部门"},
@@ -116,7 +118,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
@@ -1079,6 +1081,117 @@ func normalizeIDs(values []string, maximum int) ([]string, error) {
 		clean = append(clean, value)
 	}
 	return clean, nil
+}
+
+func (s *Service) ListUserAssignments(ctx context.Context, orgID, userID string) ([]domain.UserAssignment, error) {
+	userID = strings.TrimSpace(userID)
+	user, err := s.repo.UserByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if user.OrganizationID != orgID {
+		return nil, sql.ErrNoRows
+	}
+	return s.repo.ListUserAssignments(ctx, orgID, userID)
+}
+
+func (s *Service) ReplaceUserAssignments(ctx context.Context, actor domain.Principal, orgID, userID string, assignments []domain.UserAssignment) error {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return err
+	}
+	userID = strings.TrimSpace(userID)
+	user, err := s.repo.UserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if user.OrganizationID != orgID {
+		return sql.ErrNoRows
+	}
+	clean, err := normalizeUserAssignments(orgID, userID, assignments, time.Now().UTC())
+	if err != nil {
+		return err
+	}
+	departments, err := s.repo.ListDepartmentsForUpdate(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	positions, err := s.repo.ListPositions(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	if err := validateAssignmentTargets(departments, positions, clean); err != nil {
+		return err
+	}
+	return s.repo.ReplaceUserAssignments(ctx, orgID, userID, clean)
+}
+
+func normalizeUserAssignments(orgID, userID string, assignments []domain.UserAssignment, now time.Time) ([]domain.UserAssignment, error) {
+	if len(assignments) > 50 {
+		return nil, ErrInvalidUserAssignment
+	}
+	clean := make([]domain.UserAssignment, 0, len(assignments))
+	seen := make(map[string]struct{}, len(assignments))
+	primaryCount := 0
+	for _, assignment := range assignments {
+		assignment.ID = ""
+		assignment.OrganizationID = orgID
+		assignment.UserID = userID
+		assignment.DepartmentID = strings.TrimSpace(assignment.DepartmentID)
+		assignment.PositionID = strings.TrimSpace(assignment.PositionID)
+		if assignment.DepartmentID == "" {
+			return nil, ErrInvalidUserAssignment
+		}
+		if assignment.ValidFrom.IsZero() {
+			assignment.ValidFrom = now
+		} else {
+			assignment.ValidFrom = assignment.ValidFrom.UTC()
+		}
+		if assignment.ValidUntil != nil {
+			until := assignment.ValidUntil.UTC()
+			if !until.After(assignment.ValidFrom) {
+				return nil, ErrInvalidUserAssignment
+			}
+			assignment.ValidUntil = &until
+		}
+		key := assignment.DepartmentID + "\x00" + assignment.PositionID
+		if _, exists := seen[key]; exists {
+			return nil, ErrInvalidUserAssignment
+		}
+		seen[key] = struct{}{}
+		if assignment.Primary {
+			primaryCount++
+		}
+		clean = append(clean, assignment)
+	}
+	if len(clean) > 0 && primaryCount != 1 {
+		return nil, ErrInvalidUserAssignment
+	}
+	return clean, nil
+}
+
+func validateAssignmentTargets(departments []domain.Department, positions []domain.Position, assignments []domain.UserAssignment) error {
+	departmentByID := make(map[string]domain.Department, len(departments))
+	for _, department := range departments {
+		departmentByID[department.ID] = department
+	}
+	positionByID := make(map[string]domain.Position, len(positions))
+	for _, position := range positions {
+		positionByID[position.ID] = position
+	}
+	for _, assignment := range assignments {
+		department, ok := departmentByID[assignment.DepartmentID]
+		if !ok || department.OrganizationID != assignment.OrganizationID || department.Status != "ACTIVE" {
+			return ErrInvalidUserAssignment
+		}
+		if assignment.PositionID == "" {
+			continue
+		}
+		position, ok := positionByID[assignment.PositionID]
+		if !ok || position.OrganizationID != assignment.OrganizationID || position.DepartmentID != assignment.DepartmentID || position.Status != "ACTIVE" {
+			return ErrInvalidUserAssignment
+		}
+	}
+	return nil
 }
 
 func (s *Service) ListRoles(ctx context.Context, orgID string) ([]domain.Role, error) {

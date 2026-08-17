@@ -274,6 +274,49 @@ func (s *PlatformService) UpdateUserGroupRoles(ctx context.Context, req *forgev1
 	return &forgev1.UpdateUserGroupRolesResponse{}, nil
 }
 
+func (s *PlatformService) ListUserAssignments(ctx context.Context, req *forgev1.ListUserAssignmentsRequest) (*forgev1.ListUserAssignmentsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := s.identity.ListUserAssignments(ctx, principal.OrganizationID, req.GetUserId())
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	reply := &forgev1.ListUserAssignmentsResponse{Assignments: make([]*forgev1.UserAssignment, 0, len(items))}
+	for _, item := range items {
+		reply.Assignments = append(reply.Assignments, userAssignmentProto(item))
+	}
+	return reply, nil
+}
+
+func (s *PlatformService) ReplaceUserAssignments(ctx context.Context, req *forgev1.ReplaceUserAssignmentsRequest) (*forgev1.ReplaceUserAssignmentsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	assignments := make([]domain.UserAssignment, 0, len(req.GetAssignments()))
+	for _, item := range req.GetAssignments() {
+		assignment := domain.UserAssignment{DepartmentID: item.GetDepartmentId(), PositionID: item.GetPositionId(), Primary: item.GetPrimary()}
+		if item.GetValidFrom() != nil {
+			assignment.ValidFrom = item.GetValidFrom().AsTime()
+		}
+		if item.GetValidUntil() != nil {
+			until := item.GetValidUntil().AsTime()
+			assignment.ValidUntil = &until
+		}
+		assignments = append(assignments, assignment)
+	}
+	event := newAuditEvent(ctx, principal, "user.assignments.replace", "user", req.GetUserId(), map[string]any{"assignment_count": len(assignments)})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.ReplaceUserAssignments(txCtx, principal, principal.OrganizationID, req.GetUserId(), assignments)
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.ReplaceUserAssignmentsResponse{}, nil
+}
+
 func (s *PlatformService) UpdateOrganization(ctx context.Context, req *forgev1.UpdateOrganizationRequest) (*forgev1.UpdateOrganizationResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -605,7 +648,8 @@ func serviceError(err error) error {
 	case errors.Is(err, appidentity.ErrInvalidRole), errors.Is(err, appidentity.ErrInvalidLoginName),
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
 		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment),
-		errors.Is(err, appidentity.ErrInvalidPosition), errors.Is(err, appidentity.ErrInvalidUserGroup):
+		errors.Is(err, appidentity.ErrInvalidPosition), errors.Is(err, appidentity.ErrInvalidUserGroup),
+		errors.Is(err, appidentity.ErrInvalidUserAssignment):
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	default:
 		return internalError(err)
@@ -669,6 +713,14 @@ func userGroupProto(group domain.UserGroup) *forgev1.UserGroup {
 		Id: group.ID, OrganizationId: group.OrganizationID, GroupKey: group.Key, Name: group.Name,
 		Description: group.Description, Status: group.Status, Roles: group.Roles, MemberIds: group.MemberIDs,
 		MemberCount: int64(group.MemberCount), CreatedAt: timestamp(group.CreatedAt), UpdatedAt: timestamp(group.UpdatedAt),
+	}
+}
+
+func userAssignmentProto(assignment domain.UserAssignment) *forgev1.UserAssignment {
+	return &forgev1.UserAssignment{
+		Id: assignment.ID, OrganizationId: assignment.OrganizationID, UserId: assignment.UserID,
+		DepartmentId: assignment.DepartmentID, PositionId: assignment.PositionID, Primary: assignment.Primary,
+		ValidFrom: timestamp(assignment.ValidFrom), ValidUntil: optionalTimestamp(assignment.ValidUntil), CreatedAt: timestamp(assignment.CreatedAt),
 	}
 }
 

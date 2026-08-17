@@ -202,6 +202,14 @@ service PlatformService {
     option (google.api.http) = {put: "/api/v1/admin/user-groups/{group_id}/roles" body: "*"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
   }
+  rpc ListUserAssignments(ListUserAssignmentsRequest) returns (ListUserAssignmentsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/users/{user_id}/assignments"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc ReplaceUserAssignments(ReplaceUserAssignmentsRequest) returns (ReplaceUserAssignmentsResponse) {
+    option (google.api.http) = {put: "/api/v1/admin/users/{user_id}/assignments" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
   rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
     option (google.api.http) = {get: "/api/v1/admin/organization"};
     option (openapi.v3.operation) = {
@@ -785,6 +793,18 @@ message UpdateUserGroupRolesRequest {
   repeated string roles = 2;
 }
 message UpdateUserGroupRolesResponse {}
+
+message ListUserAssignmentsRequest {
+  string user_id = 1;
+}
+message ListUserAssignmentsResponse {
+  repeated UserAssignment assignments = 1;
+}
+message ReplaceUserAssignmentsRequest {
+  string user_id = 1;
+  repeated UserAssignment assignments = 2;
+}
+message ReplaceUserAssignmentsResponse {}
 
 message GetOrganizationRequest {}
 message GetOrganizationResponse {

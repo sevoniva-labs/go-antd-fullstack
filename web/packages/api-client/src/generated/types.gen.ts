@@ -184,6 +184,10 @@ export type ForgeV1ListSessionsResponse = {
     sessions?: Array<ForgeV1Session>;
 };
 
+export type ForgeV1ListUserAssignmentsResponse = {
+    assignments?: Array<ForgeV1UserAssignment>;
+};
+
 export type ForgeV1ListUserGroupsResponse = {
     userGroups?: Array<ForgeV1UserGroup>;
 };
@@ -247,6 +251,15 @@ export type ForgeV1Position = {
 export type ForgeV1ReadinessResponse = {
     status?: string;
     dependencies?: Array<ForgeV1DependencyStatus>;
+};
+
+export type ForgeV1ReplaceUserAssignmentsRequest = {
+    userId?: string;
+    assignments?: Array<ForgeV1UserAssignment>;
+};
+
+export type ForgeV1ReplaceUserAssignmentsResponse = {
+    [key: string]: unknown;
 };
 
 export type ForgeV1ResetUserPasswordRequest = {
@@ -430,6 +443,18 @@ export type ForgeV1User = {
     createdAt?: string;
     roles?: Array<string>;
     permissions?: Array<string>;
+};
+
+export type ForgeV1UserAssignment = {
+    id?: string;
+    organizationId?: string;
+    userId?: string;
+    departmentId?: string;
+    positionId?: string;
+    primary?: boolean;
+    validFrom?: string;
+    validUntil?: string;
+    createdAt?: string;
 };
 
 export type ForgeV1UserGroup = {
@@ -852,6 +877,42 @@ export type PlatformServiceCreateUserResponses = {
 };
 
 export type PlatformServiceCreateUserResponse = PlatformServiceCreateUserResponses[keyof PlatformServiceCreateUserResponses];
+
+export type PlatformServiceListUserAssignmentsData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/users/{userId}/assignments';
+};
+
+export type PlatformServiceListUserAssignmentsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListUserAssignmentsResponse;
+};
+
+export type PlatformServiceListUserAssignmentsResponse = PlatformServiceListUserAssignmentsResponses[keyof PlatformServiceListUserAssignmentsResponses];
+
+export type PlatformServiceReplaceUserAssignmentsData = {
+    body: ForgeV1ReplaceUserAssignmentsRequest;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/users/{userId}/assignments';
+};
+
+export type PlatformServiceReplaceUserAssignmentsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ReplaceUserAssignmentsResponse;
+};
+
+export type PlatformServiceReplaceUserAssignmentsResponse = PlatformServiceReplaceUserAssignmentsResponses[keyof PlatformServiceReplaceUserAssignmentsResponses];
 
 export type PlatformServiceResetUserPasswordData = {
     body: ForgeV1ResetUserPasswordRequest;

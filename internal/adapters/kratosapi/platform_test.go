@@ -32,6 +32,10 @@ func TestPlatformProtoMappings(t *testing.T) {
 	if group.Id != "group-1" || group.GroupKey != "reviewers" || group.MemberCount != 1 || len(group.Roles) != 1 {
 		t.Fatalf("unexpected user group mapping: %+v", group)
 	}
+	assignment := userAssignmentProto(domain.UserAssignment{ID: "assignment-1", OrganizationID: "org-1", UserID: "user-1", DepartmentID: "dept-1", PositionID: "position-1", Primary: true, ValidFrom: now, CreatedAt: now})
+	if assignment.Id != "assignment-1" || assignment.DepartmentId != "dept-1" || assignment.PositionId != "position-1" || !assignment.Primary {
+		t.Fatalf("unexpected user assignment mapping: %+v", assignment)
+	}
 	policy := securityPolicyProto(domain.SecurityPolicy{PasswordMinLength: 14, SessionTTLSeconds: 3600, MaxConcurrentSessions: 2})
 	if policy.PasswordMinLength != 14 || policy.SessionTtlSeconds != 3600 || policy.MaxActiveSessions != 2 {
 		t.Fatalf("unexpected policy mapping: %+v", policy)

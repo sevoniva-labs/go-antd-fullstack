@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
+import type { IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListUserAssignmentsData, PlatformServiceListUserAssignmentsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceReplaceUserAssignmentsData, PlatformServiceReplaceUserAssignmentsResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -355,6 +355,34 @@ export const platformServiceCreateUser = <ThrowOnError extends boolean = false>(
         { scheme: 'bearer', type: 'http' }
     ],
     url: '/api/v1/admin/users',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceListUserAssignments = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceListUserAssignmentsData, ThrowOnError>): RequestResult<PlatformServiceListUserAssignmentsResponses, unknown, ThrowOnError> => (options.client ?? client).get<PlatformServiceListUserAssignmentsResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/admin/users/{userId}/assignments',
+    ...options
+});
+
+export const platformServiceReplaceUserAssignments = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceReplaceUserAssignmentsData, ThrowOnError>): RequestResult<PlatformServiceReplaceUserAssignmentsResponses, unknown, ThrowOnError> => (options.client ?? client).put<PlatformServiceReplaceUserAssignmentsResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/users/{userId}/assignments',
     ...options,
     headers: {
         'Content-Type': 'application/json',

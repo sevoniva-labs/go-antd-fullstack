@@ -53,6 +53,18 @@ type UserGroup struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+type UserAssignment struct {
+	ID             string     `json:"id"`
+	OrganizationID string     `json:"organization_id"`
+	UserID         string     `json:"user_id"`
+	DepartmentID   string     `json:"department_id"`
+	PositionID     string     `json:"position_id,omitempty"`
+	Primary        bool       `json:"primary"`
+	ValidFrom      time.Time  `json:"valid_from"`
+	ValidUntil     *time.Time `json:"valid_until,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+}
+
 type SecurityPolicy struct {
 	PasswordMinLength        int   `json:"password_min_length"`
 	PasswordRequireUpper     bool  `json:"password_require_upper"`

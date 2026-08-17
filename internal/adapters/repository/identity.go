@@ -779,6 +779,55 @@ func (r *IdentityRepo) ReplaceUserGroupRoles(ctx context.Context, orgID, groupID
 	})
 }
 
+func (r *IdentityRepo) ListUserAssignments(ctx context.Context, orgID, userID string) ([]identity.UserAssignment, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,user_id,department_id,position_id,is_primary,valid_from,valid_until,created_at FROM user_assignments WHERE organization_id=? AND user_id=? ORDER BY is_primary DESC,valid_from,department_id`), orgID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]identity.UserAssignment, 0)
+	for rows.Next() {
+		var item identity.UserAssignment
+		var position sql.NullString
+		var validUntil sql.NullTime
+		if err := rows.Scan(&item.ID, &item.OrganizationID, &item.UserID, &item.DepartmentID, &position, &item.Primary, &item.ValidFrom, &validUntil, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		if position.Valid {
+			item.PositionID = position.String
+		}
+		if validUntil.Valid {
+			until := validUntil.Time
+			item.ValidUntil = &until
+		}
+		out = append(out, item)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) ReplaceUserAssignments(ctx context.Context, orgID, userID string, assignments []identity.UserAssignment) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		var actualOrg string
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT organization_id FROM users WHERE id=? FOR UPDATE`), userID).Scan(&actualOrg); err != nil {
+			return err
+		}
+		if actualOrg != orgID {
+			return sql.ErrNoRows
+		}
+		if _, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM user_assignments WHERE organization_id=? AND user_id=?`), orgID, userID); err != nil {
+			return err
+		}
+		now := time.Now().UTC()
+		for _, assignment := range assignments {
+			if _, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO user_assignments(id,organization_id,user_id,department_id,position_id,is_primary,valid_from,valid_until,created_at) VALUES(?,?,?,?,?,?,?,?,?)`),
+				uuid.NewString(), orgID, userID, assignment.DepartmentID, nullableString(assignment.PositionID), assignment.Primary, assignment.ValidFrom, assignment.ValidUntil, now); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 func (r *IdentityRepo) ListUserSessionIDs(ctx context.Context, userID string) ([]string, error) {
 	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id FROM sessions WHERE user_id=? AND expires_at>? ORDER BY created_at ASC`), userID, time.Now().UTC())
 	if err != nil {

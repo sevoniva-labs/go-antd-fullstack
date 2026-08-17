@@ -32,8 +32,10 @@ const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListP
 const OperationPlatformServiceListPositions = "/forge.v1.PlatformService/ListPositions"
 const OperationPlatformServiceListRoles = "/forge.v1.PlatformService/ListRoles"
 const OperationPlatformServiceListSessions = "/forge.v1.PlatformService/ListSessions"
+const OperationPlatformServiceListUserAssignments = "/forge.v1.PlatformService/ListUserAssignments"
 const OperationPlatformServiceListUserGroups = "/forge.v1.PlatformService/ListUserGroups"
 const OperationPlatformServiceListUsers = "/forge.v1.PlatformService/ListUsers"
+const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformService/ReplaceUserAssignments"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
 const OperationPlatformServiceUnlockUser = "/forge.v1.PlatformService/UnlockUser"
@@ -62,8 +64,10 @@ type PlatformServiceHTTPServer interface {
 	ListPositions(context.Context, *ListPositionsRequest) (*ListPositionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error)
 	ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	UnlockUser(context.Context, *UnlockUserRequest) (*UnlockUserResponse, error)
@@ -94,6 +98,8 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.PATCH("/api/v1/admin/user-groups/{group_id}", _PlatformService_UpdateUserGroup0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/user-groups/{group_id}/members", _PlatformService_UpdateUserGroupMembers0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/user-groups/{group_id}/roles", _PlatformService_UpdateUserGroupRoles0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/users/{user_id}/assignments", _PlatformService_ListUserAssignments0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/users/{user_id}/assignments", _PlatformService_ReplaceUserAssignments0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/organization", _PlatformService_GetOrganization0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/organization", _PlatformService_UpdateOrganization0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/security-config", _PlatformService_GetSecurityPolicy0_HTTP_Handler(srv))
@@ -396,6 +402,53 @@ func _PlatformService_UpdateUserGroupRoles0_HTTP_Handler(srv PlatformServiceHTTP
 			return err
 		}
 		reply := out.(*UpdateUserGroupRolesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ListUserAssignments0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListUserAssignmentsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListUserAssignments)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListUserAssignments(ctx, req.(*ListUserAssignmentsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListUserAssignmentsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ReplaceUserAssignments0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ReplaceUserAssignmentsRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceReplaceUserAssignments)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ReplaceUserAssignments(ctx, req.(*ReplaceUserAssignmentsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ReplaceUserAssignmentsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -738,8 +791,10 @@ type PlatformServiceHTTPClient interface {
 	ListPositions(ctx context.Context, req *ListPositionsRequest, opts ...http.CallOption) (rsp *ListPositionsResponse, err error)
 	ListRoles(ctx context.Context, req *ListRolesRequest, opts ...http.CallOption) (rsp *ListRolesResponse, err error)
 	ListSessions(ctx context.Context, req *ListSessionsRequest, opts ...http.CallOption) (rsp *ListSessionsResponse, err error)
+	ListUserAssignments(ctx context.Context, req *ListUserAssignmentsRequest, opts ...http.CallOption) (rsp *ListUserAssignmentsResponse, err error)
 	ListUserGroups(ctx context.Context, req *ListUserGroupsRequest, opts ...http.CallOption) (rsp *ListUserGroupsResponse, err error)
 	ListUsers(ctx context.Context, req *ListUsersRequest, opts ...http.CallOption) (rsp *ListUsersResponse, err error)
+	ReplaceUserAssignments(ctx context.Context, req *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (rsp *ReplaceUserAssignmentsResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
 	UnlockUser(ctx context.Context, req *UnlockUserRequest, opts ...http.CallOption) (rsp *UnlockUserResponse, err error)
@@ -932,6 +987,19 @@ func (c *PlatformServiceHTTPClientImpl) ListSessions(ctx context.Context, in *Li
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) ListUserAssignments(ctx context.Context, in *ListUserAssignmentsRequest, opts ...http.CallOption) (*ListUserAssignmentsResponse, error) {
+	var out ListUserAssignmentsResponse
+	pattern := "/api/v1/admin/users/{user_id}/assignments"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListUserAssignments))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListUserGroups(ctx context.Context, in *ListUserGroupsRequest, opts ...http.CallOption) (*ListUserGroupsResponse, error) {
 	var out ListUserGroupsResponse
 	pattern := "/api/v1/admin/user-groups"
@@ -952,6 +1020,19 @@ func (c *PlatformServiceHTTPClientImpl) ListUsers(ctx context.Context, in *ListU
 	opts = append(opts, http.Operation(OperationPlatformServiceListUsers))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ReplaceUserAssignments(ctx context.Context, in *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (*ReplaceUserAssignmentsResponse, error) {
+	var out ReplaceUserAssignmentsResponse
+	pattern := "/api/v1/admin/users/{user_id}/assignments"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceReplaceUserAssignments))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

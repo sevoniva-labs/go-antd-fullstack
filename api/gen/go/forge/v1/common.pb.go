@@ -602,6 +602,114 @@ func (x *UserGroup) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type UserAssignment struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DepartmentId   string                 `protobuf:"bytes,4,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	PositionId     string                 `protobuf:"bytes,5,opt,name=position_id,json=positionId,proto3" json:"position_id,omitempty"`
+	Primary        bool                   `protobuf:"varint,6,opt,name=primary,proto3" json:"primary,omitempty"`
+	ValidFrom      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=valid_from,json=validFrom,proto3" json:"valid_from,omitempty"`
+	ValidUntil     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=valid_until,json=validUntil,proto3" json:"valid_until,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *UserAssignment) Reset() {
+	*x = UserAssignment{}
+	mi := &file_forge_v1_common_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserAssignment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserAssignment) ProtoMessage() {}
+
+func (x *UserAssignment) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_common_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserAssignment.ProtoReflect.Descriptor instead.
+func (*UserAssignment) Descriptor() ([]byte, []int) {
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UserAssignment) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UserAssignment) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *UserAssignment) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserAssignment) GetDepartmentId() string {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return ""
+}
+
+func (x *UserAssignment) GetPositionId() string {
+	if x != nil {
+		return x.PositionId
+	}
+	return ""
+}
+
+func (x *UserAssignment) GetPrimary() bool {
+	if x != nil {
+		return x.Primary
+	}
+	return false
+}
+
+func (x *UserAssignment) GetValidFrom() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ValidFrom
+	}
+	return nil
+}
+
+func (x *UserAssignment) GetValidUntil() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ValidUntil
+	}
+	return nil
+}
+
+func (x *UserAssignment) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 type SecurityPolicy struct {
 	state                    protoimpl.MessageState `protogen:"open.v1"`
 	PasswordMinLength        int64                  `protobuf:"varint,1,opt,name=password_min_length,json=passwordMinLength,proto3" json:"password_min_length,omitempty"`
@@ -621,7 +729,7 @@ type SecurityPolicy struct {
 
 func (x *SecurityPolicy) Reset() {
 	*x = SecurityPolicy{}
-	mi := &file_forge_v1_common_proto_msgTypes[5]
+	mi := &file_forge_v1_common_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +741,7 @@ func (x *SecurityPolicy) String() string {
 func (*SecurityPolicy) ProtoMessage() {}
 
 func (x *SecurityPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_common_proto_msgTypes[5]
+	mi := &file_forge_v1_common_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +754,7 @@ func (x *SecurityPolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SecurityPolicy.ProtoReflect.Descriptor instead.
 func (*SecurityPolicy) Descriptor() ([]byte, []int) {
-	return file_forge_v1_common_proto_rawDescGZIP(), []int{5}
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SecurityPolicy) GetPasswordMinLength() int64 {
@@ -739,7 +847,7 @@ type Role struct {
 
 func (x *Role) Reset() {
 	*x = Role{}
-	mi := &file_forge_v1_common_proto_msgTypes[6]
+	mi := &file_forge_v1_common_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -751,7 +859,7 @@ func (x *Role) String() string {
 func (*Role) ProtoMessage() {}
 
 func (x *Role) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_common_proto_msgTypes[6]
+	mi := &file_forge_v1_common_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -764,7 +872,7 @@ func (x *Role) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Role.ProtoReflect.Descriptor instead.
 func (*Role) Descriptor() ([]byte, []int) {
-	return file_forge_v1_common_proto_rawDescGZIP(), []int{6}
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Role) GetKey() string {
@@ -815,7 +923,7 @@ type Permission struct {
 
 func (x *Permission) Reset() {
 	*x = Permission{}
-	mi := &file_forge_v1_common_proto_msgTypes[7]
+	mi := &file_forge_v1_common_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -827,7 +935,7 @@ func (x *Permission) String() string {
 func (*Permission) ProtoMessage() {}
 
 func (x *Permission) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_common_proto_msgTypes[7]
+	mi := &file_forge_v1_common_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -840,7 +948,7 @@ func (x *Permission) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Permission.ProtoReflect.Descriptor instead.
 func (*Permission) Descriptor() ([]byte, []int) {
-	return file_forge_v1_common_proto_rawDescGZIP(), []int{7}
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Permission) GetKey() string {
@@ -895,7 +1003,7 @@ type Session struct {
 
 func (x *Session) Reset() {
 	*x = Session{}
-	mi := &file_forge_v1_common_proto_msgTypes[8]
+	mi := &file_forge_v1_common_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -907,7 +1015,7 @@ func (x *Session) String() string {
 func (*Session) ProtoMessage() {}
 
 func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_common_proto_msgTypes[8]
+	mi := &file_forge_v1_common_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -920,7 +1028,7 @@ func (x *Session) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Session.ProtoReflect.Descriptor instead.
 func (*Session) Descriptor() ([]byte, []int) {
-	return file_forge_v1_common_proto_rawDescGZIP(), []int{8}
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Session) GetId() string {
@@ -1001,7 +1109,7 @@ type ApiToken struct {
 
 func (x *ApiToken) Reset() {
 	*x = ApiToken{}
-	mi := &file_forge_v1_common_proto_msgTypes[9]
+	mi := &file_forge_v1_common_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1013,7 +1121,7 @@ func (x *ApiToken) String() string {
 func (*ApiToken) ProtoMessage() {}
 
 func (x *ApiToken) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_common_proto_msgTypes[9]
+	mi := &file_forge_v1_common_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1026,7 +1134,7 @@ func (x *ApiToken) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApiToken.ProtoReflect.Descriptor instead.
 func (*ApiToken) Descriptor() ([]byte, []int) {
-	return file_forge_v1_common_proto_rawDescGZIP(), []int{9}
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ApiToken) GetId() string {
@@ -1098,7 +1206,7 @@ type AuditEvent struct {
 
 func (x *AuditEvent) Reset() {
 	*x = AuditEvent{}
-	mi := &file_forge_v1_common_proto_msgTypes[10]
+	mi := &file_forge_v1_common_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1110,7 +1218,7 @@ func (x *AuditEvent) String() string {
 func (*AuditEvent) ProtoMessage() {}
 
 func (x *AuditEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_common_proto_msgTypes[10]
+	mi := &file_forge_v1_common_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1123,7 +1231,7 @@ func (x *AuditEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuditEvent.ProtoReflect.Descriptor instead.
 func (*AuditEvent) Descriptor() ([]byte, []int) {
-	return file_forge_v1_common_proto_rawDescGZIP(), []int{10}
+	return file_forge_v1_common_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *AuditEvent) GetId() string {
@@ -1286,7 +1394,21 @@ const file_forge_v1_common_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc5\x04\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xf5\x02\n" +
+	"\x0eUserAssignment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12#\n" +
+	"\rdepartment_id\x18\x04 \x01(\tR\fdepartmentId\x12\x1f\n" +
+	"\vposition_id\x18\x05 \x01(\tR\n" +
+	"positionId\x12\x18\n" +
+	"\aprimary\x18\x06 \x01(\bR\aprimary\x129\n" +
+	"\n" +
+	"valid_from\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tvalidFrom\x12;\n" +
+	"\vvalid_until\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"validUntil\x129\n" +
+	"\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xc5\x04\n" +
 	"\x0eSecurityPolicy\x12.\n" +
 	"\x13password_min_length\x18\x01 \x01(\x03R\x11passwordMinLength\x124\n" +
 	"\x16password_require_upper\x18\x02 \x01(\bR\x14passwordRequireUpper\x124\n" +
@@ -1372,45 +1494,49 @@ func file_forge_v1_common_proto_rawDescGZIP() []byte {
 	return file_forge_v1_common_proto_rawDescData
 }
 
-var file_forge_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_forge_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_forge_v1_common_proto_goTypes = []any{
 	(*User)(nil),                  // 0: forge.v1.User
 	(*Organization)(nil),          // 1: forge.v1.Organization
 	(*Department)(nil),            // 2: forge.v1.Department
 	(*Position)(nil),              // 3: forge.v1.Position
 	(*UserGroup)(nil),             // 4: forge.v1.UserGroup
-	(*SecurityPolicy)(nil),        // 5: forge.v1.SecurityPolicy
-	(*Role)(nil),                  // 6: forge.v1.Role
-	(*Permission)(nil),            // 7: forge.v1.Permission
-	(*Session)(nil),               // 8: forge.v1.Session
-	(*ApiToken)(nil),              // 9: forge.v1.ApiToken
-	(*AuditEvent)(nil),            // 10: forge.v1.AuditEvent
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*UserAssignment)(nil),        // 5: forge.v1.UserAssignment
+	(*SecurityPolicy)(nil),        // 6: forge.v1.SecurityPolicy
+	(*Role)(nil),                  // 7: forge.v1.Role
+	(*Permission)(nil),            // 8: forge.v1.Permission
+	(*Session)(nil),               // 9: forge.v1.Session
+	(*ApiToken)(nil),              // 10: forge.v1.ApiToken
+	(*AuditEvent)(nil),            // 11: forge.v1.AuditEvent
+	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
 }
 var file_forge_v1_common_proto_depIdxs = []int32{
-	11, // 0: forge.v1.User.locked_until:type_name -> google.protobuf.Timestamp
-	11, // 1: forge.v1.User.password_changed_at:type_name -> google.protobuf.Timestamp
-	11, // 2: forge.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	11, // 3: forge.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
-	11, // 4: forge.v1.Organization.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 5: forge.v1.Department.created_at:type_name -> google.protobuf.Timestamp
-	11, // 6: forge.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 7: forge.v1.Position.created_at:type_name -> google.protobuf.Timestamp
-	11, // 8: forge.v1.Position.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 9: forge.v1.UserGroup.created_at:type_name -> google.protobuf.Timestamp
-	11, // 10: forge.v1.UserGroup.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 11: forge.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	11, // 12: forge.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
-	11, // 13: forge.v1.Session.last_seen_at:type_name -> google.protobuf.Timestamp
-	11, // 14: forge.v1.ApiToken.created_at:type_name -> google.protobuf.Timestamp
-	11, // 15: forge.v1.ApiToken.expires_at:type_name -> google.protobuf.Timestamp
-	11, // 16: forge.v1.ApiToken.last_used_at:type_name -> google.protobuf.Timestamp
-	11, // 17: forge.v1.AuditEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	18, // [18:18] is the sub-list for method output_type
-	18, // [18:18] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	12, // 0: forge.v1.User.locked_until:type_name -> google.protobuf.Timestamp
+	12, // 1: forge.v1.User.password_changed_at:type_name -> google.protobuf.Timestamp
+	12, // 2: forge.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	12, // 3: forge.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
+	12, // 4: forge.v1.Organization.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 5: forge.v1.Department.created_at:type_name -> google.protobuf.Timestamp
+	12, // 6: forge.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 7: forge.v1.Position.created_at:type_name -> google.protobuf.Timestamp
+	12, // 8: forge.v1.Position.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 9: forge.v1.UserGroup.created_at:type_name -> google.protobuf.Timestamp
+	12, // 10: forge.v1.UserGroup.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 11: forge.v1.UserAssignment.valid_from:type_name -> google.protobuf.Timestamp
+	12, // 12: forge.v1.UserAssignment.valid_until:type_name -> google.protobuf.Timestamp
+	12, // 13: forge.v1.UserAssignment.created_at:type_name -> google.protobuf.Timestamp
+	12, // 14: forge.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	12, // 15: forge.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
+	12, // 16: forge.v1.Session.last_seen_at:type_name -> google.protobuf.Timestamp
+	12, // 17: forge.v1.ApiToken.created_at:type_name -> google.protobuf.Timestamp
+	12, // 18: forge.v1.ApiToken.expires_at:type_name -> google.protobuf.Timestamp
+	12, // 19: forge.v1.ApiToken.last_used_at:type_name -> google.protobuf.Timestamp
+	12, // 20: forge.v1.AuditEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	21, // [21:21] is the sub-list for method output_type
+	21, // [21:21] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_forge_v1_common_proto_init() }
@@ -1424,7 +1550,7 @@ func file_forge_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_forge_v1_common_proto_rawDesc), len(file_forge_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

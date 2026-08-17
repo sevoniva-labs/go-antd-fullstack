@@ -27,6 +27,7 @@ CSRF_REQUIRED = {
     ("patch", "/api/v1/admin/user-groups/{group_id}"),
     ("put", "/api/v1/admin/user-groups/{group_id}/members"),
     ("put", "/api/v1/admin/user-groups/{group_id}/roles"),
+    ("put", "/api/v1/admin/users/{user_id}/assignments"),
     ("patch", "/api/v1/admin/organization"),
     ("put", "/api/v1/admin/security-config"),
     ("put", "/api/v1/admin/roles/{role_key}/permissions"),

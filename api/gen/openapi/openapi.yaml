@@ -517,6 +517,54 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/users/{userId}/assignments:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListUserAssignments
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListUserAssignmentsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        put:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ReplaceUserAssignments
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.ReplaceUserAssignmentsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ReplaceUserAssignmentsResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/users/{userId}/reset-password:
         post:
             tags:
@@ -1118,6 +1166,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.Session'
+        forge.v1.ListUserAssignmentsResponse:
+            type: object
+            properties:
+                assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.UserAssignment'
         forge.v1.ListUserGroupsResponse:
             type: object
             properties:
@@ -1224,6 +1279,18 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.DependencyStatus'
+        forge.v1.ReplaceUserAssignmentsRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                assignments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.UserAssignment'
+        forge.v1.ReplaceUserAssignmentsResponse:
+            type: object
+            properties: {}
         forge.v1.ResetUserPasswordRequest:
             type: object
             properties:
@@ -1506,6 +1573,30 @@ components:
                     type: array
                     items:
                         type: string
+        forge.v1.UserAssignment:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                userId:
+                    type: string
+                departmentId:
+                    type: string
+                positionId:
+                    type: string
+                primary:
+                    type: boolean
+                validFrom:
+                    type: string
+                    format: date-time
+                validUntil:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
         forge.v1.UserGroup:
             type: object
             properties:
