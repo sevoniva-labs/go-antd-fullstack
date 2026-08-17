@@ -140,6 +140,19 @@ CREATE TABLE IF NOT EXISTS reliable_messages (
 );
 CREATE INDEX IF NOT EXISTS idx_reliable_messages_pending ON reliable_messages(status, next_attempt_at, created_at);
 
+CREATE TABLE IF NOT EXISTS consumed_messages (
+  consumer_group varchar(160) NOT NULL,
+  event_id varchar(200) NOT NULL,
+  organization_id varchar(36) NULL,
+  topic varchar(200) NOT NULL,
+  event_type varchar(160) NOT NULL,
+  body_hash char(64) NOT NULL,
+  provider_message_id varchar(200) NOT NULL DEFAULT '',
+  consumed_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (consumer_group, event_id)
+);
+CREATE INDEX IF NOT EXISTS idx_consumed_messages_at ON consumed_messages(consumed_at);
+
 CREATE TABLE IF NOT EXISTS feature_flags (
   organization_id varchar(36) NOT NULL,
   flag_key varchar(160) NOT NULL,
@@ -150,6 +163,7 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 
 -- +goose Down
 DROP TABLE IF EXISTS feature_flags;
+DROP TABLE IF EXISTS consumed_messages;
 DROP TABLE IF EXISTS reliable_messages;
 DROP TABLE IF EXISTS idempotency_records;
 DROP TABLE IF EXISTS audit_logs;

@@ -25,6 +25,7 @@ type Consumer interface {
 	Retry(context.Context, Delivery, time.Duration) error
 	Close()
 	Provider() string
+	Group() string
 }
 
 func NewConsumer(cfg config.Messaging) (Consumer, error) {

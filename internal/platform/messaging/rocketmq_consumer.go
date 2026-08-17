@@ -41,6 +41,7 @@ type rocketMQConsumer struct {
 	client            rocketMQConsumerClient
 	batchSize         int32
 	invisibleDuration time.Duration
+	group             string
 	closed            atomic.Bool
 }
 
@@ -76,7 +77,7 @@ func newRocketMQConsumerWithFactory(cfg config.Messaging, factory rocketMQConsum
 	if invisibleDuration < 10*time.Second || invisibleDuration > 12*time.Hour {
 		invisibleDuration = 30 * time.Second
 	}
-	return &rocketMQConsumer{client: client, batchSize: int32(batchSize), invisibleDuration: invisibleDuration}, nil
+	return &rocketMQConsumer{client: client, batchSize: int32(batchSize), invisibleDuration: invisibleDuration, group: cfg.RocketMQGroup}, nil
 }
 
 func newApacheRocketMQConsumer(cfg config.Messaging, tlsConfig *tls.Config, topics []string) (rocketMQConsumerClient, error) {
@@ -208,6 +209,7 @@ func (r *rocketMQConsumer) Close() {
 }
 
 func (r *rocketMQConsumer) Provider() string { return "rocketmq" }
+func (r *rocketMQConsumer) Group() string    { return r.group }
 
 func decodeRocketMQDelivery(ctx context.Context, source rocketMQSourceDelivery) (Message, error) {
 	properties := cloneStringMap(source.properties)
