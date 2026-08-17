@@ -13,12 +13,14 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@forge/app-contract": "workspace:*",
     "@forge/host-sdk": "workspace:*",
     "@forge/manifest-security": "workspace:*",
     "react": "19.2.8",
     "wujie": "2.1.0"
   },
   "devDependencies": {
+    "@forge/testkit": "workspace:*",
     "@testing-library/react": "16.3.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
