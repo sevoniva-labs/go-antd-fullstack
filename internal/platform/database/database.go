@@ -18,6 +18,8 @@ type DB struct {
 	Provider string
 }
 
+type transactionContextKey struct{}
+
 func Open(ctx context.Context, cfg config.Database) (*DB, error) {
 	driver := "pgx"
 	if cfg.Provider == "mysql" || cfg.Provider == "oceanbase" {
@@ -57,6 +59,9 @@ func (db *DB) Rebind(query string) string {
 }
 
 func (db *DB) WithTx(ctx context.Context, fn func(*sql.Tx) error) error {
+	if tx := transactionFromContext(ctx); tx != nil {
+		return fn(tx)
+	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -66,4 +71,48 @@ func (db *DB) WithTx(ctx context.Context, fn func(*sql.Tx) error) error {
 		return err
 	}
 	return tx.Commit()
+}
+
+// WithinTx propagates one local transaction through context so repositories
+// and reliable side effects such as audit records commit or roll back together.
+func (db *DB) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	if transactionFromContext(ctx) != nil {
+		return fn(ctx)
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	txCtx := context.WithValue(ctx, transactionContextKey{}, tx)
+	if err := fn(txCtx); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+func (db *DB) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	if tx := transactionFromContext(ctx); tx != nil {
+		return tx.ExecContext(ctx, query, args...)
+	}
+	return db.DB.ExecContext(ctx, query, args...)
+}
+
+func (db *DB) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+	if tx := transactionFromContext(ctx); tx != nil {
+		return tx.QueryContext(ctx, query, args...)
+	}
+	return db.DB.QueryContext(ctx, query, args...)
+}
+
+func (db *DB) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
+	if tx := transactionFromContext(ctx); tx != nil {
+		return tx.QueryRowContext(ctx, query, args...)
+	}
+	return db.DB.QueryRowContext(ctx, query, args...)
+}
+
+func transactionFromContext(ctx context.Context) *sql.Tx {
+	tx, _ := ctx.Value(transactionContextKey{}).(*sql.Tx)
+	return tx
 }
