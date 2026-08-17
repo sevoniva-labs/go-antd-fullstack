@@ -41,6 +41,7 @@ var ErrInvalidMFA = errors.New("invalid multi-factor authentication code")
 var ErrMFAAlreadyEnabled = repository.ErrMFAAlreadyEnabled
 var ErrMFANotPending = errors.New("multi-factor authentication enrollment is not pending")
 var ErrMFAUnavailable = errors.New("multi-factor authentication encryption is unavailable")
+var ErrRoleConflict = errors.New("role combination violates segregation of duties")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -124,6 +125,15 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 		{"user", "普通用户", domain.DataScopeSelf},
 	} {
 		if _, err = s.repo.EnsureRole(ctx, orgID, r.k, r.n, r.scope); err != nil {
+			return err
+		}
+	}
+	for _, rule := range []struct{ a, b, reason string }{
+		{"system_admin", "security_admin", "系统管理与安全管理必须职责分离"},
+		{"system_admin", "auditor", "系统管理与审计监督必须职责分离"},
+		{"security_admin", "auditor", "安全管理与审计监督必须职责分离"},
+	} {
+		if err = s.repo.EnsureRoleConflict(ctx, orgID, rule.a, rule.b, rule.reason); err != nil {
 			return err
 		}
 	}
@@ -700,6 +710,9 @@ func (s *Service) CreateUser(ctx context.Context, actor domain.Principal, orgID,
 	if err := enforceRoleMutation(actor, nil, roles); err != nil {
 		return domain.User{}, err
 	}
+	if err := s.validateRoleCombination(ctx, orgID, roles); err != nil {
+		return domain.User{}, err
+	}
 	policy, err := s.resolveSecurityPolicy(ctx, orgID)
 	if err != nil {
 		return domain.User{}, err
@@ -1152,6 +1165,11 @@ func (s *Service) UpdateUserGroup(ctx context.Context, actor domain.Principal, o
 		if err := enforceRoleMutation(actor, current.Roles, nil); err != nil {
 			return domain.UserGroup{}, err
 		}
+		if clean.Status == "ACTIVE" {
+			if err := s.validateGroupMembers(ctx, orgID, current.ID, current.Roles, current.MemberIDs); err != nil {
+				return domain.UserGroup{}, err
+			}
+		}
 	}
 	return s.repo.UpdateUserGroup(ctx, clean)
 }
@@ -1170,6 +1188,9 @@ func (s *Service) UpdateUserGroupMembers(ctx context.Context, actor domain.Princ
 	clean, err := normalizeIDs(memberIDs, 10_000)
 	if err != nil {
 		return ErrInvalidUserGroup
+	}
+	if err := s.validateGroupMembers(ctx, orgID, groupID, group.Roles, clean); err != nil {
+		return err
 	}
 	return s.repo.ReplaceUserGroupMembers(ctx, orgID, groupID, clean)
 }
@@ -1200,6 +1221,9 @@ func (s *Service) UpdateUserGroupRoles(ctx context.Context, actor domain.Princip
 		}
 	}
 	if err := enforceRoleMutation(actor, group.Roles, clean); err != nil {
+		return err
+	}
+	if err := s.validateGroupMembers(ctx, orgID, groupID, clean, group.MemberIDs); err != nil {
 		return err
 	}
 	return s.repo.ReplaceUserGroupRoles(ctx, orgID, groupID, clean)
@@ -1554,7 +1578,53 @@ func (s *Service) UpdateUserRoles(ctx context.Context, actor domain.Principal, o
 	if err := enforceRoleMutation(actor, target.Roles, clean); err != nil {
 		return err
 	}
+	groupRoles, err := s.repo.GroupRolesForUser(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if err := s.validateRoleCombination(ctx, orgID, append(clean, groupRoles...)); err != nil {
+		return err
+	}
 	return s.repo.ReplaceUserRoles(ctx, orgID, userID, clean)
+}
+
+func (s *Service) validateGroupMembers(ctx context.Context, orgID, groupID string, groupRoles, memberIDs []string) error {
+	for _, userID := range memberIDs {
+		otherRoles, err := s.repo.RolesForUserExcludingGroup(ctx, userID, groupID)
+		if err != nil {
+			return err
+		}
+		if err := s.validateRoleCombination(ctx, orgID, append(otherRoles, groupRoles...)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Service) validateRoleCombination(ctx context.Context, orgID string, roleKeys []string) error {
+	rules, err := s.repo.RoleConflictRules(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	if hasRoleConflict(roleKeys, rules) {
+		return ErrRoleConflict
+	}
+	return nil
+}
+
+func hasRoleConflict(roleKeys []string, rules []domain.RoleConflictRule) bool {
+	set := make(map[string]struct{}, len(roleKeys))
+	for _, key := range roleKeys {
+		set[key] = struct{}{}
+	}
+	for _, rule := range rules {
+		_, hasA := set[rule.RoleA]
+		_, hasB := set[rule.RoleB]
+		if hasA && hasB {
+			return true
+		}
+	}
+	return false
 }
 
 func authorizeGrantActor(actor domain.Principal, orgID string) error {

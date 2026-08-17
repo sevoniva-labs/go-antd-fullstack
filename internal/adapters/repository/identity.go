@@ -1459,3 +1459,79 @@ func (r *IdentityRepo) DeleteMFAAndOtherSessions(ctx context.Context, userID, cu
 		return err
 	})
 }
+
+func (r *IdentityRepo) EnsureRoleConflict(ctx context.Context, orgID, roleA, roleB, reason string) error {
+	if roleB < roleA {
+		roleA, roleB = roleB, roleA
+	}
+	var count int
+	if err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM role_conflict_rules WHERE organization_id=? AND role_a=? AND role_b=?`), orgID, roleA, roleB).Scan(&count); err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO role_conflict_rules(id,organization_id,role_a,role_b,reason,status,created_at) VALUES(?,?,?,?,?,'ACTIVE',?)`), uuid.NewString(), orgID, roleA, roleB, reason, time.Now().UTC())
+	if err == nil {
+		return nil
+	}
+	if readErr := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM role_conflict_rules WHERE organization_id=? AND role_a=? AND role_b=?`), orgID, roleA, roleB).Scan(&count); readErr == nil && count > 0 {
+		return nil
+	}
+	return err
+}
+
+func (r *IdentityRepo) RoleConflictRules(ctx context.Context, orgID string) ([]identity.RoleConflictRule, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,role_a,role_b,reason FROM role_conflict_rules WHERE organization_id=? AND status='ACTIVE' ORDER BY role_a,role_b`), orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]identity.RoleConflictRule, 0)
+	for rows.Next() {
+		var rule identity.RoleConflictRule
+		if err := rows.Scan(&rule.ID, &rule.OrganizationID, &rule.RoleA, &rule.RoleB, &rule.Reason); err != nil {
+			return nil, err
+		}
+		out = append(out, rule)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) GroupRolesForUser(ctx context.Context, userID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT DISTINCT r.role_key FROM roles r JOIN user_group_roles ugr ON ugr.role_id=r.id JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE' JOIN user_group_members ugm ON ugm.group_id=ug.id WHERE ugm.user_id=? ORDER BY r.role_key`), userID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]string, 0)
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, err
+		}
+		out = append(out, key)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) RolesForUserExcludingGroup(ctx context.Context, userID, excludedGroupID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT role_key FROM (
+		SELECT r.role_key AS role_key FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=?
+		UNION
+		SELECT r.role_key AS role_key FROM roles r JOIN user_group_roles ugr ON ugr.role_id=r.id JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE' JOIN user_group_members ugm ON ugm.group_id=ug.id WHERE ugm.user_id=? AND ug.id<>?
+	) effective_roles ORDER BY role_key`), userID, userID, excludedGroupID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]string, 0)
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, err
+		}
+		out = append(out, key)
+	}
+	return out, rows.Err()
+}

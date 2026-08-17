@@ -656,6 +656,8 @@ func serviceError(err error) error {
 		return kratoserrors.NotFound("NOT_FOUND", "resource not found")
 	case errors.Is(err, appidentity.ErrGrantCeiling), errors.Is(err, appidentity.ErrLastSystemAdmin):
 		return kratoserrors.Forbidden("PERMISSION_DENIED", "operation is not permitted")
+	case errors.Is(err, appidentity.ErrRoleConflict):
+		return kratoserrors.Conflict("ROLE_CONFLICT", "role combination violates segregation of duties")
 	case errors.Is(err, appidentity.ErrInteractiveSessionRequired):
 		return kratoserrors.Forbidden("INTERACTIVE_SESSION_REQUIRED", "interactive session is required")
 	case errors.Is(err, appidentity.ErrInvalidCredentials):

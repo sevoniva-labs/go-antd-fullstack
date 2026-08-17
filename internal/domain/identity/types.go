@@ -153,6 +153,14 @@ type Role struct {
 	CreatedAt   time.Time    `json:"created_at"`
 }
 
+type RoleConflictRule struct {
+	ID             string
+	OrganizationID string
+	RoleA          string
+	RoleB          string
+	Reason         string
+}
+
 type Session struct {
 	ID          string    `json:"id"`
 	UserID      string    `json:"user_id"`
