@@ -208,6 +208,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
 	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter, db)
+	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db)
 	securityMiddleware := selector.Server(authn.Server(identitySvc), authz.Server(authz.PlatformRules())).Match(func(_ context.Context, operation string) bool {
 		switch operation {
 		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
@@ -220,6 +221,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	grpcServer := kgrpc.NewServer(grpcOpts...)
 	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
 	forgev1.RegisterPlatformServiceServer(grpcServer, platformService)
+	forgev1.RegisterIdentityServiceServer(grpcServer, identityService)
 	runtime := kratos.New(
 		kratos.Context(ctx), kratos.Name(cfg.App.Name), kratos.Version(opts.Version),
 		kratos.Metadata(map[string]string{"environment": cfg.App.Environment, "region": cfg.App.Region, "zone": cfg.App.Zone}),
