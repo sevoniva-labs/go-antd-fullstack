@@ -55,6 +55,7 @@ web-build:
 
 contract:
 	python3 scripts/check-error-codes.py
+	python3 scripts/check-contract-coverage.py
 
 proto-tools: $(PROTO_TOOLS)
 

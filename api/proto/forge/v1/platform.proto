@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package forge.v1;
+
+import "forge/v1/common.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1";
+
+service PlatformService {
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/users"};
+  }
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/users" body: "*"};
+  }
+  rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/organization"};
+  }
+  rpc UpdateOrganization(UpdateOrganizationRequest) returns (UpdateOrganizationResponse) {
+    option (google.api.http) = {patch: "/api/v1/admin/organization" body: "*"};
+  }
+  rpc GetSecurityPolicy(GetSecurityPolicyRequest) returns (GetSecurityPolicyResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/security-config"};
+  }
+  rpc UpdateSecurityPolicy(UpdateSecurityPolicyRequest) returns (UpdateSecurityPolicyResponse) {
+    option (google.api.http) = {put: "/api/v1/admin/security-config" body: "policy"};
+  }
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/roles"};
+  }
+  rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/permissions"};
+  }
+  rpc UpdateRolePermissions(UpdateRolePermissionsRequest) returns (UpdateRolePermissionsResponse) {
+    option (google.api.http) = {put: "/api/v1/admin/roles/{role_key}/permissions" body: "*"};
+  }
+  rpc UpdateUserRoles(UpdateUserRolesRequest) returns (UpdateUserRolesResponse) {
+    option (google.api.http) = {patch: "/api/v1/admin/users/{user_id}/roles" body: "*"};
+  }
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse) {
+    option (google.api.http) = {patch: "/api/v1/admin/users/{user_id}/status" body: "*"};
+  }
+  rpc UnlockUser(UnlockUserRequest) returns (UnlockUserResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/users/{user_id}/unlock" body: "*"};
+  }
+  rpc ResetUserPassword(ResetUserPasswordRequest) returns (ResetUserPasswordResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/users/{user_id}/reset-password" body: "*"};
+  }
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/sessions"};
+  }
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse) {
+    option (google.api.http) = {delete: "/api/v1/admin/sessions/{session_id}"};
+  }
+  rpc ListAuditLogs(ListAuditLogsRequest) returns (ListAuditLogsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/audit-logs"};
+  }
+  rpc ExportAuditLogs(ExportAuditLogsRequest) returns (ExportAuditLogsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/audit-logs/export"};
+  }
+}
+
+message ListUsersRequest { int32 limit = 1; }
+message ListUsersResponse { repeated User users = 1; }
+
+message CreateUserRequest {
+  string login_name = 1;
+  string display_name = 2;
+  string password = 3;
+  repeated string roles = 4;
+}
+message CreateUserResponse { User user = 1; }
+
+message GetOrganizationRequest {}
+message GetOrganizationResponse { Organization organization = 1; }
+
+message UpdateOrganizationRequest {
+  string name = 1;
+  string description = 2;
+  string status = 3;
+  int32 max_users = 4;
+  int32 max_active_sessions = 5;
+}
+message UpdateOrganizationResponse { Organization organization = 1; }
+
+message GetSecurityPolicyRequest {}
+message GetSecurityPolicyResponse { SecurityPolicy policy = 1; }
+message UpdateSecurityPolicyRequest { SecurityPolicy policy = 1; }
+message UpdateSecurityPolicyResponse { SecurityPolicy policy = 1; }
+
+message ListRolesRequest {}
+message ListRolesResponse { repeated Role roles = 1; }
+message ListPermissionsRequest {}
+message ListPermissionsResponse { repeated Permission permissions = 1; }
+
+message UpdateRolePermissionsRequest {
+  string role_key = 1;
+  repeated string permissions = 2;
+}
+message UpdateRolePermissionsResponse { Role role = 1; }
+
+message UpdateUserRolesRequest {
+  string user_id = 1;
+  repeated string roles = 2;
+}
+message UpdateUserRolesResponse { User user = 1; }
+
+message UpdateUserStatusRequest {
+  string user_id = 1;
+  string status = 2;
+}
+message UpdateUserStatusResponse { User user = 1; }
+
+message UnlockUserRequest { string user_id = 1; }
+message UnlockUserResponse { User user = 1; }
+
+message ResetUserPasswordRequest {
+  string user_id = 1;
+  string password = 2;
+}
+message ResetUserPasswordResponse {}
+
+message ListSessionsRequest { int32 limit = 1; }
+message ListSessionsResponse { repeated Session sessions = 1; }
+message RevokeSessionRequest { string session_id = 1; }
+message RevokeSessionResponse {}
+
+message ListAuditLogsRequest { int32 limit = 1; }
+message ListAuditLogsResponse { repeated AuditEvent events = 1; }
+
+message ExportAuditLogsRequest {
+  string format = 1;
+  int32 limit = 2;
+}
+message ExportAuditLogsResponse {
+  bytes content = 1;
+  string content_type = 2;
+  string filename = 3;
+}
