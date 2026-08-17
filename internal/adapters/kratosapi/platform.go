@@ -2,10 +2,17 @@ package kratosapi
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
+	"math"
+	"net"
+	"strconv"
 	"time"
 
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/transport"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
@@ -13,16 +20,179 @@ import (
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
 	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/authn"
+	"github.com/sevoniva-labs/forge/internal/platform/database"
 )
 
 type PlatformService struct {
 	forgev1.UnimplementedPlatformServiceServer
 	identity *appidentity.Service
 	audit    *audit.Writer
+	db       *database.DB
 }
 
-func NewPlatformService(identity *appidentity.Service, auditWriter *audit.Writer) *PlatformService {
-	return &PlatformService{identity: identity, audit: auditWriter}
+func NewPlatformService(identity *appidentity.Service, auditWriter *audit.Writer, db *database.DB) *PlatformService {
+	return &PlatformService{identity: identity, audit: auditWriter, db: db}
+}
+
+func (s *PlatformService) CreateUser(ctx context.Context, req *forgev1.CreateUserRequest) (*forgev1.CreateUserResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var created domain.User
+	event := newAuditEvent(ctx, principal, "user.create", "user", "", map[string]any{"login_name": req.GetLoginName(), "roles": req.GetRoles()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var createErr error
+		created, createErr = s.identity.CreateUser(txCtx, principal, principal.OrganizationID, req.GetLoginName(), req.GetDisplayName(), req.GetPassword(), req.GetRoles())
+		if createErr == nil {
+			event.ResourceID = created.ID
+		}
+		return createErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.CreateUserResponse{User: userProto(created)}, nil
+}
+
+func (s *PlatformService) UpdateOrganization(ctx context.Context, req *forgev1.UpdateOrganizationRequest) (*forgev1.UpdateOrganizationResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	maxUsers, err := checkedInt(req.GetMaxUsers())
+	if err != nil {
+		return nil, err
+	}
+	maxSessions, err := checkedInt(req.GetMaxActiveSessions())
+	if err != nil {
+		return nil, err
+	}
+	var updated domain.Organization
+	event := newAuditEvent(ctx, principal, "organization.update", "organization", principal.OrganizationID, map[string]any{"status": req.GetStatus()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var updateErr error
+		updated, updateErr = s.identity.UpdateOrganization(txCtx, principal.OrganizationID, domain.Organization{
+			Name: req.GetName(), Description: req.GetDescription(), Status: req.GetStatus(), MaxUsers: maxUsers, MaxSessions: maxSessions,
+		})
+		return updateErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateOrganizationResponse{Organization: organizationProto(updated)}, nil
+}
+
+func (s *PlatformService) UpdateSecurityPolicy(ctx context.Context, req *forgev1.UpdateSecurityPolicyRequest) (*forgev1.UpdateSecurityPolicyResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	policy, err := securityPolicyDomain(req.GetPolicy())
+	if err != nil {
+		return nil, err
+	}
+	var updated domain.SecurityPolicy
+	event := newAuditEvent(ctx, principal, "security.config.update", "security", "policy", nil)
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var updateErr error
+		updated, updateErr = s.identity.UpdateSecurityPolicy(txCtx, principal.OrganizationID, principal.UserID, policy)
+		return updateErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateSecurityPolicyResponse{Policy: securityPolicyProto(updated)}, nil
+}
+
+func (s *PlatformService) UpdateRolePermissions(ctx context.Context, req *forgev1.UpdateRolePermissionsRequest) (*forgev1.UpdateRolePermissionsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "role.permissions.update", "role", req.GetRoleKey(), map[string]any{"permissions": req.GetPermissions()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.UpdateRolePermissions(txCtx, principal, principal.OrganizationID, req.GetRoleKey(), req.GetPermissions())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateRolePermissionsResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), Permissions: req.GetPermissions()}}, nil
+}
+
+func (s *PlatformService) UpdateUserRoles(ctx context.Context, req *forgev1.UpdateUserRolesRequest) (*forgev1.UpdateUserRolesResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "user.roles.update", "user", req.GetUserId(), map[string]any{"roles": req.GetRoles()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.UpdateUserRoles(txCtx, principal, principal.OrganizationID, req.GetUserId(), req.GetRoles())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateUserRolesResponse{User: &forgev1.User{Id: req.GetUserId(), OrganizationId: principal.OrganizationID, Roles: req.GetRoles()}}, nil
+}
+
+func (s *PlatformService) UpdateUserStatus(ctx context.Context, req *forgev1.UpdateUserStatusRequest) (*forgev1.UpdateUserStatusResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "user.status.update", "user", req.GetUserId(), map[string]any{"status": req.GetStatus()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.SetUserStatus(txCtx, principal.OrganizationID, req.GetUserId(), req.GetStatus())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateUserStatusResponse{User: &forgev1.User{Id: req.GetUserId(), OrganizationId: principal.OrganizationID, Status: req.GetStatus()}}, nil
+}
+
+func (s *PlatformService) UnlockUser(ctx context.Context, req *forgev1.UnlockUserRequest) (*forgev1.UnlockUserResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "user.unlock", "user", req.GetUserId(), nil)
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.UnlockUser(txCtx, principal.OrganizationID, req.GetUserId())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UnlockUserResponse{User: &forgev1.User{Id: req.GetUserId(), OrganizationId: principal.OrganizationID}}, nil
+}
+
+func (s *PlatformService) ResetUserPassword(ctx context.Context, req *forgev1.ResetUserPasswordRequest) (*forgev1.ResetUserPasswordResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "user.password.reset", "user", req.GetUserId(), nil)
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.AdminResetPassword(txCtx, principal.OrganizationID, req.GetUserId(), req.GetPassword())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.ResetUserPasswordResponse{}, nil
+}
+
+func (s *PlatformService) RevokeSession(ctx context.Context, req *forgev1.RevokeSessionRequest) (*forgev1.RevokeSessionResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "session.revoke", "session", req.GetSessionId(), nil)
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.RevokeSession(txCtx, principal.OrganizationID, req.GetSessionId(), principal.SessionID)
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.RevokeSessionResponse{}, nil
 }
 
 func (s *PlatformService) ListUsers(ctx context.Context, _ *forgev1.ListUsersRequest) (*forgev1.ListUsersResponse, error) {
@@ -132,6 +302,90 @@ func requiredPrincipal(ctx context.Context) (domain.Principal, error) {
 		return domain.Principal{}, kratoserrors.Unauthorized("UNAUTHENTICATED", "authenticated organization is required")
 	}
 	return principal, nil
+}
+
+func (s *PlatformService) audited(ctx context.Context, event *audit.Event, operation func(context.Context) error) error {
+	if s.db == nil || s.audit == nil {
+		return errors.New("reliable audit is unavailable")
+	}
+	return s.db.WithinTx(ctx, func(txCtx context.Context) error {
+		if err := operation(txCtx); err != nil {
+			return err
+		}
+		return s.audit.Write(txCtx, *event)
+	})
+}
+
+func newAuditEvent(ctx context.Context, principal domain.Principal, action, resourceType, resourceID string, details map[string]any) *audit.Event {
+	event := &audit.Event{
+		OrganizationID: principal.OrganizationID, ActorID: principal.UserID, ActorName: principal.LoginName,
+		Action: action, ResourceType: resourceType, ResourceID: resourceID, Details: details,
+	}
+	if tr, ok := transport.FromServerContext(ctx); ok {
+		event.RequestID = tr.RequestHeader().Get("X-Request-ID")
+	}
+	if remote, ok := peer.FromContext(ctx); ok && remote.Addr != nil {
+		host, _, err := net.SplitHostPort(remote.Addr.String())
+		if err == nil {
+			event.ClientIP = host
+		}
+	}
+	return event
+}
+
+func checkedInt(value int64) (int, error) {
+	if value < 0 || (strconv.IntSize == 32 && value > math.MaxInt32) {
+		return 0, kratoserrors.BadRequest("INVALID_ARGUMENT", "numeric value is out of range")
+	}
+	return int(value), nil // #nosec G115 -- guarded above on 32-bit; int64 and int have equal width on 64-bit.
+}
+
+func securityPolicyDomain(policy *forgev1.SecurityPolicy) (domain.SecurityPolicy, error) {
+	if policy == nil {
+		return domain.SecurityPolicy{}, kratoserrors.BadRequest("INVALID_ARGUMENT", "policy is required")
+	}
+	minLength, err := checkedInt(policy.GetPasswordMinLength())
+	if err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	history, err := checkedInt(policy.GetPasswordHistory())
+	if err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	maxAge, err := checkedInt(policy.GetPasswordMaxAgeDays())
+	if err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	maxFailures, err := checkedInt(policy.GetLoginMaxFailures())
+	if err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	maxSessions, err := checkedInt(policy.GetMaxActiveSessions())
+	if err != nil {
+		return domain.SecurityPolicy{}, err
+	}
+	return domain.SecurityPolicy{
+		PasswordMinLength: minLength, PasswordRequireUpper: policy.GetPasswordRequireUpper(),
+		PasswordRequireLower: policy.GetPasswordRequireLower(), PasswordRequireDigit: policy.GetPasswordRequireDigit(),
+		PasswordRequireSymbol: policy.GetPasswordRequireSymbol(), PasswordHistory: history, PasswordMaxAgeDays: maxAge,
+		LoginMaxFailures: maxFailures, LoginLockDurationSeconds: policy.GetLoginLockDurationSeconds(),
+		SessionTTLSeconds: policy.GetSessionTtlSeconds(), MaxConcurrentSessions: maxSessions,
+	}, nil
+}
+
+func serviceError(err error) error {
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return kratoserrors.NotFound("NOT_FOUND", "resource not found")
+	case errors.Is(err, appidentity.ErrGrantCeiling), errors.Is(err, appidentity.ErrLastSystemAdmin):
+		return kratoserrors.Forbidden("PERMISSION_DENIED", "operation is not permitted")
+	case errors.Is(err, appidentity.ErrInvalidRole), errors.Is(err, appidentity.ErrInvalidLoginName),
+		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
+		errors.Is(err, appidentity.ErrInvalidSecurityPolicy):
+		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
+	default:
+		return internalError(err)
+	}
 }
 
 func internalError(error) error {

@@ -1,6 +1,8 @@
 package kratosapi
 
 import (
+	"math"
+	"strconv"
 	"testing"
 	"time"
 
@@ -25,5 +27,19 @@ func TestPlatformProtoMappings(t *testing.T) {
 	event := auditEventProto(audit.Event{ID: "event-1", OccurredAt: now, Details: map[string]any{"safe": true}})
 	if event.Id != "event-1" || event.DetailsJson != `{"safe":true}` {
 		t.Fatalf("unexpected audit mapping: %+v", event)
+	}
+}
+
+func TestPlatformNumericMappingsRejectInvalidValues(t *testing.T) {
+	if _, err := checkedInt(-1); err == nil {
+		t.Fatal("negative quota was accepted")
+	}
+	if strconv.IntSize == 32 {
+		if _, err := checkedInt(int64(math.MaxInt32) + 1); err == nil {
+			t.Fatal("overflowing 32-bit quota was accepted")
+		}
+	}
+	if _, err := securityPolicyDomain(nil); err == nil {
+		t.Fatal("missing security policy was accepted")
 	}
 }

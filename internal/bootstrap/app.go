@@ -207,7 +207,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		"search": se.Provider(), "storage": st.Provider(), "discovery": reg.Provider(),
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
-	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter)
+	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter, db)
 	securityMiddleware := selector.Server(authn.Server(identitySvc), authz.Server(authz.PlatformRules())).Match(func(_ context.Context, operation string) bool {
 		switch operation {
 		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
