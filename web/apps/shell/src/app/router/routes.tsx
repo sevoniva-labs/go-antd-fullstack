@@ -15,7 +15,7 @@ import type { ComponentType, LazyExoticComponent, ReactNode } from 'react'
 import { lazy } from 'react'
 import { matchPath } from 'react-router-dom'
 import type { Principal } from '@forge/api-client'
-import { can } from '../../auth/access'
+import { can } from '@forge/auth-sdk'
 import { runtimeConfig } from '../config/runtime'
 
 const DashboardPage = lazy(() => import('../../pages/Dashboard').then((m) => ({ default: m.DashboardPage })))

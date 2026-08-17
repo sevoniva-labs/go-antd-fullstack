@@ -3,7 +3,7 @@ import { AutoComplete, Button, Modal, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { appRoutes, routeAllowed } from '../app/router/routes'
-import { useMe } from '../auth/useMe'
+import { useMe } from '@forge/auth-sdk'
 
 export function GlobalSearch() {
   const [open, setOpen] = useState(false)

@@ -9,6 +9,7 @@ WORKDIR /src
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY web/apps/shell/package.json web/apps/shell/package.json
 COPY web/packages/api-client/package.json web/packages/api-client/package.json
+COPY web/packages/auth-sdk/package.json web/packages/auth-sdk/package.json
 RUN corepack enable && pnpm install --frozen-lockfile --registry=${NPM_REGISTRY}
 COPY web/ web/
 RUN pnpm --filter @forge/shell build

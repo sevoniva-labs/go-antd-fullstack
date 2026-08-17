@@ -14,8 +14,8 @@ import { queryKeys } from '@forge/api-client'
 import { AppPageContainer } from '../components/layout/AppPageContainer'
 import { StatusTag } from '../components/data-display/StatusTag'
 import { ErrorState } from '../components/feedback/ErrorState'
-import { useMe } from '../auth/useMe'
-import { can } from '../auth/access'
+import { useMe } from '@forge/auth-sdk'
+import { can } from '@forge/auth-sdk'
 
 export function DashboardPage() {
   const navigate = useNavigate()

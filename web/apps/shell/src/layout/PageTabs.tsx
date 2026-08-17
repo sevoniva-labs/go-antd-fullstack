@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { runtimeConfig } from '../app/config/runtime'
 import { routeAllowed, routeByPath } from '../app/router/routes'
-import { useMe } from '../auth/useMe'
+import { useMe } from '@forge/auth-sdk'
 
 interface TabItem { path: string; name: string }
 const storageKey = 'forge.page-tabs'
