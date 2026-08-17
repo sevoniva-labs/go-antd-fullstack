@@ -1,10 +1,8 @@
 package httpapi
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
-	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -750,47 +748,14 @@ func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
 	switch format {
 	case "csv":
 		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-		var buf bytes.Buffer
-		cw := csv.NewWriter(&buf)
-		_ = cw.Write([]string{
-			"id",
-			"occurred_at",
-			"request_id",
-			"organization_id",
-			"actor_id",
-			"actor_name",
-			"action",
-			"resource_type",
-			"resource_id",
-			"result",
-			"client_ip",
-			"details",
-		})
-		for _, item := range items {
-			details, _ := json.Marshal(item.Details)
-			_ = cw.Write([]string{
-				item.ID,
-				item.OccurredAt.UTC().Format(time.RFC3339Nano),
-				item.RequestID,
-				item.OrganizationID,
-				item.ActorID,
-				item.ActorName,
-				item.Action,
-				item.ResourceType,
-				item.ResourceID,
-				item.Result,
-				item.ClientIP,
-				string(details),
-			})
-		}
-		cw.Flush()
-		if err := cw.Error(); err != nil {
+		data, err := encodeAuditCSV(items)
+		if err != nil {
 			s.log.Error("write csv audit logs failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 			httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(buf.Bytes())
+		_, _ = w.Write(data)
 	default:
 		data, err := json.Marshal(items)
 		if err != nil {
