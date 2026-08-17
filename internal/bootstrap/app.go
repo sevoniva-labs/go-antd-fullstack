@@ -15,7 +15,6 @@ import (
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
-	"github.com/sevoniva-labs/forge/internal/adapters/httpapi"
 	"github.com/sevoniva-labs/forge/internal/adapters/kratosapi"
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
@@ -24,9 +23,11 @@ import (
 	"github.com/sevoniva-labs/forge/internal/platform/authz"
 	"github.com/sevoniva-labs/forge/internal/platform/cache"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
+	"github.com/sevoniva-labs/forge/internal/platform/csrf"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
 	"github.com/sevoniva-labs/forge/internal/platform/discovery"
 	"github.com/sevoniva-labs/forge/internal/platform/health"
+	"github.com/sevoniva-labs/forge/internal/platform/httpserver"
 	"github.com/sevoniva-labs/forge/internal/platform/logx"
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
 	"github.com/sevoniva-labs/forge/internal/platform/metrics"
@@ -173,18 +174,29 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	if cfg.Observability.MetricsEnabled {
 		met = metrics.New()
 	}
-	api := httpapi.New(httpapi.Dependencies{
-		Config: cfg, Log: log, DB: db, Cache: c, Messaging: bus, Search: se, Storage: st,
-		Crypto: crypt, Identity: identitySvc, Audit: auditWriter, Metrics: met,
-		Discovery: reg, Version: opts.Version,
-	})
 
 	tlsCfg, err := serverTLSConfig(cfg.Server)
 	if err != nil {
 		return nil, err
 	}
-	httpOpts := []khttp.ServerOption{khttp.Address(cfg.Server.ListenAddr), khttp.Timeout(cfg.Server.WriteTimeout)}
-	grpcOpts := []kgrpc.ServerOption{kgrpc.Address(cfg.Server.GRPCListenAddr), kgrpc.Timeout(cfg.Server.WriteTimeout)}
+	publicOperation := func(_ context.Context, operation string) bool {
+		switch operation {
+		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
+			return false
+		default:
+			return true
+		}
+	}
+	grpcSecurity := selector.Server(authn.Server(identitySvc), authz.Server(authz.PlatformRules())).Match(publicOperation).Build()
+	httpSecurity := selector.Server(authn.Server(identitySvc), csrf.Server(), authz.Server(authz.PlatformRules())).Match(publicOperation).Build()
+	httpOpts := []khttp.ServerOption{
+		khttp.Address(cfg.Server.ListenAddr), khttp.Timeout(cfg.Server.WriteTimeout), khttp.Middleware(httpSecurity),
+		khttp.Filter(httpserver.Filters(httpserver.FilterOptions{
+			Log: log, Metrics: met, Secure: cfg.Security.SecureCookies,
+			AllowedOrigins: cfg.Security.AllowedOrigins, MaxBodyBytes: cfg.Server.MaxBodyBytes,
+		})...),
+	}
+	grpcOpts := []kgrpc.ServerOption{kgrpc.Address(cfg.Server.GRPCListenAddr), kgrpc.Timeout(cfg.Server.WriteTimeout), kgrpc.Middleware(grpcSecurity)}
 	if tlsCfg != nil {
 		httpOpts = append(httpOpts, khttp.TLSConfig(tlsCfg.Clone()))
 		grpcOpts = append(grpcOpts, kgrpc.TLSConfig(tlsCfg.Clone()))
@@ -194,7 +206,6 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	httpServer.ReadTimeout = cfg.Server.ReadTimeout
 	httpServer.WriteTimeout = cfg.Server.WriteTimeout
 	httpServer.IdleTimeout = cfg.Server.IdleTimeout
-	httpServer.HandlePrefix("/", api)
 
 	checks := []health.Check{
 		{Name: "database", Provider: cfg.Database.Provider, Ping: db.PingContext},
@@ -205,20 +216,22 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 	providers := map[string]string{
 		"database": cfg.Database.Provider, "cache": c.Provider(), "messaging": bus.Provider(),
-		"search": se.Provider(), "storage": st.Provider(), "discovery": reg.Provider(),
+		"search": se.Provider(), "storage": st.Provider(), "crypto": crypt.Name(),
+		"discovery": reg.Provider(), "remote_config": cfg.RemoteConfig.Provider,
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
 	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter, db)
 	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db, ratelimit.New(c), cfg.Security.SecureCookies, cfg.Security.SameSite)
-	securityMiddleware := selector.Server(authn.Server(identitySvc), authz.Server(authz.PlatformRules())).Match(func(_ context.Context, operation string) bool {
-		switch operation {
-		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
-			return false
-		default:
-			return true
-		}
-	}).Build()
-	grpcOpts = append(grpcOpts, kgrpc.Middleware(securityMiddleware))
+	forgev1.RegisterSystemServiceHTTPServer(httpServer, systemService)
+	forgev1.RegisterIdentityServiceHTTPServer(httpServer, identityService)
+	forgev1.RegisterPlatformServiceHTTPServer(httpServer, platformService)
+	if met != nil {
+		httpServer.Handle(cfg.Observability.MetricsPath, met.Handler())
+	}
+	if !cfg.Compliance.DisableDebugEndpoints {
+		httpServer.HandlePrefix("/debug/pprof/", httpserver.DebugHandler())
+	}
+	httpServer.HandlePrefix("/", httpserver.SPA(cfg.Server.WebDir))
 	grpcServer := kgrpc.NewServer(grpcOpts...)
 	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
 	forgev1.RegisterPlatformServiceServer(grpcServer, platformService)
