@@ -15,6 +15,7 @@ import (
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/transport"
 	"google.golang.org/grpc/peer"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
@@ -359,9 +360,25 @@ func (s *PlatformService) UpdateSecurityPolicy(ctx context.Context, req *forgev1
 	if err != nil {
 		return nil, err
 	}
+	policyPayload, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(req.GetPolicy())
+	if err != nil {
+		return nil, internalError(err)
+	}
 	var updated domain.SecurityPolicy
-	event := newAuditEvent(ctx, principal, "security.config.update", "security", "policy", nil)
+	event := newAuditEvent(ctx, principal, "security.config.update", "security", "policy", map[string]any{"approval_id": req.GetApprovalId()})
 	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "SECURITY_POLICY_CHANGE",
+			Action:      "security.config.update",
+			Resource:    "security",
+			ResourceID:  "policy",
+			PayloadJSON: string(policyPayload),
+		}); executionErr != nil {
+			return executionErr
+		}
 		var updateErr error
 		updated, updateErr = s.identity.UpdateSecurityPolicy(txCtx, principal.OrganizationID, principal.UserID, policy)
 		return updateErr

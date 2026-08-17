@@ -1818,6 +1818,7 @@ func (x *GetSecurityPolicyResponse) GetPolicy() *SecurityPolicy {
 type UpdateSecurityPolicyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Policy        *SecurityPolicy        `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,2,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1857,6 +1858,13 @@ func (x *UpdateSecurityPolicyRequest) GetPolicy() *SecurityPolicy {
 		return x.Policy
 	}
 	return nil
+}
+
+func (x *UpdateSecurityPolicyRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
 }
 
 type UpdateSecurityPolicyResponse struct {
@@ -3130,9 +3138,11 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\forganization\x18\x01 \x01(\v2\x16.forge.v1.OrganizationR\forganization\"\x1a\n" +
 	"\x18GetSecurityPolicyRequest\"M\n" +
 	"\x19GetSecurityPolicyResponse\x120\n" +
-	"\x06policy\x18\x01 \x01(\v2\x18.forge.v1.SecurityPolicyR\x06policy\"O\n" +
+	"\x06policy\x18\x01 \x01(\v2\x18.forge.v1.SecurityPolicyR\x06policy\"p\n" +
 	"\x1bUpdateSecurityPolicyRequest\x120\n" +
-	"\x06policy\x18\x01 \x01(\v2\x18.forge.v1.SecurityPolicyR\x06policy\"P\n" +
+	"\x06policy\x18\x01 \x01(\v2\x18.forge.v1.SecurityPolicyR\x06policy\x12\x1f\n" +
+	"\vapproval_id\x18\x02 \x01(\tR\n" +
+	"approvalId\"P\n" +
 	"\x1cUpdateSecurityPolicyResponse\x120\n" +
 	"\x06policy\x18\x01 \x01(\v2\x18.forge.v1.SecurityPolicyR\x06policy\"\x12\n" +
 	"\x10ListRolesRequest\"9\n" +

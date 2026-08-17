@@ -864,6 +864,7 @@ message GetSecurityPolicyResponse {
 }
 message UpdateSecurityPolicyRequest {
   SecurityPolicy policy = 1;
+  string approval_id = 2;
 }
 message UpdateSecurityPolicyResponse {
   SecurityPolicy policy = 1;

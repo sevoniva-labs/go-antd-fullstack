@@ -323,6 +323,11 @@ paths:
             tags:
                 - PlatformService
             operationId: PlatformService_UpdateSecurityPolicy
+            parameters:
+                - name: approvalId
+                  in: query
+                  schema:
+                    type: string
             requestBody:
                 content:
                     application/json:
