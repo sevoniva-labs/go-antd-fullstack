@@ -3,6 +3,9 @@ apiVersion: apisix.apache.org/v2
 kind: ApisixRoute
 metadata:
   name: {{ .Values.service.name }}-routes
+  annotations:
+    forge.sevoniva.cn/change-approval-ref: {{ .Values.governance.changeApprovalRef | quote }}
+    forge.sevoniva.cn/apisix-ingress-controller-version: {{ .Values.compatibility.ingressControllerVersion | quote }}
 spec:
   ingressClassName: {{ .Values.ingressClassName | quote }}
   http:

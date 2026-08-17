@@ -3,6 +3,9 @@ apiVersion: apisix.apache.org/v2
 kind: ApisixTls
 metadata:
   name: {{ .Values.service.name }}-web-tls
+  annotations:
+    forge.sevoniva.cn/change-approval-ref: {{ .Values.governance.changeApprovalRef | quote }}
+    forge.sevoniva.cn/apisix-ingress-controller-version: {{ .Values.compatibility.ingressControllerVersion | quote }}
 spec:
   ingressClassName: {{ .Values.ingressClassName | quote }}
   hosts:
@@ -15,6 +18,9 @@ apiVersion: apisix.apache.org/v2
 kind: ApisixTls
 metadata:
   name: {{ .Values.service.name }}-grpc-tls
+  annotations:
+    forge.sevoniva.cn/change-approval-ref: {{ .Values.governance.changeApprovalRef | quote }}
+    forge.sevoniva.cn/apisix-ingress-controller-version: {{ .Values.compatibility.ingressControllerVersion | quote }}
 spec:
   ingressClassName: {{ .Values.ingressClassName | quote }}
   hosts:

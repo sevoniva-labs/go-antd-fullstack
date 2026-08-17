@@ -3,6 +3,9 @@ apiVersion: apisix.apache.org/v2
 kind: ApisixPluginConfig
 metadata:
   name: {{ .Values.service.name }}-gateway-plugins
+  annotations:
+    forge.sevoniva.cn/change-approval-ref: {{ .Values.governance.changeApprovalRef | quote }}
+    forge.sevoniva.cn/apisix-ingress-controller-version: {{ .Values.compatibility.ingressControllerVersion | quote }}
 spec:
   ingressClassName: {{ .Values.ingressClassName | quote }}
   plugins:
@@ -22,6 +25,7 @@ spec:
         rejected_code: 429
         rejected_msg: Too Many Requests
         allow_degradation: false
+        policy: {{ .Values.rateLimit.policy | quote }}
     - name: prometheus
       enable: true
       config: {}

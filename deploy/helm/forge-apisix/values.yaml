@@ -1,5 +1,14 @@
 enabled: false
+profile: production
 ingressClassName: apisix
+
+compatibility:
+  ingressControllerVersion: "2.1.0"
+  minimumKubernetesVersion: "1.31"
+
+governance:
+  # Required when the production profile is enabled, for example CHG-20260817-001.
+  changeApprovalRef: ""
 
 service:
   name: forge
@@ -28,3 +37,6 @@ upstream:
 rateLimit:
   rate: 100
   burst: 200
+  # Local counters are per APISIX instance. Cluster-wide quotas require a separately
+  # approved Redis-backed plugin configuration with credentials outside Helm values.
+  policy: local
