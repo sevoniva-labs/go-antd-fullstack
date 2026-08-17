@@ -182,6 +182,26 @@ service PlatformService {
       ]
     };
   }
+  rpc ListUserGroups(ListUserGroupsRequest) returns (ListUserGroupsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/user-groups"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc CreateUserGroup(CreateUserGroupRequest) returns (CreateUserGroupResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/user-groups" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc UpdateUserGroup(UpdateUserGroupRequest) returns (UpdateUserGroupResponse) {
+    option (google.api.http) = {patch: "/api/v1/admin/user-groups/{group_id}" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc UpdateUserGroupMembers(UpdateUserGroupMembersRequest) returns (UpdateUserGroupMembersResponse) {
+    option (google.api.http) = {put: "/api/v1/admin/user-groups/{group_id}/members" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc UpdateUserGroupRoles(UpdateUserGroupRolesRequest) returns (UpdateUserGroupRolesResponse) {
+    option (google.api.http) = {put: "/api/v1/admin/user-groups/{group_id}/roles" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
   rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
     option (google.api.http) = {get: "/api/v1/admin/organization"};
     option (openapi.v3.operation) = {
@@ -732,6 +752,39 @@ message UpdatePositionRequest {
 message UpdatePositionResponse {
   Position position = 1;
 }
+
+message ListUserGroupsRequest {}
+message ListUserGroupsResponse {
+  repeated UserGroup user_groups = 1;
+}
+message CreateUserGroupRequest {
+  string group_key = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4;
+}
+message CreateUserGroupResponse {
+  UserGroup user_group = 1;
+}
+message UpdateUserGroupRequest {
+  string group_id = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4;
+}
+message UpdateUserGroupResponse {
+  UserGroup user_group = 1;
+}
+message UpdateUserGroupMembersRequest {
+  string group_id = 1;
+  repeated string user_ids = 2;
+}
+message UpdateUserGroupMembersResponse {}
+message UpdateUserGroupRolesRequest {
+  string group_id = 1;
+  repeated string roles = 2;
+}
+message UpdateUserGroupRolesResponse {}
 
 message GetOrganizationRequest {}
 message GetOrganizationResponse {

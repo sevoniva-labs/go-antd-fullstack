@@ -355,6 +355,126 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/user-groups:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListUserGroups
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListUserGroupsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreateUserGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateUserGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateUserGroupResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/user-groups/{groupId}:
+        patch:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdateUserGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdateUserGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdateUserGroupResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/user-groups/{groupId}/members:
+        put:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdateUserGroupMembers
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdateUserGroupMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdateUserGroupMembersResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/user-groups/{groupId}/roles:
+        put:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdateUserGroupRoles
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdateUserGroupRolesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdateUserGroupRolesResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/users:
         get:
             tags:
@@ -826,6 +946,22 @@ components:
             properties:
                 position:
                     $ref: '#/components/schemas/forge.v1.Position'
+        forge.v1.CreateUserGroupRequest:
+            type: object
+            properties:
+                groupKey:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+        forge.v1.CreateUserGroupResponse:
+            type: object
+            properties:
+                userGroup:
+                    $ref: '#/components/schemas/forge.v1.UserGroup'
         forge.v1.CreateUserRequest:
             type: object
             properties:
@@ -982,6 +1118,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.Session'
+        forge.v1.ListUserGroupsResponse:
+            type: object
+            properties:
+                userGroups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.UserGroup'
         forge.v1.ListUsersResponse:
             type: object
             properties:
@@ -1265,6 +1408,46 @@ components:
             properties:
                 policy:
                     $ref: '#/components/schemas/forge.v1.SecurityPolicy'
+        forge.v1.UpdateUserGroupMembersRequest:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                userIds:
+                    type: array
+                    items:
+                        type: string
+        forge.v1.UpdateUserGroupMembersResponse:
+            type: object
+            properties: {}
+        forge.v1.UpdateUserGroupRequest:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+        forge.v1.UpdateUserGroupResponse:
+            type: object
+            properties:
+                userGroup:
+                    $ref: '#/components/schemas/forge.v1.UserGroup'
+        forge.v1.UpdateUserGroupRolesRequest:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+        forge.v1.UpdateUserGroupRolesResponse:
+            type: object
+            properties: {}
         forge.v1.UpdateUserRolesRequest:
             type: object
             properties:
@@ -1323,6 +1506,37 @@ components:
                     type: array
                     items:
                         type: string
+        forge.v1.UserGroup:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                groupKey:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                roles:
+                    type: array
+                    items:
+                        type: string
+                memberIds:
+                    type: array
+                    items:
+                        type: string
+                memberCount:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
     securitySchemes:
         SessionCookie:
             type: apiKey

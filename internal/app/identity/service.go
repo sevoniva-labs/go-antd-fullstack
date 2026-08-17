@@ -31,6 +31,7 @@ var ErrPasswordStateChanged = repository.ErrPasswordStateChanged
 var ErrInteractiveSessionRequired = errors.New("interactive user session required")
 var ErrInvalidDepartment = errors.New("invalid department")
 var ErrInvalidPosition = errors.New("invalid position")
+var ErrInvalidUserGroup = errors.New("invalid user group")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -91,6 +92,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.organization.read", "查看组织信息"}, {"system.organization.manage", "管理组织信息"},
 	{"system.department.read", "查看部门"}, {"system.department.manage", "管理部门"},
 	{"system.position.read", "查看岗位"}, {"system.position.manage", "管理岗位"},
+	{"system.user_group.read", "查看用户组"}, {"system.user_group.manage", "管理用户组"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
 	{"system.audit.read", "查看审计日志"}, {"system.audit.export", "导出审计日志"},
 	{"system.config.read", "查看系统配置"}, {"system.security.manage", "管理安全配置"},
@@ -114,7 +116,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
@@ -942,6 +944,141 @@ func validatePositionDepartment(departments []domain.Department, position domain
 		return nil
 	}
 	return ErrInvalidPosition
+}
+
+func (s *Service) ListUserGroups(ctx context.Context, orgID string) ([]domain.UserGroup, error) {
+	return s.repo.ListUserGroups(ctx, orgID)
+}
+
+func (s *Service) CreateUserGroup(ctx context.Context, actor domain.Principal, orgID string, req domain.UserGroup) (domain.UserGroup, error) {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return domain.UserGroup{}, err
+	}
+	req.OrganizationID = orgID
+	clean, err := normalizeUserGroup(req, true)
+	if err != nil {
+		return domain.UserGroup{}, err
+	}
+	return s.repo.CreateUserGroup(ctx, clean)
+}
+
+func (s *Service) UpdateUserGroup(ctx context.Context, actor domain.Principal, orgID, groupID string, req domain.UserGroup) (domain.UserGroup, error) {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return domain.UserGroup{}, err
+	}
+	groupID = strings.TrimSpace(groupID)
+	if groupID == "" {
+		return domain.UserGroup{}, ErrInvalidUserGroup
+	}
+	current, err := s.repo.UserGroupByID(ctx, orgID, groupID)
+	if err != nil {
+		return domain.UserGroup{}, err
+	}
+	req.ID = current.ID
+	req.OrganizationID = orgID
+	req.Key = current.Key
+	req.CreatedAt = current.CreatedAt
+	clean, err := normalizeUserGroup(req, false)
+	if err != nil {
+		return domain.UserGroup{}, err
+	}
+	if current.Status != clean.Status {
+		if err := enforceRoleMutation(actor, current.Roles, nil); err != nil {
+			return domain.UserGroup{}, err
+		}
+	}
+	return s.repo.UpdateUserGroup(ctx, clean)
+}
+
+func (s *Service) UpdateUserGroupMembers(ctx context.Context, actor domain.Principal, orgID, groupID string, memberIDs []string) error {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return err
+	}
+	group, err := s.repo.UserGroupByID(ctx, orgID, strings.TrimSpace(groupID))
+	if err != nil {
+		return err
+	}
+	if err := enforceRoleMutation(actor, nil, group.Roles); err != nil {
+		return err
+	}
+	clean, err := normalizeIDs(memberIDs, 10_000)
+	if err != nil {
+		return ErrInvalidUserGroup
+	}
+	return s.repo.ReplaceUserGroupMembers(ctx, orgID, groupID, clean)
+}
+
+func (s *Service) UpdateUserGroupRoles(ctx context.Context, actor domain.Principal, orgID, groupID string, roleKeys []string) error {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return err
+	}
+	group, err := s.repo.UserGroupByID(ctx, orgID, strings.TrimSpace(groupID))
+	if err != nil {
+		return err
+	}
+	clean, err := normalizeIDs(roleKeys, 200)
+	if err != nil || contains(clean, "system_admin") {
+		return ErrInvalidRole
+	}
+	roles, err := s.repo.ListRoles(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	allowed := make(map[string]struct{}, len(roles))
+	for _, role := range roles {
+		allowed[role.Key] = struct{}{}
+	}
+	for _, role := range clean {
+		if _, ok := allowed[role]; !ok {
+			return ErrInvalidRole
+		}
+	}
+	if err := enforceRoleMutation(actor, group.Roles, clean); err != nil {
+		return err
+	}
+	return s.repo.ReplaceUserGroupRoles(ctx, orgID, groupID, clean)
+}
+
+func normalizeUserGroup(req domain.UserGroup, creating bool) (domain.UserGroup, error) {
+	req.ID = strings.TrimSpace(req.ID)
+	req.OrganizationID = strings.TrimSpace(req.OrganizationID)
+	req.Key = strings.TrimSpace(req.Key)
+	req.Name = strings.TrimSpace(req.Name)
+	req.Description = strings.TrimSpace(req.Description)
+	req.Status = strings.ToUpper(strings.TrimSpace(req.Status))
+	if creating && req.Status == "" {
+		req.Status = "ACTIVE"
+	}
+	if req.OrganizationID == "" || req.Name == "" || len(req.Name) > 200 || len(req.Description) > 500 {
+		return domain.UserGroup{}, ErrInvalidUserGroup
+	}
+	if req.Status != "ACTIVE" && req.Status != "DISABLED" {
+		return domain.UserGroup{}, ErrInvalidUserGroup
+	}
+	if creating && (req.Key == "" || len(req.Key) > 100 || !validDirectoryKey(req.Key)) {
+		return domain.UserGroup{}, ErrInvalidUserGroup
+	}
+	return req, nil
+}
+
+func normalizeIDs(values []string, maximum int) ([]string, error) {
+	if len(values) > maximum {
+		return nil, errors.New("too many values")
+	}
+	seen := make(map[string]struct{}, len(values))
+	clean := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || len(value) > 160 {
+			return nil, errors.New("invalid value")
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		clean = append(clean, value)
+	}
+	return clean, nil
 }
 
 func (s *Service) ListRoles(ctx context.Context, orgID string) ([]domain.Role, error) {

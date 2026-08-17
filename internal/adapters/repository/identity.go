@@ -197,7 +197,15 @@ func (r *IdentityRepo) GrantRole(ctx context.Context, userID, roleKey string) er
 	return err
 }
 func (r *IdentityRepo) RolesForUser(ctx context.Context, userID string) ([]string, error) {
-	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT r.role_key FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=? ORDER BY r.role_key`), userID)
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT role_key FROM (
+		SELECT r.role_key AS role_key FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=?
+		UNION
+		SELECT r.role_key AS role_key FROM roles r
+		JOIN user_group_roles ugr ON ugr.role_id=r.id
+		JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE'
+		JOIN user_group_members ugm ON ugm.group_id=ug.id
+		WHERE ugm.user_id=?
+	) effective_roles ORDER BY role_key`), userID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +221,17 @@ func (r *IdentityRepo) RolesForUser(ctx context.Context, userID string) ([]strin
 	return out, rows.Err()
 }
 func (r *IdentityRepo) PermissionsForUser(ctx context.Context, userID string) ([]string, error) {
-	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT DISTINCT p.permission_key FROM permissions p JOIN role_permissions rp ON rp.permission_id=p.id JOIN user_roles ur ON ur.role_id=rp.role_id WHERE ur.user_id=? ORDER BY p.permission_key`), userID)
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT DISTINCT p.permission_key FROM permissions p
+		JOIN role_permissions rp ON rp.permission_id=p.id
+		JOIN (
+			SELECT role_id FROM user_roles WHERE user_id=?
+			UNION
+			SELECT ugr.role_id FROM user_group_roles ugr
+			JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE'
+			JOIN user_group_members ugm ON ugm.group_id=ug.id
+			WHERE ugm.user_id=?
+		) effective_roles ON effective_roles.role_id=rp.role_id
+		ORDER BY p.permission_key`), userID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -589,6 +607,176 @@ func (r *IdentityRepo) CountActivePositions(ctx context.Context, orgID, departme
 	var count int
 	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM positions WHERE organization_id=? AND department_id=? AND status='ACTIVE'`), orgID, departmentID).Scan(&count)
 	return count, err
+}
+
+func (r *IdentityRepo) ListUserGroups(ctx context.Context, orgID string) ([]identity.UserGroup, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,group_key,name,description,status,created_at,updated_at FROM user_groups WHERE organization_id=? ORDER BY group_key`), orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]identity.UserGroup, 0)
+	for rows.Next() {
+		var item identity.UserGroup
+		if err := rows.Scan(&item.ID, &item.OrganizationID, &item.Key, &item.Name, &item.Description, &item.Status, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	for index := range out {
+		members, err := r.UserGroupMemberIDs(ctx, out[index].OrganizationID, out[index].ID)
+		if err != nil {
+			return nil, err
+		}
+		roles, err := r.UserGroupRoleKeys(ctx, out[index].OrganizationID, out[index].ID)
+		if err != nil {
+			return nil, err
+		}
+		out[index].MemberIDs = members
+		out[index].MemberCount = len(members)
+		out[index].Roles = roles
+	}
+	return out, nil
+}
+
+func (r *IdentityRepo) UserGroupByID(ctx context.Context, orgID, groupID string) (identity.UserGroup, error) {
+	var out identity.UserGroup
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,organization_id,group_key,name,description,status,created_at,updated_at FROM user_groups WHERE organization_id=? AND id=?`), orgID, groupID).
+		Scan(&out.ID, &out.OrganizationID, &out.Key, &out.Name, &out.Description, &out.Status, &out.CreatedAt, &out.UpdatedAt)
+	if err != nil {
+		return out, err
+	}
+	out.MemberIDs, err = r.UserGroupMemberIDs(ctx, orgID, groupID)
+	if err != nil {
+		return identity.UserGroup{}, err
+	}
+	out.MemberCount = len(out.MemberIDs)
+	out.Roles, err = r.UserGroupRoleKeys(ctx, orgID, groupID)
+	return out, err
+}
+
+func (r *IdentityRepo) CreateUserGroup(ctx context.Context, req identity.UserGroup) (identity.UserGroup, error) {
+	now := time.Now().UTC()
+	req.ID = uuid.NewString()
+	req.CreatedAt = now
+	req.UpdatedAt = now
+	req.Roles = []string{}
+	req.MemberIDs = []string{}
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO user_groups(id,organization_id,group_key,name,description,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)`),
+		req.ID, req.OrganizationID, req.Key, req.Name, req.Description, req.Status, now, now)
+	if err != nil {
+		return identity.UserGroup{}, err
+	}
+	return req, nil
+}
+
+func (r *IdentityRepo) UpdateUserGroup(ctx context.Context, req identity.UserGroup) (identity.UserGroup, error) {
+	result, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE user_groups SET name=?,description=?,status=?,updated_at=? WHERE organization_id=? AND id=?`),
+		req.Name, req.Description, req.Status, time.Now().UTC(), req.OrganizationID, req.ID)
+	if err != nil {
+		return identity.UserGroup{}, err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return identity.UserGroup{}, err
+	}
+	if count != 1 {
+		return identity.UserGroup{}, sql.ErrNoRows
+	}
+	return r.UserGroupByID(ctx, req.OrganizationID, req.ID)
+}
+
+func (r *IdentityRepo) UserGroupMemberIDs(ctx context.Context, orgID, groupID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT ugm.user_id FROM user_group_members ugm JOIN user_groups ug ON ug.id=ugm.group_id WHERE ug.organization_id=? AND ug.id=? ORDER BY ugm.user_id`), orgID, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]string, 0)
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) UserGroupRoleKeys(ctx context.Context, orgID, groupID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT r.role_key FROM user_group_roles ugr JOIN user_groups ug ON ug.id=ugr.group_id JOIN roles r ON r.id=ugr.role_id WHERE ug.organization_id=? AND ug.id=? ORDER BY r.role_key`), orgID, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]string, 0)
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, err
+		}
+		out = append(out, key)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) ReplaceUserGroupMembers(ctx context.Context, orgID, groupID string, memberIDs []string) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		var groupOrg string
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT organization_id FROM user_groups WHERE id=? FOR UPDATE`), groupID).Scan(&groupOrg); err != nil {
+			return err
+		}
+		if groupOrg != orgID {
+			return sql.ErrNoRows
+		}
+		if _, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM user_group_members WHERE group_id=?`), groupID); err != nil {
+			return err
+		}
+		for _, userID := range memberIDs {
+			var userOrg string
+			if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT organization_id FROM users WHERE id=?`), userID).Scan(&userOrg); err != nil {
+				return err
+			}
+			if userOrg != orgID {
+				return sql.ErrNoRows
+			}
+			if _, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO user_group_members(group_id,user_id,created_at) VALUES(?,?,?)`), groupID, userID, time.Now().UTC()); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (r *IdentityRepo) ReplaceUserGroupRoles(ctx context.Context, orgID, groupID string, roleKeys []string) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		var groupOrg string
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT organization_id FROM user_groups WHERE id=? FOR UPDATE`), groupID).Scan(&groupOrg); err != nil {
+			return err
+		}
+		if groupOrg != orgID {
+			return sql.ErrNoRows
+		}
+		if _, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM user_group_roles WHERE group_id=?`), groupID); err != nil {
+			return err
+		}
+		for _, roleKey := range roleKeys {
+			var roleID string
+			if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM roles WHERE organization_id=? AND role_key=?`), orgID, roleKey).Scan(&roleID); err != nil {
+				return err
+			}
+			if _, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO user_group_roles(group_id,role_id,created_at) VALUES(?,?,?)`), groupID, roleID, time.Now().UTC()); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *IdentityRepo) ListUserSessionIDs(ctx context.Context, userID string) ([]string, error) {

@@ -189,6 +189,91 @@ func (s *PlatformService) UpdatePosition(ctx context.Context, req *forgev1.Updat
 	return &forgev1.UpdatePositionResponse{Position: positionProto(updated)}, nil
 }
 
+func (s *PlatformService) ListUserGroups(ctx context.Context, _ *forgev1.ListUserGroupsRequest) (*forgev1.ListUserGroupsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := s.identity.ListUserGroups(ctx, principal.OrganizationID)
+	if err != nil {
+		return nil, internalError(err)
+	}
+	reply := &forgev1.ListUserGroupsResponse{UserGroups: make([]*forgev1.UserGroup, 0, len(items))}
+	for _, item := range items {
+		reply.UserGroups = append(reply.UserGroups, userGroupProto(item))
+	}
+	return reply, nil
+}
+
+func (s *PlatformService) CreateUserGroup(ctx context.Context, req *forgev1.CreateUserGroupRequest) (*forgev1.CreateUserGroupResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var created domain.UserGroup
+	event := newAuditEvent(ctx, principal, "user_group.create", "user_group", "", map[string]any{"group_key": req.GetGroupKey()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var createErr error
+		created, createErr = s.identity.CreateUserGroup(txCtx, principal, principal.OrganizationID, domain.UserGroup{Key: req.GetGroupKey(), Name: req.GetName(), Description: req.GetDescription(), Status: req.GetStatus()})
+		if createErr == nil {
+			event.ResourceID = created.ID
+		}
+		return createErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.CreateUserGroupResponse{UserGroup: userGroupProto(created)}, nil
+}
+
+func (s *PlatformService) UpdateUserGroup(ctx context.Context, req *forgev1.UpdateUserGroupRequest) (*forgev1.UpdateUserGroupResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var updated domain.UserGroup
+	event := newAuditEvent(ctx, principal, "user_group.update", "user_group", req.GetGroupId(), map[string]any{"status": req.GetStatus()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var updateErr error
+		updated, updateErr = s.identity.UpdateUserGroup(txCtx, principal, principal.OrganizationID, req.GetGroupId(), domain.UserGroup{Name: req.GetName(), Description: req.GetDescription(), Status: req.GetStatus()})
+		return updateErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateUserGroupResponse{UserGroup: userGroupProto(updated)}, nil
+}
+
+func (s *PlatformService) UpdateUserGroupMembers(ctx context.Context, req *forgev1.UpdateUserGroupMembersRequest) (*forgev1.UpdateUserGroupMembersResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "user_group.members.update", "user_group", req.GetGroupId(), map[string]any{"member_count": len(req.GetUserIds())})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.UpdateUserGroupMembers(txCtx, principal, principal.OrganizationID, req.GetGroupId(), req.GetUserIds())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateUserGroupMembersResponse{}, nil
+}
+
+func (s *PlatformService) UpdateUserGroupRoles(ctx context.Context, req *forgev1.UpdateUserGroupRolesRequest) (*forgev1.UpdateUserGroupRolesResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "user_group.roles.update", "user_group", req.GetGroupId(), map[string]any{"roles": req.GetRoles()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.UpdateUserGroupRoles(txCtx, principal, principal.OrganizationID, req.GetGroupId(), req.GetRoles())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateUserGroupRolesResponse{}, nil
+}
+
 func (s *PlatformService) UpdateOrganization(ctx context.Context, req *forgev1.UpdateOrganizationRequest) (*forgev1.UpdateOrganizationResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -520,7 +605,7 @@ func serviceError(err error) error {
 	case errors.Is(err, appidentity.ErrInvalidRole), errors.Is(err, appidentity.ErrInvalidLoginName),
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
 		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment),
-		errors.Is(err, appidentity.ErrInvalidPosition):
+		errors.Is(err, appidentity.ErrInvalidPosition), errors.Is(err, appidentity.ErrInvalidUserGroup):
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	default:
 		return internalError(err)
@@ -576,6 +661,14 @@ func positionProto(position domain.Position) *forgev1.Position {
 		Id: position.ID, OrganizationId: position.OrganizationID, DepartmentId: position.DepartmentID,
 		PositionKey: position.Key, Name: position.Name, Description: position.Description, Status: position.Status,
 		SortOrder: int64(position.SortOrder), CreatedAt: timestamp(position.CreatedAt), UpdatedAt: timestamp(position.UpdatedAt),
+	}
+}
+
+func userGroupProto(group domain.UserGroup) *forgev1.UserGroup {
+	return &forgev1.UserGroup{
+		Id: group.ID, OrganizationId: group.OrganizationID, GroupKey: group.Key, Name: group.Name,
+		Description: group.Description, Status: group.Status, Roles: group.Roles, MemberIds: group.MemberIDs,
+		MemberCount: int64(group.MemberCount), CreatedAt: timestamp(group.CreatedAt), UpdatedAt: timestamp(group.UpdatedAt),
 	}
 }
 

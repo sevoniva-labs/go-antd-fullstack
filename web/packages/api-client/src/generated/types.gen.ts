@@ -74,6 +74,17 @@ export type ForgeV1CreatePositionResponse = {
     position?: ForgeV1Position;
 };
 
+export type ForgeV1CreateUserGroupRequest = {
+    groupKey?: string;
+    name?: string;
+    description?: string;
+    status?: string;
+};
+
+export type ForgeV1CreateUserGroupResponse = {
+    userGroup?: ForgeV1UserGroup;
+};
+
 export type ForgeV1CreateUserRequest = {
     loginName?: string;
     displayName?: string;
@@ -171,6 +182,10 @@ export type ForgeV1ListRolesResponse = {
 
 export type ForgeV1ListSessionsResponse = {
     sessions?: Array<ForgeV1Session>;
+};
+
+export type ForgeV1ListUserGroupsResponse = {
+    userGroups?: Array<ForgeV1UserGroup>;
 };
 
 export type ForgeV1ListUsersResponse = {
@@ -356,6 +371,35 @@ export type ForgeV1UpdateSecurityPolicyResponse = {
     policy?: ForgeV1SecurityPolicy;
 };
 
+export type ForgeV1UpdateUserGroupMembersRequest = {
+    groupId?: string;
+    userIds?: Array<string>;
+};
+
+export type ForgeV1UpdateUserGroupMembersResponse = {
+    [key: string]: unknown;
+};
+
+export type ForgeV1UpdateUserGroupRequest = {
+    groupId?: string;
+    name?: string;
+    description?: string;
+    status?: string;
+};
+
+export type ForgeV1UpdateUserGroupResponse = {
+    userGroup?: ForgeV1UserGroup;
+};
+
+export type ForgeV1UpdateUserGroupRolesRequest = {
+    groupId?: string;
+    roles?: Array<string>;
+};
+
+export type ForgeV1UpdateUserGroupRolesResponse = {
+    [key: string]: unknown;
+};
+
 export type ForgeV1UpdateUserRolesRequest = {
     userId?: string;
     roles?: Array<string>;
@@ -386,6 +430,20 @@ export type ForgeV1User = {
     createdAt?: string;
     roles?: Array<string>;
     permissions?: Array<string>;
+};
+
+export type ForgeV1UserGroup = {
+    id?: string;
+    organizationId?: string;
+    groupKey?: string;
+    name?: string;
+    description?: string;
+    status?: string;
+    roles?: Array<string>;
+    memberIds?: Array<string>;
+    memberCount?: string;
+    createdAt?: string;
+    updatedAt?: string;
 };
 
 export type PlatformServiceListAuditLogsData = {
@@ -674,6 +732,92 @@ export type PlatformServiceRevokeSessionResponses = {
 };
 
 export type PlatformServiceRevokeSessionResponse = PlatformServiceRevokeSessionResponses[keyof PlatformServiceRevokeSessionResponses];
+
+export type PlatformServiceListUserGroupsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/user-groups';
+};
+
+export type PlatformServiceListUserGroupsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListUserGroupsResponse;
+};
+
+export type PlatformServiceListUserGroupsResponse = PlatformServiceListUserGroupsResponses[keyof PlatformServiceListUserGroupsResponses];
+
+export type PlatformServiceCreateUserGroupData = {
+    body: ForgeV1CreateUserGroupRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/user-groups';
+};
+
+export type PlatformServiceCreateUserGroupResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateUserGroupResponse;
+};
+
+export type PlatformServiceCreateUserGroupResponse = PlatformServiceCreateUserGroupResponses[keyof PlatformServiceCreateUserGroupResponses];
+
+export type PlatformServiceUpdateUserGroupData = {
+    body: ForgeV1UpdateUserGroupRequest;
+    path: {
+        groupId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/user-groups/{groupId}';
+};
+
+export type PlatformServiceUpdateUserGroupResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdateUserGroupResponse;
+};
+
+export type PlatformServiceUpdateUserGroupResponse = PlatformServiceUpdateUserGroupResponses[keyof PlatformServiceUpdateUserGroupResponses];
+
+export type PlatformServiceUpdateUserGroupMembersData = {
+    body: ForgeV1UpdateUserGroupMembersRequest;
+    path: {
+        groupId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/user-groups/{groupId}/members';
+};
+
+export type PlatformServiceUpdateUserGroupMembersResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdateUserGroupMembersResponse;
+};
+
+export type PlatformServiceUpdateUserGroupMembersResponse = PlatformServiceUpdateUserGroupMembersResponses[keyof PlatformServiceUpdateUserGroupMembersResponses];
+
+export type PlatformServiceUpdateUserGroupRolesData = {
+    body: ForgeV1UpdateUserGroupRolesRequest;
+    path: {
+        groupId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/user-groups/{groupId}/roles';
+};
+
+export type PlatformServiceUpdateUserGroupRolesResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdateUserGroupRolesResponse;
+};
+
+export type PlatformServiceUpdateUserGroupRolesResponse = PlatformServiceUpdateUserGroupRolesResponses[keyof PlatformServiceUpdateUserGroupRolesResponses];
 
 export type PlatformServiceListUsersData = {
     body?: never;

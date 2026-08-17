@@ -39,6 +39,20 @@ type Position struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+type UserGroup struct {
+	ID             string    `json:"id"`
+	OrganizationID string    `json:"organization_id"`
+	Key            string    `json:"group_key"`
+	Name           string    `json:"name"`
+	Description    string    `json:"description"`
+	Status         string    `json:"status"`
+	Roles          []string  `json:"roles"`
+	MemberIDs      []string  `json:"member_ids"`
+	MemberCount    int       `json:"member_count"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type SecurityPolicy struct {
 	PasswordMinLength        int   `json:"password_min_length"`
 	PasswordRequireUpper     bool  `json:"password_require_upper"`

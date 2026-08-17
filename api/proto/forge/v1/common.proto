@@ -57,6 +57,20 @@ message Position {
   google.protobuf.Timestamp updated_at = 10;
 }
 
+message UserGroup {
+  string id = 1;
+  string organization_id = 2;
+  string group_key = 3;
+  string name = 4;
+  string description = 5;
+  string status = 6;
+  repeated string roles = 7;
+  repeated string member_ids = 8;
+  int64 member_count = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
 message SecurityPolicy {
   int64 password_min_length = 1;
   bool password_require_upper = 2;

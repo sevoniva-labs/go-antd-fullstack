@@ -19,29 +19,34 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PlatformService_ListUsers_FullMethodName             = "/forge.v1.PlatformService/ListUsers"
-	PlatformService_CreateUser_FullMethodName            = "/forge.v1.PlatformService/CreateUser"
-	PlatformService_ListDepartments_FullMethodName       = "/forge.v1.PlatformService/ListDepartments"
-	PlatformService_CreateDepartment_FullMethodName      = "/forge.v1.PlatformService/CreateDepartment"
-	PlatformService_UpdateDepartment_FullMethodName      = "/forge.v1.PlatformService/UpdateDepartment"
-	PlatformService_ListPositions_FullMethodName         = "/forge.v1.PlatformService/ListPositions"
-	PlatformService_CreatePosition_FullMethodName        = "/forge.v1.PlatformService/CreatePosition"
-	PlatformService_UpdatePosition_FullMethodName        = "/forge.v1.PlatformService/UpdatePosition"
-	PlatformService_GetOrganization_FullMethodName       = "/forge.v1.PlatformService/GetOrganization"
-	PlatformService_UpdateOrganization_FullMethodName    = "/forge.v1.PlatformService/UpdateOrganization"
-	PlatformService_GetSecurityPolicy_FullMethodName     = "/forge.v1.PlatformService/GetSecurityPolicy"
-	PlatformService_UpdateSecurityPolicy_FullMethodName  = "/forge.v1.PlatformService/UpdateSecurityPolicy"
-	PlatformService_ListRoles_FullMethodName             = "/forge.v1.PlatformService/ListRoles"
-	PlatformService_ListPermissions_FullMethodName       = "/forge.v1.PlatformService/ListPermissions"
-	PlatformService_UpdateRolePermissions_FullMethodName = "/forge.v1.PlatformService/UpdateRolePermissions"
-	PlatformService_UpdateUserRoles_FullMethodName       = "/forge.v1.PlatformService/UpdateUserRoles"
-	PlatformService_UpdateUserStatus_FullMethodName      = "/forge.v1.PlatformService/UpdateUserStatus"
-	PlatformService_UnlockUser_FullMethodName            = "/forge.v1.PlatformService/UnlockUser"
-	PlatformService_ResetUserPassword_FullMethodName     = "/forge.v1.PlatformService/ResetUserPassword"
-	PlatformService_ListSessions_FullMethodName          = "/forge.v1.PlatformService/ListSessions"
-	PlatformService_RevokeSession_FullMethodName         = "/forge.v1.PlatformService/RevokeSession"
-	PlatformService_ListAuditLogs_FullMethodName         = "/forge.v1.PlatformService/ListAuditLogs"
-	PlatformService_ExportAuditLogs_FullMethodName       = "/forge.v1.PlatformService/ExportAuditLogs"
+	PlatformService_ListUsers_FullMethodName              = "/forge.v1.PlatformService/ListUsers"
+	PlatformService_CreateUser_FullMethodName             = "/forge.v1.PlatformService/CreateUser"
+	PlatformService_ListDepartments_FullMethodName        = "/forge.v1.PlatformService/ListDepartments"
+	PlatformService_CreateDepartment_FullMethodName       = "/forge.v1.PlatformService/CreateDepartment"
+	PlatformService_UpdateDepartment_FullMethodName       = "/forge.v1.PlatformService/UpdateDepartment"
+	PlatformService_ListPositions_FullMethodName          = "/forge.v1.PlatformService/ListPositions"
+	PlatformService_CreatePosition_FullMethodName         = "/forge.v1.PlatformService/CreatePosition"
+	PlatformService_UpdatePosition_FullMethodName         = "/forge.v1.PlatformService/UpdatePosition"
+	PlatformService_ListUserGroups_FullMethodName         = "/forge.v1.PlatformService/ListUserGroups"
+	PlatformService_CreateUserGroup_FullMethodName        = "/forge.v1.PlatformService/CreateUserGroup"
+	PlatformService_UpdateUserGroup_FullMethodName        = "/forge.v1.PlatformService/UpdateUserGroup"
+	PlatformService_UpdateUserGroupMembers_FullMethodName = "/forge.v1.PlatformService/UpdateUserGroupMembers"
+	PlatformService_UpdateUserGroupRoles_FullMethodName   = "/forge.v1.PlatformService/UpdateUserGroupRoles"
+	PlatformService_GetOrganization_FullMethodName        = "/forge.v1.PlatformService/GetOrganization"
+	PlatformService_UpdateOrganization_FullMethodName     = "/forge.v1.PlatformService/UpdateOrganization"
+	PlatformService_GetSecurityPolicy_FullMethodName      = "/forge.v1.PlatformService/GetSecurityPolicy"
+	PlatformService_UpdateSecurityPolicy_FullMethodName   = "/forge.v1.PlatformService/UpdateSecurityPolicy"
+	PlatformService_ListRoles_FullMethodName              = "/forge.v1.PlatformService/ListRoles"
+	PlatformService_ListPermissions_FullMethodName        = "/forge.v1.PlatformService/ListPermissions"
+	PlatformService_UpdateRolePermissions_FullMethodName  = "/forge.v1.PlatformService/UpdateRolePermissions"
+	PlatformService_UpdateUserRoles_FullMethodName        = "/forge.v1.PlatformService/UpdateUserRoles"
+	PlatformService_UpdateUserStatus_FullMethodName       = "/forge.v1.PlatformService/UpdateUserStatus"
+	PlatformService_UnlockUser_FullMethodName             = "/forge.v1.PlatformService/UnlockUser"
+	PlatformService_ResetUserPassword_FullMethodName      = "/forge.v1.PlatformService/ResetUserPassword"
+	PlatformService_ListSessions_FullMethodName           = "/forge.v1.PlatformService/ListSessions"
+	PlatformService_RevokeSession_FullMethodName          = "/forge.v1.PlatformService/RevokeSession"
+	PlatformService_ListAuditLogs_FullMethodName          = "/forge.v1.PlatformService/ListAuditLogs"
+	PlatformService_ExportAuditLogs_FullMethodName        = "/forge.v1.PlatformService/ExportAuditLogs"
 )
 
 // PlatformServiceClient is the client API for PlatformService service.
@@ -56,6 +61,11 @@ type PlatformServiceClient interface {
 	ListPositions(ctx context.Context, in *ListPositionsRequest, opts ...grpc.CallOption) (*ListPositionsResponse, error)
 	CreatePosition(ctx context.Context, in *CreatePositionRequest, opts ...grpc.CallOption) (*CreatePositionResponse, error)
 	UpdatePosition(ctx context.Context, in *UpdatePositionRequest, opts ...grpc.CallOption) (*UpdatePositionResponse, error)
+	ListUserGroups(ctx context.Context, in *ListUserGroupsRequest, opts ...grpc.CallOption) (*ListUserGroupsResponse, error)
+	CreateUserGroup(ctx context.Context, in *CreateUserGroupRequest, opts ...grpc.CallOption) (*CreateUserGroupResponse, error)
+	UpdateUserGroup(ctx context.Context, in *UpdateUserGroupRequest, opts ...grpc.CallOption) (*UpdateUserGroupResponse, error)
+	UpdateUserGroupMembers(ctx context.Context, in *UpdateUserGroupMembersRequest, opts ...grpc.CallOption) (*UpdateUserGroupMembersResponse, error)
+	UpdateUserGroupRoles(ctx context.Context, in *UpdateUserGroupRolesRequest, opts ...grpc.CallOption) (*UpdateUserGroupRolesResponse, error)
 	GetOrganization(ctx context.Context, in *GetOrganizationRequest, opts ...grpc.CallOption) (*GetOrganizationResponse, error)
 	UpdateOrganization(ctx context.Context, in *UpdateOrganizationRequest, opts ...grpc.CallOption) (*UpdateOrganizationResponse, error)
 	GetSecurityPolicy(ctx context.Context, in *GetSecurityPolicyRequest, opts ...grpc.CallOption) (*GetSecurityPolicyResponse, error)
@@ -155,6 +165,56 @@ func (c *platformServiceClient) UpdatePosition(ctx context.Context, in *UpdatePo
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdatePositionResponse)
 	err := c.cc.Invoke(ctx, PlatformService_UpdatePosition_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) ListUserGroups(ctx context.Context, in *ListUserGroupsRequest, opts ...grpc.CallOption) (*ListUserGroupsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserGroupsResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListUserGroups_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) CreateUserGroup(ctx context.Context, in *CreateUserGroupRequest, opts ...grpc.CallOption) (*CreateUserGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateUserGroupResponse)
+	err := c.cc.Invoke(ctx, PlatformService_CreateUserGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) UpdateUserGroup(ctx context.Context, in *UpdateUserGroupRequest, opts ...grpc.CallOption) (*UpdateUserGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserGroupResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UpdateUserGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) UpdateUserGroupMembers(ctx context.Context, in *UpdateUserGroupMembersRequest, opts ...grpc.CallOption) (*UpdateUserGroupMembersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserGroupMembersResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UpdateUserGroupMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) UpdateUserGroupRoles(ctx context.Context, in *UpdateUserGroupRolesRequest, opts ...grpc.CallOption) (*UpdateUserGroupRolesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserGroupRolesResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UpdateUserGroupRoles_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -323,6 +383,11 @@ type PlatformServiceServer interface {
 	ListPositions(context.Context, *ListPositionsRequest) (*ListPositionsResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
 	UpdatePosition(context.Context, *UpdatePositionRequest) (*UpdatePositionResponse, error)
+	ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error)
+	CreateUserGroup(context.Context, *CreateUserGroupRequest) (*CreateUserGroupResponse, error)
+	UpdateUserGroup(context.Context, *UpdateUserGroupRequest) (*UpdateUserGroupResponse, error)
+	UpdateUserGroupMembers(context.Context, *UpdateUserGroupMembersRequest) (*UpdateUserGroupMembersResponse, error)
+	UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*UpdateOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
@@ -371,6 +436,21 @@ func (UnimplementedPlatformServiceServer) CreatePosition(context.Context, *Creat
 }
 func (UnimplementedPlatformServiceServer) UpdatePosition(context.Context, *UpdatePositionRequest) (*UpdatePositionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdatePosition not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListUserGroups not implemented")
+}
+func (UnimplementedPlatformServiceServer) CreateUserGroup(context.Context, *CreateUserGroupRequest) (*CreateUserGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateUserGroup not implemented")
+}
+func (UnimplementedPlatformServiceServer) UpdateUserGroup(context.Context, *UpdateUserGroupRequest) (*UpdateUserGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUserGroup not implemented")
+}
+func (UnimplementedPlatformServiceServer) UpdateUserGroupMembers(context.Context, *UpdateUserGroupMembersRequest) (*UpdateUserGroupMembersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUserGroupMembers not implemented")
+}
+func (UnimplementedPlatformServiceServer) UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUserGroupRoles not implemented")
 }
 func (UnimplementedPlatformServiceServer) GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrganization not implemented")
@@ -578,6 +658,96 @@ func _PlatformService_UpdatePosition_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlatformServiceServer).UpdatePosition(ctx, req.(*UpdatePositionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_ListUserGroups_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserGroupsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListUserGroups(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListUserGroups_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListUserGroups(ctx, req.(*ListUserGroupsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_CreateUserGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).CreateUserGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_CreateUserGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).CreateUserGroup(ctx, req.(*CreateUserGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_UpdateUserGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UpdateUserGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UpdateUserGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UpdateUserGroup(ctx, req.(*UpdateUserGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_UpdateUserGroupMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserGroupMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UpdateUserGroupMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UpdateUserGroupMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UpdateUserGroupMembers(ctx, req.(*UpdateUserGroupMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_UpdateUserGroupRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserGroupRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UpdateUserGroupRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UpdateUserGroupRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UpdateUserGroupRoles(ctx, req.(*UpdateUserGroupRolesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -890,6 +1060,26 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdatePosition",
 			Handler:    _PlatformService_UpdatePosition_Handler,
+		},
+		{
+			MethodName: "ListUserGroups",
+			Handler:    _PlatformService_ListUserGroups_Handler,
+		},
+		{
+			MethodName: "CreateUserGroup",
+			Handler:    _PlatformService_CreateUserGroup_Handler,
+		},
+		{
+			MethodName: "UpdateUserGroup",
+			Handler:    _PlatformService_UpdateUserGroup_Handler,
+		},
+		{
+			MethodName: "UpdateUserGroupMembers",
+			Handler:    _PlatformService_UpdateUserGroupMembers_Handler,
+		},
+		{
+			MethodName: "UpdateUserGroupRoles",
+			Handler:    _PlatformService_UpdateUserGroupRoles_Handler,
 		},
 		{
 			MethodName: "GetOrganization",

@@ -22,6 +22,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
 const OperationPlatformServiceCreatePosition = "/forge.v1.PlatformService/CreatePosition"
 const OperationPlatformServiceCreateUser = "/forge.v1.PlatformService/CreateUser"
+const OperationPlatformServiceCreateUserGroup = "/forge.v1.PlatformService/CreateUserGroup"
 const OperationPlatformServiceExportAuditLogs = "/forge.v1.PlatformService/ExportAuditLogs"
 const OperationPlatformServiceGetOrganization = "/forge.v1.PlatformService/GetOrganization"
 const OperationPlatformServiceGetSecurityPolicy = "/forge.v1.PlatformService/GetSecurityPolicy"
@@ -31,6 +32,7 @@ const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListP
 const OperationPlatformServiceListPositions = "/forge.v1.PlatformService/ListPositions"
 const OperationPlatformServiceListRoles = "/forge.v1.PlatformService/ListRoles"
 const OperationPlatformServiceListSessions = "/forge.v1.PlatformService/ListSessions"
+const OperationPlatformServiceListUserGroups = "/forge.v1.PlatformService/ListUserGroups"
 const OperationPlatformServiceListUsers = "/forge.v1.PlatformService/ListUsers"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
@@ -40,6 +42,9 @@ const OperationPlatformServiceUpdateOrganization = "/forge.v1.PlatformService/Up
 const OperationPlatformServiceUpdatePosition = "/forge.v1.PlatformService/UpdatePosition"
 const OperationPlatformServiceUpdateRolePermissions = "/forge.v1.PlatformService/UpdateRolePermissions"
 const OperationPlatformServiceUpdateSecurityPolicy = "/forge.v1.PlatformService/UpdateSecurityPolicy"
+const OperationPlatformServiceUpdateUserGroup = "/forge.v1.PlatformService/UpdateUserGroup"
+const OperationPlatformServiceUpdateUserGroupMembers = "/forge.v1.PlatformService/UpdateUserGroupMembers"
+const OperationPlatformServiceUpdateUserGroupRoles = "/forge.v1.PlatformService/UpdateUserGroupRoles"
 const OperationPlatformServiceUpdateUserRoles = "/forge.v1.PlatformService/UpdateUserRoles"
 const OperationPlatformServiceUpdateUserStatus = "/forge.v1.PlatformService/UpdateUserStatus"
 
@@ -47,6 +52,7 @@ type PlatformServiceHTTPServer interface {
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	CreateUserGroup(context.Context, *CreateUserGroupRequest) (*CreateUserGroupResponse, error)
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
@@ -56,6 +62,7 @@ type PlatformServiceHTTPServer interface {
 	ListPositions(context.Context, *ListPositionsRequest) (*ListPositionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
@@ -65,6 +72,9 @@ type PlatformServiceHTTPServer interface {
 	UpdatePosition(context.Context, *UpdatePositionRequest) (*UpdatePositionResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateSecurityPolicy(context.Context, *UpdateSecurityPolicyRequest) (*UpdateSecurityPolicyResponse, error)
+	UpdateUserGroup(context.Context, *UpdateUserGroupRequest) (*UpdateUserGroupResponse, error)
+	UpdateUserGroupMembers(context.Context, *UpdateUserGroupMembersRequest) (*UpdateUserGroupMembersResponse, error)
+	UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
 	UpdateUserStatus(context.Context, *UpdateUserStatusRequest) (*UpdateUserStatusResponse, error)
 }
@@ -79,6 +89,11 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/positions", _PlatformService_ListPositions0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/positions", _PlatformService_CreatePosition0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/positions/{position_id}", _PlatformService_UpdatePosition0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/user-groups", _PlatformService_ListUserGroups0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/user-groups", _PlatformService_CreateUserGroup0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/admin/user-groups/{group_id}", _PlatformService_UpdateUserGroup0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/user-groups/{group_id}/members", _PlatformService_UpdateUserGroupMembers0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/user-groups/{group_id}/roles", _PlatformService_UpdateUserGroupRoles0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/organization", _PlatformService_GetOrganization0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/organization", _PlatformService_UpdateOrganization0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/security-config", _PlatformService_GetSecurityPolicy0_HTTP_Handler(srv))
@@ -265,6 +280,122 @@ func _PlatformService_UpdatePosition0_HTTP_Handler(srv PlatformServiceHTTPServer
 			return err
 		}
 		reply := out.(*UpdatePositionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ListUserGroups0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListUserGroupsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListUserGroups)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListUserGroups(ctx, req.(*ListUserGroupsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListUserGroupsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_CreateUserGroup0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateUserGroupRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceCreateUserGroup)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateUserGroup(ctx, req.(*CreateUserGroupRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateUserGroupResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UpdateUserGroup0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateUserGroupRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUpdateUserGroup)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateUserGroup(ctx, req.(*UpdateUserGroupRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateUserGroupResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UpdateUserGroupMembers0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateUserGroupMembersRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUpdateUserGroupMembers)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateUserGroupMembers(ctx, req.(*UpdateUserGroupMembersRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateUserGroupMembersResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UpdateUserGroupRoles0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateUserGroupRolesRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUpdateUserGroupRoles)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateUserGroupRoles(ctx, req.(*UpdateUserGroupRolesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateUserGroupRolesResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -597,6 +728,7 @@ type PlatformServiceHTTPClient interface {
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
+	CreateUserGroup(ctx context.Context, req *CreateUserGroupRequest, opts ...http.CallOption) (rsp *CreateUserGroupResponse, err error)
 	ExportAuditLogs(ctx context.Context, req *ExportAuditLogsRequest, opts ...http.CallOption) (rsp *ExportAuditLogsResponse, err error)
 	GetOrganization(ctx context.Context, req *GetOrganizationRequest, opts ...http.CallOption) (rsp *GetOrganizationResponse, err error)
 	GetSecurityPolicy(ctx context.Context, req *GetSecurityPolicyRequest, opts ...http.CallOption) (rsp *GetSecurityPolicyResponse, err error)
@@ -606,6 +738,7 @@ type PlatformServiceHTTPClient interface {
 	ListPositions(ctx context.Context, req *ListPositionsRequest, opts ...http.CallOption) (rsp *ListPositionsResponse, err error)
 	ListRoles(ctx context.Context, req *ListRolesRequest, opts ...http.CallOption) (rsp *ListRolesResponse, err error)
 	ListSessions(ctx context.Context, req *ListSessionsRequest, opts ...http.CallOption) (rsp *ListSessionsResponse, err error)
+	ListUserGroups(ctx context.Context, req *ListUserGroupsRequest, opts ...http.CallOption) (rsp *ListUserGroupsResponse, err error)
 	ListUsers(ctx context.Context, req *ListUsersRequest, opts ...http.CallOption) (rsp *ListUsersResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
@@ -615,6 +748,9 @@ type PlatformServiceHTTPClient interface {
 	UpdatePosition(ctx context.Context, req *UpdatePositionRequest, opts ...http.CallOption) (rsp *UpdatePositionResponse, err error)
 	UpdateRolePermissions(ctx context.Context, req *UpdateRolePermissionsRequest, opts ...http.CallOption) (rsp *UpdateRolePermissionsResponse, err error)
 	UpdateSecurityPolicy(ctx context.Context, req *UpdateSecurityPolicyRequest, opts ...http.CallOption) (rsp *UpdateSecurityPolicyResponse, err error)
+	UpdateUserGroup(ctx context.Context, req *UpdateUserGroupRequest, opts ...http.CallOption) (rsp *UpdateUserGroupResponse, err error)
+	UpdateUserGroupMembers(ctx context.Context, req *UpdateUserGroupMembersRequest, opts ...http.CallOption) (rsp *UpdateUserGroupMembersResponse, err error)
+	UpdateUserGroupRoles(ctx context.Context, req *UpdateUserGroupRolesRequest, opts ...http.CallOption) (rsp *UpdateUserGroupRolesResponse, err error)
 	UpdateUserRoles(ctx context.Context, req *UpdateUserRolesRequest, opts ...http.CallOption) (rsp *UpdateUserRolesResponse, err error)
 	UpdateUserStatus(ctx context.Context, req *UpdateUserStatusRequest, opts ...http.CallOption) (rsp *UpdateUserStatusResponse, err error)
 }
@@ -658,6 +794,19 @@ func (c *PlatformServiceHTTPClientImpl) CreateUser(ctx context.Context, in *Crea
 	pattern := "/api/v1/admin/users"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceCreateUser))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) CreateUserGroup(ctx context.Context, in *CreateUserGroupRequest, opts ...http.CallOption) (*CreateUserGroupResponse, error) {
+	var out CreateUserGroupResponse
+	pattern := "/api/v1/admin/user-groups"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceCreateUserGroup))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -783,6 +932,19 @@ func (c *PlatformServiceHTTPClientImpl) ListSessions(ctx context.Context, in *Li
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) ListUserGroups(ctx context.Context, in *ListUserGroupsRequest, opts ...http.CallOption) (*ListUserGroupsResponse, error) {
+	var out ListUserGroupsResponse
+	pattern := "/api/v1/admin/user-groups"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListUserGroups))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListUsers(ctx context.Context, in *ListUsersRequest, opts ...http.CallOption) (*ListUsersResponse, error) {
 	var out ListUsersResponse
 	pattern := "/api/v1/admin/users"
@@ -894,6 +1056,45 @@ func (c *PlatformServiceHTTPClientImpl) UpdateSecurityPolicy(ctx context.Context
 	opts = append(opts, http.Operation(OperationPlatformServiceUpdateSecurityPolicy))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in.Policy, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UpdateUserGroup(ctx context.Context, in *UpdateUserGroupRequest, opts ...http.CallOption) (*UpdateUserGroupResponse, error) {
+	var out UpdateUserGroupResponse
+	pattern := "/api/v1/admin/user-groups/{group_id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUpdateUserGroup))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UpdateUserGroupMembers(ctx context.Context, in *UpdateUserGroupMembersRequest, opts ...http.CallOption) (*UpdateUserGroupMembersResponse, error) {
+	var out UpdateUserGroupMembersResponse
+	pattern := "/api/v1/admin/user-groups/{group_id}/members"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUpdateUserGroupMembers))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UpdateUserGroupRoles(ctx context.Context, in *UpdateUserGroupRolesRequest, opts ...http.CallOption) (*UpdateUserGroupRolesResponse, error) {
+	var out UpdateUserGroupRolesResponse
+	pattern := "/api/v1/admin/user-groups/{group_id}/roles"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUpdateUserGroupRoles))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

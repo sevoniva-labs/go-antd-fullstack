@@ -28,6 +28,10 @@ func TestPlatformProtoMappings(t *testing.T) {
 	if position.Id != "position-1" || position.DepartmentId != "dept-1" || position.PositionKey != "reviewer" || position.SortOrder != 20 {
 		t.Fatalf("unexpected position mapping: %+v", position)
 	}
+	group := userGroupProto(domain.UserGroup{ID: "group-1", OrganizationID: "org-1", Key: "reviewers", Name: "Reviewers", Status: "ACTIVE", Roles: []string{"auditor"}, MemberIDs: []string{"user-1"}, MemberCount: 1, CreatedAt: now})
+	if group.Id != "group-1" || group.GroupKey != "reviewers" || group.MemberCount != 1 || len(group.Roles) != 1 {
+		t.Fatalf("unexpected user group mapping: %+v", group)
+	}
 	policy := securityPolicyProto(domain.SecurityPolicy{PasswordMinLength: 14, SessionTTLSeconds: 3600, MaxConcurrentSessions: 2})
 	if policy.PasswordMinLength != 14 || policy.SessionTtlSeconds != 3600 || policy.MaxActiveSessions != 2 {
 		t.Fatalf("unexpected policy mapping: %+v", policy)

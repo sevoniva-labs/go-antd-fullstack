@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
+import type { IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -250,6 +250,88 @@ export const platformServiceRevokeSession = <ThrowOnError extends boolean = fals
     ],
     url: '/api/v1/admin/sessions/{sessionId}',
     ...options
+});
+
+export const platformServiceListUserGroups = <ThrowOnError extends boolean = false>(options?: Options<PlatformServiceListUserGroupsData, ThrowOnError>): RequestResult<PlatformServiceListUserGroupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PlatformServiceListUserGroupsResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/admin/user-groups',
+    ...options
+});
+
+export const platformServiceCreateUserGroup = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceCreateUserGroupData, ThrowOnError>): RequestResult<PlatformServiceCreateUserGroupResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServiceCreateUserGroupResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/user-groups',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceUpdateUserGroup = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceUpdateUserGroupData, ThrowOnError>): RequestResult<PlatformServiceUpdateUserGroupResponses, unknown, ThrowOnError> => (options.client ?? client).patch<PlatformServiceUpdateUserGroupResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/user-groups/{groupId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceUpdateUserGroupMembers = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceUpdateUserGroupMembersData, ThrowOnError>): RequestResult<PlatformServiceUpdateUserGroupMembersResponses, unknown, ThrowOnError> => (options.client ?? client).put<PlatformServiceUpdateUserGroupMembersResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/user-groups/{groupId}/members',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceUpdateUserGroupRoles = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceUpdateUserGroupRolesData, ThrowOnError>): RequestResult<PlatformServiceUpdateUserGroupRolesResponses, unknown, ThrowOnError> => (options.client ?? client).put<PlatformServiceUpdateUserGroupRolesResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/user-groups/{groupId}/roles',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 export const platformServiceListUsers = <ThrowOnError extends boolean = false>(options?: Options<PlatformServiceListUsersData, ThrowOnError>): RequestResult<PlatformServiceListUsersResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PlatformServiceListUsersResponses, unknown, ThrowOnError>({
