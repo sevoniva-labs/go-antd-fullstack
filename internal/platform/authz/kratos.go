@@ -1,0 +1,59 @@
+package authz
+
+import (
+	"context"
+	"strings"
+
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
+	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
+	"github.com/sevoniva-labs/forge/internal/platform/authn"
+)
+
+const platformOperationPrefix = "/forge.v1.PlatformService/"
+
+func Server(rules map[string][]string) middleware.Middleware {
+	return func(next middleware.Handler) middleware.Handler {
+		return func(ctx context.Context, req any) (any, error) {
+			tr, ok := transport.FromServerContext(ctx)
+			if !ok {
+				return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "transport context is required")
+			}
+			required, registered := rules[tr.Operation()]
+			if !registered {
+				if strings.HasPrefix(tr.Operation(), platformOperationPrefix) {
+					return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "operation has no authorization policy")
+				}
+				return next(ctx, req)
+			}
+			principal, authenticated := authn.Principal(ctx)
+			if !authenticated || !principal.HasPermission(required...) {
+				return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "permission denied")
+			}
+			return next(ctx, req)
+		}
+	}
+}
+
+func PlatformRules() map[string][]string {
+	return map[string][]string{
+		forgev1.OperationPlatformServiceListUsers:             {"system.user.read"},
+		forgev1.OperationPlatformServiceCreateUser:            {"system.user.create"},
+		forgev1.OperationPlatformServiceGetOrganization:       {"system.organization.read"},
+		forgev1.OperationPlatformServiceUpdateOrganization:    {"system.organization.manage"},
+		forgev1.OperationPlatformServiceGetSecurityPolicy:     {"system.config.read"},
+		forgev1.OperationPlatformServiceUpdateSecurityPolicy:  {"system.security.manage"},
+		forgev1.OperationPlatformServiceListRoles:             {"system.role.read"},
+		forgev1.OperationPlatformServiceListPermissions:       {"system.role.read"},
+		forgev1.OperationPlatformServiceUpdateRolePermissions: {"system.role.manage"},
+		forgev1.OperationPlatformServiceUpdateUserRoles:       {"system.user.role.manage"},
+		forgev1.OperationPlatformServiceUpdateUserStatus:      {"system.user.update"},
+		forgev1.OperationPlatformServiceUnlockUser:            {"system.user.update"},
+		forgev1.OperationPlatformServiceResetUserPassword:     {"system.user.update"},
+		forgev1.OperationPlatformServiceListSessions:          {"system.session.read"},
+		forgev1.OperationPlatformServiceRevokeSession:         {"system.session.revoke"},
+		forgev1.OperationPlatformServiceListAuditLogs:         {"system.audit.read"},
+		forgev1.OperationPlatformServiceExportAuditLogs:       {"system.audit.export"},
+	}
+}

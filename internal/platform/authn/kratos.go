@@ -31,9 +31,13 @@ func Server(authenticator Authenticator) middleware.Middleware {
 			if err != nil {
 				return nil, kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 			}
-			return next(context.WithValue(ctx, principalContextKey{}, principal), req)
+			return next(WithPrincipal(ctx, principal), req)
 		}
 	}
+}
+
+func WithPrincipal(ctx context.Context, principal domain.Principal) context.Context {
+	return context.WithValue(ctx, principalContextKey{}, principal)
 }
 
 func Principal(ctx context.Context) (domain.Principal, bool) {

@@ -21,6 +21,7 @@ import (
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/authn"
+	"github.com/sevoniva-labs/forge/internal/platform/authz"
 	"github.com/sevoniva-labs/forge/internal/platform/cache"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
@@ -206,7 +207,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		"search": se.Provider(), "storage": st.Provider(), "discovery": reg.Provider(),
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
-	authMiddleware := selector.Server(authn.Server(identitySvc)).Match(func(_ context.Context, operation string) bool {
+	securityMiddleware := selector.Server(authn.Server(identitySvc), authz.Server(authz.PlatformRules())).Match(func(_ context.Context, operation string) bool {
 		switch operation {
 		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
 			return false
@@ -214,7 +215,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 			return true
 		}
 	}).Build()
-	grpcOpts = append(grpcOpts, kgrpc.Middleware(authMiddleware))
+	grpcOpts = append(grpcOpts, kgrpc.Middleware(securityMiddleware))
 	grpcServer := kgrpc.NewServer(grpcOpts...)
 	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
 	runtime := kratos.New(
