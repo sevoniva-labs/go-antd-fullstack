@@ -42,3 +42,9 @@ security:
   stage: security
   script:
     - make security-tools
+    - make supply-chain-evidence
+  artifacts:
+    when: always
+    expire_in: 90 days
+    paths:
+      - .evidence/

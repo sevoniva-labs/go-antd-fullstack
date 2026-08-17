@@ -26,7 +26,9 @@ for pattern in "${patterns[@]}"; do
 done
 
 required_versions=(
-  'github.com/golangci/golangci-lint/v2 v2.12.2'
+	'github.com/anchore/syft v1.50.0'
+	'github.com/golangci/golangci-lint/v2 v2.12.2'
+	'github.com/zricethezav/gitleaks/v8 v8.30.1'
   'github.com/securego/gosec/v2 v2.28.0'
   'golang.org/x/vuln v1.7.0'
   'honnef.co/go/tools v0.7.0'
@@ -34,6 +36,13 @@ required_versions=(
 for version in "${required_versions[@]}"; do
   rg -Fq "$version" tools/go.mod || {
     echo "missing pinned tool version: $version" >&2
+    exit 1
+  }
+done
+
+for version in 'TRIVY_VERSION:-0.74.0' 'COSIGN_VERSION:-3.1.2'; do
+  rg -Fq "$version" scripts/verify-image-supply-chain.sh || {
+    echo "missing pinned release tool version: $version" >&2
     exit 1
   }
 done

@@ -8,7 +8,7 @@ PNPM = corepack pnpm
 GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 
-.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools verify
+.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -20,6 +20,7 @@ help:
 	@echo "  make contract      Check API error-code contract"
 	@echo "  make check         Format, vet, test, contract, frontend lint/build"
 	@echo "  make verify        Run the complete required CI verification gate"
+	@echo "  make release-evidence  Scan, sign, and verify an internal digest image"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
 
@@ -94,7 +95,13 @@ security-tools: ci-policy
 	$(TOOL_RUN) honnef.co/go/tools/cmd/staticcheck ./...
 	$(TOOL_RUN) github.com/golangci/golangci-lint/v2/cmd/golangci-lint run ./...
 
-verify: ci-go ci-web ci-deploy security-tools
+supply-chain-evidence: ci-policy
+	bash scripts/generate-supply-chain-evidence.sh
+
+release-evidence: supply-chain-evidence
+	bash scripts/verify-image-supply-chain.sh
+
+verify: ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-check: fmt contract
 	python3 -m json.tool web/package.json >/dev/null

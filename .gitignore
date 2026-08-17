@@ -9,6 +9,8 @@ Thumbs.db
 
 # Frontend build artifacts
 /web/dist/
+/.evidence/
+__pycache__/
 /web/node_modules/
 /web/.next/
 

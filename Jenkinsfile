@@ -24,7 +24,13 @@ pipeline {
       steps { sh 'make ci-deploy' }
     }
     stage('Security') {
-      steps { sh 'make security-tools' }
+      steps {
+        sh 'make security-tools'
+        sh 'make supply-chain-evidence'
+      }
+      post {
+        always { archiveArtifacts artifacts: '.evidence/**', allowEmptyArchive: false, fingerprint: true }
+      }
     }
   }
 }
