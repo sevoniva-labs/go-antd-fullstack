@@ -14,8 +14,6 @@ import (
 	"github.com/apache/rocketmq-clients/golang/v5/credentials"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/tlsx"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/propagation"
 	"google.golang.org/grpc"
 	grpccredentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -117,39 +115,48 @@ type rocketMQClientConn struct {
 func (c *rocketMQClientConn) Conn() *grpc.ClientConn { return c.conn }
 func (c *rocketMQClientConn) Close() error           { return c.conn.Close() }
 
-func (r *rocketMQ) Publish(ctx context.Context, topic string, key, value []byte) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
+func (r *rocketMQ) Publish(ctx context.Context, message Message) (Receipt, error) {
 	if r.closed.Load() {
-		return errors.New("rocketmq producer is closed")
+		return Receipt{}, errors.New("rocketmq producer is closed")
 	}
-	topic = strings.TrimSpace(topic)
-	if _, ok := r.topics[topic]; !ok {
-		return fmt.Errorf("rocketmq topic %q is not configured", topic)
+	message, headers, err := prepareMessage(ctx, message)
+	if err != nil {
+		return Receipt{}, err
 	}
-	message := &rmq.Message{Topic: topic, Body: append([]byte(nil), value...)}
-	if len(key) > 0 {
-		if utf8.Valid(key) {
-			message.SetKeys(string(key))
+	if _, ok := r.topics[message.Topic]; !ok {
+		return Receipt{}, fmt.Errorf("rocketmq topic %q is not configured", message.Topic)
+	}
+	rmqMessage := &rmq.Message{Topic: message.Topic, Body: message.Body}
+	keys := []string{message.ID}
+	if len(message.Key) > 0 {
+		if utf8.Valid(message.Key) {
+			keys = append(keys, string(message.Key))
 		} else {
-			message.SetKeys(base64.RawURLEncoding.EncodeToString(key))
-			message.AddProperty("forge-key-encoding", "base64url")
+			keys = append(keys, base64.RawURLEncoding.EncodeToString(message.Key))
+			headers[HeaderKeyEncoding] = "base64url"
 		}
 	}
-	carrier := propagation.MapCarrier{}
-	otel.GetTextMapPropagator().Inject(ctx, carrier)
-	for _, name := range carrier.Keys() {
-		message.AddProperty(name, carrier.Get(name))
+	rmqMessage.SetKeys(keys...)
+	if message.Tag != "" {
+		rmqMessage.SetTag(message.Tag)
 	}
-	receipts, err := r.producer.Send(ctx, message)
+	if message.OrderingKey != "" {
+		rmqMessage.SetMessageGroup(message.OrderingKey)
+	}
+	if !message.DeliverAt.IsZero() {
+		rmqMessage.SetDelayTimestamp(message.DeliverAt)
+	}
+	for name, value := range headers {
+		rmqMessage.AddProperty(name, value)
+	}
+	receipts, err := r.producer.Send(ctx, rmqMessage)
 	if err != nil {
-		return fmt.Errorf("publish rocketmq topic %q: %w", topic, err)
+		return Receipt{}, fmt.Errorf("publish rocketmq topic %q: %w", message.Topic, err)
 	}
 	if len(receipts) == 0 {
-		return fmt.Errorf("publish rocketmq topic %q: empty send receipt", topic)
+		return Receipt{}, fmt.Errorf("publish rocketmq topic %q: empty send receipt", message.Topic)
 	}
-	return nil
+	return Receipt{Provider: "rocketmq", ProviderMessageID: receipts[0].MessageID}, nil
 }
 
 // Start synchronizes producer settings and topic routes with the Proxy. The

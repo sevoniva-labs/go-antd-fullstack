@@ -3,6 +3,8 @@ package messaging
 import (
 	"context"
 	"errors"
+	"fmt"
+	"sort"
 	"time"
 
 	"github.com/sevoniva-labs/forge/internal/platform/config"
@@ -12,7 +14,7 @@ import (
 )
 
 type Bus interface {
-	Publish(context.Context, string, []byte, []byte) error
+	Publish(context.Context, Message) (Receipt, error)
 	Ping(context.Context) error
 	Close()
 	Provider() string
@@ -44,21 +46,49 @@ func New(cfg config.Messaging) (Bus, error) {
 	case "rocketmq":
 		return newRocketMQ(cfg)
 	default:
-		return nil, errors.New("unsupported messaging provider")
+		return nil, fmt.Errorf("unsupported messaging provider %q", cfg.Provider)
 	}
 }
 
 type noop struct{}
 
-func (noop) Publish(context.Context, string, []byte, []byte) error { return nil }
-func (noop) Ping(context.Context) error                            { return nil }
-func (noop) Close()                                                {}
-func (noop) Provider() string                                      { return "disabled" }
+func (noop) Publish(context.Context, Message) (Receipt, error) {
+	return Receipt{}, errors.New("messaging provider is disabled")
+}
+func (noop) Ping(context.Context) error { return nil }
+func (noop) Close()                     {}
+func (noop) Provider() string           { return "disabled" }
 
 type kafka struct{ client *kgo.Client }
 
-func (k *kafka) Publish(ctx context.Context, topic string, key, value []byte) error {
-	return k.client.ProduceSync(ctx, &kgo.Record{Topic: topic, Key: key, Value: value, Timestamp: time.Now()}).FirstErr()
+func (k *kafka) Publish(ctx context.Context, message Message) (Receipt, error) {
+	message, headers, err := prepareMessage(ctx, message)
+	if err != nil {
+		return Receipt{}, err
+	}
+	if message.DeliverAt.After(time.Now()) {
+		return Receipt{}, errors.New("kafka stream provider does not support delayed business messages")
+	}
+	key := message.Key
+	if message.OrderingKey != "" {
+		key = []byte(message.OrderingKey)
+	}
+	headerNames := make([]string, 0, len(headers))
+	for name := range headers {
+		headerNames = append(headerNames, name)
+	}
+	sort.Strings(headerNames)
+	recordHeaders := make([]kgo.RecordHeader, 0, len(headers))
+	for _, name := range headerNames {
+		recordHeaders = append(recordHeaders, kgo.RecordHeader{Key: name, Value: []byte(headers[name])})
+	}
+	err = k.client.ProduceSync(ctx, &kgo.Record{
+		Topic: message.Topic, Key: key, Value: message.Body, Headers: recordHeaders, Timestamp: time.Now().UTC(),
+	}).FirstErr()
+	if err != nil {
+		return Receipt{}, fmt.Errorf("publish kafka topic %q: %w", message.Topic, err)
+	}
+	return Receipt{Provider: "kafka"}, nil
 }
 func (k *kafka) Ping(ctx context.Context) error { return k.client.Ping(ctx) }
 func (k *kafka) Close()                         { k.client.Close() }

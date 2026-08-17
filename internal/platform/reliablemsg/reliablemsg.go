@@ -5,11 +5,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 type Event struct {
@@ -20,6 +24,9 @@ type Event struct {
 	Type           string
 	Payload        any
 	Headers        map[string]string
+	Tag            string
+	OrderingKey    string
+	DeliverAt      time.Time
 }
 
 type Store struct{ db *database.DB }
@@ -39,11 +46,28 @@ func EnqueueTx(ctx context.Context, db *database.DB, tx *sql.Tx, e Event) (strin
 	if err != nil {
 		return "", err
 	}
-	headers, err := json.Marshal(e.Headers)
+	headerValues := make(map[string]string, len(e.Headers))
+	for rawName, value := range e.Headers {
+		name := strings.ToLower(strings.TrimSpace(rawName))
+		if _, exists := headerValues[name]; exists {
+			return "", fmt.Errorf("reliable message: duplicate header %q", rawName)
+		}
+		headerValues[name] = value
+	}
+	if headerValues["traceparent"] == "" {
+		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(headerValues))
+	}
+	if err := messaging.Validate(messaging.Message{
+		ID: e.ID, OrganizationID: e.OrganizationID, Topic: e.Topic, Key: []byte(e.Key), Type: e.Type,
+		Body: payload, Headers: headerValues, Tag: e.Tag, OrderingKey: e.OrderingKey, DeliverAt: e.DeliverAt,
+	}); err != nil {
+		return "", err
+	}
+	headers, err := json.Marshal(headerValues)
 	if err != nil {
 		return "", err
 	}
-	_, err = tx.ExecContext(ctx, db.Rebind(`INSERT INTO reliable_messages(id,organization_id,topic,event_key,event_type,payload_json,headers_json,status,attempts,next_attempt_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`), e.ID, nullIfEmpty(e.OrganizationID), e.Topic, e.Key, e.Type, string(payload), string(headers), "PENDING", 0, time.Now().UTC(), time.Now().UTC())
+	_, err = tx.ExecContext(ctx, db.Rebind(`INSERT INTO reliable_messages(id,organization_id,topic,event_key,event_type,ordering_key,tag,deliver_at,payload_json,headers_json,status,attempts,next_attempt_at,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`), e.ID, nullIfEmpty(e.OrganizationID), e.Topic, e.Key, e.Type, e.OrderingKey, e.Tag, nullTime(e.DeliverAt), string(payload), string(headers), "PENDING", 0, time.Now().UTC(), time.Now().UTC())
 	return e.ID, err
 }
 func (s *Store) Enqueue(ctx context.Context, e Event) (string, error) {
@@ -53,15 +77,17 @@ func (s *Store) Enqueue(ctx context.Context, e Event) (string, error) {
 }
 
 type pending struct {
-	ID, Topic, Key, Payload string
-	Attempts                int
+	ID, Topic, Key, Type, OrderingKey, Tag, Payload, Headers string
+	OrganizationID                                           sql.NullString
+	DeliverAt                                                sql.NullTime
+	Attempts                                                 int
 }
 
 func (s *Store) pending(ctx context.Context, limit int) ([]pending, error) {
 	if limit <= 0 || limit > 500 {
 		limit = 100
 	}
-	rows, err := s.db.QueryContext(ctx, s.db.Rebind(`SELECT id,topic,event_key,payload_json,attempts FROM reliable_messages WHERE status='PENDING' AND next_attempt_at<=? ORDER BY created_at LIMIT ?`), time.Now().UTC(), limit)
+	rows, err := s.db.QueryContext(ctx, s.db.Rebind(`SELECT id,organization_id,topic,event_key,event_type,ordering_key,tag,deliver_at,payload_json,headers_json,attempts FROM reliable_messages WHERE status='PENDING' AND next_attempt_at<=? ORDER BY created_at LIMIT ?`), time.Now().UTC(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +95,7 @@ func (s *Store) pending(ctx context.Context, limit int) ([]pending, error) {
 	var out []pending
 	for rows.Next() {
 		var p pending
-		if err := rows.Scan(&p.ID, &p.Topic, &p.Key, &p.Payload, &p.Attempts); err != nil {
+		if err := rows.Scan(&p.ID, &p.OrganizationID, &p.Topic, &p.Key, &p.Type, &p.OrderingKey, &p.Tag, &p.DeliverAt, &p.Payload, &p.Headers, &p.Attempts); err != nil {
 			return nil, err
 		}
 		out = append(out, p)
@@ -129,7 +155,12 @@ func (s *Store) PublishBatch(ctx context.Context, bus messaging.Bus, limit int) 
 		if !ok {
 			continue
 		}
-		if err := bus.Publish(ctx, e.Topic, []byte(e.Key), []byte(e.Payload)); err != nil {
+		message, err := e.message()
+		if err != nil {
+			_ = s.retry(ctx, e, err)
+			continue
+		}
+		if _, err := bus.Publish(ctx, message); err != nil {
 			_ = s.retry(ctx, e, err)
 			continue
 		}
@@ -140,11 +171,38 @@ func (s *Store) PublishBatch(ctx context.Context, bus messaging.Bus, limit int) 
 	}
 	return n, nil
 }
+
+func (p pending) message() (messaging.Message, error) {
+	headers := map[string]string{}
+	if raw := strings.TrimSpace(p.Headers); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &headers); err != nil {
+			return messaging.Message{}, fmt.Errorf("decode reliable message headers: %w", err)
+		}
+	}
+	message := messaging.Message{
+		ID: p.ID, Topic: p.Topic, Key: []byte(p.Key), Type: p.Type, Body: []byte(p.Payload),
+		Headers: headers, Tag: p.Tag, OrderingKey: p.OrderingKey,
+	}
+	if p.OrganizationID.Valid {
+		message.OrganizationID = p.OrganizationID.String
+	}
+	if p.DeliverAt.Valid {
+		message.DeliverAt = p.DeliverAt.Time
+	}
+	return message, nil
+}
+
 func nullIfEmpty(v string) any {
 	if v == "" {
 		return nil
 	}
 	return v
+}
+func nullTime(value time.Time) any {
+	if value.IsZero() {
+		return nil
+	}
+	return value.UTC()
 }
 func min(a, b int) int {
 	if a < b {

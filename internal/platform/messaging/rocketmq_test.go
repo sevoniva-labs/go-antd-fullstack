@@ -59,14 +59,27 @@ func TestRocketMQStartsWithVerifiedTLSAndPublishesAllowedTopic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newRocketMQWithFactory() error = %v", err)
 	}
-	if err := bus.Publish(context.Background(), "audit-events", []byte("event-1"), []byte(`{"action":"login"}`)); err != nil {
+	receipt, err := bus.Publish(context.Background(), Message{
+		ID: "event-1", OrganizationID: "org-1", Topic: "audit-events", Key: []byte("account-1"),
+		Type: "identity.login", Body: []byte(`{"action":"login"}`), OrderingKey: "account-1",
+	})
+	if err != nil {
 		t.Fatalf("Publish() error = %v", err)
+	}
+	if receipt.Provider != "rocketmq" || receipt.ProviderMessageID == "" {
+		t.Fatalf("receipt = %#v", receipt)
 	}
 	if fake.started != 1 || fake.message == nil {
 		t.Fatalf("producer started = %d, message = %#v", fake.started, fake.message)
 	}
-	if got := fake.message.GetKeys(); len(got) != 1 || got[0] != "event-1" {
+	if got := fake.message.GetKeys(); len(got) != 2 || got[0] != "event-1" || got[1] != "account-1" {
 		t.Fatalf("message keys = %v", got)
+	}
+	if got := fake.message.GetProperties()[HeaderEventID]; got != "event-1" {
+		t.Fatalf("event ID property = %q", got)
+	}
+	if got := fake.message.GetMessageGroup(); got == nil || *got != "account-1" {
+		t.Fatalf("message group = %v", got)
 	}
 	bus.Close()
 	bus.Close()
@@ -84,7 +97,7 @@ func TestRocketMQRejectsUnconfiguredTopic(t *testing.T) {
 		t.Fatalf("newRocketMQWithFactory() error = %v", err)
 	}
 	defer bus.Close()
-	if err := bus.Publish(context.Background(), "other", nil, []byte("payload")); err == nil {
+	if _, err := bus.Publish(context.Background(), Message{ID: "event-1", Topic: "other", Type: "test", Body: []byte("payload")}); err == nil {
 		t.Fatal("Publish() accepted an unconfigured topic")
 	}
 	if fake.message != nil {
