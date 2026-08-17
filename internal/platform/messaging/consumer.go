@@ -1,0 +1,41 @@
+package messaging
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/sevoniva-labs/forge/internal/platform/config"
+)
+
+// Delivery retains a private acknowledgement token so application code cannot
+// acknowledge an arbitrary provider message. DecodeError marks poison input;
+// such a delivery must be retried until the broker's DLQ policy takes effect.
+type Delivery struct {
+	Message           Message
+	ProviderMessageID string
+	DeliveryAttempt   int32
+	DecodeError       error
+	ackToken          any
+}
+
+type Consumer interface {
+	Receive(context.Context) ([]Delivery, error)
+	Ack(context.Context, Delivery) error
+	Retry(context.Context, Delivery, time.Duration) error
+	Close()
+	Provider() string
+}
+
+func NewConsumer(cfg config.Messaging) (Consumer, error) {
+	switch cfg.Provider {
+	case "rocketmq":
+		return newRocketMQConsumer(cfg)
+	case "kafka":
+		return nil, fmt.Errorf("kafka is configured only for streaming; business-event consumers require rocketmq")
+	case "disabled", "":
+		return nil, fmt.Errorf("messaging consumer is disabled")
+	default:
+		return nil, fmt.Errorf("unsupported messaging consumer provider %q", cfg.Provider)
+	}
+}

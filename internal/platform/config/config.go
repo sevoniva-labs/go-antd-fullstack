@@ -102,12 +102,15 @@ type Messaging struct {
 
 	// RocketMQ 5.x uses Apache's official gRPC client and requires a Proxy
 	// endpoint. Access credentials are environment/file-only secrets.
-	RocketMQEndpoint  string   `yaml:"rocketmq_endpoint"`
-	RocketMQGroup     string   `yaml:"rocketmq_group"`
-	RocketMQNamespace string   `yaml:"rocketmq_namespace"`
-	RocketMQTopics    []string `yaml:"rocketmq_topics"`
-	RocketMQAccessKey string   `yaml:"-"`
-	RocketMQSecretKey string   `yaml:"-"`
+	RocketMQEndpoint          string        `yaml:"rocketmq_endpoint"`
+	RocketMQGroup             string        `yaml:"rocketmq_group"`
+	RocketMQNamespace         string        `yaml:"rocketmq_namespace"`
+	RocketMQTopics            []string      `yaml:"rocketmq_topics"`
+	RocketMQAccessKey         string        `yaml:"-"`
+	RocketMQSecretKey         string        `yaml:"-"`
+	RocketMQBatchSize         int           `yaml:"rocketmq_batch_size"`
+	RocketMQInvisibleDuration time.Duration `yaml:"rocketmq_invisible_duration"`
+	RocketMQAwaitDuration     time.Duration `yaml:"rocketmq_await_duration"`
 }
 
 type Search struct {
@@ -240,9 +243,12 @@ func Default() Config {
 			ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
 			ShutdownTimeout: 15 * time.Second, MaxBodyBytes: 8 << 20,
 		},
-		Database:     Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: true},
-		Cache:        Cache{Provider: "memory", Mode: "standalone", Prefix: "forge:", TTL: 10 * time.Minute},
-		Messaging:    Messaging{Provider: "disabled", ClientID: "forge"},
+		Database: Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: true},
+		Cache:    Cache{Provider: "memory", Mode: "standalone", Prefix: "forge:", TTL: 10 * time.Minute},
+		Messaging: Messaging{
+			Provider: "disabled", ClientID: "forge", RocketMQBatchSize: 16,
+			RocketMQInvisibleDuration: 30 * time.Second, RocketMQAwaitDuration: 5 * time.Second,
+		},
 		Search:       Search{Provider: "disabled"},
 		Storage:      Storage{Provider: "local", LocalRoot: "./data"},
 		Discovery:    Discovery{Provider: "disabled", Group: "DEFAULT_GROUP", Cluster: "DEFAULT", Weight: 1, Metadata: map[string]string{}},
@@ -421,6 +427,9 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Messaging.RocketMQGroup, "FORGE_ROCKETMQ_GROUP")
 	overrideString(&cfg.Messaging.RocketMQNamespace, "FORGE_ROCKETMQ_NAMESPACE")
 	overrideCSV(&cfg.Messaging.RocketMQTopics, "FORGE_ROCKETMQ_TOPICS")
+	overrideInt(&cfg.Messaging.RocketMQBatchSize, "FORGE_ROCKETMQ_BATCH_SIZE")
+	overrideDuration(&cfg.Messaging.RocketMQInvisibleDuration, "FORGE_ROCKETMQ_INVISIBLE_DURATION")
+	overrideDuration(&cfg.Messaging.RocketMQAwaitDuration, "FORGE_ROCKETMQ_AWAIT_DURATION")
 
 	overrideString(&cfg.Search.Provider, "FORGE_SEARCH_PROVIDER")
 	overrideCSV(&cfg.Search.URLs, "FORGE_SEARCH_URLS")

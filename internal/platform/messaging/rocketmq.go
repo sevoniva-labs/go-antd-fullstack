@@ -47,13 +47,7 @@ func newRocketMQWithFactory(cfg config.Messaging, factory rocketMQProducerFactor
 	if err != nil {
 		return nil, err
 	}
-	tlsConfig, err := tlsx.ClientConfig(tlsx.ClientOptions{
-		Enabled:    cfg.TLS,
-		CAFile:     cfg.TLSCAFile,
-		CertFile:   cfg.TLSCertFile,
-		KeyFile:    cfg.TLSKeyFile,
-		ServerName: cfg.TLSServerName,
-	})
+	tlsConfig, err := rocketMQTLSConfig(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("rocketmq tls: %w", err)
 	}
@@ -69,9 +63,6 @@ func newRocketMQWithFactory(cfg config.Messaging, factory rocketMQProducerFactor
 }
 
 func newApacheRocketMQProducer(cfg config.Messaging, tlsConfig *tls.Config, topics []string) (rocketMQProducer, error) {
-	clientFactory := func(rmqConfig *rmq.Config, _ ...rmq.ClientOption) (rmq.Client, error) {
-		return rmq.NewClient(rmqConfig, rmq.WithClientConnFunc(rocketMQConnFactory(tlsConfig)))
-	}
 	return rmq.NewProducer(&rmq.Config{
 		Endpoint:      strings.TrimSpace(cfg.RocketMQEndpoint),
 		NameSpace:     strings.TrimSpace(cfg.RocketMQNamespace),
@@ -80,7 +71,20 @@ func newApacheRocketMQProducer(cfg config.Messaging, tlsConfig *tls.Config, topi
 			AccessKey:    cfg.RocketMQAccessKey,
 			AccessSecret: cfg.RocketMQSecretKey,
 		},
-	}, rmq.WithTopics(topics...), rmq.WithClientFunc(clientFactory))
+	}, rmq.WithTopics(topics...), rmq.WithClientFunc(rocketMQClientFactory(tlsConfig)))
+}
+
+func rocketMQClientFactory(tlsConfig *tls.Config) rmq.NewClientFunc {
+	return func(rmqConfig *rmq.Config, _ ...rmq.ClientOption) (rmq.Client, error) {
+		return rmq.NewClient(rmqConfig, rmq.WithClientConnFunc(rocketMQConnFactory(tlsConfig)))
+	}
+}
+
+func rocketMQTLSConfig(cfg config.Messaging) (*tls.Config, error) {
+	return tlsx.ClientConfig(tlsx.ClientOptions{
+		Enabled: cfg.TLS, CAFile: cfg.TLSCAFile, CertFile: cfg.TLSCertFile,
+		KeyFile: cfg.TLSKeyFile, ServerName: cfg.TLSServerName,
+	})
 }
 
 // rocketMQConnFactory replaces the SDK's insecure default TLS configuration.
