@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
+	ktracing "github.com/go-kratos/kratos/v2/middleware/tracing"
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
@@ -193,10 +194,10 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		khttp.Address(cfg.Server.ListenAddr), khttp.Timeout(cfg.Server.WriteTimeout), khttp.Middleware(httpSecurity),
 		khttp.Filter(httpserver.Filters(httpserver.FilterOptions{
 			Log: log, Metrics: met, Secure: cfg.Security.SecureCookies,
-			AllowedOrigins: cfg.Security.AllowedOrigins, MaxBodyBytes: cfg.Server.MaxBodyBytes,
+			AllowedOrigins: cfg.Security.AllowedOrigins, MaxBodyBytes: cfg.Server.MaxBodyBytes, ServiceName: cfg.App.Name,
 		})...),
 	}
-	grpcOpts := []kgrpc.ServerOption{kgrpc.Address(cfg.Server.GRPCListenAddr), kgrpc.Timeout(cfg.Server.WriteTimeout), kgrpc.Middleware(grpcSecurity)}
+	grpcOpts := []kgrpc.ServerOption{kgrpc.Address(cfg.Server.GRPCListenAddr), kgrpc.Timeout(cfg.Server.WriteTimeout), kgrpc.Middleware(ktracing.Server(), grpcSecurity)}
 	if tlsCfg != nil {
 		httpOpts = append(httpOpts, khttp.TLSConfig(tlsCfg.Clone()))
 		grpcOpts = append(grpcOpts, kgrpc.TLSConfig(tlsCfg.Clone()))

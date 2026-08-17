@@ -14,6 +14,7 @@ import (
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/google/uuid"
 	"github.com/sevoniva-labs/forge/internal/platform/metrics"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -25,16 +26,36 @@ type FilterOptions struct {
 	Secure         bool
 	AllowedOrigins []string
 	MaxBodyBytes   int64
+	ServiceName    string
 }
 
 func Filters(options FilterOptions) []khttp.FilterFunc {
 	return []khttp.FilterFunc{
 		recoverer(options.Log),
 		requestID,
+		tracing(options.ServiceName),
 		securityHeaders(options.Secure),
 		cors(options.AllowedOrigins),
 		bodyLimit(options.MaxBodyBytes),
 		accessLog(options.Log, options.Metrics),
+	}
+}
+
+func tracing(serviceName string) khttp.FilterFunc {
+	operation := strings.TrimSpace(serviceName) + ".http"
+	if operation == ".http" {
+		operation = "forge.http"
+	}
+	return func(next http.Handler) http.Handler {
+		return otelhttp.NewHandler(next, operation,
+			otelhttp.WithFilter(func(request *http.Request) bool {
+				path := request.URL.Path
+				return path != "/metrics" && path != "/api/v1/system/health" && path != "/api/v1/system/ready" && !strings.HasPrefix(path, "/debug/pprof/")
+			}),
+			otelhttp.WithSpanNameFormatter(func(_ string, request *http.Request) string {
+				return request.Method + " " + metricRoute(request.URL.Path)
+			}),
+		)
 	}
 }
 

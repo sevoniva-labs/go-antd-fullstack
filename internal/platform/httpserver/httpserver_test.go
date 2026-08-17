@@ -1,12 +1,17 @@
 package httpserver
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"go.opentelemetry.io/otel"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestSPARejectsAPIAndTraversalFallback(t *testing.T) {
@@ -64,5 +69,25 @@ func TestMetricRouteBoundsCardinality(t *testing.T) {
 	}
 	if got := metricRoute("/attacker/unique/path"); got != "unmatched" {
 		t.Fatalf("metricRoute() = %q", got)
+	}
+}
+
+func TestTracingCreatesServerSpan(t *testing.T) {
+	previous := otel.GetTracerProvider()
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.AlwaysSample()))
+	otel.SetTracerProvider(provider)
+	t.Cleanup(func() {
+		_ = provider.Shutdown(context.Background())
+		otel.SetTracerProvider(previous)
+	})
+	var spanContext trace.SpanContext
+	handler := tracing("forge")(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		spanContext = trace.SpanFromContext(r.Context()).SpanContext()
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/v1/me", nil))
+	if !spanContext.IsValid() || !spanContext.IsSampled() {
+		t.Fatalf("invalid server span context: %v", spanContext)
 	}
 }
