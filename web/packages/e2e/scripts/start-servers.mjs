@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const repositoryRoot = resolve(fileURLToPath(new URL('../../../..', import.meta.url)))
 const processes = [
   spawn('pnpm', [
-    '--filter', '@forge/shell', 'dev', '--mode', 'e2e', '--host', '127.0.0.1',
+    '--filter', '@forge/shell', 'preview', '--host', '127.0.0.1',
     '--port', '4173', '--strictPort',
   ], { cwd: repositoryRoot, env: process.env, stdio: 'inherit' }),
   spawn('pnpm', [

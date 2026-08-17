@@ -6,7 +6,7 @@
   "scripts": {
     "e2e": "playwright test",
     "e2e:install:cn": "PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright playwright install chromium",
-    "fixture:prepare": "pnpm --filter @forge/example-remote build && node scripts/prepare-fixtures.mjs",
+    "fixture:prepare": "pnpm --filter @forge/example-remote build && node scripts/prepare-fixtures.mjs && pnpm --filter @forge/shell typecheck && pnpm --filter @forge/shell exec vite build --mode e2e",
     "fixture:serve": "node scripts/start-servers.mjs",
     "lint": "oxlint src tests playwright.config.ts",
     "test": "vitest run src",
