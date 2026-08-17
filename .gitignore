@@ -34,3 +34,9 @@ coverage.out
 # Local architecture/security plans
 /docs/banking-production-feasibility-plan.local.md
 /docs/banking-production-goal-prompt.local.md
+
+# pnpm workspace and TypeScript build cache
+/node_modules/
+*.tsbuildinfo
+/web/vite.config.js
+/web/vite.config.d.ts

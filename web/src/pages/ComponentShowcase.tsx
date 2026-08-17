@@ -71,7 +71,7 @@ export function ComponentShowcasePage() {
 
       <SearchToolbar
         filters={<Space wrap><Input.Search placeholder="关键词" style={{ width: 260 }} /><Tag>环境：DEV</Tag></Space>}
-        actions={<Space><PermissionButton permission="system.user.create" type="primary" icon={<PlusOutlined />}>权限按钮</PermissionButton><ConfirmAction title="确认执行示例操作？"><Button danger icon={<DeleteOutlined />}>危险操作</Button></ConfirmAction></Space>}
+        actions={<Space><PermissionButton permission="system.user.create" type="primary" icon={<PlusOutlined />}>权限按钮</PermissionButton><ConfirmAction title="确认执行示例操作？" onConfirm={() => undefined}><Button danger icon={<DeleteOutlined />}>危险操作</Button></ConfirmAction></Space>}
       />
 
       <AppProTable<SampleRow> rowKey="id" search={false} columns={columns} dataSource={rows} />

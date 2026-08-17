@@ -17,6 +17,10 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
+      args:
+        NODE_IMAGE: ${FORGE_NODE_IMAGE:?set internal Node image digest}
+        GO_IMAGE: ${FORGE_GO_IMAGE:?set internal Go image digest}
+        RUNTIME_IMAGE: ${FORGE_RUNTIME_IMAGE:?set internal runtime image digest}
     ports:
       - "8080:8080"
     environment:

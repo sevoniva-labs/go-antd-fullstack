@@ -1,28 +1,34 @@
-# syntax=docker/dockerfile:1.7
-FROM node:22-bookworm-slim AS web-build
-WORKDIR /src/web
-COPY web/package*.json ./
-RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
-COPY web/ ./
-RUN npm run build
+ARG NODE_IMAGE
+ARG GO_IMAGE
+ARG RUNTIME_IMAGE
 
-FROM golang:1.26.3-bookworm AS go-build
-ARG VERSION=container
+FROM ${NODE_IMAGE} AS web-build
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY}
 WORKDIR /src
-COPY go.mod ./
-RUN go mod download
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY web/package.json web/package.json
+RUN corepack enable && pnpm install --frozen-lockfile --registry=${NPM_REGISTRY}
+COPY web/ web/
+RUN pnpm --filter sevoniva-forge-web build
+
+FROM ${GO_IMAGE} AS go-build
+ARG VERSION=container
+ARG GOPROXY=https://goproxy.cn
+ARG GOSUMDB=sum.golang.google.cn
+ENV GOPROXY=${GOPROXY} GOSUMDB=${GOSUMDB}
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 COPY . .
 RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/forge ./cmd/server \
  && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/forge-worker ./cmd/worker \
  && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/forge-migrate ./cmd/migrate
 
-FROM debian:bookworm-slim
-RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates tzdata \
- && rm -rf /var/lib/apt/lists/* \
- && useradd --system --uid 10001 --create-home forge \
- && mkdir -p /app/web /app/data /tmp/forge-nacos \
- && chown -R forge:forge /app /tmp/forge-nacos
+FROM ${RUNTIME_IMAGE}
+# The signed enterprise runtime base must already contain CA certificates and timezone data.
+RUN mkdir -p /app/web /app/data /tmp/forge-nacos \
+ && chown -R 10001:10001 /app /tmp/forge-nacos
 WORKDIR /app
 COPY --from=go-build /out/forge /app/forge
 COPY --from=go-build /out/forge-worker /app/forge-worker

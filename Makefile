@@ -4,6 +4,7 @@ MODULE ?= github.com/sevoniva-labs/forge
 GOPROXY ?= https://goproxy.cn
 GOSUMDB ?= sum.golang.google.cn
 NPM_REGISTRY ?= https://registry.npmmirror.com
+PNPM = corepack pnpm
 GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 
@@ -40,13 +41,13 @@ tidy:
 	go mod tidy
 
 web-install:
-	cd web && npm install --registry=$(NPM_REGISTRY)
+	$(PNPM) install --frozen-lockfile --registry=$(NPM_REGISTRY)
 
 web-dev:
-	cd web && npm run dev
+	$(PNPM) --filter sevoniva-forge-web dev
 
 web-build:
-	cd web && npm run build
+	$(PNPM) --filter sevoniva-forge-web build
 
 contract:
 	python3 scripts/check-error-codes.py
@@ -60,13 +61,14 @@ build: web-build
 check: fmt contract
 	go vet ./...
 	go test ./...
-	cd web && npm run lint
-	cd web && npm run typecheck
-	cd web && npm run test
-	cd web && npm run build
+	$(PNPM) --filter sevoniva-forge-web lint
+	$(PNPM) --filter sevoniva-forge-web typecheck
+	$(PNPM) --filter sevoniva-forge-web test
+	$(PNPM) --filter sevoniva-forge-web build
 
 ci-policy:
 	bash scripts/check-ci-policy.sh
+	bash scripts/check-container-policy.sh
 
 ci-go: ci-policy contract
 	$(GO_ENV) go mod verify
@@ -76,10 +78,10 @@ ci-go: ci-policy contract
 	$(GO_ENV) go test -race ./...
 
 ci-web: ci-policy web-install
-	cd web && npm run lint
-	cd web && npm run typecheck
-	cd web && npm run test
-	cd web && npm run build
+	$(PNPM) --filter sevoniva-forge-web lint
+	$(PNPM) --filter sevoniva-forge-web typecheck
+	$(PNPM) --filter sevoniva-forge-web test
+	$(PNPM) --filter sevoniva-forge-web build
 
 ci-deploy: ci-policy
 	helm lint deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml
@@ -96,7 +98,17 @@ offline-check: fmt contract
 	bash -n scripts/init-project.sh
 
 docker-build:
-	docker build -f deploy/docker/Dockerfile -t $(APP):dev .
+	@for value in "$$FORGE_NODE_IMAGE" "$$FORGE_GO_IMAGE" "$$FORGE_RUNTIME_IMAGE"; do \
+		[[ "$$value" =~ @sha256:[0-9a-f]{64}$$ ]] || { echo "all FORGE_*_IMAGE values must be internal repository@sha256 references" >&2; exit 1; }; \
+	done
+	docker build -f deploy/docker/Dockerfile \
+		--build-arg NODE_IMAGE="$$FORGE_NODE_IMAGE" \
+		--build-arg GO_IMAGE="$$FORGE_GO_IMAGE" \
+		--build-arg RUNTIME_IMAGE="$$FORGE_RUNTIME_IMAGE" \
+		--build-arg NPM_REGISTRY="$(NPM_REGISTRY)" \
+		--build-arg GOPROXY="$(GOPROXY)" \
+		--build-arg GOSUMDB="$(GOSUMDB)" \
+		-t $(APP):dev .
 
 compose-up:
 	docker compose -f deploy/compose/minimal.yaml up -d --build

@@ -80,7 +80,13 @@ services:
     restart: "no"
 
   forge:
-    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        NODE_IMAGE: ${FORGE_NODE_IMAGE:?set internal Node image digest}
+        GO_IMAGE: ${FORGE_GO_IMAGE:?set internal Go image digest}
+        RUNTIME_IMAGE: ${FORGE_RUNTIME_IMAGE:?set internal runtime image digest}
     ports: ["8080:8080"]
     volumes: ["../../configs/full.yaml:/app/config.yaml:ro"]
     environment:
@@ -111,7 +117,13 @@ services:
       s3-init: { condition: service_completed_successfully }
 
   forge-worker:
-    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        NODE_IMAGE: ${FORGE_NODE_IMAGE:?set internal Node image digest}
+        GO_IMAGE: ${FORGE_GO_IMAGE:?set internal Go image digest}
+        RUNTIME_IMAGE: ${FORGE_RUNTIME_IMAGE:?set internal runtime image digest}
     entrypoint: ["/app/forge-worker"]
     volumes: ["../../configs/full.yaml:/app/config.yaml:ro"]
     environment:

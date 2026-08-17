@@ -3,7 +3,13 @@
 # a database image. Set FORGE_DATABASE_DSN to the target cluster/tenant DSN.
 services:
   forge:
-    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        NODE_IMAGE: ${FORGE_NODE_IMAGE:?set internal Node image digest}
+        GO_IMAGE: ${FORGE_GO_IMAGE:?set internal Go image digest}
+        RUNTIME_IMAGE: ${FORGE_RUNTIME_IMAGE:?set internal runtime image digest}
     ports: ["8080:8080"]
     volumes: ["../../configs/xinchuang.yaml:/app/config.yaml:ro"]
     environment:
