@@ -950,6 +950,7 @@ message ListAuditLogsResponse {
 message ExportAuditLogsRequest {
   string format = 1;
   int32 limit = 2;
+  string approval_id = 3;
 }
 message ExportAuditLogsResponse {
   bytes content = 1;

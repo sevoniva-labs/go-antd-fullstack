@@ -2931,6 +2931,7 @@ type ExportAuditLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Format        string                 `protobuf:"bytes,1,opt,name=format,proto3" json:"format,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,3,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2977,6 +2978,13 @@ func (x *ExportAuditLogsRequest) GetLimit() int32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *ExportAuditLogsRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
 }
 
 type ExportAuditLogsResponse struct {
@@ -3216,10 +3224,12 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\x14ListAuditLogsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\"E\n" +
 	"\x15ListAuditLogsResponse\x12,\n" +
-	"\x06events\x18\x01 \x03(\v2\x14.forge.v1.AuditEventR\x06events\"F\n" +
+	"\x06events\x18\x01 \x03(\v2\x14.forge.v1.AuditEventR\x06events\"g\n" +
 	"\x16ExportAuditLogsRequest\x12\x16\n" +
 	"\x06format\x18\x01 \x01(\tR\x06format\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"r\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x1f\n" +
+	"\vapproval_id\x18\x03 \x01(\tR\n" +
+	"approvalId\"r\n" +
 	"\x17ExportAuditLogsResponse\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\fR\acontent\x12!\n" +
 	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x1a\n" +

@@ -12,6 +12,7 @@ import (
 
 	kerrors "github.com/go-kratos/kratos/v2/errors"
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
+	appapproval "github.com/sevoniva-labs/forge/internal/app/approval"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 )
 
@@ -43,8 +44,24 @@ func (s *PlatformService) ExportAuditLogs(ctx context.Context, req *forgev1.Expo
 	}
 
 	var content []byte
-	event := newAuditEvent(ctx, principal, "audit.export", "audit_log", "", map[string]any{"format": format, "limit": limit})
+	payload, err := json.Marshal(map[string]any{"format": format, "limit": limit})
+	if err != nil {
+		return nil, internalError(err)
+	}
+	event := newAuditEvent(ctx, principal, "audit.export", "audit_log", "organization", map[string]any{"format": format, "limit": limit, "approval_id": req.GetApprovalId()})
 	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "AUDIT_LOG_EXPORT",
+			Action:      "audit.export",
+			Resource:    "audit_log",
+			ResourceID:  "organization",
+			PayloadJSON: string(payload),
+		}); executionErr != nil {
+			return executionErr
+		}
 		items, listErr := s.audit.List(txCtx, principal.OrganizationID, limit)
 		if listErr != nil {
 			return listErr
@@ -53,7 +70,7 @@ func (s *PlatformService) ExportAuditLogs(ctx context.Context, req *forgev1.Expo
 		return listErr
 	})
 	if err != nil {
-		return nil, internalError(err)
+		return nil, serviceError(err)
 	}
 
 	contentType := "application/json; charset=utf-8"
