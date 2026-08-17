@@ -16,17 +16,18 @@ import { lazy } from 'react'
 import { matchPath } from 'react-router-dom'
 import type { Principal } from '@forge/api-client'
 import { can } from '@forge/auth-sdk'
+import { platformAdminModules, type PlatformAdminModuleKey } from '@forge/platform-admin/modules'
 import { runtimeConfig } from '../config/runtime'
 
 const DashboardPage = lazy(() => import('../../pages/Dashboard').then((m) => ({ default: m.DashboardPage })))
-const UsersPage = lazy(() => import('../../pages/Users').then((m) => ({ default: m.UsersPage })))
-const RolesPage = lazy(() => import('../../pages/Roles').then((m) => ({ default: m.RolesPage })))
-const PermissionsPage = lazy(() => import('../../pages/Permissions').then((m) => ({ default: m.PermissionsPage })))
-const OrganizationPage = lazy(() => import('../../pages/Organization').then((m) => ({ default: m.OrganizationPage })))
-const SessionsPage = lazy(() => import('../../pages/Sessions').then((m) => ({ default: m.SessionsPage })))
-const AuditLogsPage = lazy(() => import('../../pages/AuditLogs').then((m) => ({ default: m.AuditLogsPage })))
-const SecurityPage = lazy(() => import('../../pages/Security').then((m) => ({ default: m.SecurityPage })))
-const SystemStatusPage = lazy(() => import('../../pages/SystemStatus').then((m) => ({ default: m.SystemStatusPage })))
+const UsersPage = lazy(() => import('@forge/platform-admin/users').then((m) => ({ default: m.UsersPage })))
+const RolesPage = lazy(() => import('@forge/platform-admin/roles').then((m) => ({ default: m.RolesPage })))
+const PermissionsPage = lazy(() => import('@forge/platform-admin/permissions').then((m) => ({ default: m.PermissionsPage })))
+const OrganizationPage = lazy(() => import('@forge/platform-admin/organization').then((m) => ({ default: m.OrganizationPage })))
+const SessionsPage = lazy(() => import('@forge/platform-admin/sessions').then((m) => ({ default: m.SessionsPage })))
+const AuditLogsPage = lazy(() => import('@forge/platform-admin/audit-logs').then((m) => ({ default: m.AuditLogsPage })))
+const SecurityPage = lazy(() => import('@forge/platform-admin/security').then((m) => ({ default: m.SecurityPage })))
+const SystemStatusPage = lazy(() => import('@forge/platform-admin/system-status').then((m) => ({ default: m.SystemStatusPage })))
 const AccountSecurityPage = lazy(() => import('../../pages/AccountSecurity').then((m) => ({ default: m.AccountSecurityPage })))
 const ApiTokensPage = lazy(() => import('../../pages/ApiTokens').then((m) => ({ default: m.ApiTokensPage })))
 const ComponentShowcasePage = lazy(() => import('../../pages/ComponentShowcase').then((m) => ({ default: m.ComponentShowcasePage })))
@@ -41,19 +42,39 @@ export interface AppRoute {
   component: LazyExoticComponent<ComponentType>
 }
 
+const platformAdminComponents: Record<PlatformAdminModuleKey, LazyExoticComponent<ComponentType>> = {
+  users: UsersPage,
+  roles: RolesPage,
+  permissions: PermissionsPage,
+  organization: OrganizationPage,
+  security: SecurityPage,
+  sessions: SessionsPage,
+  'audit-logs': AuditLogsPage,
+  'system-status': SystemStatusPage,
+}
+
+const platformAdminIcons: Record<PlatformAdminModuleKey, ReactNode> = {
+  users: <TeamOutlined />,
+  roles: <UserSwitchOutlined />,
+  permissions: <FileProtectOutlined />,
+  organization: <ApartmentOutlined />,
+  security: <SafetyCertificateOutlined />,
+  sessions: <LockOutlined />,
+  'audit-logs': <AuditOutlined />,
+  'system-status': <SettingOutlined />,
+}
+
+const platformRoutes: AppRoute[] = platformAdminModules.map((module) => ({
+  ...module,
+  icon: platformAdminIcons[module.key],
+  menu: true,
+  component: platformAdminComponents[module.key],
+}))
+
 export const appRoutes: AppRoute[] = [
   { path: '/dashboard', name: '工作台', icon: <DashboardOutlined />, menu: true, component: DashboardPage },
 
-  { path: '/admin/users', name: '用户管理', icon: <TeamOutlined />, permission: 'system.user.read', group: '系统管理', menu: true, component: UsersPage },
-  { path: '/admin/roles', name: '角色管理', icon: <UserSwitchOutlined />, permission: 'system.role.read', group: '系统管理', menu: true, component: RolesPage },
-  { path: '/admin/permissions', name: '权限清单', icon: <FileProtectOutlined />, permission: 'system.role.read', group: '系统管理', menu: true, component: PermissionsPage },
-  { path: '/admin/organization', name: '组织信息', icon: <ApartmentOutlined />, permission: 'system.organization.read', group: '系统管理', menu: true, component: OrganizationPage },
-
-  { path: '/security', name: '安全基线', icon: <SafetyCertificateOutlined />, group: '安全中心', menu: true, component: SecurityPage },
-  { path: '/admin/sessions', name: '在线会话', icon: <LockOutlined />, permission: 'system.session.read', group: '安全中心', menu: true, component: SessionsPage },
-  { path: '/admin/audit-logs', name: '审计日志', icon: <AuditOutlined />, permission: 'system.audit.read', group: '安全中心', menu: true, component: AuditLogsPage },
-
-  { path: '/ops/system', name: '系统状态', icon: <SettingOutlined />, group: '运维中心', menu: true, component: SystemStatusPage },
+  ...platformRoutes,
 
   { path: '/account/security', name: '账号安全', icon: <LockOutlined />, group: '个人中心', menu: true, component: AccountSecurityPage },
   { path: '/account/api-tokens', name: 'API Token', icon: <KeyOutlined />, group: '个人中心', menu: true, component: ApiTokensPage },

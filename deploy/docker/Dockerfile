@@ -8,6 +8,7 @@ ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY}
 WORKDIR /src
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY web/apps/shell/package.json web/apps/shell/package.json
+COPY web/apps/platform-admin/package.json web/apps/platform-admin/package.json
 COPY web/packages/api-client/package.json web/packages/api-client/package.json
 COPY web/packages/auth-sdk/package.json web/packages/auth-sdk/package.json
 COPY web/packages/design-system/package.json web/packages/design-system/package.json
