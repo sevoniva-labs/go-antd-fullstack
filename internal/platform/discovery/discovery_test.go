@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -11,11 +12,21 @@ import (
 )
 
 type fakeNamingClient struct {
-	services map[string]model.Service
+	services     map[string]model.Service
+	registered   []vo.RegisterInstanceParam
+	deregistered []vo.DeregisterInstanceParam
+	onRegister   func()
 }
 
-func (*fakeNamingClient) RegisterInstance(vo.RegisterInstanceParam) (bool, error) { return true, nil }
-func (*fakeNamingClient) DeregisterInstance(vo.DeregisterInstanceParam) (bool, error) {
+func (f *fakeNamingClient) RegisterInstance(param vo.RegisterInstanceParam) (bool, error) {
+	f.registered = append(f.registered, param)
+	if f.onRegister != nil {
+		f.onRegister()
+	}
+	return true, nil
+}
+func (f *fakeNamingClient) DeregisterInstance(param vo.DeregisterInstanceParam) (bool, error) {
+	f.deregistered = append(f.deregistered, param)
 	return true, nil
 }
 func (f *fakeNamingClient) GetService(param vo.GetServiceParam) (model.Service, error) {
@@ -78,5 +89,36 @@ func TestNacosPingRequiresOwnHealthyRegisteredEndpoints(t *testing.T) {
 	services["account-grpc"] = model.Service{}
 	if err := registry.Ping(context.Background()); err == nil {
 		t.Fatal("Ping() accepted a service after its own instance was removed")
+	}
+}
+
+func TestNacosRegisterRollsBackPartialRegistrationOnCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	client := &fakeNamingClient{}
+	client.onRegister = func() {
+		if len(client.registered) == 1 {
+			cancel()
+		}
+	}
+	registry := &nacosRegistry{
+		client: client,
+		cfg: config.Discovery{
+			AdvertiseIP: "10.20.30.40", Cluster: "HZ-A", Group: "FORGE", Weight: 1,
+		},
+		endpoints: []endpoint{
+			{service: "account-http", port: 8080},
+			{service: "account-grpc", port: 9090},
+		},
+	}
+
+	err := registry.Register(ctx)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Register() error = %v, want context cancellation", err)
+	}
+	if len(client.registered) != 1 || len(client.deregistered) != 1 {
+		t.Fatalf("registered=%d deregistered=%d, want a rolled back partial registration", len(client.registered), len(client.deregistered))
+	}
+	if client.deregistered[0].ServiceName != "account-http" || registry.registered.Load() {
+		t.Fatalf("rollback = %#v, registered state = %t", client.deregistered, registry.registered.Load())
 	}
 }

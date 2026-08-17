@@ -103,7 +103,7 @@ func (n *nacosRegistry) Register(ctx context.Context) error {
 	registered := make([]endpoint, 0, len(n.endpoints))
 	for _, item := range n.endpoints {
 		if err := ctx.Err(); err != nil {
-			return err
+			return errors.Join(err, n.rollbackRegistration(registered))
 		}
 		ok, err := n.client.RegisterInstance(vo.RegisterInstanceParam{
 			Ip: n.cfg.AdvertiseIP, Port: item.port, ServiceName: item.service,
@@ -111,19 +111,30 @@ func (n *nacosRegistry) Register(ctx context.Context) error {
 			Metadata: item.metadata, ClusterName: n.cfg.Cluster, GroupName: n.cfg.Group,
 		})
 		if err != nil || !ok {
-			for index := len(registered) - 1; index >= 0; index-- {
-				_ = n.deregisterEndpoint(registered[index])
-			}
+			var registerErr error
 			if err != nil {
-				return fmt.Errorf("register Nacos service %s: %w", item.service, err)
+				registerErr = fmt.Errorf("register Nacos service %s: %w", item.service, err)
+			} else {
+				registerErr = fmt.Errorf("register Nacos service %s returned false", item.service)
 			}
-			return fmt.Errorf("register Nacos service %s returned false", item.service)
+			return errors.Join(registerErr, n.rollbackRegistration(registered))
 		}
 		registered = append(registered, item)
 	}
 	n.registered.Store(true)
 	return nil
 }
+
+func (n *nacosRegistry) rollbackRegistration(registered []endpoint) error {
+	var rollbackErrors []error
+	for index := len(registered) - 1; index >= 0; index-- {
+		if err := n.deregisterEndpoint(registered[index]); err != nil {
+			rollbackErrors = append(rollbackErrors, fmt.Errorf("rollback partial Nacos registration: %w", err))
+		}
+	}
+	return errors.Join(rollbackErrors...)
+}
+
 func (n *nacosRegistry) Deregister(ctx context.Context) error {
 	if !n.registered.Load() {
 		return nil
