@@ -35,6 +35,10 @@ var protectedOperations = map[string]struct{}{
 	forgev1.OperationPlatformServiceResetUserPassword:     {},
 	forgev1.OperationPlatformServiceRevokeSession:         {},
 	forgev1.OperationPlatformServiceExportAuditLogs:       {},
+	forgev1.OperationApprovalServiceCreateApproval:        {},
+	forgev1.OperationApprovalServiceDecideApproval:        {},
+	forgev1.OperationApprovalServiceTransferApproval:      {},
+	forgev1.OperationApprovalServiceWithdrawApproval:      {},
 }
 
 func Server() middleware.Middleware {

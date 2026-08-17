@@ -14,6 +14,35 @@ export type ForgeV1ApiToken = {
     prefix?: string;
 };
 
+export type ForgeV1ApprovalRequest = {
+    id?: string;
+    organizationId?: string;
+    requestType?: string;
+    action?: string;
+    resource?: string;
+    resourceId?: string;
+    summary?: string;
+    requestDigest?: string;
+    applicantId?: string;
+    mode?: string;
+    requiredApprovals?: number;
+    status?: string;
+    expiresAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    tasks?: Array<ForgeV1ApprovalTask>;
+};
+
+export type ForgeV1ApprovalTask = {
+    id?: string;
+    assigneeId?: string;
+    status?: string;
+    decision?: string;
+    comment?: string;
+    transferredFrom?: string;
+    decidedAt?: string;
+};
+
 export type ForgeV1AuditEvent = {
     id?: string;
     occurredAt?: string;
@@ -66,6 +95,23 @@ export type ForgeV1CreateApiTokenResponse = {
     secret?: string;
 };
 
+export type ForgeV1CreateApprovalRequest = {
+    requestType?: string;
+    action?: string;
+    resource?: string;
+    resourceId?: string;
+    summary?: string;
+    payloadJson?: string;
+    mode?: string;
+    requiredApprovals?: number;
+    approverIds?: Array<string>;
+    expiresInSeconds?: string;
+};
+
+export type ForgeV1CreateApprovalResponse = {
+    approval?: ForgeV1ApprovalRequest;
+};
+
 export type ForgeV1CreateDepartmentRequest = {
     departmentKey?: string;
     name?: string;
@@ -113,6 +159,16 @@ export type ForgeV1CreateUserResponse = {
     user?: ForgeV1User;
 };
 
+export type ForgeV1DecideApprovalRequest = {
+    approvalId?: string;
+    decision?: string;
+    comment?: string;
+};
+
+export type ForgeV1DecideApprovalResponse = {
+    approval?: ForgeV1ApprovalRequest;
+};
+
 export type ForgeV1Department = {
     id?: string;
     organizationId?: string;
@@ -151,6 +207,10 @@ export type ForgeV1ExportAuditLogsResponse = {
     content?: string;
     contentType?: string;
     filename?: string;
+};
+
+export type ForgeV1GetApprovalResponse = {
+    approval?: ForgeV1ApprovalRequest;
 };
 
 export type ForgeV1GetCurrentUserResponse = {
@@ -376,6 +436,16 @@ export type ForgeV1StepUpAuthenticationResponse = {
     verifiedAt?: string;
 };
 
+export type ForgeV1TransferApprovalRequest = {
+    approvalId?: string;
+    newAssigneeId?: string;
+    comment?: string;
+};
+
+export type ForgeV1TransferApprovalResponse = {
+    approval?: ForgeV1ApprovalRequest;
+};
+
 export type ForgeV1UnlockUserRequest = {
     userId?: string;
 };
@@ -532,6 +602,15 @@ export type ForgeV1UserGroup = {
     memberCount?: string;
     createdAt?: string;
     updatedAt?: string;
+};
+
+export type ForgeV1WithdrawApprovalRequest = {
+    approvalId?: string;
+    comment?: string;
+};
+
+export type ForgeV1WithdrawApprovalResponse = {
+    approval?: ForgeV1ApprovalRequest;
 };
 
 export type PlatformServiceListAuditLogsData = {
@@ -1116,6 +1195,94 @@ export type IdentityServiceRevokeApiTokenResponses = {
 };
 
 export type IdentityServiceRevokeApiTokenResponse = IdentityServiceRevokeApiTokenResponses[keyof IdentityServiceRevokeApiTokenResponses];
+
+export type ApprovalServiceCreateApprovalData = {
+    body: ForgeV1CreateApprovalRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/approvals';
+};
+
+export type ApprovalServiceCreateApprovalResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateApprovalResponse;
+};
+
+export type ApprovalServiceCreateApprovalResponse = ApprovalServiceCreateApprovalResponses[keyof ApprovalServiceCreateApprovalResponses];
+
+export type ApprovalServiceGetApprovalData = {
+    body?: never;
+    path: {
+        approvalId: string;
+    };
+    query?: never;
+    url: '/api/v1/approvals/{approvalId}';
+};
+
+export type ApprovalServiceGetApprovalResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1GetApprovalResponse;
+};
+
+export type ApprovalServiceGetApprovalResponse = ApprovalServiceGetApprovalResponses[keyof ApprovalServiceGetApprovalResponses];
+
+export type ApprovalServiceDecideApprovalData = {
+    body: ForgeV1DecideApprovalRequest;
+    path: {
+        approvalId: string;
+    };
+    query?: never;
+    url: '/api/v1/approvals/{approvalId}/decisions';
+};
+
+export type ApprovalServiceDecideApprovalResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1DecideApprovalResponse;
+};
+
+export type ApprovalServiceDecideApprovalResponse = ApprovalServiceDecideApprovalResponses[keyof ApprovalServiceDecideApprovalResponses];
+
+export type ApprovalServiceTransferApprovalData = {
+    body: ForgeV1TransferApprovalRequest;
+    path: {
+        approvalId: string;
+    };
+    query?: never;
+    url: '/api/v1/approvals/{approvalId}/transfer';
+};
+
+export type ApprovalServiceTransferApprovalResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1TransferApprovalResponse;
+};
+
+export type ApprovalServiceTransferApprovalResponse = ApprovalServiceTransferApprovalResponses[keyof ApprovalServiceTransferApprovalResponses];
+
+export type ApprovalServiceWithdrawApprovalData = {
+    body: ForgeV1WithdrawApprovalRequest;
+    path: {
+        approvalId: string;
+    };
+    query?: never;
+    url: '/api/v1/approvals/{approvalId}/withdraw';
+};
+
+export type ApprovalServiceWithdrawApprovalResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1WithdrawApprovalResponse;
+};
+
+export type ApprovalServiceWithdrawApprovalResponse = ApprovalServiceWithdrawApprovalResponses[keyof ApprovalServiceWithdrawApprovalResponses];
 
 export type IdentityServiceLoginData = {
     body: ForgeV1LoginRequest;

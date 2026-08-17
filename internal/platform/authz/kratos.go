@@ -12,6 +12,7 @@ import (
 )
 
 const platformOperationPrefix = "/forge.v1.PlatformService/"
+const approvalOperationPrefix = "/forge.v1.ApprovalService/"
 
 func Server(rules map[string][]string) middleware.Middleware {
 	return func(next middleware.Handler) middleware.Handler {
@@ -26,7 +27,7 @@ func Server(rules map[string][]string) middleware.Middleware {
 			}
 			required, registered := rules[tr.Operation()]
 			if !registered {
-				if strings.HasPrefix(tr.Operation(), platformOperationPrefix) {
+				if strings.HasPrefix(tr.Operation(), platformOperationPrefix) || strings.HasPrefix(tr.Operation(), approvalOperationPrefix) {
 					return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "operation has no authorization policy")
 				}
 				return next(ctx, req)
@@ -83,5 +84,10 @@ func PlatformRules() map[string][]string {
 		forgev1.OperationPlatformServiceRevokeSession:          {"system.session.revoke"},
 		forgev1.OperationPlatformServiceListAuditLogs:          {"system.audit.read"},
 		forgev1.OperationPlatformServiceExportAuditLogs:        {"system.audit.export"},
+		forgev1.OperationApprovalServiceCreateApproval:         {"approval.request.create"},
+		forgev1.OperationApprovalServiceGetApproval:            {"approval.request.read"},
+		forgev1.OperationApprovalServiceDecideApproval:         {"approval.task.decide"},
+		forgev1.OperationApprovalServiceTransferApproval:       {"approval.task.transfer"},
+		forgev1.OperationApprovalServiceWithdrawApproval:       {"approval.request.withdraw"},
 	}
 }

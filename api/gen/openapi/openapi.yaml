@@ -760,6 +760,128 @@ paths:
             security:
                 - SessionCookie: []
                   CsrfToken: []
+    /api/v1/approvals:
+        post:
+            tags:
+                - ApprovalService
+            operationId: ApprovalService_CreateApproval
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateApprovalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateApprovalResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/approvals/{approvalId}:
+        get:
+            tags:
+                - ApprovalService
+            operationId: ApprovalService_GetApproval
+            parameters:
+                - name: approvalId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.GetApprovalResponse'
+            security:
+                - SessionCookie: []
+    /api/v1/approvals/{approvalId}/decisions:
+        post:
+            tags:
+                - ApprovalService
+            operationId: ApprovalService_DecideApproval
+            parameters:
+                - name: approvalId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.DecideApprovalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.DecideApprovalResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/approvals/{approvalId}/transfer:
+        post:
+            tags:
+                - ApprovalService
+            operationId: ApprovalService_TransferApproval
+            parameters:
+                - name: approvalId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.TransferApprovalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.TransferApprovalResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/approvals/{approvalId}/withdraw:
+        post:
+            tags:
+                - ApprovalService
+            operationId: ApprovalService_WithdrawApproval
+            parameters:
+                - name: approvalId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.WithdrawApprovalRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.WithdrawApprovalResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
     /api/v1/auth/login:
         post:
             tags:
@@ -1025,6 +1147,65 @@ components:
                     format: date-time
                 prefix:
                     type: string
+        forge.v1.ApprovalRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                requestType:
+                    type: string
+                action:
+                    type: string
+                resource:
+                    type: string
+                resourceId:
+                    type: string
+                summary:
+                    type: string
+                requestDigest:
+                    type: string
+                applicantId:
+                    type: string
+                mode:
+                    type: string
+                requiredApprovals:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                expiresAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                tasks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.ApprovalTask'
+        forge.v1.ApprovalTask:
+            type: object
+            properties:
+                id:
+                    type: string
+                assigneeId:
+                    type: string
+                status:
+                    type: string
+                decision:
+                    type: string
+                comment:
+                    type: string
+                transferredFrom:
+                    type: string
+                decidedAt:
+                    type: string
+                    format: date-time
         forge.v1.AuditEvent:
             type: object
             properties:
@@ -1106,6 +1287,37 @@ components:
                     $ref: '#/components/schemas/forge.v1.ApiToken'
                 secret:
                     type: string
+        forge.v1.CreateApprovalRequest:
+            type: object
+            properties:
+                requestType:
+                    type: string
+                action:
+                    type: string
+                resource:
+                    type: string
+                resourceId:
+                    type: string
+                summary:
+                    type: string
+                payloadJson:
+                    type: string
+                mode:
+                    type: string
+                requiredApprovals:
+                    type: integer
+                    format: int32
+                approverIds:
+                    type: array
+                    items:
+                        type: string
+                expiresInSeconds:
+                    type: string
+        forge.v1.CreateApprovalResponse:
+            type: object
+            properties:
+                approval:
+                    $ref: '#/components/schemas/forge.v1.ApprovalRequest'
         forge.v1.CreateDepartmentRequest:
             type: object
             properties:
@@ -1178,6 +1390,20 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.DecideApprovalRequest:
+            type: object
+            properties:
+                approvalId:
+                    type: string
+                decision:
+                    type: string
+                comment:
+                    type: string
+        forge.v1.DecideApprovalResponse:
+            type: object
+            properties:
+                approval:
+                    $ref: '#/components/schemas/forge.v1.ApprovalRequest'
         forge.v1.Department:
             type: object
             properties:
@@ -1243,6 +1469,11 @@ components:
                     type: string
                 filename:
                     type: string
+        forge.v1.GetApprovalResponse:
+            type: object
+            properties:
+                approval:
+                    $ref: '#/components/schemas/forge.v1.ApprovalRequest'
         forge.v1.GetCurrentUserResponse:
             type: object
             properties:
@@ -1591,6 +1822,20 @@ components:
                 verifiedAt:
                     type: string
                     format: date-time
+        forge.v1.TransferApprovalRequest:
+            type: object
+            properties:
+                approvalId:
+                    type: string
+                newAssigneeId:
+                    type: string
+                comment:
+                    type: string
+        forge.v1.TransferApprovalResponse:
+            type: object
+            properties:
+                approval:
+                    $ref: '#/components/schemas/forge.v1.ApprovalRequest'
         forge.v1.UnlockUserRequest:
             type: object
             properties:
@@ -1852,6 +2097,18 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+        forge.v1.WithdrawApprovalRequest:
+            type: object
+            properties:
+                approvalId:
+                    type: string
+                comment:
+                    type: string
+        forge.v1.WithdrawApprovalResponse:
+            type: object
+            properties:
+                approval:
+                    $ref: '#/components/schemas/forge.v1.ApprovalRequest'
     securitySchemes:
         SessionCookie:
             type: apiKey
@@ -1869,6 +2126,7 @@ components:
             name: X-CSRF-Token
             in: header
 tags:
+    - name: ApprovalService
     - name: IdentityService
     - name: PlatformService
     - name: ReferenceSettlementService

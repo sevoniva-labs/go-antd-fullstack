@@ -18,6 +18,7 @@ import (
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
 	"github.com/sevoniva-labs/forge/internal/adapters/kratosapi"
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
+	appapproval "github.com/sevoniva-labs/forge/internal/app/approval"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/authn"
@@ -144,6 +145,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 
 	repo := repository.NewIdentityRepo(db)
+	approvalSvc := appapproval.NewService(repository.NewApprovalRepo(db))
 	identitySvc := appidentity.NewService(repo, appidentity.Options{
 		MinLength:     cfg.Security.PasswordMinLength,
 		RequireUpper:  cfg.Security.PasswordUpper,
@@ -224,9 +226,11 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
 	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter, db)
 	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db, ratelimit.New(c), cfg.Security.SecureCookies, cfg.Security.SameSite)
+	approvalService := kratosapi.NewApprovalService(approvalSvc, auditWriter, db)
 	forgev1.RegisterSystemServiceHTTPServer(httpServer, systemService)
 	forgev1.RegisterIdentityServiceHTTPServer(httpServer, identityService)
 	forgev1.RegisterPlatformServiceHTTPServer(httpServer, platformService)
+	forgev1.RegisterApprovalServiceHTTPServer(httpServer, approvalService)
 	if met != nil {
 		httpServer.Handle(cfg.Observability.MetricsPath, met.Handler())
 	}
@@ -243,6 +247,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
 	forgev1.RegisterPlatformServiceServer(grpcServer, platformService)
 	forgev1.RegisterIdentityServiceServer(grpcServer, identityService)
+	forgev1.RegisterApprovalServiceServer(grpcServer, approvalService)
 	runtime := kratos.New(
 		kratos.Context(ctx), kratos.Name(cfg.App.Name), kratos.Version(opts.Version),
 		kratos.Metadata(map[string]string{"environment": cfg.App.Environment, "region": cfg.App.Region, "zone": cfg.App.Zone}),

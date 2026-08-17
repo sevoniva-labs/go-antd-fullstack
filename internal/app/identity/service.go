@@ -113,6 +113,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
 	{"system.audit.read", "查看审计日志"}, {"system.audit.export", "导出审计日志"},
 	{"system.config.read", "查看系统配置"}, {"system.security.manage", "管理安全配置"},
+	{"approval.request.create", "发起审批"}, {"approval.request.read", "查看审批"}, {"approval.task.decide", "处理审批"}, {"approval.task.transfer", "转办审批"}, {"approval.request.withdraw", "撤回审批"},
 }
 
 func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwordRaw string) error {
@@ -156,6 +157,17 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "auditor", k); err != nil {
 			return err
 		}
+	}
+	for _, k := range []string{"approval.request.create", "approval.request.read", "approval.task.decide", "approval.task.transfer", "approval.request.withdraw"} {
+		if err = s.repo.GrantPermissionToRole(ctx, orgID, "user", k); err != nil {
+			return err
+		}
+		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
+			return err
+		}
+	}
+	if err = s.repo.GrantPermissionToRole(ctx, orgID, "auditor", "approval.request.read"); err != nil {
+		return err
 	}
 	if admin == "" {
 		return s.finalizeBootstrapDefaults(ctx, orgID)
