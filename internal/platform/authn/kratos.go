@@ -2,6 +2,8 @@ package authn
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"strings"
 
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
@@ -11,6 +13,7 @@ import (
 )
 
 type Authenticator interface {
+	Authenticate(context.Context, string) (domain.Principal, error)
 	AuthenticateAPIToken(context.Context, string) (domain.Principal, error)
 }
 
@@ -23,17 +26,29 @@ func Server(authenticator Authenticator) middleware.Middleware {
 			if !ok {
 				return nil, kratoserrors.Unauthorized("UNAUTHENTICATED", "transport context is required")
 			}
-			token := bearerToken(tr.RequestHeader().Get("Authorization"))
-			if token == "" {
-				return nil, kratoserrors.Unauthorized("UNAUTHENTICATED", "Bearer token is required")
-			}
-			principal, err := authenticator.AuthenticateAPIToken(ctx, token)
+			principal, err := authenticate(ctx, authenticator, tr.RequestHeader())
 			if err != nil {
 				return nil, kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 			}
 			return next(WithPrincipal(ctx, principal), req)
 		}
 	}
+}
+
+func authenticate(ctx context.Context, authenticator Authenticator, header transport.Header) (domain.Principal, error) {
+	authorization := strings.TrimSpace(header.Get("Authorization"))
+	if authorization != "" {
+		token := bearerToken(authorization)
+		if token == "" {
+			return domain.Principal{}, errors.New("unsupported authorization scheme")
+		}
+		return authenticator.AuthenticateAPIToken(ctx, token)
+	}
+	session := sessionCookie(header.Get("Cookie"))
+	if session == "" {
+		return domain.Principal{}, errors.New("credentials are required")
+	}
+	return authenticator.Authenticate(ctx, session)
 }
 
 func WithPrincipal(ctx context.Context, principal domain.Principal) context.Context {
@@ -51,4 +66,13 @@ func bearerToken(value string) string {
 		return parts[1]
 	}
 	return ""
+}
+
+func sessionCookie(value string) string {
+	request := &http.Request{Header: http.Header{"Cookie": []string{value}}}
+	cookie, err := request.Cookie("forge_session")
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(cookie.Value)
 }
