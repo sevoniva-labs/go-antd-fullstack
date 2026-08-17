@@ -39,6 +39,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     rolldownOptions: {
       output: {
+        chunkFileNames: 'assets/chunk-[hash].js',
         codeSplitting: {
           groups: [
             {
@@ -49,13 +50,15 @@ export default defineConfig({
             {
               name: 'ant-design',
               test: /node_modules[\\/](?:antd|@ant-design[\\/]|@rc-component[\\/]|rc-[^\\/]+)(?:[\\/]|$)/,
-              maxSize: 400 * 1024,
+              entriesAware: true,
+              maxSize: 1024 * 1024,
               priority: 20,
             },
             {
               name: 'vendor',
               test: /node_modules/,
-              maxSize: 350 * 1024,
+              entriesAware: true,
+              maxSize: 1024 * 1024,
               priority: 10,
             },
           ],
