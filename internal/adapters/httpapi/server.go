@@ -93,23 +93,23 @@ func New(d Dependencies) *Server {
 		r.Post("/api/v1/api-tokens", s.createAPIToken)
 		r.Delete("/api/v1/api-tokens/{tokenID}", s.revokeAPIToken)
 		r.Route("/api/v1/admin", func(r chi.Router) {
-			r.Get("/organization", requirePermissions("system.organization.read")(http.HandlerFunc(s.getOrganization)))
-			r.Patch("/organization", requirePermissions("system.organization.manage")(http.HandlerFunc(s.updateOrganization)))
-			r.Get("/security-config", requirePermissions("system.config.read")(http.HandlerFunc(s.getSecurityConfig)))
-			r.Put("/security-config", requirePermissions("system.security.manage")(http.HandlerFunc(s.updateSecurityConfig)))
-			r.Get("/roles", requirePermissions("system.role.read")(http.HandlerFunc(s.listRoles)))
-			r.Get("/permissions", requirePermissions("system.role.read")(http.HandlerFunc(s.listPermissions)))
-			r.Put("/roles/{roleKey}/permissions", requirePermissions("system.role.manage")(http.HandlerFunc(s.updateRolePermissions)))
-			r.Get("/users", requirePermissions("system.user.read")(http.HandlerFunc(s.listUsers)))
-			r.Post("/users", requirePermissions("system.user.create")(http.HandlerFunc(s.createUser)))
-			r.Patch("/users/{userID}/roles", requirePermissions("system.user.role.manage")(http.HandlerFunc(s.updateUserRoles)))
-			r.Patch("/users/{userID}/status", requirePermissions("system.user.update")(http.HandlerFunc(s.updateUserStatus)))
-			r.Post("/users/{userID}/unlock", requirePermissions("system.user.update")(http.HandlerFunc(s.unlockUser)))
-			r.Post("/users/{userID}/reset-password", requirePermissions("system.user.update")(http.HandlerFunc(s.resetUserPassword)))
-			r.Get("/sessions", requirePermissions("system.session.read")(http.HandlerFunc(s.listSessions)))
-			r.Delete("/sessions/{sessionID}", requirePermissions("system.session.revoke")(http.HandlerFunc(s.revokeSession)))
-			r.Get("/audit-logs", requirePermissions("system.audit.read")(http.HandlerFunc(s.listAuditLogs)))
-			r.Get("/audit-logs/export", requirePermissions("system.audit.export")(http.HandlerFunc(s.exportAuditLogs)))
+			r.With(requirePermissions("system.organization.read")).Get("/organization", s.getOrganization)
+			r.With(requirePermissions("system.organization.manage")).Patch("/organization", s.updateOrganization)
+			r.With(requirePermissions("system.config.read")).Get("/security-config", s.getSecurityConfig)
+			r.With(requirePermissions("system.security.manage")).Put("/security-config", s.updateSecurityConfig)
+			r.With(requirePermissions("system.role.read")).Get("/roles", s.listRoles)
+			r.With(requirePermissions("system.role.read")).Get("/permissions", s.listPermissions)
+			r.With(requirePermissions("system.role.manage")).Put("/roles/{roleKey}/permissions", s.updateRolePermissions)
+			r.With(requirePermissions("system.user.read")).Get("/users", s.listUsers)
+			r.With(requirePermissions("system.user.create")).Post("/users", s.createUser)
+			r.With(requirePermissions("system.user.role.manage")).Patch("/users/{userID}/roles", s.updateUserRoles)
+			r.With(requirePermissions("system.user.update")).Patch("/users/{userID}/status", s.updateUserStatus)
+			r.With(requirePermissions("system.user.update")).Post("/users/{userID}/unlock", s.unlockUser)
+			r.With(requirePermissions("system.user.update")).Post("/users/{userID}/reset-password", s.resetUserPassword)
+			r.With(requirePermissions("system.session.read")).Get("/sessions", s.listSessions)
+			r.With(requirePermissions("system.session.revoke")).Delete("/sessions/{sessionID}", s.revokeSession)
+			r.With(requirePermissions("system.audit.read")).Get("/audit-logs", s.listAuditLogs)
+			r.With(requirePermissions("system.audit.export")).Get("/audit-logs/export", s.exportAuditLogs)
 		})
 	})
 	if s.metrics != nil && s.cfg.Observability.MetricsEnabled {
@@ -295,7 +295,7 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		case strings.Contains(strings.ToLower(err.Error()), "duplicate"), strings.Contains(strings.ToLower(err.Error()), "unique"):
 			code, msg, status = "LOGIN_NAME_CONFLICT", "登录名已存在", http.StatusConflict
 		default:
-			s.log.Error("create user failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			s.log.Error("create user failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 			status = http.StatusInternalServerError
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
@@ -332,29 +332,29 @@ func (s *Server) updateOrganization(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	item, err := s.identity.UpdateOrganization(r.Context(), p.OrganizationID, identity.Organization{
-		Name:         req.Name,
-		Description:  req.Description,
-		Status:       req.Status,
-		MaxUsers:     req.MaxUsers,
-		MaxSessions:  req.MaxActiveSessions,
+	item, err := s.identity.UpdateOrganization(r.Context(), p.OrganizationID, domain.Organization{
+		Name:        req.Name,
+		Description: req.Description,
+		Status:      req.Status,
+		MaxUsers:    req.MaxUsers,
+		MaxSessions: req.MaxActiveSessions,
 	})
 	if err != nil {
 		switch {
 		case strings.Contains(err.Error(), "invalid organization"):
 			httpx.Error(w, 400, "INVALID_ORGANIZATION", "组织参数不合法", RequestID(r), TraceID(r))
 		default:
-			s.log.Error("update organization failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			s.log.Error("update organization failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 			httpx.Error(w, 500, "INTERNAL", "更新组织信息失败", RequestID(r), TraceID(r))
 		}
 		return
 	}
 	if s.audit != nil {
 		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "organization.update", ResourceType: "organization", ResourceID: item.ID, ClientIP: s.clientIP(r), Details: map[string]any{
-			"name":               req.Name,
-			"description":        req.Description,
-			"status":             req.Status,
-			"max_users":          req.MaxUsers,
+			"name":                req.Name,
+			"description":         req.Description,
+			"status":              req.Status,
+			"max_users":           req.MaxUsers,
 			"max_active_sessions": req.MaxActiveSessions,
 		}})
 	}
@@ -365,7 +365,7 @@ func (s *Server) getSecurityConfig(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	policy, err := s.identity.SecurityPolicy(r.Context(), p.OrganizationID)
 	if err != nil {
-		s.log.Error("get security config failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		s.log.Error("get security config failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 		httpx.Error(w, 500, "INTERNAL", "查询安全配置失败", RequestID(r), TraceID(r))
 		return
 	}
@@ -373,17 +373,17 @@ func (s *Server) getSecurityConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 type updateSecurityConfigRequest struct {
-	PasswordMinLength       int   `json:"password_min_length"`
+	PasswordMinLength        int   `json:"password_min_length"`
 	PasswordRequireUpper     bool  `json:"password_require_upper"`
 	PasswordRequireLower     bool  `json:"password_require_lower"`
 	PasswordRequireDigit     bool  `json:"password_require_digit"`
 	PasswordRequireSymbol    bool  `json:"password_require_symbol"`
-	PasswordHistory         int   `json:"password_history"`
-	PasswordMaxAgeDays      int   `json:"password_max_age_days"`
-	LoginMaxFailures        int   `json:"login_max_failures"`
+	PasswordHistory          int   `json:"password_history"`
+	PasswordMaxAgeDays       int   `json:"password_max_age_days"`
+	LoginMaxFailures         int   `json:"login_max_failures"`
 	LoginLockDurationSeconds int64 `json:"login_lock_duration_seconds"`
-	SessionTTLSeconds       int64 `json:"session_ttl_seconds"`
-	MaxConcurrentSessions   int   `json:"max_active_sessions"`
+	SessionTTLSeconds        int64 `json:"session_ttl_seconds"`
+	MaxConcurrentSessions    int   `json:"max_active_sessions"`
 }
 
 func (s *Server) updateSecurityConfig(w http.ResponseWriter, r *http.Request) {
@@ -394,40 +394,40 @@ func (s *Server) updateSecurityConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	policy, err := s.identity.UpdateSecurityPolicy(r.Context(), p.OrganizationID, p.UserID, domain.SecurityPolicy{
-		PasswordMinLength:       req.PasswordMinLength,
-		PasswordRequireUpper:    req.PasswordRequireUpper,
-		PasswordRequireLower:    req.PasswordRequireLower,
-		PasswordRequireDigit:    req.PasswordRequireDigit,
-		PasswordRequireSymbol:   req.PasswordRequireSymbol,
-		PasswordHistory:         req.PasswordHistory,
-		PasswordMaxAgeDays:      req.PasswordMaxAgeDays,
-		LoginMaxFailures:        req.LoginMaxFailures,
+		PasswordMinLength:        req.PasswordMinLength,
+		PasswordRequireUpper:     req.PasswordRequireUpper,
+		PasswordRequireLower:     req.PasswordRequireLower,
+		PasswordRequireDigit:     req.PasswordRequireDigit,
+		PasswordRequireSymbol:    req.PasswordRequireSymbol,
+		PasswordHistory:          req.PasswordHistory,
+		PasswordMaxAgeDays:       req.PasswordMaxAgeDays,
+		LoginMaxFailures:         req.LoginMaxFailures,
 		LoginLockDurationSeconds: req.LoginLockDurationSeconds,
-		SessionTTLSeconds:       req.SessionTTLSeconds,
-		MaxConcurrentSessions:   req.MaxConcurrentSessions,
+		SessionTTLSeconds:        req.SessionTTLSeconds,
+		MaxConcurrentSessions:    req.MaxConcurrentSessions,
 	})
 	if err != nil {
 		if errors.Is(err, appidentity.ErrInvalidSecurityPolicy) {
 			httpx.Error(w, 400, "INVALID_SECURITY_CONFIG", "安全配置参数不合法", RequestID(r), TraceID(r))
 			return
 		}
-		s.log.Error("update security config failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		s.log.Error("update security config failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 		httpx.Error(w, 500, "INTERNAL", "更新安全配置失败", RequestID(r), TraceID(r))
 		return
 	}
 	if s.audit != nil {
 		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.config.update", ResourceType: "security", ResourceID: "policy", ClientIP: s.clientIP(r), Details: map[string]any{
-			"password_min_length":        req.PasswordMinLength,
-			"password_require_upper":     req.PasswordRequireUpper,
-			"password_require_lower":     req.PasswordRequireLower,
-			"password_require_digit":     req.PasswordRequireDigit,
-			"password_require_symbol":    req.PasswordRequireSymbol,
-			"password_history":           req.PasswordHistory,
-			"password_max_age_days":      req.PasswordMaxAgeDays,
-			"login_max_failures":         req.LoginMaxFailures,
+			"password_min_length":         req.PasswordMinLength,
+			"password_require_upper":      req.PasswordRequireUpper,
+			"password_require_lower":      req.PasswordRequireLower,
+			"password_require_digit":      req.PasswordRequireDigit,
+			"password_require_symbol":     req.PasswordRequireSymbol,
+			"password_history":            req.PasswordHistory,
+			"password_max_age_days":       req.PasswordMaxAgeDays,
+			"login_max_failures":          req.LoginMaxFailures,
 			"login_lock_duration_seconds": req.LoginLockDurationSeconds,
-			"session_ttl_seconds":        req.SessionTTLSeconds,
-			"max_active_sessions":        req.MaxConcurrentSessions,
+			"session_ttl_seconds":         req.SessionTTLSeconds,
+			"max_active_sessions":         req.MaxConcurrentSessions,
 		}})
 	}
 	httpx.Success(w, 200, policy, RequestID(r), TraceID(r))
@@ -628,7 +628,7 @@ func (s *Server) listAuditLogs(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	items, err := s.audit.List(r.Context(), p.OrganizationID, 200)
 	if err != nil {
-		s.log.Error("list audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		s.log.Error("list audit logs failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 		httpx.Error(w, 500, "INTERNAL", "查询审计日志失败", RequestID(r), TraceID(r))
 		return
 	}
@@ -658,7 +658,7 @@ func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
 
 	items, err := s.audit.List(r.Context(), p.OrganizationID, limit)
 	if err != nil {
-		s.log.Error("export audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+		s.log.Error("export audit logs failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 		httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
 		return
 	}
@@ -703,7 +703,7 @@ func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
 		}
 		cw.Flush()
 		if err := cw.Error(); err != nil {
-			s.log.Error("write csv audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			s.log.Error("write csv audit logs failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 			httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
 			return
 		}
@@ -712,7 +712,7 @@ func (s *Server) exportAuditLogs(w http.ResponseWriter, r *http.Request) {
 	default:
 		data, err := json.Marshal(items)
 		if err != nil {
-			s.log.Error("encode json audit logs failed", "err", err, "request_id", RequestID(r), TraceID(r))
+			s.log.Error("encode json audit logs failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 			httpx.Error(w, 500, "INTERNAL", "导出审计日志失败", RequestID(r), TraceID(r))
 			return
 		}

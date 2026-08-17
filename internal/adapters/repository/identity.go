@@ -497,7 +497,7 @@ func (r *IdentityRepo) SetSecuritySettings(ctx context.Context, orgID, updatedBy
 		}
 		q := r.db.Rebind(upsert)
 		for key, value := range values {
-			if _, err := tx.ExecContext(q, orgID, key, value, now, updatedBy); err != nil {
+			if _, err := tx.ExecContext(ctx, q, orgID, key, value, now, updatedBy); err != nil {
 				return err
 			}
 		}

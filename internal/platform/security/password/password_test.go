@@ -17,7 +17,13 @@ func TestHasherRoundTrip(t *testing.T) {
 }
 
 func TestPolicy(t *testing.T) {
-	p := Policy{MinLength: 12}
+	p := Policy{
+		MinLength:     12,
+		RequireUpper:  true,
+		RequireLower:  true,
+		RequireDigit:  true,
+		RequireSymbol: true,
+	}
 	if err := p.Validate("Short1!"); err == nil {
 		t.Fatal("expected short password rejection")
 	}
