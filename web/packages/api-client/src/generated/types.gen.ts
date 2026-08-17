@@ -114,6 +114,12 @@ export type ForgeV1DependencyStatus = {
     message?: string;
 };
 
+export type ForgeV1EffectiveDataScope = {
+    organizationWide?: boolean;
+    self?: boolean;
+    departmentIds?: Array<string>;
+};
+
 export type ForgeV1ExportAuditLogsResponse = {
     content?: string;
     contentType?: string;
@@ -285,6 +291,7 @@ export type ForgeV1Role = {
     description?: string;
     dataScope?: string;
     permissions?: Array<string>;
+    dataScopeDepartmentIds?: Array<string>;
 };
 
 export type ForgeV1SecurityPolicy = {
@@ -371,6 +378,16 @@ export type ForgeV1UpdatePositionResponse = {
     position?: ForgeV1Position;
 };
 
+export type ForgeV1UpdateRoleDataScopeRequest = {
+    roleKey?: string;
+    dataScope?: string;
+    departmentIds?: Array<string>;
+};
+
+export type ForgeV1UpdateRoleDataScopeResponse = {
+    role?: ForgeV1Role;
+};
+
 export type ForgeV1UpdateRolePermissionsRequest = {
     roleKey?: string;
     permissions?: Array<string>;
@@ -443,6 +460,7 @@ export type ForgeV1User = {
     createdAt?: string;
     roles?: Array<string>;
     permissions?: Array<string>;
+    dataScope?: ForgeV1EffectiveDataScope;
 };
 
 export type ForgeV1UserAssignment = {
@@ -671,6 +689,24 @@ export type PlatformServiceListRolesResponses = {
 };
 
 export type PlatformServiceListRolesResponse = PlatformServiceListRolesResponses[keyof PlatformServiceListRolesResponses];
+
+export type PlatformServiceUpdateRoleDataScopeData = {
+    body: ForgeV1UpdateRoleDataScopeRequest;
+    path: {
+        roleKey: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/roles/{roleKey}/data-scope';
+};
+
+export type PlatformServiceUpdateRoleDataScopeResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdateRoleDataScopeResponse;
+};
+
+export type PlatformServiceUpdateRoleDataScopeResponse = PlatformServiceUpdateRoleDataScopeResponses[keyof PlatformServiceUpdateRoleDataScopeResponses];
 
 export type PlatformServiceUpdateRolePermissionsData = {
     body: ForgeV1UpdateRolePermissionsRequest;

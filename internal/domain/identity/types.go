@@ -2,6 +2,35 @@ package identity
 
 import "time"
 
+const (
+	DataScopeOrganization   = "ORGANIZATION"
+	DataScopeDepartment     = "DEPARTMENT"
+	DataScopeDepartmentTree = "DEPARTMENT_TREE"
+	DataScopeSelf           = "SELF"
+	DataScopeCustom         = "CUSTOM"
+)
+
+type EffectiveDataScope struct {
+	OrganizationWide bool     `json:"organization_wide"`
+	Self             bool     `json:"self"`
+	DepartmentIDs    []string `json:"department_ids"`
+}
+
+func (scope EffectiveDataScope) Allows(userID, departmentID, actorUserID string) bool {
+	if scope.OrganizationWide {
+		return true
+	}
+	if scope.Self && userID != "" && userID == actorUserID {
+		return true
+	}
+	for _, allowed := range scope.DepartmentIDs {
+		if allowed == departmentID {
+			return true
+		}
+	}
+	return false
+}
+
 type Organization struct {
 	ID          string    `json:"id"`
 	Key         string    `json:"org_key"`
@@ -104,6 +133,8 @@ type Role struct {
 	ID          string       `json:"id"`
 	Key         string       `json:"role_key"`
 	Name        string       `json:"name"`
+	DataScope   string       `json:"data_scope"`
+	Departments []string     `json:"data_scope_departments"`
 	Permissions []Permission `json:"permissions"`
 	CreatedAt   time.Time    `json:"created_at"`
 }
@@ -159,17 +190,18 @@ type APIToken struct {
 }
 
 type Principal struct {
-	Type               string    `json:"principal_type"`
-	UserID             string    `json:"user_id"`
-	OrganizationID     string    `json:"organization_id"`
-	LoginName          string    `json:"login_name"`
-	DisplayName        string    `json:"display_name"`
-	Roles              []string  `json:"roles"`
-	Permissions        []string  `json:"permissions,omitempty"`
-	Scopes             []string  `json:"scopes,omitempty"`
-	MustChangePassword bool      `json:"must_change_password"`
-	SessionID          string    `json:"-"`
-	PasswordChangedAt  time.Time `json:"-"`
+	Type               string             `json:"principal_type"`
+	UserID             string             `json:"user_id"`
+	OrganizationID     string             `json:"organization_id"`
+	LoginName          string             `json:"login_name"`
+	DisplayName        string             `json:"display_name"`
+	Roles              []string           `json:"roles"`
+	Permissions        []string           `json:"permissions,omitempty"`
+	Scopes             []string           `json:"scopes,omitempty"`
+	MustChangePassword bool               `json:"must_change_password"`
+	SessionID          string             `json:"-"`
+	PasswordChangedAt  time.Time          `json:"-"`
+	DataScope          EffectiveDataScope `json:"data_scope"`
 }
 
 func (p Principal) HasRole(keys ...string) bool {

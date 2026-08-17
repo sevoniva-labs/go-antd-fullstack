@@ -33,6 +33,7 @@ var ErrInvalidDepartment = errors.New("invalid department")
 var ErrInvalidPosition = errors.New("invalid position")
 var ErrInvalidUserGroup = errors.New("invalid user group")
 var ErrInvalidUserAssignment = errors.New("invalid user assignment")
+var ErrInvalidDataScope = errors.New("invalid data scope")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -105,8 +106,13 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	if err != nil {
 		return err
 	}
-	for _, r := range []struct{ k, n string }{{"system_admin", "系统管理员"}, {"security_admin", "安全管理员"}, {"auditor", "审计员"}, {"user", "普通用户"}} {
-		if _, err = s.repo.EnsureRole(ctx, orgID, r.k, r.n); err != nil {
+	for _, r := range []struct{ k, n, scope string }{
+		{"system_admin", "系统管理员", domain.DataScopeOrganization},
+		{"security_admin", "安全管理员", domain.DataScopeOrganization},
+		{"auditor", "审计员", domain.DataScopeOrganization},
+		{"user", "普通用户", domain.DataScopeSelf},
+	} {
+		if _, err = s.repo.EnsureRole(ctx, orgID, r.k, r.n, r.scope); err != nil {
 			return err
 		}
 	}
@@ -513,8 +519,8 @@ func (s *Service) Logout(ctx context.Context, token string) error {
 	}
 	return s.repo.DeleteSessionByHash(ctx, hashToken(token))
 }
-func (s *Service) ListUsers(ctx context.Context, orgID string) ([]domain.User, error) {
-	return s.repo.ListUsers(ctx, orgID, 200)
+func (s *Service) ListUsers(ctx context.Context, actor domain.Principal) ([]domain.User, error) {
+	return s.repo.ListUsers(ctx, actor.OrganizationID, actor.UserID, actor.DataScope, 200)
 }
 func (s *Service) CreateUser(ctx context.Context, actor domain.Principal, orgID, login, display, raw string, roles []string) (domain.User, error) {
 	if err := authorizeGrantActor(actor, orgID); err != nil {
@@ -779,6 +785,13 @@ func (s *Service) UpdateDepartment(ctx context.Context, actor domain.Principal, 
 			return domain.Department{}, err
 		}
 		if active > 0 {
+			return domain.Department{}, ErrInvalidDepartment
+		}
+		assigned, err := s.repo.CountCurrentAssignments(ctx, orgID, clean.ID, time.Now().UTC())
+		if err != nil {
+			return domain.Department{}, err
+		}
+		if assigned > 0 {
 			return domain.Department{}, ErrInvalidDepartment
 		}
 	}
@@ -1083,16 +1096,23 @@ func normalizeIDs(values []string, maximum int) ([]string, error) {
 	return clean, nil
 }
 
-func (s *Service) ListUserAssignments(ctx context.Context, orgID, userID string) ([]domain.UserAssignment, error) {
+func (s *Service) ListUserAssignments(ctx context.Context, actor domain.Principal, userID string) ([]domain.UserAssignment, error) {
 	userID = strings.TrimSpace(userID)
 	user, err := s.repo.UserByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	if user.OrganizationID != orgID {
+	if user.OrganizationID != actor.OrganizationID {
 		return nil, sql.ErrNoRows
 	}
-	return s.repo.ListUserAssignments(ctx, orgID, userID)
+	visible, err := s.userWithinDataScope(ctx, actor, userID)
+	if err != nil {
+		return nil, err
+	}
+	if !visible {
+		return nil, ErrGrantCeiling
+	}
+	return s.repo.ListUserAssignments(ctx, actor.OrganizationID, userID)
 }
 
 func (s *Service) ReplaceUserAssignments(ctx context.Context, actor domain.Principal, orgID, userID string, assignments []domain.UserAssignment) error {
@@ -1106,6 +1126,13 @@ func (s *Service) ReplaceUserAssignments(ctx context.Context, actor domain.Princ
 	}
 	if user.OrganizationID != orgID {
 		return sql.ErrNoRows
+	}
+	visible, err := s.userWithinDataScope(ctx, actor, userID)
+	if err != nil {
+		return err
+	}
+	if !visible {
+		return ErrGrantCeiling
 	}
 	clean, err := normalizeUserAssignments(orgID, userID, assignments, time.Now().UTC())
 	if err != nil {
@@ -1123,6 +1150,28 @@ func (s *Service) ReplaceUserAssignments(ctx context.Context, actor domain.Princ
 		return err
 	}
 	return s.repo.ReplaceUserAssignments(ctx, orgID, userID, clean)
+}
+
+func (s *Service) userWithinDataScope(ctx context.Context, actor domain.Principal, userID string) (bool, error) {
+	if actor.OrganizationID == "" || actor.UserID == "" {
+		return false, nil
+	}
+	if actor.DataScope.OrganizationWide || actor.HasRole("system_admin") {
+		return true, nil
+	}
+	if actor.DataScope.Self && actor.UserID == userID {
+		return true, nil
+	}
+	departments, err := s.repo.CurrentUserDepartmentIDs(ctx, actor.OrganizationID, userID, time.Now().UTC())
+	if err != nil {
+		return false, err
+	}
+	for _, departmentID := range departments {
+		if actor.DataScope.Allows(userID, departmentID, actor.UserID) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func normalizeUserAssignments(orgID, userID string, assignments []domain.UserAssignment, now time.Time) ([]domain.UserAssignment, error) {
@@ -1196,6 +1245,66 @@ func validateAssignmentTargets(departments []domain.Department, positions []doma
 
 func (s *Service) ListRoles(ctx context.Context, orgID string) ([]domain.Role, error) {
 	return s.repo.ListRoles(ctx, orgID)
+}
+
+func (s *Service) UpdateRoleDataScope(ctx context.Context, actor domain.Principal, orgID, roleKey, scopeType string, departmentIDs []string) error {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return err
+	}
+	if !actor.HasRole("system_admin") {
+		return ErrGrantCeiling
+	}
+	roleKey = strings.TrimSpace(roleKey)
+	scopeType = strings.ToUpper(strings.TrimSpace(scopeType))
+	if roleKey == "" || roleKey == "system_admin" {
+		return ErrInvalidDataScope
+	}
+	switch scopeType {
+	case domain.DataScopeOrganization, domain.DataScopeDepartment, domain.DataScopeDepartmentTree, domain.DataScopeSelf, domain.DataScopeCustom:
+	default:
+		return ErrInvalidDataScope
+	}
+	clean, err := normalizeIDs(departmentIDs, 500)
+	if err != nil {
+		return ErrInvalidDataScope
+	}
+	if scopeType == domain.DataScopeCustom {
+		if len(clean) == 0 {
+			return ErrInvalidDataScope
+		}
+		departments, err := s.repo.ListDepartmentsForUpdate(ctx, orgID)
+		if err != nil {
+			return err
+		}
+		allowed := make(map[string]struct{}, len(departments))
+		for _, department := range departments {
+			if department.Status == "ACTIVE" {
+				allowed[department.ID] = struct{}{}
+			}
+		}
+		for _, departmentID := range clean {
+			if _, ok := allowed[departmentID]; !ok {
+				return ErrInvalidDataScope
+			}
+		}
+	} else if len(clean) != 0 {
+		return ErrInvalidDataScope
+	}
+	roles, err := s.repo.ListRoles(ctx, orgID)
+	if err != nil {
+		return err
+	}
+	found := false
+	for _, role := range roles {
+		if role.Key == roleKey {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return ErrInvalidRole
+	}
+	return s.repo.ReplaceRoleDataScope(ctx, orgID, roleKey, scopeType, clean)
 }
 
 func (s *Service) ListPermissions(ctx context.Context) ([]domain.Permission, error) {

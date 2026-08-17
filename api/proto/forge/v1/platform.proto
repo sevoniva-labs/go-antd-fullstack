@@ -390,6 +390,42 @@ service PlatformService {
       ]
     };
   }
+  rpc UpdateRoleDataScope(UpdateRoleDataScopeRequest) returns (UpdateRoleDataScopeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/admin/roles/{role_key}/data-scope"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            },
+            {
+              name: "CsrfToken"
+              value: {
+                value: []
+              }
+            }
+          ]
+        },
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
+  }
   rpc UpdateRolePermissions(UpdateRolePermissionsRequest) returns (UpdateRolePermissionsResponse) {
     option (google.api.http) = {
       put: "/api/v1/admin/roles/{role_key}/permissions"
@@ -847,6 +883,15 @@ message UpdateRolePermissionsRequest {
   repeated string permissions = 2;
 }
 message UpdateRolePermissionsResponse {
+  Role role = 1;
+}
+
+message UpdateRoleDataScopeRequest {
+  string role_key = 1;
+  string data_scope = 2;
+  repeated string department_ids = 3;
+}
+message UpdateRoleDataScopeResponse {
   Role role = 1;
 }
 

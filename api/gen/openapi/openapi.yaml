@@ -248,6 +248,34 @@ paths:
             security:
                 - SessionCookie: []
                 - BearerAuth: []
+    /api/v1/admin/roles/{roleKey}/data-scope:
+        put:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdateRoleDataScope
+            parameters:
+                - name: roleKey
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdateRoleDataScopeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdateRoleDataScopeResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/roles/{roleKey}/permissions:
         put:
             tags:
@@ -1060,6 +1088,17 @@ components:
                     type: string
                 message:
                     type: string
+        forge.v1.EffectiveDataScope:
+            type: object
+            properties:
+                organizationWide:
+                    type: boolean
+                self:
+                    type: boolean
+                departmentIds:
+                    type: array
+                    items:
+                        type: string
         forge.v1.ExportAuditLogsResponse:
             type: object
             properties:
@@ -1322,6 +1361,10 @@ components:
                     type: array
                     items:
                         type: string
+                dataScopeDepartmentIds:
+                    type: array
+                    items:
+                        type: string
         forge.v1.SecurityPolicy:
             type: object
             properties:
@@ -1456,6 +1499,22 @@ components:
             properties:
                 position:
                     $ref: '#/components/schemas/forge.v1.Position'
+        forge.v1.UpdateRoleDataScopeRequest:
+            type: object
+            properties:
+                roleKey:
+                    type: string
+                dataScope:
+                    type: string
+                departmentIds:
+                    type: array
+                    items:
+                        type: string
+        forge.v1.UpdateRoleDataScopeResponse:
+            type: object
+            properties:
+                role:
+                    $ref: '#/components/schemas/forge.v1.Role'
         forge.v1.UpdateRolePermissionsRequest:
             type: object
             properties:
@@ -1573,6 +1632,8 @@ components:
                     type: array
                     items:
                         type: string
+                dataScope:
+                    $ref: '#/components/schemas/forge.v1.EffectiveDataScope'
         forge.v1.UserAssignment:
             type: object
             properties:

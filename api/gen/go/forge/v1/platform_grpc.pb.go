@@ -40,6 +40,7 @@ const (
 	PlatformService_UpdateSecurityPolicy_FullMethodName   = "/forge.v1.PlatformService/UpdateSecurityPolicy"
 	PlatformService_ListRoles_FullMethodName              = "/forge.v1.PlatformService/ListRoles"
 	PlatformService_ListPermissions_FullMethodName        = "/forge.v1.PlatformService/ListPermissions"
+	PlatformService_UpdateRoleDataScope_FullMethodName    = "/forge.v1.PlatformService/UpdateRoleDataScope"
 	PlatformService_UpdateRolePermissions_FullMethodName  = "/forge.v1.PlatformService/UpdateRolePermissions"
 	PlatformService_UpdateUserRoles_FullMethodName        = "/forge.v1.PlatformService/UpdateUserRoles"
 	PlatformService_UpdateUserStatus_FullMethodName       = "/forge.v1.PlatformService/UpdateUserStatus"
@@ -76,6 +77,7 @@ type PlatformServiceClient interface {
 	UpdateSecurityPolicy(ctx context.Context, in *UpdateSecurityPolicyRequest, opts ...grpc.CallOption) (*UpdateSecurityPolicyResponse, error)
 	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
 	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
+	UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(ctx context.Context, in *UpdateUserRolesRequest, opts ...grpc.CallOption) (*UpdateUserRolesResponse, error)
 	UpdateUserStatus(ctx context.Context, in *UpdateUserStatusRequest, opts ...grpc.CallOption) (*UpdateUserStatusResponse, error)
@@ -305,6 +307,16 @@ func (c *platformServiceClient) ListPermissions(ctx context.Context, in *ListPer
 	return out, nil
 }
 
+func (c *platformServiceClient) UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateRoleDataScopeResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UpdateRoleDataScope_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformServiceClient) UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateRolePermissionsResponse)
@@ -420,6 +432,7 @@ type PlatformServiceServer interface {
 	UpdateSecurityPolicy(context.Context, *UpdateSecurityPolicyRequest) (*UpdateSecurityPolicyResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
+	UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
 	UpdateUserStatus(context.Context, *UpdateUserStatusRequest) (*UpdateUserStatusResponse, error)
@@ -501,6 +514,9 @@ func (UnimplementedPlatformServiceServer) ListRoles(context.Context, *ListRolesR
 }
 func (UnimplementedPlatformServiceServer) ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListPermissions not implemented")
+}
+func (UnimplementedPlatformServiceServer) UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateRoleDataScope not implemented")
 }
 func (UnimplementedPlatformServiceServer) UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateRolePermissions not implemented")
@@ -928,6 +944,24 @@ func _PlatformService_ListPermissions_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_UpdateRoleDataScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleDataScopeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UpdateRoleDataScope(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UpdateRoleDataScope_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UpdateRoleDataScope(ctx, req.(*UpdateRoleDataScopeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlatformService_UpdateRolePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRolePermissionsRequest)
 	if err := dec(in); err != nil {
@@ -1180,6 +1214,10 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPermissions",
 			Handler:    _PlatformService_ListPermissions_Handler,
+		},
+		{
+			MethodName: "UpdateRoleDataScope",
+			Handler:    _PlatformService_UpdateRoleDataScope_Handler,
 		},
 		{
 			MethodName: "UpdateRolePermissions",

@@ -213,7 +213,12 @@ func principalUser(principal domain.Principal) *forgev1.User {
 		Id: principal.UserID, OrganizationId: principal.OrganizationID, LoginName: principal.LoginName,
 		DisplayName: principal.DisplayName, MustChangePassword: principal.MustChangePassword,
 		PasswordChangedAt: timestamp(principal.PasswordChangedAt), Roles: principal.Roles, Permissions: principal.Permissions,
+		DataScope: effectiveDataScopeProto(principal.DataScope),
 	}
+}
+
+func effectiveDataScopeProto(scope domain.EffectiveDataScope) *forgev1.EffectiveDataScope {
+	return &forgev1.EffectiveDataScope{OrganizationWide: scope.OrganizationWide, Self: scope.Self, DepartmentIds: scope.DepartmentIDs}
 }
 
 func (s *IdentityService) allow(ctx context.Context, key string, limit int, window time.Duration, retryAfter string) error {

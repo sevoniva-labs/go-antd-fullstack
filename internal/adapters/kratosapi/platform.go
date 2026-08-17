@@ -279,7 +279,7 @@ func (s *PlatformService) ListUserAssignments(ctx context.Context, req *forgev1.
 	if err != nil {
 		return nil, err
 	}
-	items, err := s.identity.ListUserAssignments(ctx, principal.OrganizationID, req.GetUserId())
+	items, err := s.identity.ListUserAssignments(ctx, principal, req.GetUserId())
 	if err != nil {
 		return nil, serviceError(err)
 	}
@@ -382,6 +382,21 @@ func (s *PlatformService) UpdateRolePermissions(ctx context.Context, req *forgev
 	return &forgev1.UpdateRolePermissionsResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), Permissions: req.GetPermissions()}}, nil
 }
 
+func (s *PlatformService) UpdateRoleDataScope(ctx context.Context, req *forgev1.UpdateRoleDataScopeRequest) (*forgev1.UpdateRoleDataScopeResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "role.data_scope.update", "role", req.GetRoleKey(), map[string]any{"data_scope": req.GetDataScope(), "department_count": len(req.GetDepartmentIds())})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.UpdateRoleDataScope(txCtx, principal, principal.OrganizationID, req.GetRoleKey(), req.GetDataScope(), req.GetDepartmentIds())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateRoleDataScopeResponse{Role: &forgev1.Role{Key: req.GetRoleKey(), DataScope: req.GetDataScope(), DataScopeDepartmentIds: req.GetDepartmentIds()}}, nil
+}
+
 func (s *PlatformService) UpdateUserRoles(ctx context.Context, req *forgev1.UpdateUserRolesRequest) (*forgev1.UpdateUserRolesResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -462,7 +477,7 @@ func (s *PlatformService) ListUsers(ctx context.Context, _ *forgev1.ListUsersReq
 	if err != nil {
 		return nil, err
 	}
-	users, err := s.identity.ListUsers(ctx, principal.OrganizationID)
+	users, err := s.identity.ListUsers(ctx, principal)
 	if err != nil {
 		return nil, internalError(err)
 	}
@@ -649,7 +664,7 @@ func serviceError(err error) error {
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
 		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment),
 		errors.Is(err, appidentity.ErrInvalidPosition), errors.Is(err, appidentity.ErrInvalidUserGroup),
-		errors.Is(err, appidentity.ErrInvalidUserAssignment):
+		errors.Is(err, appidentity.ErrInvalidUserAssignment), errors.Is(err, appidentity.ErrInvalidDataScope):
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	default:
 		return internalError(err)
@@ -744,7 +759,7 @@ func roleProto(role domain.Role) *forgev1.Role {
 	for _, permission := range role.Permissions {
 		permissions = append(permissions, permission.Key)
 	}
-	return &forgev1.Role{Key: role.Key, Name: role.Name, Permissions: permissions}
+	return &forgev1.Role{Key: role.Key, Name: role.Name, DataScope: role.DataScope, DataScopeDepartmentIds: role.Departments, Permissions: permissions}
 }
 
 func sessionProto(session domain.Session) *forgev1.Session {

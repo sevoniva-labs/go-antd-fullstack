@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"sort"
 	"strings"
 	"time"
 
@@ -51,7 +52,7 @@ func (r *IdentityRepo) EnsureOrganization(ctx context.Context, key, name string)
 	}
 	return "", err
 }
-func (r *IdentityRepo) EnsureRole(ctx context.Context, orgID, key, name string) (string, error) {
+func (r *IdentityRepo) EnsureRole(ctx context.Context, orgID, key, name, dataScope string) (string, error) {
 	var id string
 	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM roles WHERE organization_id=? AND role_key=?`), orgID, key).Scan(&id)
 	if err == nil {
@@ -61,7 +62,7 @@ func (r *IdentityRepo) EnsureRole(ctx context.Context, orgID, key, name string) 
 		return "", err
 	}
 	id = uuid.NewString()
-	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO roles(id,organization_id,role_key,name,created_at) VALUES(?,?,?,?,?)`), id, orgID, key, name, time.Now().UTC())
+	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO roles(id,organization_id,role_key,name,data_scope_type,created_at) VALUES(?,?,?,?,?,?)`), id, orgID, key, name, dataScope, time.Now().UTC())
 	if err == nil {
 		return id, nil
 	}
@@ -71,6 +72,7 @@ func (r *IdentityRepo) EnsureRole(ctx context.Context, orgID, key, name string) 
 	}
 	return "", err
 }
+
 func (r *IdentityRepo) EnsurePermission(ctx context.Context, key, name string) (string, error) {
 	var id string
 	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM permissions WHERE permission_key=?`), key).Scan(&id)
@@ -294,6 +296,10 @@ func (r *IdentityRepo) PrincipalBySessionHash(ctx context.Context, hash string) 
 	}
 	p.Roles, _ = r.RolesForUser(ctx, p.UserID)
 	p.Permissions, _ = r.PermissionsForUser(ctx, p.UserID)
+	p.DataScope, err = r.DataScopeForUser(ctx, p.OrganizationID, p.UserID)
+	if err != nil {
+		return p, err
+	}
 	_, _ = r.db.ExecContext(ctx, r.db.Rebind(`UPDATE sessions SET last_seen_at=? WHERE id=?`), time.Now().UTC(), p.SessionID)
 	return p, nil
 }
@@ -347,8 +353,33 @@ func (r *IdentityRepo) UpdatePasswordAndRevokeOtherSessions(ctx context.Context,
 		return err
 	})
 }
-func (r *IdentityRepo) ListUsers(ctx context.Context, orgID string, limit int) ([]identity.User, error) {
-	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,login_name,display_name,status,must_change_password,locked_until,password_changed_at,created_at,updated_at FROM users WHERE organization_id=? ORDER BY created_at DESC LIMIT ?`), orgID, limit)
+func (r *IdentityRepo) ListUsers(ctx context.Context, orgID, actorUserID string, scope identity.EffectiveDataScope, limit int) ([]identity.User, error) {
+	query := `SELECT u.id,u.organization_id,u.login_name,u.display_name,u.status,u.must_change_password,u.locked_until,u.password_changed_at,u.created_at,u.updated_at FROM users u WHERE u.organization_id=?`
+	args := []any{orgID}
+	if !scope.OrganizationWide {
+		conditions := make([]string, 0, 2)
+		if scope.Self && actorUserID != "" {
+			conditions = append(conditions, `u.id=?`)
+			args = append(args, actorUserID)
+		}
+		if len(scope.DepartmentIDs) > 0 {
+			placeholders := make([]string, len(scope.DepartmentIDs))
+			for index, departmentID := range scope.DepartmentIDs {
+				placeholders[index] = "?"
+				args = append(args, departmentID)
+			}
+			now := time.Now().UTC()
+			conditions = append(conditions, `EXISTS (SELECT 1 FROM user_assignments ua WHERE ua.organization_id=u.organization_id AND ua.user_id=u.id AND ua.department_id IN (`+strings.Join(placeholders, ",")+`) AND ua.valid_from<=? AND (ua.valid_until IS NULL OR ua.valid_until>?))`)
+			args = append(args, now, now)
+		}
+		if len(conditions) == 0 {
+			return []identity.User{}, nil
+		}
+		query += ` AND (` + strings.Join(conditions, ` OR `) + `)`
+	}
+	query += ` ORDER BY u.created_at DESC LIMIT ?`
+	args = append(args, limit)
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(query), args...)
 	if err != nil {
 		return nil, err
 	}
@@ -440,6 +471,10 @@ func (r *IdentityRepo) PrincipalByAPITokenHash(ctx context.Context, hash string)
 	_ = json.Unmarshal([]byte(scopesRaw), &p.Scopes)
 	p.Roles, _ = r.RolesForUser(ctx, p.UserID)
 	p.Permissions, _ = r.PermissionsForUser(ctx, p.UserID)
+	p.DataScope, err = r.DataScopeForUser(ctx, p.OrganizationID, p.UserID)
+	if err != nil {
+		return p, err
+	}
 	_, _ = r.db.ExecContext(ctx, r.db.Rebind(`UPDATE api_tokens SET last_used_at=? WHERE id=?`), time.Now().UTC(), tokenID)
 	return p, nil
 }
@@ -606,6 +641,12 @@ func (r *IdentityRepo) UpdatePosition(ctx context.Context, req identity.Position
 func (r *IdentityRepo) CountActivePositions(ctx context.Context, orgID, departmentID string) (int, error) {
 	var count int
 	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM positions WHERE organization_id=? AND department_id=? AND status='ACTIVE'`), orgID, departmentID).Scan(&count)
+	return count, err
+}
+
+func (r *IdentityRepo) CountCurrentAssignments(ctx context.Context, orgID, departmentID string, at time.Time) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM user_assignments WHERE organization_id=? AND department_id=? AND valid_from<=? AND (valid_until IS NULL OR valid_until>?)`), orgID, departmentID, at, at).Scan(&count)
 	return count, err
 }
 
@@ -805,6 +846,125 @@ func (r *IdentityRepo) ListUserAssignments(ctx context.Context, orgID, userID st
 	return out, rows.Err()
 }
 
+func (r *IdentityRepo) CurrentUserDepartmentIDs(ctx context.Context, orgID, userID string, at time.Time) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT DISTINCT department_id FROM user_assignments WHERE organization_id=? AND user_id=? AND valid_from<=? AND (valid_until IS NULL OR valid_until>?) ORDER BY department_id`), orgID, userID, at, at)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]string, 0)
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) DataScopeForUser(ctx context.Context, orgID, userID string) (identity.EffectiveDataScope, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT DISTINCT r.id,r.data_scope_type FROM roles r
+		JOIN (
+			SELECT role_id FROM user_roles WHERE user_id=?
+			UNION
+			SELECT ugr.role_id FROM user_group_roles ugr
+			JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE'
+			JOIN user_group_members ugm ON ugm.group_id=ug.id
+			WHERE ugm.user_id=?
+		) effective_roles ON effective_roles.role_id=r.id
+		WHERE r.organization_id=?`), userID, userID, orgID)
+	if err != nil {
+		return identity.EffectiveDataScope{}, err
+	}
+	type roleScope struct{ id, scope string }
+	roleScopes := make([]roleScope, 0)
+	for rows.Next() {
+		var item roleScope
+		if err := rows.Scan(&item.id, &item.scope); err != nil {
+			_ = rows.Close()
+			return identity.EffectiveDataScope{}, err
+		}
+		roleScopes = append(roleScopes, item)
+	}
+	if err := rows.Err(); err != nil {
+		_ = rows.Close()
+		return identity.EffectiveDataScope{}, err
+	}
+	if err := rows.Close(); err != nil {
+		return identity.EffectiveDataScope{}, err
+	}
+	result := identity.EffectiveDataScope{}
+	departmentSet := make(map[string]struct{})
+	needDepartment := false
+	needTree := false
+	for _, item := range roleScopes {
+		switch item.scope {
+		case identity.DataScopeOrganization:
+			return identity.EffectiveDataScope{OrganizationWide: true}, nil
+		case identity.DataScopeSelf:
+			result.Self = true
+		case identity.DataScopeDepartment:
+			needDepartment = true
+		case identity.DataScopeDepartmentTree:
+			needDepartment = true
+			needTree = true
+		case identity.DataScopeCustom:
+			ids, err := r.RoleDataScopeDepartments(ctx, orgID, item.id)
+			if err != nil {
+				return identity.EffectiveDataScope{}, err
+			}
+			for _, id := range ids {
+				departmentSet[id] = struct{}{}
+			}
+		default:
+			return identity.EffectiveDataScope{}, errors.New("invalid role data scope")
+		}
+	}
+	if len(roleScopes) == 0 {
+		result.Self = true
+	}
+	if needDepartment {
+		own, err := r.CurrentUserDepartmentIDs(ctx, orgID, userID, time.Now().UTC())
+		if err != nil {
+			return identity.EffectiveDataScope{}, err
+		}
+		for _, id := range own {
+			departmentSet[id] = struct{}{}
+		}
+		if needTree && len(own) > 0 {
+			departments, err := r.ListDepartments(ctx, orgID)
+			if err != nil {
+				return identity.EffectiveDataScope{}, err
+			}
+			children := make(map[string][]string)
+			for _, department := range departments {
+				if department.Status == "ACTIVE" && department.ParentID != "" {
+					children[department.ParentID] = append(children[department.ParentID], department.ID)
+				}
+			}
+			pending := append([]string(nil), own...)
+			for len(pending) > 0 {
+				current := pending[len(pending)-1]
+				pending = pending[:len(pending)-1]
+				for _, child := range children[current] {
+					if _, exists := departmentSet[child]; exists {
+						continue
+					}
+					departmentSet[child] = struct{}{}
+					pending = append(pending, child)
+				}
+			}
+		}
+	}
+	result.DepartmentIDs = make([]string, 0, len(departmentSet))
+	for id := range departmentSet {
+		result.DepartmentIDs = append(result.DepartmentIDs, id)
+	}
+	sort.Strings(result.DepartmentIDs)
+	return result, nil
+}
+
 func (r *IdentityRepo) ReplaceUserAssignments(ctx context.Context, orgID, userID string, assignments []identity.UserAssignment) error {
 	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
 		var actualOrg string
@@ -923,7 +1083,7 @@ func (r *IdentityRepo) PermissionsForRole(ctx context.Context, roleID string) ([
 }
 
 func (r *IdentityRepo) ListRoles(ctx context.Context, orgID string) ([]identity.Role, error) {
-	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,role_key,name,created_at FROM roles WHERE organization_id=? ORDER BY role_key`), orgID)
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,role_key,name,data_scope_type,created_at FROM roles WHERE organization_id=? ORDER BY role_key`), orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -931,13 +1091,66 @@ func (r *IdentityRepo) ListRoles(ctx context.Context, orgID string) ([]identity.
 	var out []identity.Role
 	for rows.Next() {
 		var item identity.Role
-		if err := rows.Scan(&item.ID, &item.Key, &item.Name, &item.CreatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.Key, &item.Name, &item.DataScope, &item.CreatedAt); err != nil {
 			return nil, err
 		}
-		item.Permissions, _ = r.PermissionsForRole(ctx, item.ID)
 		out = append(out, item)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	for index := range out {
+		out[index].Permissions, err = r.PermissionsForRole(ctx, out[index].ID)
+		if err != nil {
+			return nil, err
+		}
+		out[index].Departments, err = r.RoleDataScopeDepartments(ctx, orgID, out[index].ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+func (r *IdentityRepo) RoleDataScopeDepartments(ctx context.Context, orgID, roleID string) ([]string, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT rds.department_id FROM role_data_scope_departments rds JOIN roles r ON r.id=rds.role_id JOIN departments d ON d.id=rds.department_id AND d.organization_id=r.organization_id AND d.status='ACTIVE' WHERE r.organization_id=? AND r.id=? ORDER BY rds.department_id`), orgID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]string, 0)
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out = append(out, id)
+	}
 	return out, rows.Err()
+}
+
+func (r *IdentityRepo) ReplaceRoleDataScope(ctx context.Context, orgID, roleKey, scopeType string, departmentIDs []string) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		var roleID string
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM roles WHERE organization_id=? AND role_key=? FOR UPDATE`), orgID, roleKey).Scan(&roleID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, r.db.Rebind(`UPDATE roles SET data_scope_type=? WHERE id=?`), scopeType, roleID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM role_data_scope_departments WHERE role_id=?`), roleID); err != nil {
+			return err
+		}
+		for _, departmentID := range departmentIDs {
+			if _, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO role_data_scope_departments(role_id,department_id) VALUES(?,?)`), roleID, departmentID); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *IdentityRepo) ReplaceRolePermissions(ctx context.Context, orgID, roleKey string, permissionKeys []string) error {
