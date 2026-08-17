@@ -14,6 +14,7 @@ COPY web/packages/api-client/package.json web/packages/api-client/package.json
 COPY web/packages/auth-sdk/package.json web/packages/auth-sdk/package.json
 COPY web/packages/design-system/package.json web/packages/design-system/package.json
 COPY web/packages/observability/package.json web/packages/observability/package.json
+COPY web/packages/testkit/package.json web/packages/testkit/package.json
 RUN corepack enable && pnpm install --frozen-lockfile --registry=${NPM_REGISTRY}
 COPY web/ web/
 RUN pnpm --filter @forge/shell build
