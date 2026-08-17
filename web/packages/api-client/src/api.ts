@@ -103,8 +103,8 @@ export const api = {
   updateUserGroupRoles: (groupId: string, roles: string[]) =>
     apiFetch<void>(`/admin/user-groups/${encodeURIComponent(groupId)}/roles`, { method: 'PUT', body: JSON.stringify({ roles }) }),
   securityConfig: () => apiFetch<SecurityPolicy>('/admin/security-config'),
-  updateSecurityConfig: (payload: SecurityPolicy) =>
-    apiFetch<SecurityPolicy>('/admin/security-config', { method: 'PUT', body: JSON.stringify(payload) }),
+  updateSecurityConfig: (payload: SecurityPolicy, approvalId: string) =>
+    apiFetch<SecurityPolicy>(`/admin/security-config?approval_id=${encodeURIComponent(approvalId)}`, { method: 'PUT', body: JSON.stringify(payload) }),
   users: () => apiFetch<{ items: User[] }>('/admin/users'),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),

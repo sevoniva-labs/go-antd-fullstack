@@ -1,5 +1,5 @@
 import { EditOutlined } from '@ant-design/icons'
-import { ModalForm, ProFormCheckbox, ProFormDigit } from '@ant-design/pro-components'
+import { ModalForm, ProFormCheckbox, ProFormDigit, ProFormText } from '@ant-design/pro-components'
 import { Alert, App, Button, Card, Col, Descriptions, Row, Space, Spin, Tag, Typography } from 'antd'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { SecurityPolicy } from '@forge/api-client'
@@ -30,7 +30,7 @@ export function SecurityPage() {
 
   const policy = useQuery({ queryKey: queryKeys.securityConfig, queryFn: api.securityConfig, enabled: canRead })
   const update = useMutation({
-    mutationFn: api.updateSecurityConfig,
+    mutationFn: ({ nextPolicy, approvalId }: { nextPolicy: SecurityPolicy; approvalId: string }) => api.updateSecurityConfig(nextPolicy, approvalId),
     onSuccess: async () => {
       message.success('安全策略已保存')
       await policy.refetch()
@@ -85,21 +85,30 @@ export function SecurityPage() {
                   initialValues={policy.data}
                   onFinish={async (values: Record<string, any>) => {
                     await update.mutateAsync({
-                      password_min_length: Number(values.password_min_length ?? policy.data.password_min_length),
-                      password_require_upper: Boolean(values.password_require_upper),
-                      password_require_lower: Boolean(values.password_require_lower),
-                      password_require_digit: Boolean(values.password_require_digit),
-                      password_require_symbol: Boolean(values.password_require_symbol),
-                      password_history: Number(values.password_history ?? policy.data.password_history),
-                      password_max_age_days: Number(values.password_max_age_days ?? policy.data.password_max_age_days),
-                      login_max_failures: Number(values.login_max_failures ?? policy.data.login_max_failures),
-                      login_lock_duration_seconds: Number(values.login_lock_duration_seconds ?? policy.data.login_lock_duration_seconds),
-                      session_ttl_seconds: Number(values.session_ttl_seconds ?? policy.data.session_ttl_seconds),
-                      max_active_sessions: Number(values.max_active_sessions ?? policy.data.max_active_sessions),
+                      approvalId: String(values.approval_id),
+                      nextPolicy: {
+                        password_min_length: Number(values.password_min_length ?? policy.data.password_min_length),
+                        password_require_upper: Boolean(values.password_require_upper),
+                        password_require_lower: Boolean(values.password_require_lower),
+                        password_require_digit: Boolean(values.password_require_digit),
+                        password_require_symbol: Boolean(values.password_require_symbol),
+                        password_history: Number(values.password_history ?? policy.data.password_history),
+                        password_max_age_days: Number(values.password_max_age_days ?? policy.data.password_max_age_days),
+                        login_max_failures: Number(values.login_max_failures ?? policy.data.login_max_failures),
+                        login_lock_duration_seconds: Number(values.login_lock_duration_seconds ?? policy.data.login_lock_duration_seconds),
+                        session_ttl_seconds: Number(values.session_ttl_seconds ?? policy.data.session_ttl_seconds),
+                        max_active_sessions: Number(values.max_active_sessions ?? policy.data.max_active_sessions),
+                      },
                     })
                     return true
                   }}
                 >
+                  <ProFormText
+                    name="approval_id"
+                    label="审批执行票据"
+                    tooltip="请先创建 SECURITY_POLICY_CHANGE 申请；操作 security.config.update，资源 security，资源 ID 为 policy，载荷为本次完整策略 JSON。"
+                    rules={[{ required: true, message: '请输入已通过审批的执行票据 ID' }]}
+                  />
                   <ProFormDigit name="password_min_length" label="最小长度" min={1} max={64} rules={[{ required: true }]} />
                   <ProFormCheckbox name="password_require_upper" label="必须包含大写" />
                   <ProFormCheckbox name="password_require_lower" label="必须包含小写" />

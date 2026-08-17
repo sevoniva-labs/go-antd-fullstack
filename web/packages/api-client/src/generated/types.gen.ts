@@ -875,7 +875,9 @@ export type PlatformServiceGetSecurityPolicyResponse = PlatformServiceGetSecurit
 export type PlatformServiceUpdateSecurityPolicyData = {
     body: ForgeV1SecurityPolicy;
     path?: never;
-    query?: never;
+    query?: {
+        approvalId?: string;
+    };
     url: '/api/v1/admin/security-config';
 };
 
