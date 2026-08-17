@@ -51,8 +51,15 @@ func SPA(options SPAOptions) http.Handler {
 		}
 		if clean != "." && clean != "" {
 			if info, statErr := os.Stat(target); statErr == nil && !info.IsDir() {
+				file, openErr := os.Open(target)
+				if openErr != nil {
+					writeError(w, http.StatusInternalServerError, "WEB_STATIC_RESOURCE_UNAVAILABLE", "web static resource is unavailable")
+					return
+				}
+				defer file.Close()
+
 				setStaticCacheControl(w.Header(), clean)
-				http.ServeFile(w, r, target)
+				http.ServeContent(w, r, filepath.Base(target), info.ModTime(), file)
 				return
 			}
 		}
