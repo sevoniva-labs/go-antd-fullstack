@@ -139,11 +139,12 @@ export const api = {
   revokeSession: (sessionId: string) => apiFetch<void>(`/admin/sessions/${sessionId}`, { method: 'DELETE' }),
 
   auditLogs: () => apiFetch<{ items: AuditEvent[] }>('/admin/audit-logs'),
-  exportAuditLogs: (params?: { format?: 'json' | 'csv'; limit?: number }): Promise<DownloadResult> => {
+  exportAuditLogs: (params: { format?: 'json' | 'csv'; limit?: number; approvalId: string }): Promise<DownloadResult> => {
     const q = new URLSearchParams()
     const format = params?.format ?? 'json'
     q.set('format', format)
     if (params?.limit !== undefined) q.set('limit', String(params.limit))
+    q.set('approval_id', params.approvalId)
     const query = q.toString()
     return apiDownload(`/admin/audit-logs/export${query ? `?${query}` : ''}`)
   },

@@ -645,6 +645,7 @@ export type PlatformServiceExportAuditLogsData = {
     query?: {
         format?: string;
         limit?: number;
+        approvalId?: string;
     };
     url: '/api/v1/admin/audit-logs/export';
 };

@@ -1,6 +1,6 @@
 import { ExportOutlined, EyeOutlined } from '@ant-design/icons'
 import type { ProColumns } from '@ant-design/pro-components'
-import { App, Button, Descriptions, InputNumber, Radio, Space, Tag, Typography } from 'antd'
+import { App, Button, Descriptions, Input, InputNumber, Radio, Space, Tag, Typography } from 'antd'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@forge/api-client'
@@ -24,6 +24,7 @@ export function AuditLogsPage() {
   const query = useQuery({ queryKey: queryKeys.auditLogs, queryFn: api.auditLogs, refetchInterval: 30_000 })
   const [limit, setLimit] = useState<number>(2000)
   const [format, setFormat] = useState<'json' | 'csv'>('json')
+  const [approvalId, setApprovalId] = useState('')
   const [exporting, setExporting] = useState(false)
   const columns: ProColumns<AuditEvent>[] = [
     { title: '时间', dataIndex: 'occurred_at', valueType: 'dateTime', width: 180 },
@@ -43,7 +44,7 @@ export function AuditLogsPage() {
     try {
       setExporting(true)
       const safeLimit = Math.min(5000, Math.max(1, limit))
-      const result = await api.exportAuditLogs({ format, limit: safeLimit })
+      const result = await api.exportAuditLogs({ format, limit: safeLimit, approvalId: approvalId.trim() })
       const defaultFilename = `audit-logs-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15)}.${format}`
       const link = document.createElement('a')
       const blobUrl = URL.createObjectURL(result.blob)
@@ -72,6 +73,12 @@ export function AuditLogsPage() {
         search={false}
         toolBarRender={() => [
           <Space key="audit-export" size={12} wrap>
+            <Input
+              value={approvalId}
+              placeholder="已通过的审批票据 ID"
+              style={{ width: 260 }}
+              onChange={(event) => setApprovalId(event.target.value)}
+            />
             <InputNumber
               value={limit}
               min={1}
@@ -88,7 +95,7 @@ export function AuditLogsPage() {
               type="primary"
               icon={<ExportOutlined />}
               loading={exporting}
-              disabled={!canExport}
+              disabled={!canExport || !approvalId.trim()}
               onClick={() => void exportAuditLogs()}
             >
               导出
