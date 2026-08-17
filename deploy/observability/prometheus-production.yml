@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: forge
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      ca_file: /etc/forge-tls/ca.pem
+      cert_file: /etc/forge-tls/client.pem
+      key_file: /etc/forge-tls/client-key.pem
+      server_name: forge.forge.svc.cluster.local
+      insecure_skip_verify: false
+    static_configs:
+      - targets: ["forge.forge.svc.cluster.local:8080"]

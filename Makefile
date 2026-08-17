@@ -124,6 +124,7 @@ ci-web: ci-policy web-install
 	$(PNPM) --filter sevoniva-forge-web build
 
 ci-deploy: ci-policy
+	bash scripts/check-observability-policy.sh
 	helm lint deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml
 	helm template forge deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml >/tmp/forge-rendered.yaml
 
