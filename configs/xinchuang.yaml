@@ -25,6 +25,7 @@ cache:
   provider: redis
   mode: standalone
   addresses: ["redis:6379"]
+  tls: true
   prefix: "forge:"
   default_ttl: 10m
 messaging: { provider: disabled }

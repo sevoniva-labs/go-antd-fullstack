@@ -20,6 +20,7 @@ config:
   redisMode: sentinel
   redisAddresses: "redis-sentinel-0:26379,redis-sentinel-1:26379,redis-sentinel-2:26379"
   redisMasterName: mymaster
+  redisTLS: "true"
   messagingProvider: disabled
   searchProvider: disabled
   storageProvider: s3

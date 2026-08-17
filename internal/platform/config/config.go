@@ -530,6 +530,9 @@ func (c Config) Validate() error {
 	if c.Cache.Provider == "redis" && len(c.Cache.Addresses) == 0 {
 		errs = append(errs, "cache.addresses is required for redis")
 	}
+	if c.Cache.Provider == "redis" && isProduction(c.App.Environment) && !c.Cache.TLS {
+		errs = append(errs, "cache.tls must be enabled for redis in production")
+	}
 	if c.Cache.Mode != "" && c.Cache.Mode != "standalone" && c.Cache.Mode != "sentinel" && c.Cache.Mode != "cluster" {
 		errs = append(errs, "cache.mode must be standalone|sentinel|cluster")
 	}
