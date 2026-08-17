@@ -75,7 +75,7 @@ networkPolicy:
   enabled: false
   ingressFrom: []
   # Leave empty until environment-specific DB/Redis/Kafka/Search/S3/Nacos CIDRs/namespaces are known.
-  # An empty egressRules list keeps egress open; production should narrow this explicitly.
+  # An empty egressRules list denies all egress when the policy is enabled.
   egressRules: []
 
 persistence:

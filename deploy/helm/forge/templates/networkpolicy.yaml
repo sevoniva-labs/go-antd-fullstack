@@ -1,3 +1,14 @@
+{{- $environment := lower (default "development" .Values.config.environment) -}}
+{{- $production := or (eq $environment "production") (eq $environment "prod") -}}
+{{- if and $production (not .Values.networkPolicy.enabled) -}}
+{{- fail "networkPolicy.enabled must be true in production" -}}
+{{- end -}}
+{{- if and $production (empty .Values.networkPolicy.ingressFrom) -}}
+{{- fail "networkPolicy.ingressFrom must be explicit in production" -}}
+{{- end -}}
+{{- if and $production (empty .Values.networkPolicy.egressRules) -}}
+{{- fail "networkPolicy.egressRules must be explicit in production" -}}
+{{- end -}}
 {{- if .Values.networkPolicy.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -19,8 +30,6 @@ spec:
   egress:
     {{- toYaml .Values.networkPolicy.egressRules | nindent 4 }}
   {{- else }}
-  # Compatibility default. Replace with explicit DNS + DB/cache/MQ/search/storage/Nacos rules in hardened production.
-  egress:
-    - {}
+  egress: []
   {{- end }}
 {{- end }}

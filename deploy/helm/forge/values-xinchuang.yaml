@@ -8,6 +8,33 @@ podDisruptionBudget:
 autoscaling:
   enabled: false
 
+networkPolicy:
+  enabled: true
+  ingressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-apisix
+  egressRules:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - to:
+        - podSelector: {}
+      ports:
+        - { protocol: TCP, port: 2881 }
+        - { protocol: TCP, port: 6379 }
+        - { protocol: TCP, port: 26379 }
+        - { protocol: TCP, port: 8848 }
+        - { protocol: TCP, port: 9848 }
+        - { protocol: TCP, port: 4318 }
+
 image:
   repository: registry.example.cn/sevoniva/forge
   # Replace this syntactically valid placeholder with the signed build digest.
