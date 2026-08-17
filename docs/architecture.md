@@ -41,3 +41,5 @@ internal/adapters/kratosapi/order.go
 ```
 
 不要默认创建 controller/service/repository/domain/entity/model/dto/vo/bo 等十几层；只有出现清晰边界时才新增抽象。
+
+模块拆分准入、参考结算服务及安全运行方式见 `docs/service-evolution.md`。
