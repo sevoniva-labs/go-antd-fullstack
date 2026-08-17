@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from '@forge/api-client'
 import { ThemeModeProvider } from './ThemeModeProvider'
 import { SessionBoundary } from './SessionBoundary'
-import { reportBrowserError } from '../telemetry/browser'
+import { reportBrowserError } from '@forge/observability'
 
 function shouldRetry(failureCount: number, error: unknown) {
   if (error instanceof ApiError && error.status < 500) return false

@@ -1,6 +1,6 @@
 import { Button, Result } from 'antd'
 import React, { type ErrorInfo, type ReactNode } from 'react'
-import { reportBrowserError } from '../../app/telemetry/browser'
+import { reportBrowserError } from '@forge/observability'
 
 interface State { hasError: boolean }
 
