@@ -6,6 +6,7 @@ import {
 import { LoginForm, ProFormText } from '@ant-design/pro-components'
 import { Alert, App, Button, Card, Divider, Space, Typography } from 'antd'
 import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '@forge/api-client'
 import { ApiError } from '@forge/api-client'
@@ -17,6 +18,7 @@ export function LoginPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const { message } = App.useApp()
+  const [mfaRequired, setMfaRequired] = useState(false)
 
   return (
     <main className="login-shell">
@@ -53,6 +55,8 @@ export function LoginPage() {
                     organization: values.organization || runtimeConfig.defaultOrganization,
                     login_name: values.login_name,
                     password: values.password,
+                    mfa_code: values.mfa_code,
+                    recovery_code: values.recovery_code,
                   })
                   await queryClient.invalidateQueries({ queryKey: ['me'] })
                   const from = (location.state as { from?: string } | null)?.from || '/dashboard'
@@ -60,6 +64,11 @@ export function LoginPage() {
                   return true
                 } catch (error) {
                   if (error instanceof ApiError) {
+                    if (error.errorCode === 'MFA_REQUIRED') {
+                      setMfaRequired(true)
+                      message.info('密码验证通过，请输入动态验证码或一次性恢复码')
+                      return false
+                    }
                     message.error(`${error.message}${error.requestId ? ` · Request ID ${error.requestId}` : ''}`)
                   } else {
                     message.error('登录失败')
@@ -73,6 +82,9 @@ export function LoginPage() {
               )}
               <ProFormText name="login_name" fieldProps={{ prefix: <UserOutlined /> }} placeholder="用户名" rules={[{ required: true, message: '请输入用户名' }]} />
               <ProFormText.Password name="password" fieldProps={{ prefix: <LockOutlined /> }} placeholder="密码" rules={[{ required: true, message: '请输入密码' }]} />
+              {mfaRequired && <Alert type="info" showIcon message="需要多因素认证" description="输入认证器中的动态验证码；无法使用认证器时，可改用一枚未使用的恢复码。" style={{ marginBottom: 20 }} />}
+              {mfaRequired && <ProFormText name="mfa_code" label="动态验证码" fieldProps={{ prefix: <SafetyCertificateOutlined />, inputMode: 'numeric', autoComplete: 'one-time-code' }} placeholder="6 位动态验证码" />}
+              {mfaRequired && <ProFormText.Password name="recovery_code" label="恢复码（可选）" fieldProps={{ autoComplete: 'one-time-code' }} placeholder="与动态验证码二选一" />}
             </LoginForm>
           ) : (
             <Alert type="info" showIcon message="本地账号密码登录已关闭" />

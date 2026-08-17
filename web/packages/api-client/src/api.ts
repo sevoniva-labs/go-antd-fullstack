@@ -18,12 +18,19 @@ import type {
 } from './types'
 
 export const api = {
-  login: (payload: { organization?: string; login_name: string; password: string }) =>
+  login: (payload: { organization?: string; login_name: string; password: string; mfa_code?: string; recovery_code?: string }) =>
     apiFetch<Principal>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
   logout: () => apiFetch<void>('/auth/logout', { method: 'POST' }),
   changePassword: (payload: { current_password: string; new_password: string }) =>
     apiFetch<void>('/auth/password', { method: 'PATCH', body: JSON.stringify(payload) }),
   me: () => apiFetch<Principal>('/me'),
+  mfaStatus: () => apiFetch<{ enabled: boolean }>('/mfa'),
+  beginMfaEnrollment: (currentPassword: string) =>
+    apiFetch<{ secret: string; provisioning_uri: string }>('/mfa/totp/enrollment', { method: 'POST', body: JSON.stringify({ current_password: currentPassword }) }),
+  confirmMfaEnrollment: (code: string) =>
+    apiFetch<{ recovery_codes: string[] }>('/mfa/totp/enrollment/confirmation', { method: 'POST', body: JSON.stringify({ code }) }),
+  disableMfa: (payload: { current_password: string; code?: string; recovery_code?: string }) =>
+    apiFetch<void>('/mfa/totp/disable', { method: 'POST', body: JSON.stringify(payload) }),
 
   apiTokens: () => apiFetch<{ items: ApiToken[] }>('/api-tokens'),
   createApiToken: (payload: { name: string; scopes?: string[]; expires_days?: number }) =>

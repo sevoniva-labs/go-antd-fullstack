@@ -12,6 +12,7 @@ export const queryKeys = {
   sessions: ['sessions'] as const,
   auditLogs: ['audit-logs'] as const,
   apiTokens: ['api-tokens'] as const,
+  mfa: ['mfa'] as const,
   systemInfo: ['system-info'] as const,
   readiness: ['readiness'] as const,
 }
