@@ -62,7 +62,7 @@ export function UsersPage() {
     },
   })
   const resetPassword = useMutation({
-    mutationFn: ({ userId, password }: { userId: string; password: string }) => api.resetUserPassword(userId, password),
+    mutationFn: ({ userId, password, approvalId }: { userId: string; password: string; approvalId: string }) => api.resetUserPassword(userId, password, approvalId),
     onSuccess: async () => {
       message.success('密码已重置，用户下次登录必须修改新密码')
       await refresh()
@@ -132,10 +132,16 @@ export function UsersPage() {
                 title={`重置密码 · ${row.display_name || row.login_name}`}
                 trigger={<Button type="link" icon={<LockOutlined />}>重置密码</Button>}
                 onFinish={async (values) => {
-                  await resetPassword.mutateAsync({ userId: row.id, password: values.password })
+                  await resetPassword.mutateAsync({ userId: row.id, password: values.password, approvalId: values.approval_id })
                   return true
                 }}
               >
+                <ProFormText
+                  name="approval_id"
+                  label="审批执行票据"
+                  tooltip="请先创建 USER_PASSWORD_RESET 申请；操作 user.password.reset，资源 user，资源 ID 为当前用户 ID，载荷固定为 force_change=true。审批载荷不得填写密码。"
+                  rules={[{ required: true, message: '请输入已通过审批的执行票据 ID' }]}
+                />
                 <ProFormText.Password
                   name="password"
                   label="新初始密码"

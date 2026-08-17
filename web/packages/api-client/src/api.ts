@@ -114,8 +114,8 @@ export const api = {
     apiFetch<void>(`/admin/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   unlockUser: (userId: string) =>
     apiFetch<void>(`/admin/users/${userId}/unlock`, { method: 'POST' }),
-  resetUserPassword: (userId: string, password: string) =>
-    apiFetch<void>(`/admin/users/${userId}/reset-password`, { method: 'POST', body: JSON.stringify({ password }) }),
+  resetUserPassword: (userId: string, password: string, approvalId: string) =>
+    apiFetch<void>(`/admin/users/${userId}/reset-password`, { method: 'POST', body: JSON.stringify({ password, approval_id: approvalId }) }),
   userAssignments: (userId: string) =>
     apiFetch<{ items: UserAssignment[] }>(`/admin/users/${encodeURIComponent(userId)}/assignments`),
   replaceUserAssignments: (userId: string, assignments: Array<{

@@ -368,6 +368,7 @@ export type ForgeV1ReplaceUserAssignmentsResponse = {
 export type ForgeV1ResetUserPasswordRequest = {
     userId?: string;
     password?: string;
+    approvalId?: string;
 };
 
 export type ForgeV1ResetUserPasswordResponse = {
