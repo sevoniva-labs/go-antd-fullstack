@@ -3,6 +3,7 @@ import type {
   ApiToken,
   AuditEvent,
   Department,
+  Position,
   Organization,
   Permission,
   Principal,
@@ -52,6 +53,22 @@ export const api = {
     status: 'ACTIVE' | 'DISABLED'
     sort_order: number
   }) => apiFetch<Department>(`/admin/departments/${encodeURIComponent(departmentId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  positions: () => apiFetch<{ items: Position[] }>('/admin/positions'),
+  createPosition: (payload: {
+    position_key: string
+    name: string
+    description: string
+    department_id: string
+    status: 'ACTIVE' | 'DISABLED'
+    sort_order: number
+  }) => apiFetch<Position>('/admin/positions', { method: 'POST', body: JSON.stringify(payload) }),
+  updatePosition: (positionId: string, payload: {
+    name: string
+    description: string
+    department_id: string
+    status: 'ACTIVE' | 'DISABLED'
+    sort_order: number
+  }) => apiFetch<Position>(`/admin/positions/${encodeURIComponent(positionId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   securityConfig: () => apiFetch<SecurityPolicy>('/admin/security-config'),
   updateSecurityConfig: (payload: SecurityPolicy) =>
     apiFetch<SecurityPolicy>('/admin/security-config', { method: 'PUT', body: JSON.stringify(payload) }),

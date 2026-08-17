@@ -10,6 +10,7 @@
     "./departments": "./src/pages/Departments.tsx",
     "./organization": "./src/pages/Organization.tsx",
     "./permissions": "./src/pages/Permissions.tsx",
+    "./positions": "./src/pages/Positions.tsx",
     "./roles": "./src/pages/Roles.tsx",
     "./security": "./src/pages/Security.tsx",
     "./sessions": "./src/pages/Sessions.tsx",
