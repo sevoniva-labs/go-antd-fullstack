@@ -36,7 +36,7 @@ export function UserGroupsPage() {
   const roles = useQuery({ queryKey: queryKeys.roles, queryFn: api.roles })
   const refresh = () => queryClient.invalidateQueries({ queryKey: queryKeys.userGroups })
   const userOptions = (users.data?.items ?? []).map((user) => ({ label: `${user.display_name || user.login_name} (${user.login_name})`, value: user.id, disabled: user.status !== 'ACTIVE' }))
-  const roleOptions = (roles.data?.items ?? []).filter((role) => role.role_key !== 'system_admin').map((role) => ({ label: `${role.name} (${role.role_key})`, value: role.role_key }))
+  const roleOptions = (roles.data?.items ?? []).filter((role) => role.key !== 'system_admin').map((role) => ({ label: `${role.name} (${role.key})`, value: role.key }))
 
   const create = useMutation({
     mutationFn: (values: GroupValues) => api.createUserGroup({ group_key: values.group_key ?? '', name: values.name, description: values.description ?? '', status: values.status }),

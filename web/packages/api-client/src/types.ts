@@ -88,18 +88,22 @@ export interface UserAssignment {
 }
 
 export interface Permission {
-  id: string
-  permission_key: string
-  name: string
-  created_at: string
+	key: string
+	name: string
+	description: string
+	resource: string
+	action: string
 }
 
+export type RoleDataScope = 'ORGANIZATION' | 'DEPARTMENT' | 'DEPARTMENT_TREE' | 'SELF' | 'CUSTOM'
+
 export interface Role {
-  id: string
-  role_key: string
-  name: string
-  permissions: Permission[]
-  created_at: string
+	key: string
+	name: string
+	description: string
+	data_scope: RoleDataScope
+	permissions: string[]
+	data_scope_department_ids: string[]
 }
 
 export interface SessionInfo {

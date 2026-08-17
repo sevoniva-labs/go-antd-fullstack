@@ -30,7 +30,7 @@ export function UsersPage() {
   const me = useMe().data
   const users = useQuery({ queryKey: queryKeys.users, queryFn: api.users })
   const roles = useQuery({ queryKey: queryKeys.roles, queryFn: api.roles })
-  const roleOptions = (roles.data?.items || []).map((role) => ({ label: role.name, value: role.role_key }))
+  const roleOptions = (roles.data?.items || []).map((role) => ({ label: role.name, value: role.key }))
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: queryKeys.users })
   const create = useMutation({

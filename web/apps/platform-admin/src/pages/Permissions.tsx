@@ -11,7 +11,7 @@ import { CopyText } from '@forge/design-system'
 export function PermissionsPage() {
   const query = useQuery({ queryKey: queryKeys.permissions, queryFn: api.permissions })
   const columns: ProColumns<Permission>[] = [
-    { title: '权限标识', dataIndex: 'permission_key', render: (_, row) => <CopyText value={row.permission_key} /> },
+    { title: '权限标识', dataIndex: 'key', render: (_, row) => <CopyText value={row.key} /> },
     { title: '名称', dataIndex: 'name' },
     { title: '创建时间', dataIndex: 'created_at', valueType: 'dateTime', search: false },
   ]
