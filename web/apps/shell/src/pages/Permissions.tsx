@@ -3,10 +3,10 @@ import type { Permission } from '@forge/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@forge/api-client'
 import { queryKeys } from '@forge/api-client'
-import { AppPageContainer } from '../components/layout/AppPageContainer'
-import { ErrorState } from '../components/feedback/ErrorState'
-import { AppProTable } from '../components/table/AppProTable'
-import { CopyText } from '../components/data-display/CopyText'
+import { AppPageContainer } from '@forge/design-system'
+import { ErrorState } from '@forge/design-system'
+import { AppProTable } from '@forge/design-system'
+import { CopyText } from '@forge/design-system'
 
 export function PermissionsPage() {
   const query = useQuery({ queryKey: queryKeys.permissions, queryFn: api.permissions })

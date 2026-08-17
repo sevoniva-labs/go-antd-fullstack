@@ -4,9 +4,9 @@ import { Alert, Card, Col, Descriptions, Row, Skeleton, Tag } from 'antd'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@forge/api-client'
 import { queryKeys } from '@forge/api-client'
-import { AppPageContainer } from '../components/layout/AppPageContainer'
-import { StatusTag } from '../components/data-display/StatusTag'
-import { ErrorState } from '../components/feedback/ErrorState'
+import { AppPageContainer } from '@forge/design-system'
+import { StatusTag } from '@forge/design-system'
+import { ErrorState } from '@forge/design-system'
 
 export function SystemStatusPage() {
   const info = useQuery({ queryKey: queryKeys.systemInfo, queryFn: api.systemInfo, refetchInterval: 60_000 })

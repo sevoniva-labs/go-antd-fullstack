@@ -7,8 +7,8 @@ import { api } from '@forge/api-client'
 import { queryKeys } from '@forge/api-client'
 import { can } from '@forge/auth-sdk'
 import { useMe } from '@forge/auth-sdk'
-import { AppPageContainer } from '../components/layout/AppPageContainer'
-import { ErrorState } from '../components/feedback/ErrorState'
+import { AppPageContainer } from '@forge/design-system'
+import { ErrorState } from '@forge/design-system'
 
 function policyRows(policy: SecurityPolicy) {
   return [

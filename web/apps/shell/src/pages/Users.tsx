@@ -15,12 +15,12 @@ import { queryKeys } from '@forge/api-client'
 import type { User } from '@forge/api-client'
 import { can } from '@forge/auth-sdk'
 import { useMe } from '@forge/auth-sdk'
-import { BoolTag } from '../components/data-display/BoolTag'
-import { StatusTag } from '../components/data-display/StatusTag'
-import { AppPageContainer } from '../components/layout/AppPageContainer'
-import { ErrorState } from '../components/feedback/ErrorState'
-import { ConfirmAction } from '../components/security/ConfirmAction'
-import { AppProTable } from '../components/table/AppProTable'
+import { BoolTag } from '@forge/design-system'
+import { StatusTag } from '@forge/design-system'
+import { AppPageContainer } from '@forge/design-system'
+import { ErrorState } from '@forge/design-system'
+import { ConfirmAction } from '@forge/design-system'
+import { AppProTable } from '@forge/design-system'
 
 export function UsersPage() {
   const queryClient = useQueryClient()

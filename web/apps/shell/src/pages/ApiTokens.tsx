@@ -7,10 +7,10 @@ import { api } from '@forge/api-client'
 import { queryKeys } from '@forge/api-client'
 import type { ApiToken } from '@forge/api-client'
 import { useMe } from '@forge/auth-sdk'
-import { AppPageContainer } from '../components/layout/AppPageContainer'
-import { ErrorState } from '../components/feedback/ErrorState'
-import { AppProTable } from '../components/table/AppProTable'
-import { ConfirmAction } from '../components/security/ConfirmAction'
+import { AppPageContainer } from '@forge/design-system'
+import { ErrorState } from '@forge/design-system'
+import { AppProTable } from '@forge/design-system'
+import { ConfirmAction } from '@forge/design-system'
 
 export function ApiTokensPage() {
   const { message } = App.useApp()

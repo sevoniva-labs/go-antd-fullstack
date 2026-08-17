@@ -22,7 +22,7 @@ import { useMe } from '@forge/auth-sdk'
 import { BrandMark } from './BrandMark'
 import { GlobalSearch } from './GlobalSearch'
 import { PageTabs } from './PageTabs'
-import { PageLoading } from '../components/feedback/PageLoading'
+import { PageLoading } from '@forge/design-system'
 import { HeaderActionsSlot } from '../app/extensions/HeaderActionsSlot'
 
 export function AppLayout() {

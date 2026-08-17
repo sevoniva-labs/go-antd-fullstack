@@ -18,7 +18,7 @@ import {
   SecretText,
   SensitiveText,
   StatusTag,
-} from '../components'
+} from '@forge/design-system'
 
 interface SampleRow extends Record<string, unknown> {
   id: string

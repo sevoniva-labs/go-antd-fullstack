@@ -8,9 +8,9 @@ import { queryKeys } from '@forge/api-client'
 import type { Role } from '@forge/api-client'
 import { useMe } from '@forge/auth-sdk'
 import { can } from '@forge/auth-sdk'
-import { AppPageContainer } from '../components/layout/AppPageContainer'
-import { ErrorState } from '../components/feedback/ErrorState'
-import { AppProTable } from '../components/table/AppProTable'
+import { AppPageContainer } from '@forge/design-system'
+import { ErrorState } from '@forge/design-system'
+import { AppProTable } from '@forge/design-system'
 
 export function RolesPage() {
   const qc = useQueryClient()

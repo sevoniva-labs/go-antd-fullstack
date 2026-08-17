@@ -1,12 +1,13 @@
 import type { ThemeConfig } from 'antd'
-import { runtimeConfig, type ThemeMode } from '../app/config/runtime'
 
-export function createForgeTheme(mode: ThemeMode): ThemeConfig {
+export type ThemeMode = 'light' | 'dark'
+
+export function createForgeTheme(mode: ThemeMode, primaryColor = '#1677FF'): ThemeConfig {
   const dark = mode === 'dark'
   return {
     token: {
-      colorPrimary: runtimeConfig.primaryColor,
-      colorInfo: runtimeConfig.primaryColor,
+      colorPrimary: primaryColor,
+      colorInfo: primaryColor,
       colorSuccess: '#16A34A',
       colorWarning: '#D97706',
       colorError: '#DC2626',

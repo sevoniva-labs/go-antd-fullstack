@@ -22,6 +22,9 @@ importers:
       '@forge/auth-sdk':
         specifier: workspace:*
         version: link:../../packages/auth-sdk
+      '@forge/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       '@forge/observability':
         specifier: workspace:*
         version: link:../../packages/observability
@@ -135,6 +138,67 @@ importers:
       typescript:
         specifier: 6.0.2
         version: 6.0.2
+      vitest:
+        specifier: 4.0.18
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+
+  web/packages/design-system:
+    dependencies:
+      '@forge/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      '@forge/auth-sdk':
+        specifier: workspace:*
+        version: link:../auth-sdk
+      '@forge/observability':
+        specifier: workspace:*
+        version: link:../observability
+    devDependencies:
+      '@ant-design/icons':
+        specifier: 6.3.2
+        version: 6.3.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@ant-design/pro-components':
+        specifier: 3.1.14-6
+        version: 3.1.14-6(antd@6.6.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)
+      '@testing-library/jest-dom':
+        specifier: 6.9.1
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: 16.3.0
+        version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      '@vitejs/plugin-react':
+        specifier: 6.0.4
+        version: 6.0.4(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
+      antd:
+        specifier: 6.6.0
+        version: 6.6.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      dayjs:
+        specifier: 1.11.21
+        version: 1.11.21
+      jsdom:
+        specifier: 27.2.0
+        version: 27.2.0(supports-color@10.2.2)
+      oxlint:
+        specifier: 1.75.0
+        version: 1.75.0
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+      vite:
+        specifier: 8.2.0
+        version: 8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
       vitest:
         specifier: 4.0.18
         version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
