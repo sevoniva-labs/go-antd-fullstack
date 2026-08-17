@@ -79,8 +79,8 @@ message UpdateOrganizationRequest {
   string name = 1;
   string description = 2;
   string status = 3;
-  int32 max_users = 4;
-  int32 max_active_sessions = 5;
+  int64 max_users = 4;
+  int64 max_active_sessions = 5;
 }
 message UpdateOrganizationResponse { Organization organization = 1; }
 

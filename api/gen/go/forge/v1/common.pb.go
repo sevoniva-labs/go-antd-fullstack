@@ -153,8 +153,8 @@ type Organization struct {
 	Name              string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description       string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	Status            string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	MaxUsers          int32                  `protobuf:"varint,6,opt,name=max_users,json=maxUsers,proto3" json:"max_users,omitempty"`
-	MaxActiveSessions int32                  `protobuf:"varint,7,opt,name=max_active_sessions,json=maxActiveSessions,proto3" json:"max_active_sessions,omitempty"`
+	MaxUsers          int64                  `protobuf:"varint,6,opt,name=max_users,json=maxUsers,proto3" json:"max_users,omitempty"`
+	MaxActiveSessions int64                  `protobuf:"varint,7,opt,name=max_active_sessions,json=maxActiveSessions,proto3" json:"max_active_sessions,omitempty"`
 	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -226,14 +226,14 @@ func (x *Organization) GetStatus() string {
 	return ""
 }
 
-func (x *Organization) GetMaxUsers() int32 {
+func (x *Organization) GetMaxUsers() int64 {
 	if x != nil {
 		return x.MaxUsers
 	}
 	return 0
 }
 
-func (x *Organization) GetMaxActiveSessions() int32 {
+func (x *Organization) GetMaxActiveSessions() int64 {
 	if x != nil {
 		return x.MaxActiveSessions
 	}
@@ -256,17 +256,17 @@ func (x *Organization) GetUpdatedAt() *timestamppb.Timestamp {
 
 type SecurityPolicy struct {
 	state                    protoimpl.MessageState `protogen:"open.v1"`
-	PasswordMinLength        int32                  `protobuf:"varint,1,opt,name=password_min_length,json=passwordMinLength,proto3" json:"password_min_length,omitempty"`
+	PasswordMinLength        int64                  `protobuf:"varint,1,opt,name=password_min_length,json=passwordMinLength,proto3" json:"password_min_length,omitempty"`
 	PasswordRequireUpper     bool                   `protobuf:"varint,2,opt,name=password_require_upper,json=passwordRequireUpper,proto3" json:"password_require_upper,omitempty"`
 	PasswordRequireLower     bool                   `protobuf:"varint,3,opt,name=password_require_lower,json=passwordRequireLower,proto3" json:"password_require_lower,omitempty"`
 	PasswordRequireDigit     bool                   `protobuf:"varint,4,opt,name=password_require_digit,json=passwordRequireDigit,proto3" json:"password_require_digit,omitempty"`
 	PasswordRequireSymbol    bool                   `protobuf:"varint,5,opt,name=password_require_symbol,json=passwordRequireSymbol,proto3" json:"password_require_symbol,omitempty"`
-	PasswordHistory          int32                  `protobuf:"varint,6,opt,name=password_history,json=passwordHistory,proto3" json:"password_history,omitempty"`
-	PasswordMaxAgeDays       int32                  `protobuf:"varint,7,opt,name=password_max_age_days,json=passwordMaxAgeDays,proto3" json:"password_max_age_days,omitempty"`
-	LoginMaxFailures         int32                  `protobuf:"varint,8,opt,name=login_max_failures,json=loginMaxFailures,proto3" json:"login_max_failures,omitempty"`
+	PasswordHistory          int64                  `protobuf:"varint,6,opt,name=password_history,json=passwordHistory,proto3" json:"password_history,omitempty"`
+	PasswordMaxAgeDays       int64                  `protobuf:"varint,7,opt,name=password_max_age_days,json=passwordMaxAgeDays,proto3" json:"password_max_age_days,omitempty"`
+	LoginMaxFailures         int64                  `protobuf:"varint,8,opt,name=login_max_failures,json=loginMaxFailures,proto3" json:"login_max_failures,omitempty"`
 	LoginLockDurationSeconds int64                  `protobuf:"varint,9,opt,name=login_lock_duration_seconds,json=loginLockDurationSeconds,proto3" json:"login_lock_duration_seconds,omitempty"`
 	SessionTtlSeconds        int64                  `protobuf:"varint,10,opt,name=session_ttl_seconds,json=sessionTtlSeconds,proto3" json:"session_ttl_seconds,omitempty"`
-	MaxActiveSessions        int32                  `protobuf:"varint,11,opt,name=max_active_sessions,json=maxActiveSessions,proto3" json:"max_active_sessions,omitempty"`
+	MaxActiveSessions        int64                  `protobuf:"varint,11,opt,name=max_active_sessions,json=maxActiveSessions,proto3" json:"max_active_sessions,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -301,7 +301,7 @@ func (*SecurityPolicy) Descriptor() ([]byte, []int) {
 	return file_forge_v1_common_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SecurityPolicy) GetPasswordMinLength() int32 {
+func (x *SecurityPolicy) GetPasswordMinLength() int64 {
 	if x != nil {
 		return x.PasswordMinLength
 	}
@@ -336,21 +336,21 @@ func (x *SecurityPolicy) GetPasswordRequireSymbol() bool {
 	return false
 }
 
-func (x *SecurityPolicy) GetPasswordHistory() int32 {
+func (x *SecurityPolicy) GetPasswordHistory() int64 {
 	if x != nil {
 		return x.PasswordHistory
 	}
 	return 0
 }
 
-func (x *SecurityPolicy) GetPasswordMaxAgeDays() int32 {
+func (x *SecurityPolicy) GetPasswordMaxAgeDays() int64 {
 	if x != nil {
 		return x.PasswordMaxAgeDays
 	}
 	return 0
 }
 
-func (x *SecurityPolicy) GetLoginMaxFailures() int32 {
+func (x *SecurityPolicy) GetLoginMaxFailures() int64 {
 	if x != nil {
 		return x.LoginMaxFailures
 	}
@@ -371,7 +371,7 @@ func (x *SecurityPolicy) GetSessionTtlSeconds() int64 {
 	return 0
 }
 
-func (x *SecurityPolicy) GetMaxActiveSessions() int32 {
+func (x *SecurityPolicy) GetMaxActiveSessions() int64 {
 	if x != nil {
 		return x.MaxActiveSessions
 	}
@@ -880,25 +880,25 @@ const file_forge_v1_common_proto_rawDesc = "" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1b\n" +
-	"\tmax_users\x18\x06 \x01(\x05R\bmaxUsers\x12.\n" +
-	"\x13max_active_sessions\x18\a \x01(\x05R\x11maxActiveSessions\x129\n" +
+	"\tmax_users\x18\x06 \x01(\x03R\bmaxUsers\x12.\n" +
+	"\x13max_active_sessions\x18\a \x01(\x03R\x11maxActiveSessions\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xc5\x04\n" +
 	"\x0eSecurityPolicy\x12.\n" +
-	"\x13password_min_length\x18\x01 \x01(\x05R\x11passwordMinLength\x124\n" +
+	"\x13password_min_length\x18\x01 \x01(\x03R\x11passwordMinLength\x124\n" +
 	"\x16password_require_upper\x18\x02 \x01(\bR\x14passwordRequireUpper\x124\n" +
 	"\x16password_require_lower\x18\x03 \x01(\bR\x14passwordRequireLower\x124\n" +
 	"\x16password_require_digit\x18\x04 \x01(\bR\x14passwordRequireDigit\x126\n" +
 	"\x17password_require_symbol\x18\x05 \x01(\bR\x15passwordRequireSymbol\x12)\n" +
-	"\x10password_history\x18\x06 \x01(\x05R\x0fpasswordHistory\x121\n" +
-	"\x15password_max_age_days\x18\a \x01(\x05R\x12passwordMaxAgeDays\x12,\n" +
-	"\x12login_max_failures\x18\b \x01(\x05R\x10loginMaxFailures\x12=\n" +
+	"\x10password_history\x18\x06 \x01(\x03R\x0fpasswordHistory\x121\n" +
+	"\x15password_max_age_days\x18\a \x01(\x03R\x12passwordMaxAgeDays\x12,\n" +
+	"\x12login_max_failures\x18\b \x01(\x03R\x10loginMaxFailures\x12=\n" +
 	"\x1blogin_lock_duration_seconds\x18\t \x01(\x03R\x18loginLockDurationSeconds\x12.\n" +
 	"\x13session_ttl_seconds\x18\n" +
 	" \x01(\x03R\x11sessionTtlSeconds\x12.\n" +
-	"\x13max_active_sessions\x18\v \x01(\x05R\x11maxActiveSessions\"\x8f\x01\n" +
+	"\x13max_active_sessions\x18\v \x01(\x03R\x11maxActiveSessions\"\x8f\x01\n" +
 	"\x04Role\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +

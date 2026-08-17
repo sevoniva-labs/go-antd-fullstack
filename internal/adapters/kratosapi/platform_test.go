@@ -1,0 +1,29 @@
+package kratosapi
+
+import (
+	"testing"
+	"time"
+
+	"github.com/sevoniva-labs/forge/internal/app/audit"
+	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
+)
+
+func TestPlatformProtoMappings(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+	locked := now.Add(time.Minute)
+	user := userProto(domain.User{
+		ID: "user-1", OrganizationID: "org-1", LoginName: "alice", Status: "ACTIVE",
+		LockedUntil: &locked, CreatedAt: now, Roles: []string{"auditor"},
+	})
+	if user.Id != "user-1" || user.OrganizationId != "org-1" || user.LockedUntil.AsTime() != locked {
+		t.Fatalf("unexpected user mapping: %+v", user)
+	}
+	policy := securityPolicyProto(domain.SecurityPolicy{PasswordMinLength: 14, SessionTTLSeconds: 3600, MaxConcurrentSessions: 2})
+	if policy.PasswordMinLength != 14 || policy.SessionTtlSeconds != 3600 || policy.MaxActiveSessions != 2 {
+		t.Fatalf("unexpected policy mapping: %+v", policy)
+	}
+	event := auditEventProto(audit.Event{ID: "event-1", OccurredAt: now, Details: map[string]any{"safe": true}})
+	if event.Id != "event-1" || event.DetailsJson != `{"safe":true}` {
+		t.Fatalf("unexpected audit mapping: %+v", event)
+	}
+}

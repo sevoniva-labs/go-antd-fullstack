@@ -26,24 +26,24 @@ message Organization {
   string name = 3;
   string description = 4;
   string status = 5;
-  int32 max_users = 6;
-  int32 max_active_sessions = 7;
+  int64 max_users = 6;
+  int64 max_active_sessions = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
 }
 
 message SecurityPolicy {
-  int32 password_min_length = 1;
+  int64 password_min_length = 1;
   bool password_require_upper = 2;
   bool password_require_lower = 3;
   bool password_require_digit = 4;
   bool password_require_symbol = 5;
-  int32 password_history = 6;
-  int32 password_max_age_days = 7;
-  int32 login_max_failures = 8;
+  int64 password_history = 6;
+  int64 password_max_age_days = 7;
+  int64 login_max_failures = 8;
   int64 login_lock_duration_seconds = 9;
   int64 session_ttl_seconds = 10;
-  int32 max_active_sessions = 11;
+  int64 max_active_sessions = 11;
 }
 
 message Role {

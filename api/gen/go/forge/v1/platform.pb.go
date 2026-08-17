@@ -307,8 +307,8 @@ type UpdateOrganizationRequest struct {
 	Name              string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description       string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	Status            string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	MaxUsers          int32                  `protobuf:"varint,4,opt,name=max_users,json=maxUsers,proto3" json:"max_users,omitempty"`
-	MaxActiveSessions int32                  `protobuf:"varint,5,opt,name=max_active_sessions,json=maxActiveSessions,proto3" json:"max_active_sessions,omitempty"`
+	MaxUsers          int64                  `protobuf:"varint,4,opt,name=max_users,json=maxUsers,proto3" json:"max_users,omitempty"`
+	MaxActiveSessions int64                  `protobuf:"varint,5,opt,name=max_active_sessions,json=maxActiveSessions,proto3" json:"max_active_sessions,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -364,14 +364,14 @@ func (x *UpdateOrganizationRequest) GetStatus() string {
 	return ""
 }
 
-func (x *UpdateOrganizationRequest) GetMaxUsers() int32 {
+func (x *UpdateOrganizationRequest) GetMaxUsers() int64 {
 	if x != nil {
 		return x.MaxUsers
 	}
 	return 0
 }
 
-func (x *UpdateOrganizationRequest) GetMaxActiveSessions() int32 {
+func (x *UpdateOrganizationRequest) GetMaxActiveSessions() int64 {
 	if x != nil {
 		return x.MaxActiveSessions
 	}
@@ -1606,8 +1606,8 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x16\n" +
 	"\x06status\x18\x03 \x01(\tR\x06status\x12\x1b\n" +
-	"\tmax_users\x18\x04 \x01(\x05R\bmaxUsers\x12.\n" +
-	"\x13max_active_sessions\x18\x05 \x01(\x05R\x11maxActiveSessions\"X\n" +
+	"\tmax_users\x18\x04 \x01(\x03R\bmaxUsers\x12.\n" +
+	"\x13max_active_sessions\x18\x05 \x01(\x03R\x11maxActiveSessions\"X\n" +
 	"\x1aUpdateOrganizationResponse\x12:\n" +
 	"\forganization\x18\x01 \x01(\v2\x16.forge.v1.OrganizationR\forganization\"\x1a\n" +
 	"\x18GetSecurityPolicyRequest\"M\n" +
