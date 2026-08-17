@@ -3,6 +3,9 @@ import zhCN from 'antd/locale/zh_CN'
 import { createForgeTheme } from '@forge/design-system/theme'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { runtimeConfig, type ThemeMode } from '../config/runtime'
+import { readDocumentCSPNonce } from '../security/csp'
+
+const cspNonce = readDocumentCSPNonce()
 
 interface ThemeModeState {
   mode: ThemeMode
@@ -49,7 +52,11 @@ export function ThemeModeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeModeContext.Provider value={value}>
-      <ConfigProvider locale={zhCN} theme={{ ...createForgeTheme(mode, runtimeConfig.primaryColor), algorithm: algorithms }}>
+      <ConfigProvider
+        locale={zhCN}
+        theme={{ ...createForgeTheme(mode, runtimeConfig.primaryColor), algorithm: algorithms }}
+        {...(cspNonce ? { csp: { nonce: cspNonce } } : {})}
+      >
         {children}
       </ConfigProvider>
     </ThemeModeContext.Provider>
