@@ -7,6 +7,20 @@ interface ScenarioOptions {
   scopes?: string[]
 }
 
+interface CSPWindow extends Window {
+  __forgeCSPViolations?: string[]
+}
+
+async function captureCSPViolations(page: Page) {
+  await page.addInitScript(() => {
+    const target = window as CSPWindow
+    target.__forgeCSPViolations = []
+    document.addEventListener('securitypolicyviolation', (event) => {
+      target.__forgeCSPViolations?.push(`${event.effectiveDirective}:${event.blockedURI}`)
+    })
+  })
+}
+
 async function configureScenario(page: Page, options: ScenarioOptions = {}) {
   const manifest = options.manifest ?? 'manifest.bundle.json'
   const featureFlags = options.featureFlags ?? ['micro_frontend.example_remote']
@@ -96,13 +110,18 @@ test('keeps the regular Shell SPA route operational', async ({ page }) => {
 })
 
 test('starts a trusted same-origin app through Wujie and Host SDK', async ({ page }) => {
+  await captureCSPViolations(page)
   await configureScenario(page)
-  await page.goto('/apps/example-remote')
+  const response = await page.goto('/apps/example-remote')
 
   await expect(page.getByRole('heading', { name: '示例远程应用' })).toBeVisible()
   await expect(page.getByText('风险工作台示例')).toBeVisible()
   await expect(page.getByText('Host SDK 已连接')).toBeVisible()
   await expect(page.getByText('主发布 1.0.0')).toBeVisible()
+  const csp = response?.headers()['content-security-policy'] ?? ''
+  expect(csp).toContain("script-src 'self' 'unsafe-inline'")
+  expect(csp).not.toContain('unsafe-eval')
+  expect(await page.evaluate(() => (window as CSPWindow).__forgeCSPViolations ?? [])).toEqual([])
 })
 
 test('runs an untrusted app only in an independent-origin iframe', async ({ page }) => {
@@ -144,4 +163,28 @@ test('switches only to the rollback release declared in the signed manifest', as
   await expect(page.getByText('已回滚 0.9.0')).toBeVisible()
   await expect(page.getByText('风险工作台示例')).toBeVisible()
   await expect(page.getByText(/已切换至签名清单指定的回滚版本/)).toBeVisible()
+})
+
+test('renders Ant Design under script-strict CSP without browser violations', async ({ page }) => {
+  await expect.poll(async () => {
+    try {
+      return (await page.request.get('http://127.0.0.1:4190/runtime-config.js')).status()
+    } catch {
+      return 0
+    }
+  }, { timeout: 30_000 }).toBe(200)
+  await captureCSPViolations(page)
+  await configureScenario(page)
+  const response = await page.goto('http://127.0.0.1:4190/dashboard')
+
+  await expect(page.getByText('基础设施健康', { exact: true })).toBeVisible()
+  const csp = response?.headers()['content-security-policy'] ?? ''
+  const nonce = await page.locator('meta[name="forge-csp-nonce"]').getAttribute('content')
+  expect(nonce).toMatch(/^[A-Za-z0-9+/]{32}$/)
+  expect(csp).toContain("script-src 'self'")
+  expect(csp).not.toContain("script-src 'self' 'unsafe-inline'")
+  expect(csp).not.toContain('unsafe-eval')
+  expect(csp).toContain("style-src-elem 'self' 'unsafe-inline'")
+  await expect.poll(() => page.locator('style').count()).toBeGreaterThan(0)
+  expect(await page.evaluate(() => (window as CSPWindow).__forgeCSPViolations ?? [])).toEqual([])
 })
