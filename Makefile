@@ -97,6 +97,7 @@ build: web-build
 	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$${VERSION:-dev}" -o bin/forge ./cmd/server
 	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$${VERSION:-dev}" -o bin/forge-worker ./cmd/worker
 	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$${VERSION:-dev}" -o bin/forge-migrate ./cmd/migrate
+	CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$${VERSION:-dev}" -o bin/forge-example-settlement ./cmd/example-settlement-service
 
 check: fmt contract
 	go vet ./...
