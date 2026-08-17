@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
-	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/model"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/nacosx"
@@ -19,6 +19,12 @@ type Registry interface {
 	Deregister(context.Context) error
 	Ping(context.Context) error
 	Provider() string
+}
+
+type namingClient interface {
+	RegisterInstance(vo.RegisterInstanceParam) (bool, error)
+	DeregisterInstance(vo.DeregisterInstanceParam) (bool, error)
+	GetService(vo.GetServiceParam) (model.Service, error)
 }
 
 func New(cfg config.Discovery, appName, version, env string) (Registry, error) {
@@ -57,7 +63,7 @@ func (disabled) Ping(context.Context) error       { return nil }
 func (disabled) Provider() string                 { return "disabled" }
 
 type nacosRegistry struct {
-	client     naming_client.INamingClient
+	client     namingClient
 	cfg        config.Discovery
 	endpoints  []endpoint
 	registered atomic.Bool
@@ -93,9 +99,12 @@ func buildEndpoints(cfg config.Discovery, appName string, baseMetadata map[strin
 	}
 }
 
-func (n *nacosRegistry) Register(context.Context) error {
+func (n *nacosRegistry) Register(ctx context.Context) error {
 	registered := make([]endpoint, 0, len(n.endpoints))
 	for _, item := range n.endpoints {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		ok, err := n.client.RegisterInstance(vo.RegisterInstanceParam{
 			Ip: n.cfg.AdvertiseIP, Port: item.port, ServiceName: item.service,
 			Weight: n.cfg.Weight, Enable: true, Healthy: true, Ephemeral: true,
@@ -115,12 +124,16 @@ func (n *nacosRegistry) Register(context.Context) error {
 	n.registered.Store(true)
 	return nil
 }
-func (n *nacosRegistry) Deregister(context.Context) error {
+func (n *nacosRegistry) Deregister(ctx context.Context) error {
 	if !n.registered.Load() {
 		return nil
 	}
 	var errs []error
 	for index := len(n.endpoints) - 1; index >= 0; index-- {
+		if err := ctx.Err(); err != nil {
+			errs = append(errs, err)
+			break
+		}
 		if err := n.deregisterEndpoint(n.endpoints[index]); err != nil {
 			errs = append(errs, err)
 		}
@@ -145,19 +158,45 @@ func (n *nacosRegistry) deregisterEndpoint(item endpoint) error {
 	return nil
 }
 
-func (n *nacosRegistry) Ping(context.Context) error {
+func (n *nacosRegistry) Ping(ctx context.Context) error {
 	if !n.registered.Load() {
 		return fmt.Errorf("nacos service not registered")
 	}
 	for _, item := range n.endpoints {
-		if _, err := n.client.GetService(vo.GetServiceParam{
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		service, err := n.client.GetService(vo.GetServiceParam{
 			ServiceName: item.service, Clusters: []string{n.cfg.Cluster}, GroupName: n.cfg.Group,
-		}); err != nil {
+		})
+		if err != nil {
 			return fmt.Errorf("query Nacos service %s: %w", item.service, err)
+		}
+		if !containsRegisteredEndpoint(service.Hosts, n.cfg.AdvertiseIP, item) {
+			return fmt.Errorf("nacos service %s does not contain the healthy registered endpoint %s:%d", item.service, n.cfg.AdvertiseIP, item.port)
 		}
 	}
 	return nil
 }
 func (n *nacosRegistry) Provider() string { return "nacos" }
+
+func containsRegisteredEndpoint(instances []model.Instance, advertiseIP string, item endpoint) bool {
+	for _, instance := range instances {
+		if instance.Ip != advertiseIP || instance.Port != item.port || !instance.Enable || !instance.Healthy || !instance.Ephemeral {
+			continue
+		}
+		metadataMatches := true
+		for key, value := range item.metadata {
+			if instance.Metadata[key] != value {
+				metadataMatches = false
+				break
+			}
+		}
+		if metadataMatches {
+			return true
+		}
+	}
+	return false
+}
 
 func MetadataPort(port uint64) string { return strconv.FormatUint(port, 10) }

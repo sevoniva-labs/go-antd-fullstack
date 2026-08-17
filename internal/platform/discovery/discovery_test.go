@@ -1,10 +1,26 @@
 package discovery
 
 import (
+	"context"
+	"strings"
 	"testing"
 
+	"github.com/nacos-group/nacos-sdk-go/v2/model"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 )
+
+type fakeNamingClient struct {
+	services map[string]model.Service
+}
+
+func (*fakeNamingClient) RegisterInstance(vo.RegisterInstanceParam) (bool, error) { return true, nil }
+func (*fakeNamingClient) DeregisterInstance(vo.DeregisterInstanceParam) (bool, error) {
+	return true, nil
+}
+func (f *fakeNamingClient) GetService(param vo.GetServiceParam) (model.Service, error) {
+	return f.services[param.ServiceName], nil
+}
 
 func TestBuildEndpointsSeparatesProtocols(t *testing.T) {
 	endpoints := buildEndpoints(config.Discovery{
@@ -30,5 +46,37 @@ func TestBuildEndpointsUsesProtocolSpecificDefaults(t *testing.T) {
 	endpoints := buildEndpoints(config.Discovery{AdvertisePort: 8080, AdvertiseGRPCPort: 9090}, "forge", nil)
 	if endpoints[0].service != "forge-http" || endpoints[1].service != "forge-grpc" {
 		t.Fatalf("unexpected default services: %#v", endpoints)
+	}
+}
+
+func TestNacosPingRequiresOwnHealthyRegisteredEndpoints(t *testing.T) {
+	cfg := config.Discovery{AdvertiseIP: "10.20.30.40", Cluster: "HZ-A", Group: "FORGE"}
+	endpoints := buildEndpoints(config.Discovery{
+		ServiceName: "account-http", GRPCServiceName: "account-grpc",
+		AdvertisePort: 8080, AdvertiseGRPCPort: 9090,
+	}, "account", map[string]string{"application": "account", "version": "v1"})
+	services := make(map[string]model.Service, len(endpoints))
+	for _, item := range endpoints {
+		services[item.service] = model.Service{Hosts: []model.Instance{{
+			Ip: cfg.AdvertiseIP, Port: item.port, Enable: true, Healthy: true, Ephemeral: true,
+			Metadata: item.metadata,
+		}}}
+	}
+	registry := &nacosRegistry{client: &fakeNamingClient{services: services}, cfg: cfg, endpoints: endpoints}
+	registry.registered.Store(true)
+	if err := registry.Ping(context.Background()); err != nil {
+		t.Fatalf("Ping() healthy endpoint error = %v", err)
+	}
+
+	unhealthy := services["account-grpc"]
+	unhealthy.Hosts[0].Healthy = false
+	services["account-grpc"] = unhealthy
+	if err := registry.Ping(context.Background()); err == nil || !strings.Contains(err.Error(), "does not contain the healthy registered endpoint") {
+		t.Fatalf("Ping() unhealthy endpoint error = %v", err)
+	}
+
+	services["account-grpc"] = model.Service{}
+	if err := registry.Ping(context.Background()); err == nil {
+		t.Fatal("Ping() accepted a service after its own instance was removed")
 	}
 }
