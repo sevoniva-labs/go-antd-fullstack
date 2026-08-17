@@ -41,20 +41,23 @@ type App struct {
 }
 
 type Server struct {
-	ListenAddr       string        `yaml:"listen_addr"`
-	GRPCListenAddr   string        `yaml:"grpc_listen_addr"`
-	PublicURL        string        `yaml:"public_url"`
-	WebDir           string        `yaml:"web_dir"`
-	ReadTimeout      time.Duration `yaml:"read_timeout"`
-	WriteTimeout     time.Duration `yaml:"write_timeout"`
-	IdleTimeout      time.Duration `yaml:"idle_timeout"`
-	ShutdownTimeout  time.Duration `yaml:"shutdown_timeout"`
-	MaxBodyBytes     int64         `yaml:"max_body_bytes"`
-	TLSEnabled       bool          `yaml:"tls_enabled"`
-	TLSCertFile      string        `yaml:"tls_cert_file"`
-	TLSKeyFile       string        `yaml:"tls_key_file"`
-	TLSClientCAFile  string        `yaml:"tls_client_ca_file"`
-	RequireClientTLS bool          `yaml:"require_client_tls"`
+	ListenAddr             string        `yaml:"listen_addr"`
+	GRPCListenAddr         string        `yaml:"grpc_listen_addr"`
+	PublicURL              string        `yaml:"public_url"`
+	WebDir                 string        `yaml:"web_dir"`
+	WebCSPFrameSources     []string      `yaml:"web_csp_frame_sources"`
+	WebCSPWujieEnabled     bool          `yaml:"web_csp_wujie_enabled"`
+	WebCSPWujieApprovalRef string        `yaml:"web_csp_wujie_approval_ref"`
+	ReadTimeout            time.Duration `yaml:"read_timeout"`
+	WriteTimeout           time.Duration `yaml:"write_timeout"`
+	IdleTimeout            time.Duration `yaml:"idle_timeout"`
+	ShutdownTimeout        time.Duration `yaml:"shutdown_timeout"`
+	MaxBodyBytes           int64         `yaml:"max_body_bytes"`
+	TLSEnabled             bool          `yaml:"tls_enabled"`
+	TLSCertFile            string        `yaml:"tls_cert_file"`
+	TLSKeyFile             string        `yaml:"tls_key_file"`
+	TLSClientCAFile        string        `yaml:"tls_client_ca_file"`
+	RequireClientTLS       bool          `yaml:"require_client_tls"`
 }
 
 type Database struct {
@@ -389,6 +392,9 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Server.GRPCListenAddr, "FORGE_GRPC_LISTEN")
 	overrideString(&cfg.Server.PublicURL, "FORGE_PUBLIC_URL")
 	overrideString(&cfg.Server.WebDir, "FORGE_WEB_DIR")
+	overrideCSV(&cfg.Server.WebCSPFrameSources, "FORGE_WEB_CSP_FRAME_SOURCES")
+	overrideBool(&cfg.Server.WebCSPWujieEnabled, "FORGE_WEB_CSP_WUJIE_ENABLED")
+	overrideString(&cfg.Server.WebCSPWujieApprovalRef, "FORGE_WEB_CSP_WUJIE_APPROVAL_REF")
 	overrideBool(&cfg.Server.TLSEnabled, "FORGE_TLS_ENABLED")
 	overrideString(&cfg.Server.TLSCertFile, "FORGE_TLS_CERT_FILE")
 	overrideString(&cfg.Server.TLSKeyFile, "FORGE_TLS_KEY_FILE")
@@ -708,6 +714,25 @@ func (c Config) Validate() error {
 	if c.Server.RequireClientTLS && c.Server.TLSClientCAFile == "" {
 		errs = append(errs, "client mTLS requires tls_client_ca_file")
 	}
+	seenFrameSources := make(map[string]struct{}, len(c.Server.WebCSPFrameSources))
+	for _, source := range c.Server.WebCSPFrameSources {
+		source = strings.TrimSpace(source)
+		if !validWebCSPFrameSource(source, isProduction(c.App.Environment)) {
+			errs = append(errs, "server.web_csp_frame_sources must contain exact HTTP(S) origins and use HTTPS in production")
+			continue
+		}
+		if _, duplicate := seenFrameSources[source]; duplicate {
+			errs = append(errs, "server.web_csp_frame_sources must not contain duplicates")
+		}
+		seenFrameSources[source] = struct{}{}
+	}
+	approvalRef := strings.TrimSpace(c.Server.WebCSPWujieApprovalRef)
+	if c.Server.WebCSPWujieEnabled && !validApprovalReference(approvalRef) {
+		errs = append(errs, "server.web_csp_wujie_enabled requires a valid web_csp_wujie_approval_ref")
+	}
+	if !c.Server.WebCSPWujieEnabled && approvalRef != "" {
+		errs = append(errs, "server.web_csp_wujie_approval_ref requires web_csp_wujie_enabled=true")
+	}
 	if c.Observability.MetricsEnabled && !strings.HasPrefix(c.Observability.MetricsPath, "/") {
 		errs = append(errs, "observability.metrics_path must start with /")
 	}
@@ -732,6 +757,36 @@ func (c Config) Validate() error {
 		return errors.New(strings.Join(errs, "; "))
 	}
 	return nil
+}
+
+func validWebCSPFrameSource(source string, production bool) bool {
+	if source == "" || len(source) > 512 || strings.ContainsAny(source, "*'\";,") {
+		return false
+	}
+	parsed, err := url.Parse(source)
+	if err != nil || parsed.Host == "" || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return false
+	}
+	if parsed.Path != "" && parsed.Path != "/" {
+		return false
+	}
+	if production {
+		return parsed.Scheme == "https"
+	}
+	return parsed.Scheme == "https" || parsed.Scheme == "http"
+}
+
+func validApprovalReference(value string) bool {
+	if len(value) < 6 || len(value) > 128 {
+		return false
+	}
+	for _, char := range value {
+		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') || strings.ContainsRune("._:/-", char) {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func isProduction(environment string) bool {

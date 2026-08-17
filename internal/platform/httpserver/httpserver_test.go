@@ -19,7 +19,7 @@ func TestSPARejectsAPIAndTraversalFallback(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "index.html"), []byte("index"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	handler := SPA(root)
+	handler := SPA(SPAOptions{Root: root})
 	for _, path := range []string{"/api/v1/missing", "/../../etc/passwd"} {
 		request := httptest.NewRequest(http.MethodGet, path, nil)
 		response := httptest.NewRecorder()
@@ -27,6 +27,73 @@ func TestSPARejectsAPIAndTraversalFallback(t *testing.T) {
 		if response.Code != http.StatusNotFound || strings.Contains(response.Body.String(), "index") {
 			t.Fatalf("path %s returned status=%d body=%q", path, response.Code, response.Body.String())
 		}
+	}
+}
+
+func TestSPAServesNonceCSPAndGovernedCacheHeaders(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "assets"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	files := map[string]string{
+		"index.html":               `<meta name="forge-csp-nonce" content="` + cspNonceMarker + `"><div>index</div>`,
+		"runtime-config.js":        "window.__FORGE_CONFIG__ = {}",
+		"assets/chunk-AbCd1234.js": "console.log('hashed')",
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(root, name), []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	handler := SPA(SPAOptions{Root: root, FrameSources: []string{"https://remote.example.cn"}})
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/platform/users", nil))
+	csp := response.Header().Get("Content-Security-Policy")
+	if response.Code != http.StatusOK || strings.Contains(response.Body.String(), cspNonceMarker) {
+		t.Fatalf("index response status=%d body=%q", response.Code, response.Body.String())
+	}
+	if !strings.Contains(csp, "script-src 'self'") || strings.Contains(csp, "script-src 'self' 'unsafe-inline'") {
+		t.Fatalf("strict CSP script policy missing: %q", csp)
+	}
+	if !strings.Contains(csp, "style-src-elem 'self' 'nonce-") || !strings.Contains(csp, "frame-src https://remote.example.cn") {
+		t.Fatalf("strict CSP nonce or frame source missing: %q", csp)
+	}
+	if !strings.Contains(response.Body.String(), "content=\"") || response.Header().Get("Cache-Control") != "no-store" {
+		t.Fatalf("index nonce/cache policy missing")
+	}
+
+	for path, want := range map[string]string{
+		"/runtime-config.js":        "no-store",
+		"/assets/chunk-AbCd1234.js": "public, max-age=31536000, immutable",
+	} {
+		assetResponse := httptest.NewRecorder()
+		handler.ServeHTTP(assetResponse, httptest.NewRequest(http.MethodGet, path, nil))
+		if got := assetResponse.Header().Get("Cache-Control"); got != want {
+			t.Errorf("path %s Cache-Control=%q want=%q", path, got, want)
+		}
+	}
+}
+
+func TestSPAWujieCSPRequiresExplicitUnsafeInlineMode(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "index.html"), []byte(cspNonceMarker), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	handler := SPA(SPAOptions{Root: root, WujieCSPEnabled: true})
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/", nil))
+	csp := response.Header().Get("Content-Security-Policy")
+	for _, required := range []string{
+		"frame-src 'self'",
+		"script-src 'self' 'unsafe-inline'",
+		"style-src 'self' 'unsafe-inline'",
+	} {
+		if !strings.Contains(csp, required) {
+			t.Fatalf("Wujie CSP missing %q: %q", required, csp)
+		}
+	}
+	if strings.Contains(csp, "unsafe-eval") {
+		t.Fatalf("Wujie CSP must not enable unsafe-eval: %q", csp)
 	}
 }
 

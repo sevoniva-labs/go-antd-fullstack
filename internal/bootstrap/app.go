@@ -232,7 +232,11 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	if !cfg.Compliance.DisableDebugEndpoints {
 		httpServer.HandlePrefix("/debug/pprof/", httpserver.DebugHandler())
 	}
-	httpServer.HandlePrefix("/", httpserver.SPA(cfg.Server.WebDir))
+	httpServer.HandlePrefix("/", httpserver.SPA(httpserver.SPAOptions{
+		Root:            cfg.Server.WebDir,
+		FrameSources:    cfg.Server.WebCSPFrameSources,
+		WujieCSPEnabled: cfg.Server.WebCSPWujieEnabled,
+	}))
 	grpcServer := kgrpc.NewServer(grpcOpts...)
 	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
 	forgev1.RegisterPlatformServiceServer(grpcServer, platformService)
