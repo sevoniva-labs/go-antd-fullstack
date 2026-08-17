@@ -7,7 +7,9 @@ import (
 	"testing"
 	"time"
 
+	kratoserrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/sevoniva-labs/forge/internal/platform/ratelimit"
 )
 
 type cookieHeader http.Header
@@ -52,5 +54,18 @@ func TestRequestCookieParsesSession(t *testing.T) {
 	})
 	if got := requestCookie(ctx, sessionCookieName); got != "session-secret" {
 		t.Fatalf("requestCookie() = %q", got)
+	}
+}
+
+func TestIdentitySecurityRateLimitRejectsSixthAttempt(t *testing.T) {
+	service := &IdentityService{limiter: ratelimit.New(nil)}
+	for attempt := 1; attempt <= 6; attempt++ {
+		err := service.allow(context.Background(), "password-change:user:u1", 5, 15*time.Minute, "900")
+		if attempt <= 5 && err != nil {
+			t.Fatalf("attempt %d unexpectedly rejected: %v", attempt, err)
+		}
+		if attempt == 6 && (err == nil || kratoserrors.Reason(err) != "RATE_LIMITED") {
+			t.Fatalf("attempt 6 error = %v, want RATE_LIMITED", err)
+		}
 	}
 }

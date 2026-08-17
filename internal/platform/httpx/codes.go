@@ -22,6 +22,9 @@ var codeMap = map[string]string{
 	"INVALID_LOGIN_NAME":            "100005",
 	"INVALID_ORGANIZATION":          "100006",
 	"INVALID_SECURITY_CONFIG":       "100007",
+	"INVALID_ARGUMENT":              "100008",
+	"INVALID_EXPORT_FORMAT":         "100009",
+	"INVALID_EXPORT_LIMIT":          "100010",
 	"UNAUTHENTICATED":               "200001",
 	"INVALID_CREDENTIALS":           "200002",
 	"LOGIN_FAILED":                  "200002",
@@ -51,6 +54,7 @@ var codeMap = map[string]string{
 	"DEPENDENCY_UNAVAILABLE":        "400001",
 	"STORAGE_UNAVAILABLE":           "400002",
 	"RELIABLE_AUDIT_UNAVAILABLE":    "400003",
+	"RATE_LIMIT_UNAVAILABLE":        "400004",
 	"INTERNAL":                      "900000",
 	"CREATE_USER_FAILED":            "900001",
 }

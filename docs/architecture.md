@@ -8,7 +8,7 @@ Forge 的核心目标是让业务模块稳定，而基础设施可以替换。�
 React / Ant Design
        │ OpenAPI / HTTP
        ▼
-HTTP Adapter
+Kratos HTTP / gRPC Adapter
        │
 Application Services
        │
@@ -34,7 +34,8 @@ DB | Cache | MQ | Search | Storage | Crypto | Observability
 internal/domain/order/
 internal/app/order/
 internal/adapters/repository/order.go
-internal/adapters/httpapi/handlers_order.go
+api/proto/forge/v1/order.proto
+internal/adapters/kratosapi/order.go
 ```
 
 不要默认创建 controller/service/repository/domain/entity/model/dto/vo/bo 等十几层；只有出现清晰边界时才新增抽象。
