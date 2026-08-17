@@ -4,7 +4,7 @@ import { configureApiClient } from '@forge/api-client'
 import AppRoutes from './App'
 import { runtimeConfig } from './app/config/runtime'
 import { AppProviders } from './app/providers/AppProviders'
-import { AppErrorBoundary } from '@forge/design-system'
+import { AppErrorBoundary } from '@forge/design-system/error-boundary'
 import './index.css'
 
 configureApiClient({ baseUrl: runtimeConfig.apiBaseUrl })

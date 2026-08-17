@@ -1,6 +1,6 @@
 import { ConfigProvider, theme } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import { createForgeTheme } from '@forge/design-system'
+import { createForgeTheme } from '@forge/design-system/theme'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { runtimeConfig, type ThemeMode } from '../config/runtime'
 
