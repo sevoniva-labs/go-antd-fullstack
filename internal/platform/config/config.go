@@ -138,23 +138,25 @@ type Storage struct {
 }
 
 type Discovery struct {
-	Provider      string            `yaml:"provider"` // disabled | nacos
-	Servers       []string          `yaml:"servers"`
-	Namespace     string            `yaml:"namespace"`
-	Group         string            `yaml:"group"`
-	Cluster       string            `yaml:"cluster"`
-	ServiceName   string            `yaml:"service_name"`
-	AdvertiseIP   string            `yaml:"advertise_ip"`
-	AdvertisePort uint64            `yaml:"advertise_port"`
-	Weight        float64           `yaml:"weight"`
-	Metadata      map[string]string `yaml:"metadata"`
-	Username      string            `yaml:"-"`
-	Password      string            `yaml:"-"`
-	TLSRequired   bool              `yaml:"tls_required"`
-	TLSCAFile     string            `yaml:"tls_ca_file"`
-	TLSCertFile   string            `yaml:"tls_cert_file"`
-	TLSKeyFile    string            `yaml:"tls_key_file"`
-	TLSServerName string            `yaml:"tls_server_name"`
+	Provider          string            `yaml:"provider"` // disabled | nacos
+	Servers           []string          `yaml:"servers"`
+	Namespace         string            `yaml:"namespace"`
+	Group             string            `yaml:"group"`
+	Cluster           string            `yaml:"cluster"`
+	ServiceName       string            `yaml:"service_name"`
+	GRPCServiceName   string            `yaml:"grpc_service_name"`
+	AdvertiseIP       string            `yaml:"advertise_ip"`
+	AdvertisePort     uint64            `yaml:"advertise_port"`
+	AdvertiseGRPCPort uint64            `yaml:"advertise_grpc_port"`
+	Weight            float64           `yaml:"weight"`
+	Metadata          map[string]string `yaml:"metadata"`
+	Username          string            `yaml:"-"`
+	Password          string            `yaml:"-"`
+	TLSRequired       bool              `yaml:"tls_required"`
+	TLSCAFile         string            `yaml:"tls_ca_file"`
+	TLSCertFile       string            `yaml:"tls_cert_file"`
+	TLSKeyFile        string            `yaml:"tls_key_file"`
+	TLSServerName     string            `yaml:"tls_server_name"`
 }
 
 type RemoteConfig struct {
@@ -439,8 +441,10 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Discovery.Group, "FORGE_NACOS_GROUP")
 	overrideString(&cfg.Discovery.Cluster, "FORGE_NACOS_CLUSTER")
 	overrideString(&cfg.Discovery.ServiceName, "FORGE_DISCOVERY_SERVICE_NAME")
+	overrideString(&cfg.Discovery.GRPCServiceName, "FORGE_DISCOVERY_GRPC_SERVICE_NAME")
 	overrideString(&cfg.Discovery.AdvertiseIP, "FORGE_DISCOVERY_ADVERTISE_IP")
 	overrideUint64(&cfg.Discovery.AdvertisePort, "FORGE_DISCOVERY_ADVERTISE_PORT")
+	overrideUint64(&cfg.Discovery.AdvertiseGRPCPort, "FORGE_DISCOVERY_ADVERTISE_GRPC_PORT")
 	overrideBool(&cfg.Discovery.TLSRequired, "FORGE_NACOS_TLS_REQUIRED")
 	overrideString(&cfg.Discovery.TLSCAFile, "FORGE_NACOS_TLS_CA_FILE")
 	overrideString(&cfg.Discovery.TLSCertFile, "FORGE_NACOS_TLS_CERT_FILE")
@@ -610,8 +614,11 @@ func (c Config) Validate() error {
 		if len(c.Discovery.Servers) == 0 {
 			errs = append(errs, "discovery.servers required for nacos")
 		}
-		if c.Discovery.AdvertiseIP == "" || c.Discovery.AdvertisePort == 0 {
-			errs = append(errs, "nacos discovery requires advertise_ip and advertise_port")
+		if c.Discovery.AdvertiseIP == "" || c.Discovery.AdvertisePort == 0 || c.Discovery.AdvertiseGRPCPort == 0 {
+			errs = append(errs, "nacos discovery requires advertise_ip, advertise_port and advertise_grpc_port")
+		}
+		if c.Discovery.ServiceName != "" && c.Discovery.ServiceName == c.Discovery.GRPCServiceName {
+			errs = append(errs, "nacos HTTP and gRPC service names must differ")
 		}
 	}
 	switch c.RemoteConfig.Provider {

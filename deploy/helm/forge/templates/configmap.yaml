@@ -65,8 +65,10 @@ data:
 
   FORGE_DISCOVERY_PROVIDER: {{ .Values.config.discoveryProvider | quote }}
   FORGE_DISCOVERY_SERVICE_NAME: {{ .Values.config.discoveryServiceName | quote }}
+  FORGE_DISCOVERY_GRPC_SERVICE_NAME: {{ .Values.config.discoveryGRPCServiceName | quote }}
   FORGE_DISCOVERY_ADVERTISE_IP: {{ .Values.config.discoveryAdvertiseIP | quote }}
   FORGE_DISCOVERY_ADVERTISE_PORT: {{ .Values.config.discoveryAdvertisePort | quote }}
+  FORGE_DISCOVERY_ADVERTISE_GRPC_PORT: {{ .Values.config.discoveryAdvertiseGRPCPort | quote }}
   FORGE_NACOS_SERVERS: {{ .Values.config.nacosServers | quote }}
   FORGE_NACOS_NAMESPACE: {{ .Values.config.nacosNamespace | quote }}
   FORGE_NACOS_GROUP: {{ .Values.config.nacosGroup | quote }}

@@ -186,9 +186,11 @@ config:
   storageTLSServerName: ""
 
   discoveryProvider: disabled
-  discoveryServiceName: forge
+  discoveryServiceName: forge-http
+  discoveryGRPCServiceName: forge-grpc
   discoveryAdvertiseIP: ""
   discoveryAdvertisePort: "8080"
+  discoveryAdvertiseGRPCPort: "9090"
   nacosServers: ""
   nacosNamespace: ""
   nacosGroup: DEFAULT_GROUP

@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"sync/atomic"
@@ -38,15 +39,11 @@ func New(cfg config.Discovery, appName, version, env string) (Registry, error) {
 		if err != nil {
 			return nil, err
 		}
-		service := cfg.ServiceName
-		if service == "" {
-			service = appName
-		}
 		meta := map[string]string{"application": appName, "version": version, "environment": env}
 		for k, v := range cfg.Metadata {
 			meta[k] = v
 		}
-		return &nacosRegistry{client: client, cfg: cfg, service: service, metadata: meta}, nil
+		return &nacosRegistry{client: client, cfg: cfg, endpoints: buildEndpoints(cfg, appName, meta)}, nil
 	default:
 		return nil, fmt.Errorf("unsupported discovery provider %q", cfg.Provider)
 	}
@@ -62,22 +59,58 @@ func (disabled) Provider() string                 { return "disabled" }
 type nacosRegistry struct {
 	client     naming_client.INamingClient
 	cfg        config.Discovery
-	service    string
-	metadata   map[string]string
+	endpoints  []endpoint
 	registered atomic.Bool
 }
 
-func (n *nacosRegistry) Register(context.Context) error {
-	ok, err := n.client.RegisterInstance(vo.RegisterInstanceParam{
-		Ip: n.cfg.AdvertiseIP, Port: n.cfg.AdvertisePort, ServiceName: n.service,
-		Weight: n.cfg.Weight, Enable: true, Healthy: true, Ephemeral: true,
-		Metadata: n.metadata, ClusterName: n.cfg.Cluster, GroupName: n.cfg.Group,
-	})
-	if err != nil {
-		return err
+type endpoint struct {
+	service  string
+	port     uint64
+	metadata map[string]string
+}
+
+func buildEndpoints(cfg config.Discovery, appName string, baseMetadata map[string]string) []endpoint {
+	httpService := cfg.ServiceName
+	if httpService == "" {
+		httpService = appName + "-http"
 	}
-	if !ok {
-		return fmt.Errorf("nacos register returned false")
+	grpcService := cfg.GRPCServiceName
+	if grpcService == "" {
+		grpcService = appName + "-grpc"
+	}
+	makeMetadata := func(protocol string, port uint64) map[string]string {
+		metadata := make(map[string]string, len(baseMetadata)+2)
+		for key, value := range baseMetadata {
+			metadata[key] = value
+		}
+		metadata["protocol"] = protocol
+		metadata["port"] = MetadataPort(port)
+		return metadata
+	}
+	return []endpoint{
+		{service: httpService, port: cfg.AdvertisePort, metadata: makeMetadata("http", cfg.AdvertisePort)},
+		{service: grpcService, port: cfg.AdvertiseGRPCPort, metadata: makeMetadata("grpc", cfg.AdvertiseGRPCPort)},
+	}
+}
+
+func (n *nacosRegistry) Register(context.Context) error {
+	registered := make([]endpoint, 0, len(n.endpoints))
+	for _, item := range n.endpoints {
+		ok, err := n.client.RegisterInstance(vo.RegisterInstanceParam{
+			Ip: n.cfg.AdvertiseIP, Port: item.port, ServiceName: item.service,
+			Weight: n.cfg.Weight, Enable: true, Healthy: true, Ephemeral: true,
+			Metadata: item.metadata, ClusterName: n.cfg.Cluster, GroupName: n.cfg.Group,
+		})
+		if err != nil || !ok {
+			for index := len(registered) - 1; index >= 0; index-- {
+				_ = n.deregisterEndpoint(registered[index])
+			}
+			if err != nil {
+				return fmt.Errorf("register Nacos service %s: %w", item.service, err)
+			}
+			return fmt.Errorf("register Nacos service %s returned false", item.service)
+		}
+		registered = append(registered, item)
 	}
 	n.registered.Store(true)
 	return nil
@@ -86,27 +119,44 @@ func (n *nacosRegistry) Deregister(context.Context) error {
 	if !n.registered.Load() {
 		return nil
 	}
+	var errs []error
+	for index := len(n.endpoints) - 1; index >= 0; index-- {
+		if err := n.deregisterEndpoint(n.endpoints[index]); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) == 0 {
+		n.registered.Store(false)
+	}
+	return errors.Join(errs...)
+}
+
+func (n *nacosRegistry) deregisterEndpoint(item endpoint) error {
 	ok, err := n.client.DeregisterInstance(vo.DeregisterInstanceParam{
-		Ip: n.cfg.AdvertiseIP, Port: n.cfg.AdvertisePort, ServiceName: n.service,
+		Ip: n.cfg.AdvertiseIP, Port: item.port, ServiceName: item.service,
 		Ephemeral: true, Cluster: n.cfg.Cluster, GroupName: n.cfg.Group,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("deregister Nacos service %s: %w", item.service, err)
 	}
 	if !ok {
-		return fmt.Errorf("nacos deregister returned false")
+		return fmt.Errorf("deregister Nacos service %s returned false", item.service)
 	}
-	n.registered.Store(false)
 	return nil
 }
+
 func (n *nacosRegistry) Ping(context.Context) error {
 	if !n.registered.Load() {
 		return fmt.Errorf("nacos service not registered")
 	}
-	_, err := n.client.GetService(vo.GetServiceParam{
-		ServiceName: n.service, Clusters: []string{n.cfg.Cluster}, GroupName: n.cfg.Group,
-	})
-	return err
+	for _, item := range n.endpoints {
+		if _, err := n.client.GetService(vo.GetServiceParam{
+			ServiceName: item.service, Clusters: []string{n.cfg.Cluster}, GroupName: n.cfg.Group,
+		}); err != nil {
+			return fmt.Errorf("query Nacos service %s: %w", item.service, err)
+		}
+	}
+	return nil
 }
 func (n *nacosRegistry) Provider() string { return "nacos" }
 

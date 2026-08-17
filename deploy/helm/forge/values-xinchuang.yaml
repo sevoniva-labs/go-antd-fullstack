@@ -57,7 +57,9 @@ config:
   storageTLS: "true"
 
   discoveryProvider: nacos
-  discoveryServiceName: forge
+  discoveryServiceName: forge-http
+  discoveryGRPCServiceName: forge-grpc
+  discoveryAdvertiseGRPCPort: "9090"
   nacosServers: "https://nacos.internal.example:8848"
   nacosGroup: FORGE
   nacosCluster: DEFAULT

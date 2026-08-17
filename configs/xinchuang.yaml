@@ -44,9 +44,11 @@ discovery:
   namespace: ""
   group: FORGE
   cluster: DEFAULT
-  service_name: forge
+  service_name: forge-http
+  grpc_service_name: forge-grpc
   advertise_ip: "10.0.0.10"
   advertise_port: 8080
+  advertise_grpc_port: 9090
 remote_config:
   provider: nacos
   servers: ["https://nacos.example.internal:8848"]
