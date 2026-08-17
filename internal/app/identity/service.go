@@ -499,9 +499,6 @@ func (s *Service) Authenticate(ctx context.Context, token string) (domain.Princi
 	}
 	return p, err
 }
-func (s *Service) passwordExpired(t time.Time) bool {
-	return s.passwordExpiredAt(t, s.maxAge)
-}
 func (s *Service) Logout(ctx context.Context, token string) error {
 	if token == "" {
 		return nil

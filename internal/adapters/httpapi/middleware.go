@@ -128,7 +128,7 @@ func gzipJSON(next http.Handler) http.Handler {
 			return
 		}
 		gz := gzip.NewWriter(w)
-		defer gz.Close()
+		defer func() { _ = gz.Close() }()
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Add("Vary", "Accept-Encoding")
 		next.ServeHTTP(gzipWriter{ResponseWriter: w, writer: gz}, r)
@@ -232,23 +232,6 @@ func allowedBeforePasswordChange(method, path string) bool {
 	return (method == http.MethodGet && path == "/api/v1/me") ||
 		(method == http.MethodPatch && path == "/api/v1/auth/password") ||
 		(method == http.MethodPost && path == "/api/v1/auth/logout")
-}
-
-func requireRoles(keys ...string) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			p := Principal(r)
-			if p == nil {
-				httpx.Error(w, 401, "UNAUTHENTICATED", "未认证", RequestID(r), TraceID(r))
-				return
-			}
-			if !p.HasRole(keys...) {
-				httpx.Error(w, 403, "PERMISSION_DENIED", "无权限执行此操作", RequestID(r), TraceID(r))
-				return
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
 }
 
 func requirePermissions(keys ...string) func(http.Handler) http.Handler {

@@ -2,8 +2,9 @@ package resilience
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
-	"math/rand"
+	"math/big"
 	"sync"
 	"time"
 
@@ -79,7 +80,7 @@ func Retry(ctx context.Context, max int, base time.Duration, fn func(context.Con
 			break
 		}
 		delay := base * time.Duration(1<<min(i, 6))
-		jitter := time.Duration(rand.Int63n(int64(maxDuration(delay/4, time.Millisecond))))
+		jitter := randomJitter(maxDuration(delay/4, time.Millisecond))
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -88,6 +89,18 @@ func Retry(ctx context.Context, max int, base time.Duration, fn func(context.Con
 	}
 	return last
 }
+
+func randomJitter(maximum time.Duration) time.Duration {
+	if maximum <= 0 {
+		return 0
+	}
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(maximum)))
+	if err != nil {
+		return 0
+	}
+	return time.Duration(n.Int64())
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a

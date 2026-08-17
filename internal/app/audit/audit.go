@@ -53,7 +53,7 @@ func (w *Writer) List(ctx context.Context, orgID string, limit int) ([]Event, er
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	out := make([]Event, 0, limit)
 	for rows.Next() {
 		var e Event

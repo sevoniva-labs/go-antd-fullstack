@@ -65,7 +65,7 @@ func (s *Store) pending(ctx context.Context, limit int) ([]pending, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []pending
 	for rows.Next() {
 		var p pending

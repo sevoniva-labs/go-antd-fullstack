@@ -35,7 +35,7 @@ func Open(ctx context.Context, cfg config.Database) (*DB, error) {
 	pingCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	if err := raw.PingContext(pingCtx); err != nil {
-		raw.Close()
+		_ = raw.Close()
 		return nil, fmt.Errorf("database ping: %w", err)
 	}
 	return &DB{DB: raw, Provider: cfg.Provider}, nil

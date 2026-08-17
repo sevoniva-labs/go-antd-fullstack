@@ -69,7 +69,8 @@ type elastic struct {
 
 func (e *elastic) base() string {
 	n := atomic.AddUint64(&e.rr, 1)
-	return strings.TrimRight(e.urls[int(n)%len(e.urls)], "/")
+	index := int(n % uint64(len(e.urls))) // #nosec G115 -- modulo by the non-zero slice length guarantees the result fits int.
+	return strings.TrimRight(e.urls[index], "/")
 }
 func (e *elastic) request(ctx context.Context, method, path string, body any) ([]byte, error) {
 	var r io.Reader
@@ -92,7 +93,7 @@ func (e *elastic) request(ctx context.Context, method, path string, body any) ([
 	if er != nil {
 		return nil, er
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	b, er := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
 	if er != nil {
 		return nil, er

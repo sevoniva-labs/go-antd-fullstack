@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -26,7 +27,7 @@ func New() *Metrics {
 		InFlight:      prometheus.NewGaugeVec(prometheus.GaugeOpts{Name: "forge_http_in_flight_requests", Help: "In-flight HTTP requests"}, []string{"method"}),
 		registry:      r,
 	}
-	r.MustRegister(m.Requests, m.Duration, m.ResponseBytes, m.InFlight, prometheus.NewGoCollector(), prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
+	r.MustRegister(m.Requests, m.Duration, m.ResponseBytes, m.InFlight, collectors.NewGoCollector(), collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 	return m
 }
 func (m *Metrics) Handler() http.Handler {

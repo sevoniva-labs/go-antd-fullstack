@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sevoniva-labs/forge/internal/platform/securefile"
 	"gopkg.in/yaml.v3"
 )
 
@@ -260,7 +261,7 @@ func Default() Config {
 func Load() (Config, error) {
 	cfg := Default()
 	if p := strings.TrimSpace(os.Getenv("FORGE_CONFIG")); p != "" {
-		b, err := os.ReadFile(p)
+		b, err := securefile.Read(p)
 		if err != nil {
 			return cfg, fmt.Errorf("config read: %w", err)
 		}
@@ -283,7 +284,7 @@ func Load() (Config, error) {
 func LoadForMigration() (Config, error) {
 	cfg := Default()
 	if p := strings.TrimSpace(os.Getenv("FORGE_CONFIG")); p != "" {
-		b, err := os.ReadFile(p)
+		b, err := securefile.Read(p)
 		if err != nil {
 			return cfg, fmt.Errorf("config read: %w", err)
 		}
@@ -747,7 +748,7 @@ func mysqlTLSMode(dsn string) (string, error) {
 
 func secret(key string) string {
 	if p := strings.TrimSpace(os.Getenv(key + "_FILE")); p != "" {
-		b, err := os.ReadFile(p)
+		b, err := securefile.Read(p)
 		if err == nil {
 			return strings.TrimSpace(string(b))
 		}

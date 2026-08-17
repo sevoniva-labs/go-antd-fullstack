@@ -31,7 +31,7 @@ func main() {
 		log.Error("database", "err", err)
 		os.Exit(1)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	if err := database.Migrate(db.DB, cfg.Database.Provider); err != nil {
 		log.Error("migration", "err", err)
 		os.Exit(1)

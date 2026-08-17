@@ -43,41 +43,66 @@ func New(ctx context.Context, c appcfg.Storage) (Store, error) {
 type local struct{ root string }
 
 func (l *local) path(key string) (string, error) {
-	clean := filepath.Clean("/" + key)
-	if strings.Contains(clean, "..") {
+	clean := filepath.Clean(key)
+	if clean == "." || filepath.IsAbs(clean) || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
 		return "", errors.New("invalid key")
 	}
-	return filepath.Join(l.root, strings.TrimPrefix(clean, "/")), nil
+	return clean, nil
 }
 func (l *local) Put(_ context.Context, key string, r io.Reader) error {
 	p, e := l.path(key)
 	if e != nil {
 		return e
 	}
-	if e = os.MkdirAll(filepath.Dir(p), 0o750); e != nil {
-		return e
-	}
-	f, e := os.OpenFile(p, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o640)
+	root, e := os.OpenRoot(l.root)
 	if e != nil {
 		return e
 	}
-	defer f.Close()
-	_, e = io.Copy(f, r)
-	return e
+	defer func() { _ = root.Close() }()
+	if e = root.MkdirAll(filepath.Dir(p), 0o750); e != nil {
+		return e
+	}
+	f, e := root.OpenFile(p, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if e != nil {
+		return e
+	}
+	if _, e = io.Copy(f, r); e != nil {
+		_ = f.Close()
+		return e
+	}
+	return f.Close()
 }
 func (l *local) Get(_ context.Context, key string) (io.ReadCloser, error) {
 	p, e := l.path(key)
 	if e != nil {
 		return nil, e
 	}
-	return os.Open(p)
+	root, e := os.OpenRoot(l.root)
+	if e != nil {
+		return nil, e
+	}
+	f, e := root.Open(p)
+	closeErr := root.Close()
+	if e != nil {
+		return nil, e
+	}
+	if closeErr != nil {
+		_ = f.Close()
+		return nil, closeErr
+	}
+	return f, nil
 }
 func (l *local) Delete(_ context.Context, key string) error {
 	p, e := l.path(key)
 	if e != nil {
 		return e
 	}
-	return os.Remove(p)
+	root, e := os.OpenRoot(l.root)
+	if e != nil {
+		return e
+	}
+	defer func() { _ = root.Close() }()
+	return root.Remove(p)
 }
 func (l *local) Ping(context.Context) error { return nil }
 func (l *local) Provider() string           { return "local" }

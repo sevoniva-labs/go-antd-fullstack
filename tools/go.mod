@@ -1,6 +1,6 @@
 module github.com/sevoniva-labs/forge/tools
 
-go 1.26
+go 1.26.6
 
 require (
 	github.com/golangci/golangci-lint/v2 v2.12.2

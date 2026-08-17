@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"unicode"
@@ -111,6 +112,10 @@ func (h Hasher) Verify(raw, encoded string) bool {
 	if e != nil {
 		return false
 	}
+	if m == 0 || m > math.MaxUint32 || t == 0 || t > math.MaxUint32 || p == 0 || p > math.MaxUint8 || len(salt) < 8 || len(salt) > 1024 || len(expected) == 0 || len(expected) > 1024 {
+		return false
+	}
+	// #nosec G115 -- every narrowing conversion is bounded immediately above.
 	actual := argon2.IDKey([]byte(raw), salt, uint32(t), uint32(m), uint8(p), uint32(len(expected)))
 	return subtle.ConstantTimeCompare(actual, expected) == 1
 }

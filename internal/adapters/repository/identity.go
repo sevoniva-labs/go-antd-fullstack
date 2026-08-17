@@ -201,7 +201,7 @@ func (r *IdentityRepo) RolesForUser(ctx context.Context, userID string) ([]strin
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []string
 	for rows.Next() {
 		var x string
@@ -217,7 +217,7 @@ func (r *IdentityRepo) PermissionsForUser(ctx context.Context, userID string) ([
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []string
 	for rows.Next() {
 		var x string
@@ -305,7 +305,7 @@ func (r *IdentityRepo) PasswordHistory(ctx context.Context, userID string, limit
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []string
 	for rows.Next() {
 		var h string
@@ -334,7 +334,7 @@ func (r *IdentityRepo) ListUsers(ctx context.Context, orgID string, limit int) (
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []identity.User
 	for rows.Next() {
 		var u identity.User
@@ -370,7 +370,7 @@ func (r *IdentityRepo) ListAPITokens(ctx context.Context, userID string) ([]iden
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []identity.APIToken
 	for rows.Next() {
 		var t identity.APIToken
@@ -454,7 +454,7 @@ func (r *IdentityRepo) ListUserSessionIDs(ctx context.Context, userID string) ([
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []string
 	for rows.Next() {
 		var id string
@@ -471,7 +471,7 @@ func (r *IdentityRepo) SecuritySettings(ctx context.Context, orgID string) (map[
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	out := make(map[string]string)
 	for rows.Next() {
 		var key, value string
@@ -511,7 +511,7 @@ func (r *IdentityRepo) ListPermissions(ctx context.Context) ([]identity.Permissi
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []identity.Permission
 	for rows.Next() {
 		var item identity.Permission
@@ -531,7 +531,7 @@ func (r *IdentityRepo) PermissionsForRole(ctx context.Context, roleID string) ([
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []identity.Permission
 	for rows.Next() {
 		var item identity.Permission
@@ -548,7 +548,7 @@ func (r *IdentityRepo) ListRoles(ctx context.Context, orgID string) ([]identity.
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []identity.Role
 	for rows.Next() {
 		var item identity.Role
@@ -637,7 +637,7 @@ func (r *IdentityRepo) ListSessions(ctx context.Context, orgID string, limit int
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []identity.Session
 	for rows.Next() {
 		var item identity.Session
@@ -714,7 +714,7 @@ func lockActiveSystemAdmins(ctx context.Context, db *database.DB, tx *sql.Tx, or
 	if err != nil {
 		return 0, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	n := 0
 	for rows.Next() {
 		var id string

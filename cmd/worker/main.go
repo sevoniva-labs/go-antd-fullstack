@@ -39,7 +39,7 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	bus, err := messaging.New(cfg.Messaging)
 	if err != nil {
 		return err

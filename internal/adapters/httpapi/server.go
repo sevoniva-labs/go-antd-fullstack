@@ -780,11 +780,14 @@ func (s *Server) organizationID(ctx context.Context, key string) (string, error)
 
 func setCookies(w http.ResponseWriter, session, csrf string, expires time.Time, secure bool, sameSite string) {
 	site := parseSameSite(sameSite)
+	// #nosec G124 -- production policy requires Secure; local HTTP development is explicitly supported.
 	http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: session, Path: "/", Expires: expires, MaxAge: int(time.Until(expires).Seconds()), HttpOnly: true, Secure: secure, SameSite: site})
+	// #nosec G124 -- the double-submit CSRF cookie must be readable by the browser client; it carries no authentication secret.
 	http.SetCookie(w, &http.Cookie{Name: csrfCookie, Value: csrf, Path: "/", Expires: expires, MaxAge: int(time.Until(expires).Seconds()), HttpOnly: false, Secure: secure, SameSite: site})
 }
 func clearCookies(w http.ResponseWriter, secure bool) {
 	for _, name := range []string{sessionCookie, csrfCookie} {
+		// #nosec G124 -- deletion cookies mirror the runtime Secure policy and contain an empty value.
 		http.SetCookie(w, &http.Cookie{Name: name, Value: "", Path: "/", MaxAge: -1, Expires: time.Unix(0, 0), HttpOnly: name == sessionCookie, Secure: secure, SameSite: http.SameSiteLaxMode})
 	}
 }

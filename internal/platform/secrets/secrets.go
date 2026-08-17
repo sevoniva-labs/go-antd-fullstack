@@ -5,6 +5,8 @@ import (
 	"errors"
 	"os"
 	"strings"
+
+	"github.com/sevoniva-labs/forge/internal/platform/securefile"
 )
 
 // Provider is deliberately small so Vault, cloud KMS/Secrets Manager and
@@ -20,7 +22,7 @@ func (p EnvFile) Name() string { return "env-file" }
 func (p EnvFile) Get(_ context.Context, key string) (string, error) {
 	name := p.Prefix + key
 	if path := strings.TrimSpace(os.Getenv(name + "_FILE")); path != "" {
-		b, err := os.ReadFile(path)
+		b, err := securefile.Read(path)
 		if err != nil {
 			return "", err
 		}
