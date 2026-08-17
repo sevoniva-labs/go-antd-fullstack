@@ -5,6 +5,7 @@ app:
   zone: zone-a
 server:
   listen_addr: ":8080"
+  grpc_listen_addr: ":9090"
   public_url: "https://forge.example.com"
   web_dir: "/app/web"
   read_timeout: 30s
@@ -26,15 +27,17 @@ cache:
   db: 0
   prefix: "forge:"
   default_ttl: 10m
-  tls: false
+  tls: true
 messaging: { provider: disabled }
+streaming: { provider: disabled }
 search: { provider: disabled }
 storage:
   provider: s3
-  endpoint: "http://s3:9000"
+  endpoint: "https://s3.internal.example:9000"
   region: "us-east-1"
   bucket: forge
   path_style: true
+  tls: true
 discovery: { provider: disabled }
 remote_config: { provider: disabled }
 security:

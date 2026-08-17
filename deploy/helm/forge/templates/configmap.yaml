@@ -31,6 +31,20 @@ data:
   FORGE_CACHE_DEFAULT_TTL: {{ .Values.config.cacheDefaultTTL | quote }}
 
   FORGE_MESSAGING_PROVIDER: {{ .Values.config.messagingProvider | quote }}
+  FORGE_ROCKETMQ_ENDPOINT: {{ .Values.config.rocketmqEndpoint | quote }}
+  FORGE_ROCKETMQ_GROUP: {{ .Values.config.rocketmqGroup | quote }}
+  FORGE_ROCKETMQ_NAMESPACE: {{ .Values.config.rocketmqNamespace | quote }}
+  FORGE_ROCKETMQ_TOPICS: {{ .Values.config.rocketmqTopics | quote }}
+  FORGE_ROCKETMQ_TLS: {{ .Values.config.rocketmqTLS | quote }}
+  FORGE_ROCKETMQ_TLS_CA_FILE: {{ .Values.config.rocketmqTLSCAFile | quote }}
+  FORGE_ROCKETMQ_TLS_CERT_FILE: {{ .Values.config.rocketmqTLSCertFile | quote }}
+  FORGE_ROCKETMQ_TLS_KEY_FILE: {{ .Values.config.rocketmqTLSKeyFile | quote }}
+  FORGE_ROCKETMQ_TLS_SERVER_NAME: {{ .Values.config.rocketmqTLSServerName | quote }}
+  FORGE_ROCKETMQ_BATCH_SIZE: {{ .Values.config.rocketmqBatchSize | quote }}
+  FORGE_ROCKETMQ_INVISIBLE_DURATION: {{ .Values.config.rocketmqInvisibleDuration | quote }}
+  FORGE_ROCKETMQ_AWAIT_DURATION: {{ .Values.config.rocketmqAwaitDuration | quote }}
+
+  FORGE_STREAMING_PROVIDER: {{ .Values.config.streamingProvider | quote }}
   FORGE_KAFKA_BROKERS: {{ .Values.config.kafkaBrokers | quote }}
   FORGE_KAFKA_CLIENT_ID: {{ .Values.config.kafkaClientID | quote }}
   FORGE_KAFKA_TLS: {{ .Values.config.kafkaTLS | quote }}
@@ -38,11 +52,6 @@ data:
   FORGE_KAFKA_TLS_CERT_FILE: {{ .Values.config.kafkaTLSCertFile | quote }}
   FORGE_KAFKA_TLS_KEY_FILE: {{ .Values.config.kafkaTLSKeyFile | quote }}
   FORGE_KAFKA_TLS_SERVER_NAME: {{ .Values.config.kafkaTLSServerName | quote }}
-  FORGE_ROCKETMQ_ENDPOINT: {{ .Values.config.rocketmqEndpoint | quote }}
-  FORGE_ROCKETMQ_GROUP: {{ .Values.config.rocketmqGroup | quote }}
-  FORGE_ROCKETMQ_NAMESPACE: {{ .Values.config.rocketmqNamespace | quote }}
-  FORGE_ROCKETMQ_TOPICS: {{ .Values.config.rocketmqTopics | quote }}
-
   FORGE_SEARCH_PROVIDER: {{ .Values.config.searchProvider | quote }}
   FORGE_SEARCH_URLS: {{ .Values.config.searchURLs | quote }}
   FORGE_SEARCH_TLS: {{ .Values.config.searchTLS | quote }}

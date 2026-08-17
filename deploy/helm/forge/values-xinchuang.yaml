@@ -33,6 +33,7 @@ networkPolicy:
         - { protocol: TCP, port: 26379 }
         - { protocol: TCP, port: 8848 }
         - { protocol: TCP, port: 9848 }
+        - { protocol: TCP, port: 8081 }
         - { protocol: TCP, port: 4318 }
 
 image:
@@ -48,7 +49,14 @@ config:
   redisAddresses: "redis-sentinel-0:26379,redis-sentinel-1:26379,redis-sentinel-2:26379"
   redisMasterName: mymaster
   redisTLS: "true"
-  messagingProvider: disabled
+  messagingProvider: rocketmq
+  rocketmqEndpoint: "rocketmq-proxy.messaging.svc:8081"
+  rocketmqGroup: forge-business-consumer
+  rocketmqNamespace: forge
+  rocketmqTopics: "forge-business-events"
+  rocketmqTLS: "true"
+  rocketmqTLSServerName: "rocketmq-proxy.messaging.svc"
+  streamingProvider: disabled
   searchProvider: disabled
   storageProvider: s3
   storageRegion: cn-beijing
@@ -79,7 +87,7 @@ config:
   disableDebugEndpoints: "true"
 
 worker:
-  enabled: false
+  enabled: true
 
 # Nacos registration needs the routable Pod IP. If your network model requires
 # NodeIP/VIP/service address, override this according to the platform topology.

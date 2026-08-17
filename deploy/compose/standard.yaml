@@ -63,8 +63,10 @@ services:
     volumes: ["../../configs/standard.yaml:/app/config.yaml:ro"]
     environment:
       FORGE_CONFIG: /app/config.yaml
+      FORGE_ENV: development
       FORGE_DATABASE_DSN: postgres://forge:forge_dev@postgres:5432/forge?sslmode=disable
       FORGE_REDIS_ADDRESS: redis:6379
+      FORGE_REDIS_TLS: "false"
       FORGE_STORAGE_PROVIDER: s3
       FORGE_STORAGE_ENDPOINT: ${FORGE_STORAGE_ENDPOINT:-http://s3:9000}
       FORGE_STORAGE_REGION: ${FORGE_STORAGE_REGION:-us-east-1}

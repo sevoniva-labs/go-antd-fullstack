@@ -26,11 +26,20 @@ cache:
   addresses: ["redis:6379"]
   prefix: "forge:"
   default_ttl: 10m
-messaging:
-  provider: kafka
-  brokers: ["kafka:9092"]
-  client_id: forge
   tls: true
+messaging:
+  provider: rocketmq
+  rocketmq_endpoint: "rocketmq-proxy.messaging.svc:8081"
+  rocketmq_group: forge-business-consumer
+  rocketmq_namespace: forge
+  rocketmq_topics: ["forge-business-events"]
+  rocketmq_batch_size: 16
+  rocketmq_invisible_duration: 30s
+  rocketmq_await_duration: 5s
+  tls: true
+  tls_server_name: "rocketmq-proxy.messaging.svc"
+streaming:
+  provider: disabled
 search:
   provider: elasticsearch
   urls: ["https://elasticsearch:9200"]
