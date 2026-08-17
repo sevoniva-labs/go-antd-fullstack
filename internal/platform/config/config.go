@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -305,6 +306,16 @@ func (c Config) ValidateDatabase() error {
 	if c.Database.MaxOpenConns < 1 || c.Database.MaxIdleConns < 0 || c.Database.MaxIdleConns > c.Database.MaxOpenConns {
 		errs = append(errs, "database pool settings are invalid")
 	}
+	if isProduction(c.App.Environment) {
+		if err := validateDatabaseTLS(c.Database.Provider, c.Database.DSN); err != nil {
+			errs = append(errs, "database DSN: "+err.Error())
+		}
+		if c.Database.ReadOnlyDSN != "" {
+			if err := validateDatabaseTLS(c.Database.Provider, c.Database.ReadOnlyDSN); err != nil {
+				errs = append(errs, "read-only database DSN: "+err.Error())
+			}
+		}
+	}
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, "; "))
 	}
@@ -501,6 +512,16 @@ func (c Config) Validate() error {
 	if c.Database.DSN == "" {
 		errs = append(errs, "FORGE_DATABASE_DSN is required")
 	}
+	if isProduction(c.App.Environment) {
+		if err := validateDatabaseTLS(c.Database.Provider, c.Database.DSN); err != nil {
+			errs = append(errs, "database DSN: "+err.Error())
+		}
+		if c.Database.ReadOnlyDSN != "" {
+			if err := validateDatabaseTLS(c.Database.Provider, c.Database.ReadOnlyDSN); err != nil {
+				errs = append(errs, "read-only database DSN: "+err.Error())
+			}
+		}
+	}
 	switch c.Cache.Provider {
 	case "disabled", "memory", "redis":
 	default:
@@ -610,6 +631,66 @@ func (c Config) Validate() error {
 		return errors.New(strings.Join(errs, "; "))
 	}
 	return nil
+}
+
+func isProduction(environment string) bool {
+	switch strings.ToLower(strings.TrimSpace(environment)) {
+	case "production", "prod":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateDatabaseTLS(provider, dsn string) error {
+	switch strings.ToLower(strings.TrimSpace(provider)) {
+	case "postgres":
+		mode, err := postgresSSLMode(dsn)
+		if err != nil {
+			return err
+		}
+		if mode != "verify-full" {
+			return fmt.Errorf("PostgreSQL sslmode must be verify-full in production")
+		}
+	case "mysql", "oceanbase":
+		mode, err := mysqlTLSMode(dsn)
+		if err != nil {
+			return err
+		}
+		if mode != "true" {
+			return fmt.Errorf("MySQL-compatible tls must be true in production")
+		}
+	}
+	return nil
+}
+
+func postgresSSLMode(dsn string) (string, error) {
+	if strings.Contains(dsn, "://") {
+		u, err := url.Parse(dsn)
+		if err != nil {
+			return "", fmt.Errorf("invalid PostgreSQL DSN")
+		}
+		return strings.ToLower(strings.TrimSpace(u.Query().Get("sslmode"))), nil
+	}
+	for _, field := range strings.Fields(dsn) {
+		key, value, ok := strings.Cut(field, "=")
+		if ok && strings.EqualFold(strings.TrimSpace(key), "sslmode") {
+			return strings.ToLower(strings.Trim(strings.TrimSpace(value), "'\"")), nil
+		}
+	}
+	return "", nil
+}
+
+func mysqlTLSMode(dsn string) (string, error) {
+	index := strings.LastIndexByte(dsn, '?')
+	if index < 0 || index == len(dsn)-1 {
+		return "", nil
+	}
+	query, err := url.ParseQuery(dsn[index+1:])
+	if err != nil {
+		return "", fmt.Errorf("invalid MySQL-compatible DSN parameters")
+	}
+	return strings.ToLower(strings.TrimSpace(query.Get("tls"))), nil
 }
 
 func secret(key string) string {
