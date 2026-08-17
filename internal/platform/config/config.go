@@ -88,19 +88,20 @@ type Messaging struct {
 	Provider string `yaml:"provider"` // disabled | kafka | rocketmq
 
 	// Kafka
-	Brokers       []string `yaml:"brokers"`
-	ClientID      string   `yaml:"client_id"`
-	Username      string   `yaml:"-"`
-	Password      string   `yaml:"-"`
-	TLS           bool     `yaml:"tls"`
-	TLSCAFile     string   `yaml:"tls_ca_file"`
-	TLSCertFile   string   `yaml:"tls_cert_file"`
-	TLSKeyFile    string   `yaml:"tls_key_file"`
-	TLSServerName string   `yaml:"tls_server_name"`
+	Brokers  []string `yaml:"brokers"`
+	ClientID string   `yaml:"client_id"`
+	Username string   `yaml:"-"`
+	Password string   `yaml:"-"`
 
-	// RocketMQ 5.x gRPC integration profile. The root module keeps the bus
-	// contract vendor-neutral; the official client adapter lives under
-	// integrations/rocketmq to avoid forcing the SDK on minimal builds.
+	// Shared transport TLS for Kafka or the RocketMQ 5 gRPC Proxy.
+	TLS           bool   `yaml:"tls"`
+	TLSCAFile     string `yaml:"tls_ca_file"`
+	TLSCertFile   string `yaml:"tls_cert_file"`
+	TLSKeyFile    string `yaml:"tls_key_file"`
+	TLSServerName string `yaml:"tls_server_name"`
+
+	// RocketMQ 5.x uses Apache's official gRPC client and requires a Proxy
+	// endpoint. Access credentials are environment/file-only secrets.
 	RocketMQEndpoint  string   `yaml:"rocketmq_endpoint"`
 	RocketMQGroup     string   `yaml:"rocketmq_group"`
 	RocketMQNamespace string   `yaml:"rocketmq_namespace"`
@@ -409,6 +410,13 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Messaging.TLSCertFile, "FORGE_KAFKA_TLS_CERT_FILE")
 	overrideString(&cfg.Messaging.TLSKeyFile, "FORGE_KAFKA_TLS_KEY_FILE")
 	overrideString(&cfg.Messaging.TLSServerName, "FORGE_KAFKA_TLS_SERVER_NAME")
+	if strings.EqualFold(cfg.Messaging.Provider, "rocketmq") {
+		overrideBool(&cfg.Messaging.TLS, "FORGE_ROCKETMQ_TLS")
+		overrideString(&cfg.Messaging.TLSCAFile, "FORGE_ROCKETMQ_TLS_CA_FILE")
+		overrideString(&cfg.Messaging.TLSCertFile, "FORGE_ROCKETMQ_TLS_CERT_FILE")
+		overrideString(&cfg.Messaging.TLSKeyFile, "FORGE_ROCKETMQ_TLS_KEY_FILE")
+		overrideString(&cfg.Messaging.TLSServerName, "FORGE_ROCKETMQ_TLS_SERVER_NAME")
+	}
 	overrideString(&cfg.Messaging.RocketMQEndpoint, "FORGE_ROCKETMQ_ENDPOINT")
 	overrideString(&cfg.Messaging.RocketMQGroup, "FORGE_ROCKETMQ_GROUP")
 	overrideString(&cfg.Messaging.RocketMQNamespace, "FORGE_ROCKETMQ_NAMESPACE")
@@ -564,6 +572,12 @@ func (c Config) Validate() error {
 	if c.Messaging.Provider == "rocketmq" && c.Messaging.RocketMQEndpoint == "" {
 		errs = append(errs, "messaging.rocketmq_endpoint required for rocketmq")
 	}
+	if c.Messaging.Provider == "rocketmq" && len(c.Messaging.RocketMQTopics) == 0 {
+		errs = append(errs, "messaging.rocketmq_topics required for rocketmq")
+	}
+	if c.Messaging.Provider == "rocketmq" && (c.Messaging.RocketMQAccessKey == "" || c.Messaging.RocketMQSecretKey == "") {
+		errs = append(errs, "FORGE_ROCKETMQ_ACCESS_KEY and FORGE_ROCKETMQ_SECRET_KEY are required for rocketmq")
+	}
 	if isProduction(c.App.Environment) && (c.Messaging.Provider == "kafka" || c.Messaging.Provider == "rocketmq") && !c.Messaging.TLS {
 		errs = append(errs, "messaging.tls must be enabled in production")
 	}
@@ -645,11 +659,11 @@ func (c Config) Validate() error {
 	}
 
 	for name, pair := range map[string][2]string{
-		"redis":   {c.Cache.TLSCertFile, c.Cache.TLSKeyFile},
-		"kafka":   {c.Messaging.TLSCertFile, c.Messaging.TLSKeyFile},
-		"search":  {c.Search.TLSCertFile, c.Search.TLSKeyFile},
-		"storage": {c.Storage.TLSCertFile, c.Storage.TLSKeyFile},
-		"otlp":    {c.Observability.OTLPTLSCertFile, c.Observability.OTLPTLSKeyFile},
+		"redis":     {c.Cache.TLSCertFile, c.Cache.TLSKeyFile},
+		"messaging": {c.Messaging.TLSCertFile, c.Messaging.TLSKeyFile},
+		"search":    {c.Search.TLSCertFile, c.Search.TLSKeyFile},
+		"storage":   {c.Storage.TLSCertFile, c.Storage.TLSKeyFile},
+		"otlp":      {c.Observability.OTLPTLSCertFile, c.Observability.OTLPTLSKeyFile},
 	} {
 		if (pair[0] == "") != (pair[1] == "") {
 			errs = append(errs, name+" tls_cert_file and tls_key_file must be configured together")

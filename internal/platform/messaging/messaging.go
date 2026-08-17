@@ -42,7 +42,7 @@ func New(cfg config.Messaging) (Bus, error) {
 		}
 		return &kafka{client: c}, nil
 	case "rocketmq":
-		return nil, errors.New("rocketmq is an optional official-SDK adapter; see integrations/rocketmq")
+		return newRocketMQ(cfg)
 	default:
 		return nil, errors.New("unsupported messaging provider")
 	}
