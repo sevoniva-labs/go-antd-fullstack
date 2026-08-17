@@ -73,7 +73,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	log := logx.New(cfg.Observability.LogLevel, cfg.Observability.LogFormat, cfg.App.Name, cfg.App.Environment, opts.Version)
 	slog.SetDefault(log)
 
-	traceShutdown, err := observability.InitTracing(ctx, cfg.Observability.TracingEnabled, cfg.Observability.OTLPEndpoint, cfg.App.Name, opts.Version, cfg.App.Environment)
+	traceShutdown, err := observability.InitTracing(ctx, cfg.Observability, cfg.App.Name, opts.Version, cfg.App.Environment)
 	if err != nil {
 		return nil, fmt.Errorf("tracing: %w", err)
 	}

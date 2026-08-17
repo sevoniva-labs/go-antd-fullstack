@@ -192,13 +192,18 @@ type Security struct {
 }
 
 type Observability struct {
-	LogLevel       string `yaml:"log_level"`
-	LogFormat      string `yaml:"log_format"`
-	MetricsEnabled bool   `yaml:"metrics_enabled"`
-	MetricsPath    string `yaml:"metrics_path"`
-	TracingEnabled bool   `yaml:"tracing_enabled"`
-	OTLPEndpoint   string `yaml:"otlp_endpoint"`
-	PprofEnabled   bool   `yaml:"pprof_enabled"`
+	LogLevel          string `yaml:"log_level"`
+	LogFormat         string `yaml:"log_format"`
+	MetricsEnabled    bool   `yaml:"metrics_enabled"`
+	MetricsPath       string `yaml:"metrics_path"`
+	TracingEnabled    bool   `yaml:"tracing_enabled"`
+	OTLPEndpoint      string `yaml:"otlp_endpoint"`
+	OTLPTLS           bool   `yaml:"otlp_tls"`
+	OTLPTLSCAFile     string `yaml:"otlp_tls_ca_file"`
+	OTLPTLSCertFile   string `yaml:"otlp_tls_cert_file"`
+	OTLPTLSKeyFile    string `yaml:"otlp_tls_key_file"`
+	OTLPTLSServerName string `yaml:"otlp_tls_server_name"`
+	PprofEnabled      bool   `yaml:"pprof_enabled"`
 }
 
 type Resilience struct {
@@ -472,6 +477,11 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Observability.LogFormat, "FORGE_LOG_FORMAT")
 	overrideString(&cfg.Observability.MetricsPath, "FORGE_METRICS_PATH")
 	overrideString(&cfg.Observability.OTLPEndpoint, "FORGE_OTLP_ENDPOINT")
+	overrideBool(&cfg.Observability.OTLPTLS, "FORGE_OTLP_TLS")
+	overrideString(&cfg.Observability.OTLPTLSCAFile, "FORGE_OTLP_TLS_CA_FILE")
+	overrideString(&cfg.Observability.OTLPTLSCertFile, "FORGE_OTLP_TLS_CERT_FILE")
+	overrideString(&cfg.Observability.OTLPTLSKeyFile, "FORGE_OTLP_TLS_KEY_FILE")
+	overrideString(&cfg.Observability.OTLPTLSServerName, "FORGE_OTLP_TLS_SERVER_NAME")
 	overrideBool(&cfg.Observability.TracingEnabled, "FORGE_TRACING_ENABLED")
 	overrideBool(&cfg.Observability.MetricsEnabled, "FORGE_METRICS_ENABLED")
 	overrideBool(&cfg.Observability.PprofEnabled, "FORGE_PPROF_ENABLED")
@@ -547,6 +557,9 @@ func (c Config) Validate() error {
 	if c.Messaging.Provider == "rocketmq" && c.Messaging.RocketMQEndpoint == "" {
 		errs = append(errs, "messaging.rocketmq_endpoint required for rocketmq")
 	}
+	if isProduction(c.App.Environment) && (c.Messaging.Provider == "kafka" || c.Messaging.Provider == "rocketmq") && !c.Messaging.TLS {
+		errs = append(errs, "messaging.tls must be enabled in production")
+	}
 	switch c.Search.Provider {
 	case "disabled", "elasticsearch", "opensearch":
 	default:
@@ -555,6 +568,17 @@ func (c Config) Validate() error {
 	if c.Search.Provider != "disabled" && len(c.Search.URLs) == 0 {
 		errs = append(errs, "search.urls required when search is enabled")
 	}
+	if isProduction(c.App.Environment) && c.Search.Provider != "disabled" {
+		if !c.Search.TLS {
+			errs = append(errs, "search.tls must be enabled in production")
+		}
+		for _, endpoint := range c.Search.URLs {
+			if !isHTTPSURL(endpoint) {
+				errs = append(errs, "search.urls must use https in production")
+				break
+			}
+		}
+	}
 	switch c.Storage.Provider {
 	case "local", "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
 	default:
@@ -562,6 +586,14 @@ func (c Config) Validate() error {
 	}
 	if normalizeStorageProvider(c.Storage.Provider) == "s3" && c.Storage.Bucket == "" {
 		errs = append(errs, "storage.bucket required for s3")
+	}
+	if isProduction(c.App.Environment) && normalizeStorageProvider(c.Storage.Provider) == "s3" {
+		if !c.Storage.TLS {
+			errs = append(errs, "storage.tls must be enabled for s3 in production")
+		}
+		if strings.TrimSpace(c.Storage.Endpoint) != "" && !isHTTPSURL(c.Storage.Endpoint) {
+			errs = append(errs, "storage.endpoint must use https in production")
+		}
 	}
 	if normalizeStorageProvider(c.Storage.Provider) == "local" && strings.TrimSpace(c.Storage.LocalRoot) == "" {
 		errs = append(errs, "storage.local_root required for local storage")
@@ -607,6 +639,7 @@ func (c Config) Validate() error {
 		"kafka":   {c.Messaging.TLSCertFile, c.Messaging.TLSKeyFile},
 		"search":  {c.Search.TLSCertFile, c.Search.TLSKeyFile},
 		"storage": {c.Storage.TLSCertFile, c.Storage.TLSKeyFile},
+		"otlp":    {c.Observability.OTLPTLSCertFile, c.Observability.OTLPTLSKeyFile},
 	} {
 		if (pair[0] == "") != (pair[1] == "") {
 			errs = append(errs, name+" tls_cert_file and tls_key_file must be configured together")
@@ -623,6 +656,17 @@ func (c Config) Validate() error {
 	}
 	if c.Observability.MetricsEnabled && !strings.HasPrefix(c.Observability.MetricsPath, "/") {
 		errs = append(errs, "observability.metrics_path must start with /")
+	}
+	if c.Observability.TracingEnabled && strings.TrimSpace(c.Observability.OTLPEndpoint) == "" {
+		errs = append(errs, "observability.otlp_endpoint is required when tracing is enabled")
+	}
+	if isProduction(c.App.Environment) && c.Observability.TracingEnabled {
+		if !c.Observability.OTLPTLS {
+			errs = append(errs, "observability.otlp_tls must be enabled in production")
+		}
+		if !isHTTPSURL(c.Observability.OTLPEndpoint) {
+			errs = append(errs, "observability.otlp_endpoint must use https in production")
+		}
 	}
 	if c.Resilience.RetryMaxAttempts < 1 || c.Resilience.CircuitFailureThreshold < 1 || c.Resilience.BulkheadConcurrency < 1 {
 		errs = append(errs, "resilience values must be positive")
@@ -643,6 +687,11 @@ func isProduction(environment string) bool {
 	default:
 		return false
 	}
+}
+
+func isHTTPSURL(value string) bool {
+	u, err := url.Parse(strings.TrimSpace(value))
+	return err == nil && strings.EqualFold(u.Scheme, "https") && u.Host != ""
 }
 
 func validateDatabaseTLS(provider, dsn string) error {

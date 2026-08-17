@@ -35,6 +35,7 @@ storage:
   region: cn-beijing
   bucket: forge
   path_style: true
+  tls: true
 discovery:
   provider: nacos
   servers: ["https://nacos.example.internal:8848"]
@@ -76,7 +77,8 @@ observability:
   metrics_enabled: true
   metrics_path: /metrics
   tracing_enabled: true
-  otlp_endpoint: "http://otel-collector:4318"
+  otlp_endpoint: "https://otel-collector:4318"
+  otlp_tls: true
   pprof_enabled: false
 resilience:
   dependency_timeout: 8s

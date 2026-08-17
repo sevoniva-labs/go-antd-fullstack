@@ -29,16 +29,18 @@ messaging:
   provider: kafka
   brokers: ["kafka:9092"]
   client_id: forge
-  tls: false
+  tls: true
 search:
   provider: elasticsearch
-  urls: ["http://elasticsearch:9200"]
+  urls: ["https://elasticsearch:9200"]
+  tls: true
 storage:
   provider: s3
-  endpoint: "http://s3:9000"
+  endpoint: "https://s3:9000"
   region: "us-east-1"
   bucket: forge
   path_style: true
+  tls: true
 discovery:
   provider: disabled
   group: DEFAULT_GROUP
@@ -69,7 +71,8 @@ observability:
   metrics_enabled: true
   metrics_path: /metrics
   tracing_enabled: true
-  otlp_endpoint: "http://otel-collector:4318"
+  otlp_endpoint: "https://otel-collector:4318"
+  otlp_tls: true
   pprof_enabled: false
 resilience:
   dependency_timeout: 8s

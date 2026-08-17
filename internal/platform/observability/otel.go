@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/sevoniva-labs/forge/internal/platform/config"
+	"github.com/sevoniva-labs/forge/internal/platform/tlsx"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -15,15 +17,26 @@ import (
 
 type Shutdown func(context.Context) error
 
-func InitTracing(ctx context.Context, enabled bool, endpoint, service, version, env string) (Shutdown, error) {
+func InitTracing(ctx context.Context, cfg config.Observability, service, version, env string) (Shutdown, error) {
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	if !enabled {
+	if !cfg.TracingEnabled {
 		return func(context.Context) error { return nil }, nil
 	}
-	if endpoint == "" {
+	if cfg.OTLPEndpoint == "" {
 		return nil, errors.New("tracing enabled but otlp endpoint is empty")
 	}
-	exp, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpointURL(endpoint))
+	tlsCfg, err := tlsx.ClientConfig(tlsx.ClientOptions{
+		Enabled: cfg.OTLPTLS, CAFile: cfg.OTLPTLSCAFile, CertFile: cfg.OTLPTLSCertFile,
+		KeyFile: cfg.OTLPTLSKeyFile, ServerName: cfg.OTLPTLSServerName,
+	})
+	if err != nil {
+		return nil, err
+	}
+	opts := []otlptracehttp.Option{otlptracehttp.WithEndpointURL(cfg.OTLPEndpoint)}
+	if tlsCfg != nil {
+		opts = append(opts, otlptracehttp.WithTLSClientConfig(tlsCfg))
+	}
+	exp, err := otlptracehttp.New(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
