@@ -48,10 +48,10 @@ web-install:
 	$(PNPM) install --frozen-lockfile --registry=$(NPM_REGISTRY)
 
 web-dev:
-	$(PNPM) --filter sevoniva-forge-web dev
+	$(PNPM) --filter @forge/shell dev
 
 web-build:
-	$(PNPM) --filter sevoniva-forge-web build
+	$(PNPM) --filter @forge/shell build
 
 contract:
 	python3 scripts/check-error-codes.py
@@ -105,10 +105,10 @@ build: web-build
 check: fmt contract
 	go vet ./...
 	go test ./...
-	$(PNPM) --filter sevoniva-forge-web lint
-	$(PNPM) --filter sevoniva-forge-web typecheck
-	$(PNPM) --filter sevoniva-forge-web test
-	$(PNPM) --filter sevoniva-forge-web build
+	$(PNPM) --filter @forge/shell lint
+	$(PNPM) --filter @forge/shell typecheck
+	$(PNPM) --filter @forge/shell test
+	$(PNPM) --filter @forge/shell build
 
 ci-policy:
 	bash scripts/check-ci-policy.sh
@@ -122,10 +122,10 @@ ci-go: ci-policy contract proto-check module-boundaries
 	$(GO_ENV) go test -race ./...
 
 ci-web: ci-policy web-install
-	$(PNPM) --filter sevoniva-forge-web lint
-	$(PNPM) --filter sevoniva-forge-web typecheck
-	$(PNPM) --filter sevoniva-forge-web test
-	$(PNPM) --filter sevoniva-forge-web build
+	$(PNPM) --filter @forge/shell lint
+	$(PNPM) --filter @forge/shell typecheck
+	$(PNPM) --filter @forge/shell test
+	$(PNPM) --filter @forge/shell build
 
 ci-deploy: ci-policy
 	bash scripts/check-observability-policy.sh
@@ -147,7 +147,7 @@ release-evidence: supply-chain-evidence
 verify: ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-check: fmt contract
-	python3 -m json.tool web/package.json >/dev/null
+	python3 -m json.tool web/apps/shell/package.json >/dev/null
 	bash -n scripts/init-project.sh
 
 docker-build:

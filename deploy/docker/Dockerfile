@@ -7,10 +7,10 @@ ARG NPM_REGISTRY=https://registry.npmmirror.com
 ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY}
 WORKDIR /src
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
-COPY web/package.json web/package.json
+COPY web/apps/shell/package.json web/apps/shell/package.json
 RUN corepack enable && pnpm install --frozen-lockfile --registry=${NPM_REGISTRY}
 COPY web/ web/
-RUN pnpm --filter sevoniva-forge-web build
+RUN pnpm --filter @forge/shell build
 
 FROM ${GO_IMAGE} AS go-build
 ARG VERSION=container

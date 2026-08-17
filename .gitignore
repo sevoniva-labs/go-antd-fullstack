@@ -43,3 +43,5 @@ coverage.out
 *.tsbuildinfo
 /web/vite.config.js
 /web/vite.config.d.ts
+/web/apps/*/vite.config.js
+/web/apps/*/vite.config.d.ts
