@@ -19,6 +19,8 @@ message User {
   repeated string roles = 10;
   repeated string permissions = 11;
   EffectiveDataScope data_scope = 12;
+  string authentication_level = 13;
+  google.protobuf.Timestamp mfa_verified_at = 14;
 }
 
 message EffectiveDataScope {

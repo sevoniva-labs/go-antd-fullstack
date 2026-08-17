@@ -18,6 +18,7 @@ const csrfCookieName = "forge_csrf"
 var protectedOperations = map[string]struct{}{
 	forgev1.OperationIdentityServiceLogout:                {},
 	forgev1.OperationIdentityServiceChangePassword:        {},
+	forgev1.OperationIdentityServiceStepUpAuthentication:  {},
 	forgev1.OperationIdentityServiceCreateApiToken:        {},
 	forgev1.OperationIdentityServiceRevokeApiToken:        {},
 	forgev1.OperationIdentityServiceBeginMFAEnrollment:    {},

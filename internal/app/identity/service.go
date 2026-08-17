@@ -42,6 +42,7 @@ var ErrMFAAlreadyEnabled = repository.ErrMFAAlreadyEnabled
 var ErrMFANotPending = errors.New("multi-factor authentication enrollment is not pending")
 var ErrMFAUnavailable = errors.New("multi-factor authentication encryption is unavailable")
 var ErrRoleConflict = errors.New("role combination violates segregation of duties")
+var ErrStepUpRequired = errors.New("recent multi-factor authentication required")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -61,6 +62,7 @@ const (
 	minimumLoginLockDuration  = 15 * time.Minute
 	maximumSessionTTL         = 12 * time.Hour
 	maximumConcurrentSessions = 5
+	recentMFAWindow           = 10 * time.Minute
 )
 
 type Options struct {
@@ -491,7 +493,8 @@ func (s *Service) LoginWithMFA(ctx context.Context, orgID, login, raw, mfaCode, 
 		}
 		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
 	}
-	if err := s.verifyLoginMFA(ctx, row.User.ID, mfaCode, recoveryCode); err != nil {
+	mfaVerified, err := s.verifyLoginMFA(ctx, row.User.ID, mfaCode, recoveryCode)
+	if err != nil {
 		if errors.Is(err, ErrInvalidMFA) {
 			if recordErr := s.repo.RecordLoginFailure(ctx, row.User.ID, policy.maxFailures, policy.lockDuration); recordErr != nil {
 				return domain.Principal{}, "", "", time.Time{}, recordErr
@@ -511,7 +514,14 @@ func (s *Service) LoginWithMFA(ctx context.Context, orgID, login, raw, mfaCode, 
 		return domain.Principal{}, "", "", time.Time{}, err
 	}
 	expires := time.Now().UTC().Add(policy.sessionTTL)
-	sessionID, err := s.repo.CreateSession(ctx, row.User.ID, hashToken(token), expires, ip, ua)
+	authenticationLevel := "PASSWORD"
+	var mfaVerifiedAt *time.Time
+	if mfaVerified {
+		authenticationLevel = "MFA"
+		verifiedAt := time.Now().UTC()
+		mfaVerifiedAt = &verifiedAt
+	}
+	sessionID, err := s.repo.CreateSession(ctx, row.User.ID, hashToken(token), expires, ip, ua, authenticationLevel, mfaVerifiedAt)
 	if err != nil {
 		return domain.Principal{}, "", "", time.Time{}, err
 	}
@@ -520,22 +530,64 @@ func (s *Service) LoginWithMFA(ctx context.Context, orgID, login, raw, mfaCode, 
 		return domain.Principal{}, "", "", time.Time{}, err
 	}
 	mustChange := row.User.MustChangePassword || s.passwordExpiredAt(row.User.PasswordChangedAt, policy.maxAge)
-	p := domain.Principal{Type: "USER", UserID: row.User.ID, OrganizationID: row.User.OrganizationID, LoginName: row.User.LoginName, DisplayName: row.User.DisplayName, Roles: row.User.Roles, Permissions: row.User.Permissions, MustChangePassword: mustChange, SessionID: sessionID, PasswordChangedAt: row.User.PasswordChangedAt}
+	p := domain.Principal{Type: "USER", UserID: row.User.ID, OrganizationID: row.User.OrganizationID, LoginName: row.User.LoginName, DisplayName: row.User.DisplayName, Roles: row.User.Roles, Permissions: row.User.Permissions, MustChangePassword: mustChange, SessionID: sessionID, PasswordChangedAt: row.User.PasswordChangedAt, AuthenticationLevel: authenticationLevel, MFAVerifiedAt: mfaVerifiedAt}
 	return p, token, csrf, expires, nil
 }
 
-func (s *Service) verifyLoginMFA(ctx context.Context, userID, code, recoveryCode string) error {
+func (s *Service) verifyLoginMFA(ctx context.Context, userID, code, recoveryCode string) (bool, error) {
 	factor, err := s.repo.ActiveMFAFactor(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil
+		return false, nil
 	}
 	if err != nil {
-		return err
+		return false, err
 	}
 	if strings.TrimSpace(code) == "" && strings.TrimSpace(recoveryCode) == "" {
-		return ErrMFARequired
+		return false, ErrMFARequired
 	}
-	return s.verifyMFAFactor(ctx, factor, code, recoveryCode)
+	if err := s.verifyMFAFactor(ctx, factor, code, recoveryCode); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (s *Service) StepUpAuthentication(ctx context.Context, actor domain.Principal, currentPassword, code, recoveryCode string) (time.Time, error) {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return time.Time{}, err
+	}
+	hash, err := s.repo.PasswordHashByID(ctx, actor.UserID)
+	if err != nil {
+		return time.Time{}, err
+	}
+	if !s.hasher.Verify(currentPassword, hash) {
+		return time.Time{}, ErrInvalidCredentials
+	}
+	factor, err := s.repo.ActiveMFAFactor(ctx, actor.UserID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return time.Time{}, ErrMFARequired
+	}
+	if err != nil {
+		return time.Time{}, err
+	}
+	if err := s.verifyMFAFactor(ctx, factor, code, recoveryCode); err != nil {
+		return time.Time{}, err
+	}
+	verifiedAt := time.Now().UTC()
+	if err := s.repo.MarkSessionMFAVerified(ctx, actor.UserID, actor.SessionID, verifiedAt); err != nil {
+		return time.Time{}, err
+	}
+	return verifiedAt, nil
+}
+
+func RequireRecentMFA(actor domain.Principal) error {
+	if actor.MFAVerifiedAt == nil {
+		return ErrStepUpRequired
+	}
+	age := time.Since(*actor.MFAVerifiedAt)
+	if age < 0 || age > recentMFAWindow {
+		return ErrStepUpRequired
+	}
+	return nil
 }
 
 func (s *Service) verifyMFAFactor(ctx context.Context, factor domain.MFAFactor, code, recoveryCode string) error {
@@ -1631,7 +1683,7 @@ func authorizeGrantActor(actor domain.Principal, orgID string) error {
 	if actor.Type != "USER" || actor.UserID == "" || actor.OrganizationID == "" || actor.OrganizationID != orgID {
 		return ErrGrantCeiling
 	}
-	return nil
+	return RequireRecentMFA(actor)
 }
 
 func enforceRoleMutation(actor domain.Principal, current, next []string) error {

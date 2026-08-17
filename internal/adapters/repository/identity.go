@@ -276,10 +276,10 @@ func (r *IdentityRepo) ResetLoginFailure(ctx context.Context, userID string) err
 	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE users SET failed_login_count=0,locked_until=NULL,updated_at=? WHERE id=?`), time.Now().UTC(), userID)
 	return err
 }
-func (r *IdentityRepo) CreateSession(ctx context.Context, userID, tokenHash string, expires time.Time, ip, ua string) (string, error) {
+func (r *IdentityRepo) CreateSession(ctx context.Context, userID, tokenHash string, expires time.Time, ip, ua, authenticationLevel string, mfaVerifiedAt *time.Time) (string, error) {
 	id := uuid.NewString()
 	now := time.Now().UTC()
-	_, err := r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO sessions(id,user_id,token_hash,expires_at,created_at,last_seen_at,client_ip,user_agent) VALUES(?,?,?,?,?,?,?,?)`), id, userID, tokenHash, expires, now, now, ip, ua)
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO sessions(id,user_id,token_hash,expires_at,created_at,last_seen_at,client_ip,user_agent,authentication_level,mfa_verified_at) VALUES(?,?,?,?,?,?,?,?,?,?)`), id, userID, tokenHash, expires, now, now, ip, ua, authenticationLevel, mfaVerifiedAt)
 	return id, err
 }
 func (r *IdentityRepo) PrincipalBySessionHash(ctx context.Context, hash string) (identity.Principal, error) {
@@ -291,6 +291,14 @@ func (r *IdentityRepo) PrincipalBySessionHash(ctx context.Context, hash string) 
 		return p, err
 	}
 	p.Type = "USER"
+	var mfaVerified sql.NullTime
+	if err = r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT authentication_level,mfa_verified_at FROM sessions WHERE id=?`), p.SessionID).Scan(&p.AuthenticationLevel, &mfaVerified); err != nil {
+		return p, err
+	}
+	if mfaVerified.Valid {
+		value := mfaVerified.Time
+		p.MFAVerifiedAt = &value
+	}
 	if time.Now().After(exp) {
 		_ = r.DeleteSessionByID(ctx, p.SessionID)
 		return p, sql.ErrNoRows
@@ -303,6 +311,21 @@ func (r *IdentityRepo) PrincipalBySessionHash(ctx context.Context, hash string) 
 	}
 	_, _ = r.db.ExecContext(ctx, r.db.Rebind(`UPDATE sessions SET last_seen_at=? WHERE id=?`), time.Now().UTC(), p.SessionID)
 	return p, nil
+}
+
+func (r *IdentityRepo) MarkSessionMFAVerified(ctx context.Context, userID, sessionID string, verifiedAt time.Time) error {
+	result, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE sessions SET authentication_level='MFA',mfa_verified_at=?,last_seen_at=? WHERE id=? AND user_id=? AND expires_at>?`), verifiedAt, verifiedAt, sessionID, userID, verifiedAt)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 func (r *IdentityRepo) DeleteSessionByHash(ctx context.Context, hash string) error {
 	_, err := r.db.ExecContext(ctx, r.db.Rebind(`DELETE FROM sessions WHERE token_hash=?`), hash)

@@ -22,6 +22,7 @@ const (
 	IdentityService_Login_FullMethodName                = "/forge.v1.IdentityService/Login"
 	IdentityService_Logout_FullMethodName               = "/forge.v1.IdentityService/Logout"
 	IdentityService_ChangePassword_FullMethodName       = "/forge.v1.IdentityService/ChangePassword"
+	IdentityService_StepUpAuthentication_FullMethodName = "/forge.v1.IdentityService/StepUpAuthentication"
 	IdentityService_GetCurrentUser_FullMethodName       = "/forge.v1.IdentityService/GetCurrentUser"
 	IdentityService_GetMFAStatus_FullMethodName         = "/forge.v1.IdentityService/GetMFAStatus"
 	IdentityService_BeginMFAEnrollment_FullMethodName   = "/forge.v1.IdentityService/BeginMFAEnrollment"
@@ -39,6 +40,7 @@ type IdentityServiceClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
+	StepUpAuthentication(ctx context.Context, in *StepUpAuthenticationRequest, opts ...grpc.CallOption) (*StepUpAuthenticationResponse, error)
 	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error)
 	GetMFAStatus(ctx context.Context, in *GetMFAStatusRequest, opts ...grpc.CallOption) (*GetMFAStatusResponse, error)
 	BeginMFAEnrollment(ctx context.Context, in *BeginMFAEnrollmentRequest, opts ...grpc.CallOption) (*BeginMFAEnrollmentResponse, error)
@@ -81,6 +83,16 @@ func (c *identityServiceClient) ChangePassword(ctx context.Context, in *ChangePa
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ChangePasswordResponse)
 	err := c.cc.Invoke(ctx, IdentityService_ChangePassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) StepUpAuthentication(ctx context.Context, in *StepUpAuthenticationRequest, opts ...grpc.CallOption) (*StepUpAuthenticationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StepUpAuthenticationResponse)
+	err := c.cc.Invoke(ctx, IdentityService_StepUpAuthentication_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -174,6 +186,7 @@ type IdentityServiceServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
+	StepUpAuthentication(context.Context, *StepUpAuthenticationRequest) (*StepUpAuthenticationResponse, error)
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
 	GetMFAStatus(context.Context, *GetMFAStatusRequest) (*GetMFAStatusResponse, error)
 	BeginMFAEnrollment(context.Context, *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error)
@@ -200,6 +213,9 @@ func (UnimplementedIdentityServiceServer) Logout(context.Context, *LogoutRequest
 }
 func (UnimplementedIdentityServiceServer) ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
+}
+func (UnimplementedIdentityServiceServer) StepUpAuthentication(context.Context, *StepUpAuthenticationRequest) (*StepUpAuthenticationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method StepUpAuthentication not implemented")
 }
 func (UnimplementedIdentityServiceServer) GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentUser not implemented")
@@ -296,6 +312,24 @@ func _IdentityService_ChangePassword_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IdentityServiceServer).ChangePassword(ctx, req.(*ChangePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_StepUpAuthentication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StepUpAuthenticationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).StepUpAuthentication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_StepUpAuthentication_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).StepUpAuthentication(ctx, req.(*StepUpAuthenticationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -462,6 +496,10 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangePassword",
 			Handler:    _IdentityService_ChangePassword_Handler,
+		},
+		{
+			MethodName: "StepUpAuthentication",
+			Handler:    _IdentityService_StepUpAuthentication_Handler,
 		},
 		{
 			MethodName: "GetCurrentUser",

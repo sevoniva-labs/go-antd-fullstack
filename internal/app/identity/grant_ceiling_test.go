@@ -3,14 +3,23 @@ package identity
 import (
 	"errors"
 	"testing"
+	"time"
 
 	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
 )
 
 func TestAuthorizeGrantActor(t *testing.T) {
-	valid := domain.Principal{Type: "USER", UserID: "u1", OrganizationID: "org1"}
+	verifiedAt := time.Now().UTC()
+	valid := domain.Principal{Type: "USER", UserID: "u1", OrganizationID: "org1", MFAVerifiedAt: &verifiedAt}
 	if err := authorizeGrantActor(valid, "org1"); err != nil {
 		t.Fatalf("valid user actor rejected: %v", err)
+	}
+	if err := authorizeGrantActor(domain.Principal{Type: "USER", UserID: "u1", OrganizationID: "org1"}, "org1"); !errors.Is(err, ErrStepUpRequired) {
+		t.Fatalf("missing MFA should require step-up, got %v", err)
+	}
+	expired := time.Now().UTC().Add(-recentMFAWindow - time.Second)
+	if err := authorizeGrantActor(domain.Principal{Type: "USER", UserID: "u1", OrganizationID: "org1", MFAVerifiedAt: &expired}, "org1"); !errors.Is(err, ErrStepUpRequired) {
+		t.Fatalf("expired MFA should require step-up, got %v", err)
 	}
 	for name, actor := range map[string]domain.Principal{
 		"token":        {Type: "TOKEN", UserID: "u1", OrganizationID: "org1"},

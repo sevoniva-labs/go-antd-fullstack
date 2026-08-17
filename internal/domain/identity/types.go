@@ -212,18 +212,20 @@ type APIToken struct {
 }
 
 type Principal struct {
-	Type               string             `json:"principal_type"`
-	UserID             string             `json:"user_id"`
-	OrganizationID     string             `json:"organization_id"`
-	LoginName          string             `json:"login_name"`
-	DisplayName        string             `json:"display_name"`
-	Roles              []string           `json:"roles"`
-	Permissions        []string           `json:"permissions,omitempty"`
-	Scopes             []string           `json:"scopes,omitempty"`
-	MustChangePassword bool               `json:"must_change_password"`
-	SessionID          string             `json:"-"`
-	PasswordChangedAt  time.Time          `json:"-"`
-	DataScope          EffectiveDataScope `json:"data_scope"`
+	Type                string             `json:"principal_type"`
+	UserID              string             `json:"user_id"`
+	OrganizationID      string             `json:"organization_id"`
+	LoginName           string             `json:"login_name"`
+	DisplayName         string             `json:"display_name"`
+	Roles               []string           `json:"roles"`
+	Permissions         []string           `json:"permissions,omitempty"`
+	Scopes              []string           `json:"scopes,omitempty"`
+	MustChangePassword  bool               `json:"must_change_password"`
+	SessionID           string             `json:"-"`
+	PasswordChangedAt   time.Time          `json:"-"`
+	DataScope           EffectiveDataScope `json:"data_scope"`
+	AuthenticationLevel string             `json:"authentication_level"`
+	MFAVerifiedAt       *time.Time         `json:"mfa_verified_at,omitempty"`
 }
 
 func (p Principal) HasRole(keys ...string) bool {

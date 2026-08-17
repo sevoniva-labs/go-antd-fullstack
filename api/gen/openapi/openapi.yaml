@@ -820,6 +820,27 @@ paths:
             security:
                 - SessionCookie: []
                   CsrfToken: []
+    /api/v1/auth/step-up:
+        post:
+            tags:
+                - IdentityService
+            operationId: IdentityService_StepUpAuthentication
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.StepUpAuthenticationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.StepUpAuthenticationResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
     /api/v1/example/organizations/{organizationId}/settlements/{settlementId}:
         get:
             tags:
@@ -1555,6 +1576,21 @@ components:
                     type: string
                     format: date-time
             description: Settlement is a read-only reference projection used by the split-service example.
+        forge.v1.StepUpAuthenticationRequest:
+            type: object
+            properties:
+                currentPassword:
+                    type: string
+                mfaCode:
+                    type: string
+                recoveryCode:
+                    type: string
+        forge.v1.StepUpAuthenticationResponse:
+            type: object
+            properties:
+                verifiedAt:
+                    type: string
+                    format: date-time
         forge.v1.UnlockUserRequest:
             type: object
             properties:
@@ -1756,6 +1792,11 @@ components:
                         type: string
                 dataScope:
                     $ref: '#/components/schemas/forge.v1.EffectiveDataScope'
+                authenticationLevel:
+                    type: string
+                mfaVerifiedAt:
+                    type: string
+                    format: date-time
         forge.v1.UserAssignment:
             type: object
             properties:

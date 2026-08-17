@@ -4,6 +4,7 @@ package forge.v1;
 
 import "forge/v1/common.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "openapiv3/annotations.proto";
 
 option go_package = "github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1";
@@ -66,6 +67,13 @@ service IdentityService {
         }
       ]
     };
+  }
+  rpc StepUpAuthentication(StepUpAuthenticationRequest) returns (StepUpAuthenticationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/step-up"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
   }
   rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
     option (google.api.http) = {get: "/api/v1/me"};
@@ -265,6 +273,14 @@ message ChangePasswordRequest {
 }
 
 message ChangePasswordResponse {}
+message StepUpAuthenticationRequest {
+  string current_password = 1;
+  string mfa_code = 2;
+  string recovery_code = 3;
+}
+message StepUpAuthenticationResponse {
+  google.protobuf.Timestamp verified_at = 1;
+}
 message GetCurrentUserRequest {}
 
 message GetCurrentUserResponse {

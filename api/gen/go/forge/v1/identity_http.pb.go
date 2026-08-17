@@ -30,6 +30,7 @@ const OperationIdentityServiceListApiTokens = "/forge.v1.IdentityService/ListApi
 const OperationIdentityServiceLogin = "/forge.v1.IdentityService/Login"
 const OperationIdentityServiceLogout = "/forge.v1.IdentityService/Logout"
 const OperationIdentityServiceRevokeApiToken = "/forge.v1.IdentityService/RevokeApiToken"
+const OperationIdentityServiceStepUpAuthentication = "/forge.v1.IdentityService/StepUpAuthentication"
 
 type IdentityServiceHTTPServer interface {
 	BeginMFAEnrollment(context.Context, *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error)
@@ -43,6 +44,7 @@ type IdentityServiceHTTPServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	RevokeApiToken(context.Context, *RevokeApiTokenRequest) (*RevokeApiTokenResponse, error)
+	StepUpAuthentication(context.Context, *StepUpAuthenticationRequest) (*StepUpAuthenticationResponse, error)
 }
 
 func RegisterIdentityServiceHTTPServer(s *http.Server, srv IdentityServiceHTTPServer) {
@@ -50,6 +52,7 @@ func RegisterIdentityServiceHTTPServer(s *http.Server, srv IdentityServiceHTTPSe
 	r.POST("/api/v1/auth/login", _IdentityService_Login0_HTTP_Handler(srv))
 	r.POST("/api/v1/auth/logout", _IdentityService_Logout0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/auth/password", _IdentityService_ChangePassword0_HTTP_Handler(srv))
+	r.POST("/api/v1/auth/step-up", _IdentityService_StepUpAuthentication0_HTTP_Handler(srv))
 	r.GET("/api/v1/me", _IdentityService_GetCurrentUser0_HTTP_Handler(srv))
 	r.GET("/api/v1/mfa", _IdentityService_GetMFAStatus0_HTTP_Handler(srv))
 	r.POST("/api/v1/mfa/totp/enrollment", _IdentityService_BeginMFAEnrollment0_HTTP_Handler(srv))
@@ -122,6 +125,28 @@ func _IdentityService_ChangePassword0_HTTP_Handler(srv IdentityServiceHTTPServer
 			return err
 		}
 		reply := out.(*ChangePasswordResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_StepUpAuthentication0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in StepUpAuthenticationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceStepUpAuthentication)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.StepUpAuthentication(ctx, req.(*StepUpAuthenticationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*StepUpAuthenticationResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -305,6 +330,7 @@ type IdentityServiceHTTPClient interface {
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
 	RevokeApiToken(ctx context.Context, req *RevokeApiTokenRequest, opts ...http.CallOption) (rsp *RevokeApiTokenResponse, err error)
+	StepUpAuthentication(ctx context.Context, req *StepUpAuthenticationRequest, opts ...http.CallOption) (rsp *StepUpAuthenticationResponse, err error)
 }
 
 type IdentityServiceHTTPClientImpl struct {
@@ -452,6 +478,19 @@ func (c *IdentityServiceHTTPClientImpl) RevokeApiToken(ctx context.Context, in *
 	opts = append(opts, http.Operation(OperationIdentityServiceRevokeApiToken))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *IdentityServiceHTTPClientImpl) StepUpAuthentication(ctx context.Context, in *StepUpAuthenticationRequest, opts ...http.CallOption) (*StepUpAuthenticationResponse, error) {
+	var out StepUpAuthenticationResponse
+	pattern := "/api/v1/auth/step-up"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationIdentityServiceStepUpAuthentication))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

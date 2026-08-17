@@ -660,6 +660,8 @@ func serviceError(err error) error {
 		return kratoserrors.Conflict("ROLE_CONFLICT", "role combination violates segregation of duties")
 	case errors.Is(err, appidentity.ErrInteractiveSessionRequired):
 		return kratoserrors.Forbidden("INTERACTIVE_SESSION_REQUIRED", "interactive session is required")
+	case errors.Is(err, appidentity.ErrStepUpRequired):
+		return kratoserrors.Forbidden("STEP_UP_REQUIRED", "recent multi-factor authentication is required")
 	case errors.Is(err, appidentity.ErrInvalidCredentials):
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 	case errors.Is(err, appidentity.ErrInvalidMFA):

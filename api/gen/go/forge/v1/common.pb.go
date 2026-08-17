@@ -23,21 +23,23 @@ const (
 )
 
 type User struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	OrganizationId     string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	LoginName          string                 `protobuf:"bytes,3,opt,name=login_name,json=loginName,proto3" json:"login_name,omitempty"`
-	DisplayName        string                 `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Status             string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	MustChangePassword bool                   `protobuf:"varint,6,opt,name=must_change_password,json=mustChangePassword,proto3" json:"must_change_password,omitempty"`
-	LockedUntil        *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=locked_until,json=lockedUntil,proto3" json:"locked_until,omitempty"`
-	PasswordChangedAt  *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=password_changed_at,json=passwordChangedAt,proto3" json:"password_changed_at,omitempty"`
-	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Roles              []string               `protobuf:"bytes,10,rep,name=roles,proto3" json:"roles,omitempty"`
-	Permissions        []string               `protobuf:"bytes,11,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	DataScope          *EffectiveDataScope    `protobuf:"bytes,12,opt,name=data_scope,json=dataScope,proto3" json:"data_scope,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrganizationId      string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	LoginName           string                 `protobuf:"bytes,3,opt,name=login_name,json=loginName,proto3" json:"login_name,omitempty"`
+	DisplayName         string                 `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Status              string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	MustChangePassword  bool                   `protobuf:"varint,6,opt,name=must_change_password,json=mustChangePassword,proto3" json:"must_change_password,omitempty"`
+	LockedUntil         *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=locked_until,json=lockedUntil,proto3" json:"locked_until,omitempty"`
+	PasswordChangedAt   *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=password_changed_at,json=passwordChangedAt,proto3" json:"password_changed_at,omitempty"`
+	CreatedAt           *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Roles               []string               `protobuf:"bytes,10,rep,name=roles,proto3" json:"roles,omitempty"`
+	Permissions         []string               `protobuf:"bytes,11,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	DataScope           *EffectiveDataScope    `protobuf:"bytes,12,opt,name=data_scope,json=dataScope,proto3" json:"data_scope,omitempty"`
+	AuthenticationLevel string                 `protobuf:"bytes,13,opt,name=authentication_level,json=authenticationLevel,proto3" json:"authentication_level,omitempty"`
+	MfaVerifiedAt       *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=mfa_verified_at,json=mfaVerifiedAt,proto3" json:"mfa_verified_at,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -150,6 +152,20 @@ func (x *User) GetPermissions() []string {
 func (x *User) GetDataScope() *EffectiveDataScope {
 	if x != nil {
 		return x.DataScope
+	}
+	return nil
+}
+
+func (x *User) GetAuthenticationLevel() string {
+	if x != nil {
+		return x.AuthenticationLevel
+	}
+	return ""
+}
+
+func (x *User) GetMfaVerifiedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.MfaVerifiedAt
 	}
 	return nil
 }
@@ -1398,7 +1414,7 @@ var File_forge_v1_common_proto protoreflect.FileDescriptor
 
 const file_forge_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x15forge/v1/common.proto\x12\bforge.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x04\n" +
+	"\x15forge/v1/common.proto\x12\bforge.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfd\x04\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x1d\n" +
@@ -1415,7 +1431,9 @@ const file_forge_v1_common_proto_rawDesc = "" +
 	" \x03(\tR\x05roles\x12 \n" +
 	"\vpermissions\x18\v \x03(\tR\vpermissions\x12;\n" +
 	"\n" +
-	"data_scope\x18\f \x01(\v2\x1c.forge.v1.EffectiveDataScopeR\tdataScope\"|\n" +
+	"data_scope\x18\f \x01(\v2\x1c.forge.v1.EffectiveDataScopeR\tdataScope\x121\n" +
+	"\x14authentication_level\x18\r \x01(\tR\x13authenticationLevel\x12B\n" +
+	"\x0fmfa_verified_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\rmfaVerifiedAt\"|\n" +
 	"\x12EffectiveDataScope\x12+\n" +
 	"\x11organization_wide\x18\x01 \x01(\bR\x10organizationWide\x12\x12\n" +
 	"\x04self\x18\x02 \x01(\bR\x04self\x12%\n" +
@@ -1599,29 +1617,30 @@ var file_forge_v1_common_proto_depIdxs = []int32{
 	13, // 1: forge.v1.User.password_changed_at:type_name -> google.protobuf.Timestamp
 	13, // 2: forge.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 3: forge.v1.User.data_scope:type_name -> forge.v1.EffectiveDataScope
-	13, // 4: forge.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
-	13, // 5: forge.v1.Organization.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 6: forge.v1.Department.created_at:type_name -> google.protobuf.Timestamp
-	13, // 7: forge.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 8: forge.v1.Position.created_at:type_name -> google.protobuf.Timestamp
-	13, // 9: forge.v1.Position.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 10: forge.v1.UserGroup.created_at:type_name -> google.protobuf.Timestamp
-	13, // 11: forge.v1.UserGroup.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 12: forge.v1.UserAssignment.valid_from:type_name -> google.protobuf.Timestamp
-	13, // 13: forge.v1.UserAssignment.valid_until:type_name -> google.protobuf.Timestamp
-	13, // 14: forge.v1.UserAssignment.created_at:type_name -> google.protobuf.Timestamp
-	13, // 15: forge.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	13, // 16: forge.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
-	13, // 17: forge.v1.Session.last_seen_at:type_name -> google.protobuf.Timestamp
-	13, // 18: forge.v1.ApiToken.created_at:type_name -> google.protobuf.Timestamp
-	13, // 19: forge.v1.ApiToken.expires_at:type_name -> google.protobuf.Timestamp
-	13, // 20: forge.v1.ApiToken.last_used_at:type_name -> google.protobuf.Timestamp
-	13, // 21: forge.v1.AuditEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	22, // [22:22] is the sub-list for method output_type
-	22, // [22:22] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	13, // 4: forge.v1.User.mfa_verified_at:type_name -> google.protobuf.Timestamp
+	13, // 5: forge.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
+	13, // 6: forge.v1.Organization.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 7: forge.v1.Department.created_at:type_name -> google.protobuf.Timestamp
+	13, // 8: forge.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 9: forge.v1.Position.created_at:type_name -> google.protobuf.Timestamp
+	13, // 10: forge.v1.Position.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 11: forge.v1.UserGroup.created_at:type_name -> google.protobuf.Timestamp
+	13, // 12: forge.v1.UserGroup.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 13: forge.v1.UserAssignment.valid_from:type_name -> google.protobuf.Timestamp
+	13, // 14: forge.v1.UserAssignment.valid_until:type_name -> google.protobuf.Timestamp
+	13, // 15: forge.v1.UserAssignment.created_at:type_name -> google.protobuf.Timestamp
+	13, // 16: forge.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	13, // 17: forge.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
+	13, // 18: forge.v1.Session.last_seen_at:type_name -> google.protobuf.Timestamp
+	13, // 19: forge.v1.ApiToken.created_at:type_name -> google.protobuf.Timestamp
+	13, // 20: forge.v1.ApiToken.expires_at:type_name -> google.protobuf.Timestamp
+	13, // 21: forge.v1.ApiToken.last_used_at:type_name -> google.protobuf.Timestamp
+	13, // 22: forge.v1.AuditEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	23, // [23:23] is the sub-list for method output_type
+	23, // [23:23] is the sub-list for method input_type
+	23, // [23:23] is the sub-list for extension type_name
+	23, // [23:23] is the sub-list for extension extendee
+	0,  // [0:23] is the sub-list for field type_name
 }
 
 func init() { file_forge_v1_common_proto_init() }

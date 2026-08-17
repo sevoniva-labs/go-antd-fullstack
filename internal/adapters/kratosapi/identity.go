@@ -211,6 +211,27 @@ func (s *IdentityService) ChangePassword(ctx context.Context, req *forgev1.Chang
 	return &forgev1.ChangePasswordResponse{}, nil
 }
 
+func (s *IdentityService) StepUpAuthentication(ctx context.Context, req *forgev1.StepUpAuthenticationRequest) (*forgev1.StepUpAuthenticationResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.allow(ctx, "step-up:user:"+principal.UserID, 5, 5*time.Minute, "300"); err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "auth.step_up", "session", principal.SessionID, nil)
+	var verifiedAt time.Time
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var stepUpErr error
+		verifiedAt, stepUpErr = s.identity.StepUpAuthentication(txCtx, principal, req.GetCurrentPassword(), req.GetMfaCode(), req.GetRecoveryCode())
+		return stepUpErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.StepUpAuthenticationResponse{VerifiedAt: timestamp(verifiedAt)}, nil
+}
+
 func (s *IdentityService) ListApiTokens(ctx context.Context, _ *forgev1.ListApiTokensRequest) (*forgev1.ListApiTokensResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -288,7 +309,8 @@ func principalUser(principal domain.Principal) *forgev1.User {
 		Id: principal.UserID, OrganizationId: principal.OrganizationID, LoginName: principal.LoginName,
 		DisplayName: principal.DisplayName, MustChangePassword: principal.MustChangePassword,
 		PasswordChangedAt: timestamp(principal.PasswordChangedAt), Roles: principal.Roles, Permissions: principal.Permissions,
-		DataScope: effectiveDataScopeProto(principal.DataScope),
+		DataScope:           effectiveDataScopeProto(principal.DataScope),
+		AuthenticationLevel: principal.AuthenticationLevel, MfaVerifiedAt: optionalTimestamp(principal.MFAVerifiedAt),
 	}
 }
 

@@ -366,6 +366,16 @@ export type ForgeV1Settlement = {
     updatedAt?: string;
 };
 
+export type ForgeV1StepUpAuthenticationRequest = {
+    currentPassword?: string;
+    mfaCode?: string;
+    recoveryCode?: string;
+};
+
+export type ForgeV1StepUpAuthenticationResponse = {
+    verifiedAt?: string;
+};
+
 export type ForgeV1UnlockUserRequest = {
     userId?: string;
 };
@@ -494,6 +504,8 @@ export type ForgeV1User = {
     roles?: Array<string>;
     permissions?: Array<string>;
     dataScope?: ForgeV1EffectiveDataScope;
+    authenticationLevel?: string;
+    mfaVerifiedAt?: string;
 };
 
 export type ForgeV1UserAssignment = {
@@ -1152,6 +1164,22 @@ export type IdentityServiceChangePasswordResponses = {
 };
 
 export type IdentityServiceChangePasswordResponse = IdentityServiceChangePasswordResponses[keyof IdentityServiceChangePasswordResponses];
+
+export type IdentityServiceStepUpAuthenticationData = {
+    body: ForgeV1StepUpAuthenticationRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/step-up';
+};
+
+export type IdentityServiceStepUpAuthenticationResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1StepUpAuthenticationResponse;
+};
+
+export type IdentityServiceStepUpAuthenticationResponse = IdentityServiceStepUpAuthenticationResponses[keyof IdentityServiceStepUpAuthenticationResponses];
 
 export type ReferenceSettlementServiceGetSettlementData = {
     body?: never;
