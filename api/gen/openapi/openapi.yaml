@@ -392,6 +392,68 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/temporary-role-grants:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListTemporaryRoleGrants
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListTemporaryRoleGrantsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreateTemporaryRoleGrant
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateTemporaryRoleGrantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateTemporaryRoleGrantResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/admin/temporary-role-grants/{grantId}:revoke:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_RevokeTemporaryRoleGrant
+            parameters:
+                - name: grantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.RevokeTemporaryRoleGrantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.RevokeTemporaryRoleGrantResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
     /api/v1/admin/user-groups:
         get:
             tags:
@@ -1378,6 +1440,28 @@ components:
             properties:
                 position:
                     $ref: '#/components/schemas/forge.v1.Position'
+        forge.v1.CreateTemporaryRoleGrantRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                roleKey:
+                    type: string
+                reason:
+                    type: string
+                validFrom:
+                    type: string
+                    format: date-time
+                validUntil:
+                    type: string
+                    format: date-time
+                approvalId:
+                    type: string
+        forge.v1.CreateTemporaryRoleGrantResponse:
+            type: object
+            properties:
+                grant:
+                    $ref: '#/components/schemas/forge.v1.TemporaryRoleGrant'
         forge.v1.CreateUserGroupRequest:
             type: object
             properties:
@@ -1604,6 +1688,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.Session'
+        forge.v1.ListTemporaryRoleGrantsResponse:
+            type: object
+            properties:
+                grants:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.TemporaryRoleGrant'
         forge.v1.ListUserAssignmentsResponse:
             type: object
             properties:
@@ -1751,6 +1842,16 @@ components:
         forge.v1.RevokeSessionResponse:
             type: object
             properties: {}
+        forge.v1.RevokeTemporaryRoleGrantRequest:
+            type: object
+            properties:
+                grantId:
+                    type: string
+                reason:
+                    type: string
+        forge.v1.RevokeTemporaryRoleGrantResponse:
+            type: object
+            properties: {}
         forge.v1.Role:
             type: object
             properties:
@@ -1851,6 +1952,41 @@ components:
             type: object
             properties:
                 verifiedAt:
+                    type: string
+                    format: date-time
+        forge.v1.TemporaryRoleGrant:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                userId:
+                    type: string
+                roleKey:
+                    type: string
+                requestedBy:
+                    type: string
+                approvalId:
+                    type: string
+                reason:
+                    type: string
+                status:
+                    type: string
+                validFrom:
+                    type: string
+                    format: date-time
+                validUntil:
+                    type: string
+                    format: date-time
+                revokedAt:
+                    type: string
+                    format: date-time
+                revokedBy:
+                    type: string
+                revokeReason:
+                    type: string
+                createdAt:
                     type: string
                     format: date-time
         forge.v1.TransferApprovalRequest:

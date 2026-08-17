@@ -112,6 +112,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.user_group.read", "查看用户组"}, {"system.user_group.manage", "管理用户组"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
 	{"system.audit.read", "查看审计日志"}, {"system.audit.export", "导出审计日志"},
+	{"system.temporary_grant.read", "查看临时授权"}, {"system.temporary_grant.manage", "管理临时授权"},
 	{"system.config.read", "查看系统配置"}, {"system.security.manage", "管理安全配置"},
 	{"approval.request.create", "发起审批"}, {"approval.request.read", "查看审批"}, {"approval.task.decide", "处理审批"}, {"approval.task.transfer", "转办审批"}, {"approval.request.withdraw", "撤回审批"},
 }
@@ -148,12 +149,12 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
 	}
-	for _, k := range []string{"system.audit.read", "system.audit.export"} {
+	for _, k := range []string{"system.audit.read", "system.audit.export", "system.temporary_grant.read"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "auditor", k); err != nil {
 			return err
 		}

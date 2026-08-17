@@ -208,7 +208,10 @@ func (r *IdentityRepo) RolesForUser(ctx context.Context, userID string) ([]strin
 		JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE'
 		JOIN user_group_members ugm ON ugm.group_id=ug.id
 		WHERE ugm.user_id=?
-	) effective_roles ORDER BY role_key`), userID, userID)
+		UNION
+		SELECT r.role_key AS role_key FROM roles r JOIN temporary_role_grants trg ON trg.role_id=r.id
+		WHERE trg.user_id=? AND trg.revoked_at IS NULL AND trg.valid_from<=? AND trg.valid_until>?
+	) effective_roles ORDER BY role_key`), userID, userID, userID, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		return nil, err
 	}
@@ -233,8 +236,10 @@ func (r *IdentityRepo) PermissionsForUser(ctx context.Context, userID string) ([
 			JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE'
 			JOIN user_group_members ugm ON ugm.group_id=ug.id
 			WHERE ugm.user_id=?
+			UNION
+			SELECT role_id FROM temporary_role_grants WHERE user_id=? AND revoked_at IS NULL AND valid_from<=? AND valid_until>?
 		) effective_roles ON effective_roles.role_id=rp.role_id
-		ORDER BY p.permission_key`), userID, userID)
+		ORDER BY p.permission_key`), userID, userID, userID, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		return nil, err
 	}
@@ -896,8 +901,10 @@ func (r *IdentityRepo) DataScopeForUser(ctx context.Context, orgID, userID strin
 			JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE'
 			JOIN user_group_members ugm ON ugm.group_id=ug.id
 			WHERE ugm.user_id=?
+			UNION
+			SELECT role_id FROM temporary_role_grants WHERE user_id=? AND revoked_at IS NULL AND valid_from<=? AND valid_until>?
 		) effective_roles ON effective_roles.role_id=r.id
-		WHERE r.organization_id=?`), userID, userID, orgID)
+		WHERE r.organization_id=?`), userID, userID, userID, time.Now().UTC(), time.Now().UTC(), orgID)
 	if err != nil {
 		return identity.EffectiveDataScope{}, err
 	}
@@ -1543,7 +1550,9 @@ func (r *IdentityRepo) RolesForUserExcludingGroup(ctx context.Context, userID, e
 		SELECT r.role_key AS role_key FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=?
 		UNION
 		SELECT r.role_key AS role_key FROM roles r JOIN user_group_roles ugr ON ugr.role_id=r.id JOIN user_groups ug ON ug.id=ugr.group_id AND ug.status='ACTIVE' JOIN user_group_members ugm ON ugm.group_id=ug.id WHERE ugm.user_id=? AND ug.id<>?
-	) effective_roles ORDER BY role_key`), userID, userID, excludedGroupID)
+		UNION
+		SELECT r.role_key AS role_key FROM roles r JOIN temporary_role_grants trg ON trg.role_id=r.id WHERE trg.user_id=? AND trg.revoked_at IS NULL AND trg.valid_from<=? AND trg.valid_until>?
+	) effective_roles ORDER BY role_key`), userID, userID, excludedGroupID, userID, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		return nil, err
 	}

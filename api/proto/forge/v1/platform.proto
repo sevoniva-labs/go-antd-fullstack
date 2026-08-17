@@ -4,6 +4,7 @@ package forge.v1;
 
 import "forge/v1/common.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 import "openapiv3/annotations.proto";
 
 option go_package = "github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1";
@@ -726,6 +727,18 @@ service PlatformService {
       ]
     };
   }
+  rpc ListTemporaryRoleGrants(ListTemporaryRoleGrantsRequest) returns (ListTemporaryRoleGrantsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/temporary-role-grants"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc CreateTemporaryRoleGrant(CreateTemporaryRoleGrantRequest) returns (CreateTemporaryRoleGrantResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/temporary-role-grants" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
+  }
+  rpc RevokeTemporaryRoleGrant(RevokeTemporaryRoleGrantRequest) returns (RevokeTemporaryRoleGrantResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/temporary-role-grants/{grant_id}:revoke" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
+  }
 }
 
 message ListUsersRequest {
@@ -957,3 +970,37 @@ message ExportAuditLogsResponse {
   string content_type = 2;
   string filename = 3;
 }
+
+message TemporaryRoleGrant {
+  string id = 1;
+  string organization_id = 2;
+  string user_id = 3;
+  string role_key = 4;
+  string requested_by = 5;
+  string approval_id = 6;
+  string reason = 7;
+  string status = 8;
+  google.protobuf.Timestamp valid_from = 9;
+  google.protobuf.Timestamp valid_until = 10;
+  google.protobuf.Timestamp revoked_at = 11;
+  string revoked_by = 12;
+  string revoke_reason = 13;
+  google.protobuf.Timestamp created_at = 14;
+}
+
+message ListTemporaryRoleGrantsRequest {}
+message ListTemporaryRoleGrantsResponse { repeated TemporaryRoleGrant grants = 1; }
+message CreateTemporaryRoleGrantRequest {
+  string user_id = 1;
+  string role_key = 2;
+  string reason = 3;
+  google.protobuf.Timestamp valid_from = 4;
+  google.protobuf.Timestamp valid_until = 5;
+  string approval_id = 6;
+}
+message CreateTemporaryRoleGrantResponse { TemporaryRoleGrant grant = 1; }
+message RevokeTemporaryRoleGrantRequest {
+  string grant_id = 1;
+  string reason = 2;
+}
+message RevokeTemporaryRoleGrantResponse {}
