@@ -16,6 +16,7 @@ import (
 type IdentityRepo struct{ db *database.DB }
 
 var ErrLastSystemAdmin = errors.New("cannot remove or disable the last active system administrator")
+var ErrPasswordStateChanged = errors.New("password state changed concurrently")
 
 func NewIdentityRepo(db *database.DB) *IdentityRepo { return &IdentityRepo{db: db} }
 
@@ -739,16 +740,19 @@ func (r *IdentityRepo) UnlockUser(ctx context.Context, orgID, userID string) err
 
 func (r *IdentityRepo) AdminResetPassword(ctx context.Context, orgID, userID, oldHash, newHash string) error {
 	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
-		var actualOrg string
-		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT organization_id FROM users WHERE id=?`), userID).Scan(&actualOrg); err != nil {
+		var actualOrg, actualHash string
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT organization_id,password_hash FROM users WHERE id=? FOR UPDATE`), userID).Scan(&actualOrg, &actualHash); err != nil {
 			return err
 		}
 		if actualOrg != orgID {
 			return sql.ErrNoRows
 		}
+		if err := ensurePasswordState(oldHash, actualHash); err != nil {
+			return err
+		}
 		now := time.Now().UTC()
-		if oldHash != "" {
-			if _, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO password_history(id,user_id,password_hash,changed_at) VALUES(?,?,?,?)`), uuid.NewString(), userID, oldHash, now); err != nil {
+		if actualHash != "" {
+			if _, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO password_history(id,user_id,password_hash,changed_at) VALUES(?,?,?,?)`), uuid.NewString(), userID, actualHash, now); err != nil {
 				return err
 			}
 		}
@@ -758,4 +762,11 @@ func (r *IdentityRepo) AdminResetPassword(ctx context.Context, orgID, userID, ol
 		_, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM sessions WHERE user_id=?`), userID)
 		return err
 	})
+}
+
+func ensurePasswordState(expected, actual string) error {
+	if expected != actual {
+		return ErrPasswordStateChanged
+	}
+	return nil
 }

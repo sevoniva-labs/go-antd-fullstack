@@ -27,6 +27,7 @@ var ErrPasswordPolicy = errors.New("password policy violation")
 var ErrPasswordReused = errors.New("password was used recently")
 var ErrInvalidSecurityPolicy = errors.New("invalid security policy")
 var ErrLastSystemAdmin = repository.ErrLastSystemAdmin
+var ErrPasswordStateChanged = repository.ErrPasswordStateChanged
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy

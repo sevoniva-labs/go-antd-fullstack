@@ -593,6 +593,8 @@ func (s *Server) resetUserPassword(w http.ResponseWriter, r *http.Request) {
 			code, msg = "PASSWORD_REUSED", "新密码不能与当前密码相同"
 		} else if errors.Is(err, sql.ErrNoRows) {
 			code, msg, status = "NOT_FOUND", "用户不存在", http.StatusNotFound
+		} else if errors.Is(err, appidentity.ErrPasswordStateChanged) {
+			code, msg, status = "PASSWORD_STATE_CHANGED", "密码已被其他管理员更新，请重试", http.StatusConflict
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
