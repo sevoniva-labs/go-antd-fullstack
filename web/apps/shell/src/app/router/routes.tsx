@@ -2,6 +2,7 @@ import {
   ApartmentOutlined,
   AppstoreOutlined,
   AuditOutlined,
+  CheckSquareOutlined,
   DashboardOutlined,
   FileProtectOutlined,
   KeyOutlined,
@@ -33,6 +34,7 @@ const PositionsPage = lazy(() => import('@forge/platform-admin/positions').then(
 const UserGroupsPage = lazy(() => import('@forge/platform-admin/user-groups').then((m) => ({ default: m.UserGroupsPage })))
 const SessionsPage = lazy(() => import('@forge/platform-admin/sessions').then((m) => ({ default: m.SessionsPage })))
 const AuditLogsPage = lazy(() => import('@forge/platform-admin/audit-logs').then((m) => ({ default: m.AuditLogsPage })))
+const ApprovalsPage = lazy(() => import('@forge/platform-admin/approvals').then((m) => ({ default: m.ApprovalsPage })))
 const SecurityPage = lazy(() => import('@forge/platform-admin/security').then((m) => ({ default: m.SecurityPage })))
 const SystemStatusPage = lazy(() => import('@forge/platform-admin/system-status').then((m) => ({ default: m.SystemStatusPage })))
 const AccountSecurityPage = lazy(() => import('../../pages/AccountSecurity').then((m) => ({ default: m.AccountSecurityPage })))
@@ -61,6 +63,7 @@ const platformAdminComponents: Record<PlatformAdminModuleKey, LazyExoticComponen
   security: SecurityPage,
   sessions: SessionsPage,
   'audit-logs': AuditLogsPage,
+  approvals: ApprovalsPage,
   'system-status': SystemStatusPage,
 }
 
@@ -75,6 +78,7 @@ const platformAdminIcons: Record<PlatformAdminModuleKey, ReactNode> = {
   security: <SafetyCertificateOutlined />,
   sessions: <LockOutlined />,
   'audit-logs': <AuditOutlined />,
+  approvals: <CheckSquareOutlined />,
   'system-status': <SettingOutlined />,
 }
 

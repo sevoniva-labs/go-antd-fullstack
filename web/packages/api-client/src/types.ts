@@ -108,6 +108,35 @@ export interface Role {
 	data_scope_department_ids: string[]
 }
 
+export interface ApprovalTask {
+  id: string
+  assignee_id: string
+  status: string
+  decision: string
+  comment: string
+  transferred_from: string
+  decided_at?: string
+}
+
+export interface ApprovalRequest {
+  id: string
+  organization_id: string
+  request_type: string
+  action: string
+  resource: string
+  resource_id: string
+  summary: string
+  request_digest: string
+  applicant_id: string
+  mode: 'ANY' | 'ALL' | 'QUORUM'
+  required_approvals: number
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN' | 'EXPIRED'
+  expires_at: string
+  created_at: string
+  updated_at: string
+  tasks: ApprovalTask[]
+}
+
 export interface SessionInfo {
   id: string
   user_id: string

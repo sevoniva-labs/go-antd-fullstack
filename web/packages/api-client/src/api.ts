@@ -2,6 +2,7 @@ import { apiDownload, apiFetch, type DownloadResult } from './client'
 import type {
   ApiToken,
   AuditEvent,
+  ApprovalRequest,
   Department,
   Position,
   UserGroup,
@@ -41,6 +42,18 @@ export const api = {
 
   systemInfo: () => apiFetch<SystemInfo>('/system/info'),
   readiness: () => apiFetch<Readiness>('/system/ready'),
+
+  approvals: () => apiFetch<{ items: ApprovalRequest[]; approvals: ApprovalRequest[] }>('/approvals'),
+  createApproval: (payload: {
+    request_type: string; action: string; resource: string; resource_id?: string; summary: string; payload_json: string;
+    mode: ApprovalRequest['mode']; required_approvals: number; approver_ids: string[]; expires_in_seconds: number;
+  }) => apiFetch<ApprovalRequest>('/approvals', { method: 'POST', body: JSON.stringify(payload) }),
+  decideApproval: (approvalId: string, decision: 'APPROVE' | 'REJECT', comment: string) =>
+    apiFetch<ApprovalRequest>(`/approvals/${encodeURIComponent(approvalId)}/decisions`, { method: 'POST', body: JSON.stringify({ decision, comment }) }),
+  transferApproval: (approvalId: string, newAssigneeId: string, comment: string) =>
+    apiFetch<ApprovalRequest>(`/approvals/${encodeURIComponent(approvalId)}/transfer`, { method: 'POST', body: JSON.stringify({ new_assignee_id: newAssigneeId, comment }) }),
+  withdrawApproval: (approvalId: string, comment: string) =>
+    apiFetch<ApprovalRequest>(`/approvals/${encodeURIComponent(approvalId)}/withdraw`, { method: 'POST', body: JSON.stringify({ comment }) }),
 
   organization: () => apiFetch<Organization>('/admin/organization'),
   updateOrganization: (payload: {
