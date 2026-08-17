@@ -46,6 +46,7 @@ type Server struct {
 	PublicURL              string        `yaml:"public_url"`
 	WebDir                 string        `yaml:"web_dir"`
 	WebCSPFrameSources     []string      `yaml:"web_csp_frame_sources"`
+	WebCSPConnectSources   []string      `yaml:"web_csp_connect_sources"`
 	WebCSPWujieEnabled     bool          `yaml:"web_csp_wujie_enabled"`
 	WebCSPWujieApprovalRef string        `yaml:"web_csp_wujie_approval_ref"`
 	ReadTimeout            time.Duration `yaml:"read_timeout"`
@@ -393,6 +394,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Server.PublicURL, "FORGE_PUBLIC_URL")
 	overrideString(&cfg.Server.WebDir, "FORGE_WEB_DIR")
 	overrideCSV(&cfg.Server.WebCSPFrameSources, "FORGE_WEB_CSP_FRAME_SOURCES")
+	overrideCSV(&cfg.Server.WebCSPConnectSources, "FORGE_WEB_CSP_CONNECT_SOURCES")
 	overrideBool(&cfg.Server.WebCSPWujieEnabled, "FORGE_WEB_CSP_WUJIE_ENABLED")
 	overrideString(&cfg.Server.WebCSPWujieApprovalRef, "FORGE_WEB_CSP_WUJIE_APPROVAL_REF")
 	overrideBool(&cfg.Server.TLSEnabled, "FORGE_TLS_ENABLED")
@@ -717,7 +719,7 @@ func (c Config) Validate() error {
 	seenFrameSources := make(map[string]struct{}, len(c.Server.WebCSPFrameSources))
 	for _, source := range c.Server.WebCSPFrameSources {
 		source = strings.TrimSpace(source)
-		if !validWebCSPFrameSource(source, isProduction(c.App.Environment)) {
+		if !validWebCSPOrigin(source, isProduction(c.App.Environment)) {
 			errs = append(errs, "server.web_csp_frame_sources must contain exact HTTP(S) origins and use HTTPS in production")
 			continue
 		}
@@ -725,6 +727,18 @@ func (c Config) Validate() error {
 			errs = append(errs, "server.web_csp_frame_sources must not contain duplicates")
 		}
 		seenFrameSources[source] = struct{}{}
+	}
+	seenConnectSources := make(map[string]struct{}, len(c.Server.WebCSPConnectSources))
+	for _, source := range c.Server.WebCSPConnectSources {
+		source = strings.TrimSpace(source)
+		if !validWebCSPOrigin(source, isProduction(c.App.Environment)) {
+			errs = append(errs, "server.web_csp_connect_sources must contain exact HTTP(S) origins and use HTTPS in production")
+			continue
+		}
+		if _, duplicate := seenConnectSources[source]; duplicate {
+			errs = append(errs, "server.web_csp_connect_sources must not contain duplicates")
+		}
+		seenConnectSources[source] = struct{}{}
 	}
 	approvalRef := strings.TrimSpace(c.Server.WebCSPWujieApprovalRef)
 	if c.Server.WebCSPWujieEnabled && !validApprovalReference(approvalRef) {
@@ -759,7 +773,7 @@ func (c Config) Validate() error {
 	return nil
 }
 
-func validWebCSPFrameSource(source string, production bool) bool {
+func validWebCSPOrigin(source string, production bool) bool {
 	if source == "" || len(source) > 512 || strings.ContainsAny(source, "*'\";,") {
 		return false
 	}

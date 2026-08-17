@@ -135,6 +135,8 @@ config:
   webDir: /app/web
   # Comma-separated exact iframe origins. Production origins must use HTTPS.
   webCSPFrameSources: ""
+  # Comma-separated exact remote API/health-check origins. Production origins must use HTTPS.
+  webCSPConnectSources: ""
   # Wujie relaxes inline script/style CSP and is disabled unless separately approved.
   webCSPWujieEnabled: false
   webCSPWujieApprovalRef: ""

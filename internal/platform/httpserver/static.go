@@ -15,6 +15,7 @@ const cspNonceMarker = "__FORGE_CSP_NONCE__"
 type SPAOptions struct {
 	Root            string
 	FrameSources    []string
+	ConnectSources  []string
 	WujieCSPEnabled bool
 }
 
@@ -91,8 +92,9 @@ func serveSPAIndex(w http.ResponseWriter, r *http.Request, index string, options
 	http.ServeContent(w, r, "index.html", info.ModTime(), bytes.NewReader(content))
 }
 
-func webContentSecurityPolicy(nonce string, options SPAOptions) string {
+func webContentSecurityPolicy(_ string, options SPAOptions) string {
 	frameSources := append([]string(nil), options.FrameSources...)
+	connectSources := append([]string{"'self'"}, options.ConnectSources...)
 	if options.WujieCSPEnabled {
 		frameSources = append([]string{"'self'"}, frameSources...)
 	}
@@ -103,7 +105,7 @@ func webContentSecurityPolicy(nonce string, options SPAOptions) string {
 	directives := []string{
 		"default-src 'self'",
 		"base-uri 'self'",
-		"connect-src 'self'",
+		"connect-src " + strings.Join(connectSources, " "),
 		"font-src 'self' data:",
 		"form-action 'self'",
 		"frame-ancestors 'none'",
@@ -122,12 +124,11 @@ func webContentSecurityPolicy(nonce string, options SPAOptions) string {
 			"style-src-elem 'self' 'unsafe-inline'",
 		)
 	} else {
-		nonceSource := "'nonce-" + nonce + "'"
 		directives = append(directives,
 			"script-src 'self'",
-			"style-src 'self' "+nonceSource,
+			"style-src 'self' 'unsafe-inline'",
 			"style-src-attr 'unsafe-inline'",
-			"style-src-elem 'self' "+nonceSource,
+			"style-src-elem 'self' 'unsafe-inline'",
 		)
 	}
 	return strings.Join(directives, "; ")

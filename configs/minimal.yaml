@@ -9,6 +9,7 @@ server:
   public_url: "http://localhost:8080"
   web_dir: "web/dist"
   web_csp_frame_sources: []
+  web_csp_connect_sources: []
   web_csp_wujie_enabled: false
   web_csp_wujie_approval_ref: ""
   read_timeout: 30s

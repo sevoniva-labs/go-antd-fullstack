@@ -30,7 +30,7 @@ func TestSPARejectsAPIAndTraversalFallback(t *testing.T) {
 	}
 }
 
-func TestSPAServesNonceCSPAndGovernedCacheHeaders(t *testing.T) {
+func TestSPAServesScriptStrictCSPAndGovernedCacheHeaders(t *testing.T) {
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "assets"), 0o700); err != nil {
 		t.Fatal(err)
@@ -55,11 +55,11 @@ func TestSPAServesNonceCSPAndGovernedCacheHeaders(t *testing.T) {
 	if !strings.Contains(csp, "script-src 'self'") || strings.Contains(csp, "script-src 'self' 'unsafe-inline'") {
 		t.Fatalf("strict CSP script policy missing: %q", csp)
 	}
-	if !strings.Contains(csp, "style-src-elem 'self' 'nonce-") || !strings.Contains(csp, "frame-src https://remote.example.cn") {
-		t.Fatalf("strict CSP nonce or frame source missing: %q", csp)
+	if !strings.Contains(csp, "style-src-elem 'self' 'unsafe-inline'") || !strings.Contains(csp, "frame-src https://remote.example.cn") {
+		t.Fatalf("governed style exception or frame source missing: %q", csp)
 	}
 	if !strings.Contains(response.Body.String(), "content=\"") || response.Header().Get("Cache-Control") != "no-store" {
-		t.Fatalf("index nonce/cache policy missing")
+		t.Fatalf("index security marker/cache policy missing")
 	}
 
 	for path, want := range map[string]string{

@@ -235,6 +235,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	httpServer.HandlePrefix("/", httpserver.SPA(httpserver.SPAOptions{
 		Root:            cfg.Server.WebDir,
 		FrameSources:    cfg.Server.WebCSPFrameSources,
+		ConnectSources:  cfg.Server.WebCSPConnectSources,
 		WujieCSPEnabled: cfg.Server.WebCSPWujieEnabled,
 	}))
 	grpcServer := kgrpc.NewServer(grpcOpts...)
