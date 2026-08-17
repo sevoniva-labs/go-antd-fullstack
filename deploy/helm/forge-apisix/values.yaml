@@ -1,0 +1,30 @@
+enabled: false
+ingressClassName: apisix
+
+service:
+  name: forge
+  httpPort: 8080
+  grpcPort: 9090
+
+hosts:
+  web: forge.example.cn
+  grpc: grpc.forge.example.cn
+
+tls:
+  webSecretName: forge-ingress-tls
+  grpcSecretName: forge-grpc-ingress-tls
+  grpcClientMTLS:
+    enabled: true
+    caSecretName: forge-grpc-client-ca
+    verifyDepth: 3
+
+upstream:
+  tls: true
+  clientCertificateSecretName: forge-upstream-client-tls
+  connectTimeout: 5s
+  sendTimeout: 30s
+  readTimeout: 30s
+
+rateLimit:
+  rate: 100
+  burst: 200
