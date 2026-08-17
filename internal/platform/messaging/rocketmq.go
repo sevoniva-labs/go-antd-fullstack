@@ -123,12 +123,27 @@ func (r *rocketMQ) Publish(ctx context.Context, message Message) (Receipt, error
 	if r.closed.Load() {
 		return Receipt{}, errors.New("rocketmq producer is closed")
 	}
-	message, headers, err := prepareMessage(ctx, message)
+	message, rmqMessage, err := rocketMQPublishingMessage(ctx, message)
 	if err != nil {
 		return Receipt{}, err
 	}
 	if _, ok := r.topics[message.Topic]; !ok {
 		return Receipt{}, fmt.Errorf("rocketmq topic %q is not configured", message.Topic)
+	}
+	receipts, err := r.producer.Send(ctx, rmqMessage)
+	if err != nil {
+		return Receipt{}, fmt.Errorf("publish rocketmq topic %q: %w", message.Topic, err)
+	}
+	if len(receipts) == 0 {
+		return Receipt{}, fmt.Errorf("publish rocketmq topic %q: empty send receipt", message.Topic)
+	}
+	return Receipt{Provider: "rocketmq", ProviderMessageID: receipts[0].MessageID}, nil
+}
+
+func rocketMQPublishingMessage(ctx context.Context, message Message) (Message, *rmq.Message, error) {
+	message, headers, err := prepareMessage(ctx, message)
+	if err != nil {
+		return Message{}, nil, err
 	}
 	rmqMessage := &rmq.Message{Topic: message.Topic, Body: message.Body}
 	keys := []string{message.ID}
@@ -153,14 +168,7 @@ func (r *rocketMQ) Publish(ctx context.Context, message Message) (Receipt, error
 	for name, value := range headers {
 		rmqMessage.AddProperty(name, value)
 	}
-	receipts, err := r.producer.Send(ctx, rmqMessage)
-	if err != nil {
-		return Receipt{}, fmt.Errorf("publish rocketmq topic %q: %w", message.Topic, err)
-	}
-	if len(receipts) == 0 {
-		return Receipt{}, fmt.Errorf("publish rocketmq topic %q: empty send receipt", message.Topic)
-	}
-	return Receipt{Provider: "rocketmq", ProviderMessageID: receipts[0].MessageID}, nil
+	return message, rmqMessage, nil
 }
 
 // Start synchronizes producer settings and topic routes with the Proxy. The
