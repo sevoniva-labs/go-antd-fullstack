@@ -33,6 +33,19 @@ type Store struct{ db *database.DB }
 
 func New(db *database.DB) *Store { return &Store{db: db} }
 
+const maxBatchErrorDetails = 10
+
+type BatchError struct {
+	Failed int
+	causes []error
+}
+
+func (e *BatchError) Error() string {
+	return fmt.Sprintf("%d reliable message(s) failed in the batch: %v", e.Failed, errors.Join(e.causes...))
+}
+
+func (e *BatchError) Unwrap() []error { return e.causes }
+
 // EnqueueTx must be called inside the same business transaction as the state
 // mutation. This is the local reliable-message atomicity boundary.
 func EnqueueTx(ctx context.Context, db *database.DB, tx *sql.Tx, e Event) (string, error) {
@@ -140,36 +153,66 @@ func (s *Store) retry(ctx context.Context, p pending, publishErr error) error {
 }
 func (s *Store) PublishBatch(ctx context.Context, bus messaging.Bus, limit int) (int, error) {
 	if err := s.recoverExpiredClaims(ctx); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("recover expired reliable message claims: %w", err)
 	}
 	items, err := s.pending(ctx, limit)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("query pending reliable messages: %w", err)
 	}
 	n := 0
+	failed := 0
+	failures := make([]error, 0)
 	for _, e := range items {
 		ok, err := s.claim(ctx, e.ID)
 		if err != nil {
-			return n, err
+			return n, fmt.Errorf("claim reliable message %s: %w", e.ID, err)
 		}
 		if !ok {
 			continue
 		}
 		message, err := e.message()
 		if err != nil {
-			_ = s.retry(ctx, e, err)
+			failed++
+			failures = appendBatchFailure(failures, fmt.Errorf("decode reliable message %s: %w", e.ID, err))
+			if stateErr := s.retry(ctx, e, err); stateErr != nil {
+				return n, errors.Join(
+					newBatchError(failed, failures),
+					fmt.Errorf("persist retry state for reliable message %s: %w", e.ID, stateErr),
+				)
+			}
 			continue
 		}
 		if _, err := bus.Publish(ctx, message); err != nil {
-			_ = s.retry(ctx, e, err)
+			failed++
+			failures = appendBatchFailure(failures, fmt.Errorf("publish reliable message %s: %w", e.ID, err))
+			if stateErr := s.retry(ctx, e, err); stateErr != nil {
+				return n, errors.Join(
+					newBatchError(failed, failures),
+					fmt.Errorf("persist retry state for reliable message %s: %w", e.ID, stateErr),
+				)
+			}
 			continue
 		}
 		if err := s.published(ctx, e.ID); err != nil {
-			return n, err
+			return n, fmt.Errorf("mark reliable message %s published after provider acceptance; duplicate delivery is possible: %w", e.ID, err)
 		}
 		n++
 	}
-	return n, nil
+	return n, newBatchError(failed, failures)
+}
+
+func appendBatchFailure(failures []error, failure error) []error {
+	if len(failures) < maxBatchErrorDetails {
+		return append(failures, failure)
+	}
+	return failures
+}
+
+func newBatchError(failed int, failures []error) error {
+	if failed == 0 {
+		return nil
+	}
+	return &BatchError{Failed: failed, causes: failures}
 }
 
 func (p pending) message() (messaging.Message, error) {
