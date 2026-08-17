@@ -7,15 +7,15 @@
 ## 技术基线
 
 - Backend：Go 1.26 + Kratos v2（HTTP/gRPC）+ `database/sql`
-- Frontend：React 19 + TypeScript + Vite 8 + Ant Design 6 + Pro Components + TanStack Query
+- Frontend：pnpm workspace + React 19 + TypeScript 6 + Vite 8 + Ant Design 6 + Pro Components + TanStack Query
 - API：Proto3 + Buf + 生成式 gRPC/HTTP/OpenAPI + 统一 Envelope + 6 位稳定返回码 + request_id/trace_id
 - DB：PostgreSQL / MySQL / OceanBase MySQL profile
 - Cache：Disabled / Memory / Redis standalone/Sentinel/Cluster
 - Messaging：Disabled / RocketMQ 5.x（业务消息默认）
 - Streaming：Disabled / Kafka（仅用于日志、埋点、CDC 等流式数据）
 - Search：Disabled / Elasticsearch / OpenSearch
-- Storage：Local / S3-compatible
-- Config/Registry：Nacos 配置中心 + 服务注册发现
+- Storage：Local / 通用 S3 协议（AWS SDK v2，按端点能力显式降级）
+- Config/Discovery：Nacos 3 配置中心；Kubernetes Service/DNS 默认发现，Nacos Discovery 仅用于非 K8s
 - Crypto：Standard（SHA-256/AES-GCM）/ GM baseline（SM3/SM4-GCM）
 - Observability：slog + Prometheus + OpenTelemetry + guarded pprof
 - Deploy：Binary / systemd / Docker / Compose / Kubernetes Helm
@@ -43,7 +43,8 @@
 | Kafka Streaming | ✅ | franz-go；独立流处理 Provider，不参与业务消息发布 |
 | Search | ✅ | Elasticsearch/OpenSearch REST provider |
 | Object storage | ✅ | Local / S3-compatible |
-| Nacos | ✅ | Config Center + Registry/Discovery |
+| Nacos | ✅ | Config Center；Discovery 仅用于非 Kubernetes 部署 |
+| Microfrontend | 可选 | Wujie 可信同源应用；不可信应用仅允许独立 Origin sandbox iframe |
 | Idempotency | ✅ | DB-backed request reservation/result state |
 | 本地可靠消息表 | ✅ | 与业务事务同库提交 + Worker 租约恢复；at-least-once，消费者需幂等 |
 | Scheduler lock | ✅ | Redis 分布式锁/Memory 单机锁 |
@@ -64,7 +65,7 @@
 ## 架构
 
 ```text
-React / Ant Design
+React / Ant Design Shell / Optional Wujie or iframe
         │ OpenAPI
         ▼
  HTTP Adapter / Unified Envelope
@@ -92,7 +93,7 @@ internal/domain       领域模型
 internal/app          应用服务
 internal/adapters     HTTP/Repository
 internal/platform     企业基础设施能力
-web                   React + Ant Design
+web                   pnpm workspace：Shell、公共包、示例远程应用和生产 E2E
 api/gen/openapi/openapi.yaml  由 Proto 生成的 API 契约
 configs               minimal/standard/full/xinchuang
 deploy                Docker/Compose/Helm/systemd/observability
@@ -201,8 +202,11 @@ HTTP status 仍表达传输语义，业务不得只看 `200 + code`。CI 会检�
 - 403/404/500 + ErrorBoundary
 - `Access` / `PermissionButton` / `AppProTable` / `AppPageContainer` / `DetailDrawer` / `MetricCard` / `StatusTag` / `SensitiveText` / `SecretText` / `AppUpload` / `ConfirmAction` 等公共组件
 - runtime config：同一前端镜像可在 DEV/SIT/UAT/PRE/PROD 覆盖品牌、Logo、主色、环境、API 地址、导航模式和主题
+- 可选微前端：默认关闭；可信同源应用使用 Wujie，不可信应用强制独立 Origin sandbox iframe
+- 签名微应用清单、精确资源 URL、声明式回滚、故障关闭和不携带凭据的 Host SDK
+- 服务端脚本严格 CSP；`connect-src` 与 `frame-src` 独立治理，Wujie 生产启用需要审批引用
 - 开发环境组件示例页，生产 runtime config 默认关闭
-- Vitest + React Testing Library 测试基线
+- Vitest + React Testing Library + Playwright 生产构建 E2E
 
 Helm 会把浏览器运行时配置作为独立 ConfigMap 挂载，不需要为了环境差异重新构建前端镜像。敏感信息不得写入 runtime config。
 
@@ -233,7 +237,7 @@ make init APP=my-product MODULE=github.com/your-org/my-product
 
 ## 校验
 
-所有自动下载路径必须显式使用国内源；禁止失败后静默回退公网源。Go 依赖使用 `goproxy.cn`，校验数据库通过该代理访问；容器镜像必须使用组织内 Harbor 的不可变 digest。前端依赖将在 Phase 1 前端基座落地时固定国内 npm registry 与 `pnpm-lock.yaml`。
+所有自动下载路径必须显式使用国内源；禁止失败后静默回退公网源。Go 依赖使用 `goproxy.cn`，前端固定国内 npm registry 与 `pnpm-lock.yaml`；容器镜像必须使用组织内 Harbor 的不可变 digest。公开 Playwright 国内制品当前只验证 Linux ARM64，其他平台必须使用组织制品库或显式提供本地浏览器。
 
 本地校验：
 
@@ -247,7 +251,7 @@ CI 还会做 OpenAPI lint、多架构镜像构建、依赖漏洞、安全静态�
 
 ### 当前验证边界
 
-后端依赖已通过国内 Go 代理获取并固定 `go.sum`，当前阶段已执行 Go 单元测试、`go vet`、gosec、staticcheck、golangci-lint、govulncheck、Helm/Compose 结构和容器来源策略检查。开发 Compose 中的 RocketMQ 仅完成配置级验证；在获得组织内 Harbor 镜像及目标 ACL/TLS 集群前，不宣称完成真实集群兼容认证。前端依赖与构建验证由 Phase 1 前端基座提交提供证据。
+后端依赖已通过国内 Go 代理获取并固定 `go.sum`；Go 门禁、前端 workspace 门禁、构建预算、Helm 渲染和 7 条真实浏览器生产 E2E 已执行通过。开发环境中的中间件仍以配置级和适配器级验证为主；在获得组织内 Harbor 镜像及目标 ACL/TLS 集群前，不宣称真实集群兼容认证。完整证据与未验证边界见 `docs/validation.md`。
 
 ## License
 
