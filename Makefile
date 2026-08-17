@@ -1,8 +1,13 @@
 SHELL := /bin/bash
 APP ?= forge
 MODULE ?= github.com/sevoniva-labs/forge
+GOPROXY ?= https://goproxy.cn
+GOSUMDB ?= sum.golang.google.cn
+NPM_REGISTRY ?= https://registry.npmmirror.com
+GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
+TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 
-.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init
+.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools
 
 help:
 	@echo "Sevoniva Forge"
@@ -35,7 +40,7 @@ tidy:
 	go mod tidy
 
 web-install:
-	cd web && npm install
+	cd web && npm install --registry=$(NPM_REGISTRY)
 
 web-dev:
 	cd web && npm run dev
@@ -59,6 +64,32 @@ check: fmt contract
 	cd web && npm run typecheck
 	cd web && npm run test
 	cd web && npm run build
+
+ci-policy:
+	bash scripts/check-ci-policy.sh
+
+ci-go: ci-policy contract
+	$(GO_ENV) go mod verify
+	@test -z "$$(gofmt -l $$(find cmd internal -name '*.go'))" || (echo "Go files need formatting" >&2; gofmt -l $$(find cmd internal -name '*.go'); exit 1)
+	$(GO_ENV) go vet ./...
+	$(GO_ENV) go test ./...
+	$(GO_ENV) go test -race ./...
+
+ci-web: ci-policy web-install
+	cd web && npm run lint
+	cd web && npm run typecheck
+	cd web && npm run test
+	cd web && npm run build
+
+ci-deploy: ci-policy
+	helm lint deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml
+	helm template forge deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml >/tmp/forge-rendered.yaml
+
+security-tools: ci-policy
+	$(TOOL_RUN) github.com/securego/gosec/v2/cmd/gosec ./...
+	$(TOOL_RUN) golang.org/x/vuln/cmd/govulncheck ./...
+	$(TOOL_RUN) honnef.co/go/tools/cmd/staticcheck ./...
+	$(TOOL_RUN) github.com/golangci/golangci-lint/v2/cmd/golangci-lint run ./...
 
 offline-check: fmt contract
 	python3 -m json.tool web/package.json >/dev/null
