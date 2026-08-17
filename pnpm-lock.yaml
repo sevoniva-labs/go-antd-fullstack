@@ -61,7 +61,7 @@ importers:
         version: 8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
 
   web/apps/shell:
     dependencies:
@@ -137,7 +137,7 @@ importers:
         version: 8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
 
   web/packages/api-client:
     devDependencies:
@@ -161,7 +161,19 @@ importers:
         version: 8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
+
+  web/packages/app-contract:
+    devDependencies:
+      oxlint:
+        specifier: 1.75.0
+        version: 1.75.0
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+      vitest:
+        specifier: 4.0.18
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
 
   web/packages/auth-sdk:
     dependencies:
@@ -198,7 +210,7 @@ importers:
         version: 6.0.2
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
 
   web/packages/design-system:
     dependencies:
@@ -259,7 +271,7 @@ importers:
         version: 8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
 
   web/packages/observability:
     devDependencies:
@@ -274,7 +286,7 @@ importers:
         version: 6.0.2
       vitest:
         specifier: 4.0.18
-        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0)
 
 packages:
 
@@ -4300,7 +4312,7 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.7.0
 
-  vitest@4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0):
+  vitest@4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0)(lightningcss@1.33.0):
     dependencies:
       '@vitest/expect': 4.0.18
       '@vitest/mocker': 4.0.18(vite@7.3.6(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.33.0))
