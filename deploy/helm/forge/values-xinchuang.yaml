@@ -10,6 +10,8 @@ autoscaling:
 
 image:
   repository: registry.example.cn/sevoniva/forge
+  # Replace this syntactically valid placeholder with the signed build digest.
+  digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
 
 config:
   environment: production

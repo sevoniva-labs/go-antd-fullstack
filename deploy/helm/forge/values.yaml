@@ -2,8 +2,9 @@ replicaCount: 1
 revisionHistoryLimit: 5
 
 image:
-  repository: ghcr.io/sevoniva-labs/forge
+  repository: registry.example.cn/sevoniva/forge
   tag: "0.2.0"
+  digest: ""
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

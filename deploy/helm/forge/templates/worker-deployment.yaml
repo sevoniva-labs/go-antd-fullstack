@@ -30,7 +30,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: worker
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ include "forge.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/app/forge-worker"]
           envFrom:
