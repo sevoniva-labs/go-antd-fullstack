@@ -20,7 +20,10 @@ import (
 
 type Service struct{ repo *repository.ApprovalRepo }
 
-var ErrAccessDenied = errors.New("approval access denied")
+var (
+	ErrAccessDenied     = errors.New("approval access denied")
+	ErrApprovalRequired = errors.New("approval execution ticket is required")
+)
 
 func NewService(repo *repository.ApprovalRepo) *Service { return &Service{repo: repo} }
 
@@ -75,6 +78,9 @@ func (s *Service) Create(ctx context.Context, actor identitydomain.Principal, in
 }
 
 func (s *Service) AuthorizeExecution(ctx context.Context, actor identitydomain.Principal, approvalID string, input ExecutionInput) error {
+	if strings.TrimSpace(approvalID) == "" {
+		return ErrApprovalRequired
+	}
 	if err := requireActor(actor); err != nil {
 		return err
 	}

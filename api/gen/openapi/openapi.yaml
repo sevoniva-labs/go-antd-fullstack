@@ -2006,6 +2006,8 @@ components:
                     type: array
                     items:
                         type: string
+                approvalId:
+                    type: string
         forge.v1.UpdateUserRolesResponse:
             type: object
             properties:

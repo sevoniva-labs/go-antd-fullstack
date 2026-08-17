@@ -7,7 +7,9 @@ import (
 	"errors"
 	"math"
 	"net"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	kratoserrors "github.com/go-kratos/kratos/v2/errors"
@@ -16,8 +18,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
+	appapproval "github.com/sevoniva-labs/forge/internal/app/approval"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
+	domainapproval "github.com/sevoniva-labs/forge/internal/domain/approval"
 	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/authn"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
@@ -26,12 +30,13 @@ import (
 type PlatformService struct {
 	forgev1.UnimplementedPlatformServiceServer
 	identity *appidentity.Service
+	approval *appapproval.Service
 	audit    *audit.Writer
 	db       *database.DB
 }
 
-func NewPlatformService(identity *appidentity.Service, auditWriter *audit.Writer, db *database.DB) *PlatformService {
-	return &PlatformService{identity: identity, audit: auditWriter, db: db}
+func NewPlatformService(identity *appidentity.Service, approval *appapproval.Service, auditWriter *audit.Writer, db *database.DB) *PlatformService {
+	return &PlatformService{identity: identity, approval: approval, audit: auditWriter, db: db}
 }
 
 func (s *PlatformService) CreateUser(ctx context.Context, req *forgev1.CreateUserRequest) (*forgev1.CreateUserResponse, error) {
@@ -402,14 +407,30 @@ func (s *PlatformService) UpdateUserRoles(ctx context.Context, req *forgev1.Upda
 	if err != nil {
 		return nil, err
 	}
-	event := newAuditEvent(ctx, principal, "user.roles.update", "user", req.GetUserId(), map[string]any{"roles": req.GetRoles()})
+	roles, payload, err := userRoleChangePayload(req.GetRoles())
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	event := newAuditEvent(ctx, principal, "user.roles.update", "user", req.GetUserId(), map[string]any{"roles": roles, "approval_id": req.GetApprovalId()})
 	err = s.audited(ctx, event, func(txCtx context.Context) error {
-		return s.identity.UpdateUserRoles(txCtx, principal, principal.OrganizationID, req.GetUserId(), req.GetRoles())
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "USER_ROLE_CHANGE",
+			Action:      "user.roles.update",
+			Resource:    "user",
+			ResourceID:  req.GetUserId(),
+			PayloadJSON: payload,
+		}); executionErr != nil {
+			return executionErr
+		}
+		return s.identity.UpdateUserRoles(txCtx, principal, principal.OrganizationID, req.GetUserId(), roles)
 	})
 	if err != nil {
 		return nil, serviceError(err)
 	}
-	return &forgev1.UpdateUserRolesResponse{User: &forgev1.User{Id: req.GetUserId(), OrganizationId: principal.OrganizationID, Roles: req.GetRoles()}}, nil
+	return &forgev1.UpdateUserRolesResponse{User: &forgev1.User{Id: req.GetUserId(), OrganizationId: principal.OrganizationID, Roles: roles}}, nil
 }
 
 func (s *PlatformService) UpdateUserStatus(ctx context.Context, req *forgev1.UpdateUserStatusRequest) (*forgev1.UpdateUserStatusResponse, error) {
@@ -662,6 +683,16 @@ func serviceError(err error) error {
 		return kratoserrors.Forbidden("INTERACTIVE_SESSION_REQUIRED", "interactive session is required")
 	case errors.Is(err, appidentity.ErrStepUpRequired):
 		return kratoserrors.Forbidden("STEP_UP_REQUIRED", "recent multi-factor authentication is required")
+	case errors.Is(err, appapproval.ErrApprovalRequired):
+		return kratoserrors.BadRequest("APPROVAL_REQUIRED", "approved execution ticket is required")
+	case errors.Is(err, domainapproval.ErrDigestMismatch):
+		return kratoserrors.Conflict("APPROVAL_DIGEST_MISMATCH", "approval does not authorize this operation")
+	case errors.Is(err, domainapproval.ErrAlreadyExecuted):
+		return kratoserrors.Conflict("APPROVAL_ALREADY_EXECUTED", "approval execution ticket has already been used")
+	case errors.Is(err, domainapproval.ErrNotPending):
+		return kratoserrors.Conflict("APPROVAL_NOT_EXECUTABLE", "approval is not executable")
+	case errors.Is(err, domainapproval.ErrMakerChecker), errors.Is(err, appapproval.ErrAccessDenied):
+		return kratoserrors.Forbidden("APPROVAL_ACCESS_DENIED", "approval execution is not permitted")
 	case errors.Is(err, appidentity.ErrInvalidCredentials):
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 	case errors.Is(err, appidentity.ErrInvalidMFA):
@@ -679,6 +710,26 @@ func serviceError(err error) error {
 	default:
 		return internalError(err)
 	}
+}
+
+func userRoleChangePayload(roleKeys []string) ([]string, string, error) {
+	unique := make(map[string]struct{}, len(roleKeys))
+	for _, roleKey := range roleKeys {
+		roleKey = strings.TrimSpace(roleKey)
+		if roleKey != "" {
+			unique[roleKey] = struct{}{}
+		}
+	}
+	roles := make([]string, 0, len(unique))
+	for roleKey := range unique {
+		roles = append(roles, roleKey)
+	}
+	sort.Strings(roles)
+	payload, err := json.Marshal(map[string]any{"roles": roles})
+	if err != nil {
+		return nil, "", err
+	}
+	return roles, string(payload), nil
 }
 
 func internalError(error) error {

@@ -225,7 +225,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		"discovery": reg.Provider(), "remote_config": cfg.RemoteConfig.Provider,
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
-	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter, db)
+	platformService := kratosapi.NewPlatformService(identitySvc, approvalSvc, auditWriter, db)
 	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db, ratelimit.New(c), cfg.Security.SecureCookies, cfg.Security.SameSite)
 	approvalService := kratosapi.NewApprovalService(approvalSvc, auditWriter, db)
 	forgev1.RegisterSystemServiceHTTPServer(httpServer, systemService)

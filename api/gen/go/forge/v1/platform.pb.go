@@ -2267,6 +2267,7 @@ type UpdateUserRolesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Roles         []string               `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,3,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2313,6 +2314,13 @@ func (x *UpdateUserRolesRequest) GetRoles() []string {
 		return x.Roles
 	}
 	return nil
+}
+
+func (x *UpdateUserRolesRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
 }
 
 type UpdateUserRolesResponse struct {
@@ -3136,10 +3144,12 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"data_scope\x18\x02 \x01(\tR\tdataScope\x12%\n" +
 	"\x0edepartment_ids\x18\x03 \x03(\tR\rdepartmentIds\"A\n" +
 	"\x1bUpdateRoleDataScopeResponse\x12\"\n" +
-	"\x04role\x18\x01 \x01(\v2\x0e.forge.v1.RoleR\x04role\"G\n" +
+	"\x04role\x18\x01 \x01(\v2\x0e.forge.v1.RoleR\x04role\"h\n" +
 	"\x16UpdateUserRolesRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05roles\x18\x02 \x03(\tR\x05roles\"=\n" +
+	"\x05roles\x18\x02 \x03(\tR\x05roles\x12\x1f\n" +
+	"\vapproval_id\x18\x03 \x01(\tR\n" +
+	"approvalId\"=\n" +
 	"\x17UpdateUserRolesResponse\x12\"\n" +
 	"\x04user\x18\x01 \x01(\v2\x0e.forge.v1.UserR\x04user\"J\n" +
 	"\x17UpdateUserStatusRequest\x12\x17\n" +
