@@ -272,37 +272,41 @@ function deepFreeze<T>(value: T, seen = new WeakSet<object>()): T {
   return Object.freeze(value);
 }
 
-export class VerifiedManifestDocument<T extends object> {
+const VERIFIED_MANIFEST_DOCUMENT = Symbol('forge.verified-manifest-document');
+const verifiedManifestDocuments = new WeakSet<object>();
+
+export interface VerifiedManifestDocument<T extends object> {
+  readonly [VERIFIED_MANIFEST_DOCUMENT]: true;
   readonly manifest: Readonly<T>;
   readonly keyId: string;
   readonly algorithm: ManifestSignatureAlgorithm;
   readonly payloadSha256: string;
   readonly verifiedAt: string;
+}
 
-  private constructor(input: Readonly<{
-    manifest: T;
-    keyId: string;
-    algorithm: ManifestSignatureAlgorithm;
-    payloadSha256: string;
-    verifiedAt: string;
-  }>) {
-    this.manifest = deepFreeze(input.manifest);
-    this.keyId = input.keyId;
-    this.algorithm = input.algorithm;
-    this.payloadSha256 = input.payloadSha256;
-    this.verifiedAt = input.verifiedAt;
-    Object.freeze(this);
-  }
+function createVerifiedManifestDocument<T extends object>(input: Readonly<{
+  manifest: T;
+  keyId: string;
+  algorithm: ManifestSignatureAlgorithm;
+  payloadSha256: string;
+  verifiedAt: string;
+}>): VerifiedManifestDocument<T> {
+  const document: VerifiedManifestDocument<T> = {
+    [VERIFIED_MANIFEST_DOCUMENT]: true,
+    manifest: deepFreeze(input.manifest),
+    keyId: input.keyId,
+    algorithm: input.algorithm,
+    payloadSha256: input.payloadSha256,
+    verifiedAt: input.verifiedAt,
+  };
+  verifiedManifestDocuments.add(document);
+  return Object.freeze(document);
+}
 
-  static create<TDocument extends object>(input: Readonly<{
-    manifest: TDocument;
-    keyId: string;
-    algorithm: ManifestSignatureAlgorithm;
-    payloadSha256: string;
-    verifiedAt: string;
-  }>): VerifiedManifestDocument<TDocument> {
-    return new VerifiedManifestDocument(input);
-  }
+export function isVerifiedManifestDocument(
+  value: unknown,
+): value is VerifiedManifestDocument<object> {
+  return typeof value === 'object' && value !== null && verifiedManifestDocuments.has(value);
 }
 
 export async function sha256Integrity(payload: Uint8Array): Promise<string> {
@@ -394,7 +398,7 @@ export async function verifyManifestDocument<T extends object>(
     return securityError('SIGNATURE_INVALID', 'Manifest signature verification failed');
   }
 
-  return VerifiedManifestDocument.create({
+  return createVerifiedManifestDocument({
     manifest,
     keyId: key.keyId,
     algorithm: envelope.algorithm,

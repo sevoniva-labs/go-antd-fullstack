@@ -4,6 +4,7 @@ import {
   ManifestSecurityError,
   canonicalizeManifest,
   encodeBase64Url,
+  isVerifiedManifestDocument,
   sha256Integrity,
   verifyManifestDocument,
   verifySha256Integrity,
@@ -64,6 +65,16 @@ describe('manifest signature verification', () => {
     expect(verified.keyId).toBe('frontend-release-2026-01');
     expect(verified.payloadSha256).toMatch(/^sha256-/);
     expect(Object.isFrozen(verified.manifest)).toBe(true);
+    expect(isVerifiedManifestDocument(verified)).toBe(true);
+    expect(
+      isVerifiedManifestDocument({
+        manifest: fixture.manifest,
+        keyId: verified.keyId,
+        algorithm: verified.algorithm,
+        payloadSha256: verified.payloadSha256,
+        verifiedAt: verified.verifiedAt,
+      }),
+    ).toBe(false);
   });
 
   it('rejects non-canonical and tampered manifests', async () => {
