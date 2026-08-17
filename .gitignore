@@ -13,6 +13,7 @@ Thumbs.db
 __pycache__/
 /.tools/
 /web/node_modules/
+/web/**/node_modules/
 /web/.next/
 
 
