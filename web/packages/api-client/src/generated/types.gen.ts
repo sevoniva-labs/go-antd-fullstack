@@ -500,6 +500,7 @@ export type ForgeV1UpdateRoleDataScopeRequest = {
     roleKey?: string;
     dataScope?: string;
     departmentIds?: Array<string>;
+    approvalId?: string;
 };
 
 export type ForgeV1UpdateRoleDataScopeResponse = {
@@ -509,6 +510,7 @@ export type ForgeV1UpdateRoleDataScopeResponse = {
 export type ForgeV1UpdateRolePermissionsRequest = {
     roleKey?: string;
     permissions?: Array<string>;
+    approvalId?: string;
 };
 
 export type ForgeV1UpdateRolePermissionsResponse = {

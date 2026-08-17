@@ -1,5 +1,5 @@
 import { EditOutlined } from '@ant-design/icons'
-import { ModalForm, ProFormCheckbox, ProFormDependency, ProFormSelect, ProFormTreeSelect } from '@ant-design/pro-components'
+import { ModalForm, ProFormCheckbox, ProFormDependency, ProFormSelect, ProFormText, ProFormTreeSelect } from '@ant-design/pro-components'
 import type { ProColumns } from '@ant-design/pro-components'
 import { App, Button, Space, Tag, Typography } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -21,7 +21,7 @@ const dataScopeLabels: Record<RoleDataScope, string> = {
   CUSTOM: '自定义部门',
 }
 
-type DataScopeValues = { data_scope: RoleDataScope; department_ids?: string[] }
+type DataScopeValues = { data_scope: RoleDataScope; department_ids?: string[]; approval_id: string }
 
 export function RolesPage() {
   const qc = useQueryClient()
@@ -33,7 +33,7 @@ export function RolesPage() {
   const departments = useQuery({ queryKey: queryKeys.departments, queryFn: api.departments, enabled: canReadDepartments })
   const canManageDataScope = me?.principal_type !== 'TOKEN' && Boolean(me?.roles.includes('system_admin'))
   const update = useMutation({
-    mutationFn: ({ roleKey, permissionKeys }: { roleKey: string; permissionKeys: string[] }) => api.updateRolePermissions(roleKey, permissionKeys),
+    mutationFn: ({ roleKey, permissionKeys, approvalId }: { roleKey: string; permissionKeys: string[]; approvalId: string }) => api.updateRolePermissions(roleKey, permissionKeys, approvalId),
     onSuccess: async () => {
       message.success('角色权限已更新')
       await qc.invalidateQueries({ queryKey: queryKeys.roles })
@@ -41,7 +41,7 @@ export function RolesPage() {
   })
   const updateDataScope = useMutation({
     mutationFn: ({ roleKey, values }: { roleKey: string; values: DataScopeValues }) => api.updateRoleDataScope(
-      roleKey, values.data_scope, values.data_scope === 'CUSTOM' ? values.department_ids ?? [] : [],
+      roleKey, values.data_scope, values.data_scope === 'CUSTOM' ? values.department_ids ?? [] : [], values.approval_id,
     ),
     onSuccess: async () => {
       message.success('角色数据范围已更新')
@@ -91,13 +91,19 @@ export function RolesPage() {
               trigger={<Button type="link" icon={<EditOutlined />}>配置权限</Button>}
               initialValues={{ permissions: row.permissions }}
               onFinish={async (values) => {
-                await update.mutateAsync({ roleKey: row.key, permissionKeys: values.permissions || [] })
+                await update.mutateAsync({ roleKey: row.key, permissionKeys: values.permissions || [], approvalId: values.approval_id })
                 return true
               }}
             >
               <Typography.Paragraph type="secondary">
                 权限是代码定义的稳定能力标识；业务模块新增权限时应同步进入后端权限清单，而不是仅在页面中创建字符串。
               </Typography.Paragraph>
+              <ProFormText
+                name="approval_id"
+                label="审批执行票据"
+                tooltip="请先创建 ROLE_PERMISSION_CHANGE 申请；操作 role.permissions.update，资源 role，资源 ID 为当前角色标识，载荷为排序后的 permissions 数组。"
+                rules={[{ required: true, message: '请输入已通过审批的执行票据 ID' }]}
+              />
               <ProFormCheckbox.Group
                 name="permissions"
                 label="权限"
@@ -113,6 +119,12 @@ export function RolesPage() {
               <Typography.Paragraph type="secondary">
                 数据范围由服务端强制应用于用户目录和任职关系；自定义范围只允许选择活动部门。
               </Typography.Paragraph>
+              <ProFormText
+                name="approval_id"
+                label="审批执行票据"
+                tooltip="请先创建 ROLE_DATA_SCOPE_CHANGE 申请；操作 role.data_scope.update，资源 role，资源 ID 为当前角色标识，载荷为范围类型和排序后的部门 ID。"
+                rules={[{ required: true, message: '请输入已通过审批的执行票据 ID' }]}
+              />
               <ProFormSelect
                 name="data_scope" label="范围类型" rules={[{ required: true }]}
                 options={Object.entries(dataScopeLabels).map(([value, label]) => ({ value, label }))}

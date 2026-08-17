@@ -128,11 +128,11 @@ export const api = {
 
   roles: () => apiFetch<{ items: Role[] }>('/admin/roles'),
   permissions: () => apiFetch<{ items: Permission[] }>('/admin/permissions'),
-  updateRolePermissions: (roleKey: string, permissions: string[]) =>
-    apiFetch<void>(`/admin/roles/${encodeURIComponent(roleKey)}/permissions`, { method: 'PUT', body: JSON.stringify({ permissions }) }),
-  updateRoleDataScope: (roleKey: string, dataScope: Role['data_scope'], departmentIds: string[]) =>
+  updateRolePermissions: (roleKey: string, permissions: string[], approvalId: string) =>
+    apiFetch<void>(`/admin/roles/${encodeURIComponent(roleKey)}/permissions`, { method: 'PUT', body: JSON.stringify({ permissions, approval_id: approvalId }) }),
+  updateRoleDataScope: (roleKey: string, dataScope: Role['data_scope'], departmentIds: string[], approvalId: string) =>
     apiFetch<void>(`/admin/roles/${encodeURIComponent(roleKey)}/data-scope`, {
-      method: 'PUT', body: JSON.stringify({ data_scope: dataScope, department_ids: departmentIds }),
+      method: 'PUT', body: JSON.stringify({ data_scope: dataScope, department_ids: departmentIds, approval_id: approvalId }),
     }),
 
   sessions: () => apiFetch<{ items: SessionInfo[] }>('/admin/sessions'),
