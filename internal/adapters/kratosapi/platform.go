@@ -468,8 +468,20 @@ func (s *PlatformService) ResetUserPassword(ctx context.Context, req *forgev1.Re
 	if err != nil {
 		return nil, err
 	}
-	event := newAuditEvent(ctx, principal, "user.password.reset", "user", req.GetUserId(), nil)
+	event := newAuditEvent(ctx, principal, "user.password.reset", "user", req.GetUserId(), map[string]any{"force_change": true, "approval_id": req.GetApprovalId()})
 	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "USER_PASSWORD_RESET",
+			Action:      "user.password.reset",
+			Resource:    "user",
+			ResourceID:  req.GetUserId(),
+			PayloadJSON: `{"force_change":true}`,
+		}); executionErr != nil {
+			return executionErr
+		}
 		return s.identity.AdminResetPassword(txCtx, principal.OrganizationID, req.GetUserId(), req.GetPassword())
 	})
 	if err != nil {

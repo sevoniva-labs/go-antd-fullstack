@@ -1731,6 +1731,8 @@ components:
                     type: string
                 password:
                     type: string
+                approvalId:
+                    type: string
         forge.v1.ResetUserPasswordResponse:
             type: object
             properties: {}

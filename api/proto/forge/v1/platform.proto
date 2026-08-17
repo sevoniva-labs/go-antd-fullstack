@@ -922,6 +922,7 @@ message UnlockUserResponse {
 message ResetUserPasswordRequest {
   string user_id = 1;
   string password = 2;
+  string approval_id = 3;
 }
 message ResetUserPasswordResponse {}
 

@@ -2555,6 +2555,7 @@ type ResetUserPasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,3,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2599,6 +2600,13 @@ func (x *ResetUserPasswordRequest) GetUserId() string {
 func (x *ResetUserPasswordRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
+	}
+	return ""
+}
+
+func (x *ResetUserPasswordRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
 	}
 	return ""
 }
@@ -3160,10 +3168,12 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\x11UnlockUserRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"8\n" +
 	"\x12UnlockUserResponse\x12\"\n" +
-	"\x04user\x18\x01 \x01(\v2\x0e.forge.v1.UserR\x04user\"O\n" +
+	"\x04user\x18\x01 \x01(\v2\x0e.forge.v1.UserR\x04user\"p\n" +
 	"\x18ResetUserPasswordRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x1b\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1f\n" +
+	"\vapproval_id\x18\x03 \x01(\tR\n" +
+	"approvalId\"\x1b\n" +
 	"\x19ResetUserPasswordResponse\"+\n" +
 	"\x13ListSessionsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\"E\n" +
