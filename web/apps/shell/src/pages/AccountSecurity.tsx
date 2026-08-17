@@ -27,6 +27,8 @@ export function AccountSecurityPage() {
           <Descriptions.Item label="显示名称">{me?.display_name || '-'}</Descriptions.Item>
           <Descriptions.Item label="角色">{me?.roles.map((role) => <Tag key={role}>{role}</Tag>)}</Descriptions.Item>
           <Descriptions.Item label="主体类型">{me?.principal_type}</Descriptions.Item>
+          <Descriptions.Item label="会话认证强度"><Tag color={me?.authentication_level === 'MFA' ? 'success' : 'warning'}>{me?.authentication_level || 'PASSWORD'}</Tag></Descriptions.Item>
+          <Descriptions.Item label="最近 MFA 验证">{me?.mfa_verified_at ? new Date(me.mfa_verified_at).toLocaleString('zh-CN') : '尚未验证'}</Descriptions.Item>
         </Descriptions>
       </Card>
       <Card
@@ -37,6 +39,28 @@ export function AccountSecurityPage() {
         <Typography.Paragraph type="secondary">
           TOTP 秘钥在服务端使用部署配置的标准或国密算法加密。启用后，每次本地账号登录都必须提供动态验证码或一次性恢复码。
         </Typography.Paragraph>
+        {mfa.data?.enabled && <Alert
+          type={me?.authentication_level === 'MFA' ? 'success' : 'warning'}
+          showIcon
+          message={me?.authentication_level === 'MFA' ? '当前会话已通过多因素认证' : '特权写操作需要近期多因素认证'}
+          description="授权、组织治理和其他高风险操作要求最近十分钟内完成 MFA；验证超时后需重新执行二次认证。"
+          style={{ marginBottom: 16 }}
+        />}
+        {mfa.data?.enabled && <ModalForm<{ current_password: string; mfa_code?: string; recovery_code?: string }>
+          title="会话二次认证"
+          trigger={<Button icon={<SafetyCertificateOutlined />}>立即二次认证</Button>}
+          submitter={{ searchConfig: { submitText: '验证当前会话' } }}
+          onFinish={async (values) => {
+            await api.stepUpAuthentication(values)
+            await queryClient.invalidateQueries({ queryKey: queryKeys.me })
+            message.success('当前会话已提升为近期 MFA 认证')
+            return true
+          }}
+        >
+          <ProFormText.Password name="current_password" label="当前密码" rules={[{ required: true }]} />
+          <ProFormText name="mfa_code" label="动态验证码" fieldProps={{ inputMode: 'numeric', autoComplete: 'one-time-code' }} />
+          <ProFormText.Password name="recovery_code" label="恢复码（可选）" />
+        </ModalForm>}
         {!mfa.data?.enabled ? <ModalForm<{ current_password: string }>
           title="启用多因素认证"
           trigger={<Button type="primary" icon={<SafetyCertificateOutlined />}>启用 MFA</Button>}

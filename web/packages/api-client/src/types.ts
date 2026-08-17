@@ -8,6 +8,8 @@ export interface Principal {
   permissions?: string[]
   scopes?: string[]
   must_change_password: boolean
+  authentication_level?: 'PASSWORD' | 'MFA'
+  mfa_verified_at?: string
 }
 
 export interface User {

@@ -23,6 +23,8 @@ export const api = {
   logout: () => apiFetch<void>('/auth/logout', { method: 'POST' }),
   changePassword: (payload: { current_password: string; new_password: string }) =>
     apiFetch<void>('/auth/password', { method: 'PATCH', body: JSON.stringify(payload) }),
+  stepUpAuthentication: (payload: { current_password: string; mfa_code?: string; recovery_code?: string }) =>
+    apiFetch<{ verified_at: string }>('/auth/step-up', { method: 'POST', body: JSON.stringify(payload) }),
   me: () => apiFetch<Principal>('/me'),
   mfaStatus: () => apiFetch<{ enabled: boolean }>('/mfa'),
   beginMfaEnrollment: (currentPassword: string) =>
