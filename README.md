@@ -6,12 +6,13 @@
 
 ## 技术基线
 
-- Backend：Go 1.26 + chi + `database/sql`
+- Backend：Go 1.26 + Kratos v2（HTTP/gRPC）+ `database/sql`
 - Frontend：React 19 + TypeScript + Vite 8 + Ant Design 6 + Pro Components + TanStack Query
-- API：OpenAPI 3.1 + 统一 Envelope + 6 位稳定返回码 + request_id/trace_id
+- API：Proto3 + Buf + 生成式 gRPC/HTTP/OpenAPI + 统一 Envelope + 6 位稳定返回码 + request_id/trace_id
 - DB：PostgreSQL / MySQL / OceanBase MySQL profile
 - Cache：Disabled / Memory / Redis standalone/Sentinel/Cluster
-- Messaging：Disabled / Kafka；RocketMQ 5.x adapter slot
+- Messaging：Disabled / RocketMQ 5.x（业务消息默认）
+- Streaming：Disabled / Kafka（仅用于日志、埋点、CDC 等流式数据）
 - Search：Disabled / Elasticsearch / OpenSearch
 - Storage：Local / S3-compatible
 - Config/Registry：Nacos 配置中心 + 服务注册发现
@@ -31,15 +32,15 @@
 | Password | ✅ | Argon2id、复杂度、历史、有效期、失败锁定、首次改密 |
 | Audit | ✅ | 安全事件独立表、组织隔离、request ID/IP/actor |
 | Security HTTP | ✅ | CSP/HSTS/frame/nosniff/referrer/CORS/body limit/recovery |
-| Outbound TLS | ✅ | Redis/Kafka/Search/S3 支持企业 CA、mTLS client cert、ServerName；无 skip-verify |
+| Outbound TLS | ✅ | Redis/RocketMQ/Kafka Streaming/Search/S3 支持企业 CA、mTLS client cert、ServerName；无 skip-verify |
 | Secret | ✅/扩展 | env/`*_FILE` 内置；Vault/KMS/HSM/密码机预留 Provider |
 | Standard crypto | ✅ | SHA-256 + AES-GCM |
 | GM crypto baseline | ✅* | SM3 + SM4-GCM；SM2/HSM/证书体系属于后续适配/密评范围 |
 | Multi DB | ✅/Profile | PostgreSQL/MySQL 内置；OceanBase MySQL profile |
 | Domestic DB | 扩展位 | Kingbase/达梦/GaussDB 目录和验收清单已预留，不虚假宣称实测 |
 | Redis | ✅ | standalone/Sentinel/Cluster，分布式限流/锁 |
-| Kafka | ✅ | franz-go；可选 |
-| RocketMQ 5.x | 扩展位 | 官方 SDK adapter slot，未安装时不会静默降级 |
+| RocketMQ 5.x | ✅ | 官方 gRPC SDK；普通/FIFO/定时延时/事务消息、显式 ACK/重试、TLS/mTLS/ACL |
+| Kafka Streaming | ✅ | franz-go；独立流处理 Provider，不参与业务消息发布 |
 | Search | ✅ | Elasticsearch/OpenSearch REST provider |
 | Object storage | ✅ | Local / S3-compatible |
 | Nacos | ✅ | Config Center + Registry/Discovery |
@@ -75,7 +76,7 @@ React / Ant Design
         ▼
 ┌──────────────────────────────────────────────┐
 │ Platform / Providers                         │
-│ DB  Cache  MQ  Search  Storage  Nacos        │
+│ DB  Cache  MQ  Stream  Search  Storage Nacos │
 │ Crypto  Secrets  Lock  Idempotency  Reliable Message   │
 │ Logs  Metrics  Tracing  Health  Resilience   │
 └──────────────────────────────────────────────┘
@@ -121,8 +122,11 @@ docker compose -f deploy/compose/mysql.yaml up -d --build
 # PostgreSQL + Redis + S3-compatible 对象存储（例如 MinIO/COS/OSS 等）
 docker compose -f deploy/compose/standard.yaml up -d --build
 
-# PostgreSQL + Redis + Kafka + Elasticsearch + S3-compatible 对象存储（例如 MinIO/COS/OSS 等）+ Worker
+# PostgreSQL + Redis + RocketMQ 5 + Elasticsearch + S3-compatible 对象存储 + Worker
 docker compose -f deploy/compose/full.yaml up -d --build
+
+# 在 full 环境上按需叠加 Kafka 流处理（不替代 RocketMQ 业务消息）
+docker compose -f deploy/compose/full.yaml -f deploy/compose/kafka-streaming-dev.yaml up -d --build
 
 # 本地 Nacos 3 辅助环境
 docker compose -f deploy/compose/nacos-dev.yaml up -d
@@ -229,19 +233,21 @@ make init APP=my-product MODULE=github.com/your-org/my-product
 
 ## 校验
 
-联网环境：
+所有自动下载路径必须显式使用国内源；禁止失败后静默回退公网源。Go 依赖使用 `goproxy.cn`，校验数据库通过该代理访问；容器镜像必须使用组织内 Harbor 的不可变 digest。前端依赖将在 Phase 1 前端基座落地时固定国内 npm registry 与 `pnpm-lock.yaml`。
+
+本地校验：
 
 ```bash
 go mod tidy
-cd web && npm install && cd ..
+cd web && pnpm install --frozen-lockfile && cd ..
 make check
 ```
 
 CI 还会做 OpenAPI lint、多架构镜像构建、依赖漏洞、安全静态检查、Secret 扫描、Trivy 和 CycloneDX SBOM；tag release 提供 BuildKit provenance/SBOM attestation 与 Cosign digest 签名基线。
 
-### 本次生成包验证状态
+### 当前验证边界
 
-当前生成环境无法访问外部 Go/npm 依赖仓库，因此不会伪造“依赖级完整编译通过”。已执行离线 Go 语法/格式、YAML/JSON、Shell、OpenAPI 基础结构、错误码契约、TypeScript/TSX 语法和目录一致性检查。首次联网后应生成并提交 `go.sum` 与前端 lockfile，再由 CI 固化依赖。
+后端依赖已通过国内 Go 代理获取并固定 `go.sum`，当前阶段已执行 Go 单元测试、`go vet`、gosec、staticcheck、golangci-lint、govulncheck、Helm/Compose 结构和容器来源策略检查。开发 Compose 中的 RocketMQ 仅完成配置级验证；在获得组织内 Harbor 镜像及目标 ACL/TLS 集群前，不宣称完成真实集群兼容认证。前端依赖与构建验证由 Phase 1 前端基座提交提供证据。
 
 ## License
 

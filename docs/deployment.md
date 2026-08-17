@@ -9,7 +9,8 @@
 - `minimal.yaml`：PostgreSQL + API
 - `mysql.yaml`：MySQL + API
 - `standard.yaml`：PostgreSQL + Redis + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）
-- `full.yaml`：PostgreSQL + Redis + Kafka + Elasticsearch + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）+ Worker
+- `full.yaml`：PostgreSQL + Redis + RocketMQ 5 + Elasticsearch + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）+ Worker
+- `kafka-streaming-dev.yaml`：叠加到 `full.yaml` 的可选 Kafka 流处理环境，不替代 RocketMQ 业务消息
 - `oceanbase-external.yaml`：外部 OceanBase MySQL mode
 - `nacos-dev.yaml`：本地 Nacos 3 开发辅助，不是生产 Nacos 集群模板
 - `observability-dev.yaml`：本地 Prometheus/OTel Collector 辅助
@@ -18,6 +19,8 @@
 `S3_BUCKET_AUTO_CREATE=false`（标准/全量场景都支持），避免 `mc` 在非 MinIO 平台执行初始化导致启动阻塞。
 
 Compose 只用于开发/验证。生产中间件建议使用组织已有 HA 服务，不把开发 Compose 直接搬进生产。
+
+开发 Compose 的 RocketMQ 镜像必须由组织内 Harbor 以 digest 提供。仓库不设置公共镜像回退；未连接真实 ACL/TLS 集群时，仅能把 Compose 结果记录为配置级验证，不能写入生产兼容认证矩阵。
 
 ## Kubernetes / Helm
 

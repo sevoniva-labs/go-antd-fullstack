@@ -51,7 +51,7 @@
 
 ## Secret
 
-DSN、Crypto Key、Redis/Kafka/Search/S3/Nacos/RocketMQ 凭据仅从环境变量或 `*_FILE` 读取。Kubernetes 推荐 External Secrets/CSI/组织 Secret 平台创建 Secret，再让 Helm 引用 `existingSecret`。
+DSN、Crypto Key、Redis/RocketMQ/Kafka Streaming/Search/S3/Nacos 凭据仅从环境变量或 `*_FILE` 读取。Kubernetes 推荐 External Secrets/CSI/组织 Secret 平台创建 Secret，再让 Helm 引用 `existingSecret`。
 
 ## 框架无法替代
 
@@ -59,4 +59,4 @@ WAF/API 网关、网络分区、主机/容器/数据库/中间件加固、堡垒
 
 ## 出站 TLS 与企业 CA
 
-Redis、Kafka、Elasticsearch/OpenSearch、S3-compatible 客户端均通过 `internal/platform/tlsx` 统一设置 TLS 1.2+、企业 CA、客户端证书/私钥和 ServerName。框架**不提供 `InsecureSkipVerify` 配置**。生产内网如使用自建 CA，应挂载 CA/客户端证书 Secret 并配置对应 `*_TLS_*` 环境变量。数据库连接的 TLS/证书参数由 PostgreSQL/MySQL/OceanBase 驱动 DSN 管理。
+Redis、RocketMQ、Kafka Streaming、Elasticsearch/OpenSearch、S3-compatible 客户端均执行 TLS 1.2+、企业 CA、客户端证书/私钥和 ServerName 策略。RocketMQ 官方 Go SDK 的默认连接未直接采用，脚手架注入受控 gRPC TLS 连接以禁止跳过证书验证。框架**不提供 `InsecureSkipVerify` 配置**。生产内网如使用自建 CA，应挂载 CA/客户端证书 Secret 并配置对应 `*_TLS_*` 环境变量。数据库连接的 TLS/证书参数由 PostgreSQL/MySQL/OceanBase 驱动 DSN 管理。

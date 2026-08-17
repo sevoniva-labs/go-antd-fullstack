@@ -16,17 +16,18 @@ Domain
        │ ports / abstractions
        ▼
 Platform & Adapters
-DB | Cache | MQ | Search | Storage | Crypto | Observability
+DB | Cache | Business MQ | Streaming | Search | Storage | Crypto | Observability
 ```
 
 ## 依赖规则
 
-1. `internal/domain` 不依赖 HTTP、数据库、Redis、Kafka、Elasticsearch、S3 SDK。
+1. `internal/domain` 不依赖 HTTP、数据库、Redis、RocketMQ、Kafka、Elasticsearch、S3 SDK。
 2. `internal/app` 编排业务用例，不处理 HTTP 细节。
 3. `internal/adapters` 将 HTTP、持久化等外部协议映射到应用层。
 4. `internal/platform` 只提供跨业务基础能力。
 5. `internal/bootstrap` 是唯一主要 composition root；`cmd/server` 保持极薄。
 6. 可选中间件默认 Disabled/Memory Provider，不能成为启动硬依赖。
+7. RocketMQ 是业务消息默认实现；Kafka 只实现独立 Streaming 端口，两者不互相降级或替代。
 
 ## 新业务模块推荐结构
 

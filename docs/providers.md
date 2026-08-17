@@ -14,8 +14,8 @@
 | Cache | Redis Cluster | Built-in | UniversalClient |
 | Distributed | Rate limit | Built-in | Redis 原子计数；Memory 为本机语义 |
 | Distributed | Lock / Scheduler lock | Built-in | Redis SET NX + compare-delete |
-| Messaging | Kafka | Built-in | franz-go |
-| Messaging | RocketMQ 5.x | Built-in default | Apache 官方 gRPC SDK；TLS/mTLS、ACL、Topic 白名单 |
+| Messaging | RocketMQ 5.x | Built-in default | Apache 官方 gRPC SDK；普通/FIFO/定时延时/事务消息、显式 ACK/重试、TLS/mTLS、ACL、Topic 白名单 |
+| Streaming | Kafka | Built-in optional | franz-go；仅承载日志、埋点、CDC 等流式记录，不作为业务消息降级项 |
 | Reliability | 本地可靠消息表 | Built-in | 与业务事务同库写入，Worker 租约恢复；at-least-once |
 | Reliability | Idempotency | Built-in | DB 记录 request hash/result state |
 | Search | Elasticsearch | Built-in | REST adapter |
@@ -45,8 +45,9 @@
 
 ## Provider 设计规则
 
-1. 业务层禁止 import Redis/Kafka/S3/Nacos/ES 等厂商 SDK。
+1. 业务层禁止 import Redis/RocketMQ/Kafka/S3/Nacos/ES 等厂商 SDK。
 2. 可选 Provider 不能成为 minimal 模式的强启动依赖。
 3. “协议兼容”不等于“生产认证”；兼容矩阵必须记录实际版本/CPU/OS/数据库组合。
 4. 国产替换优先落在 adapter/provider，不为某个数据库把业务 SQL/类型扩散到 domain。
-5. Redis/Kafka/Search/S3 的 TLS 使用统一 `tlsx` 策略，支持企业 CA、客户端证书和 ServerName；框架不提供跳过证书校验开关。数据库 TLS 由对应驱动 DSN 配置。
+5. Redis/RocketMQ/Kafka Streaming/Search/S3 的 TLS 使用统一安全策略，支持企业 CA、客户端证书和 ServerName；框架不提供跳过证书校验开关。数据库 TLS 由对应驱动 DSN 配置。
+6. `messaging` 与 `streaming` 是两条独立能力线，可同时启用；禁止用 Kafka 自动接管 RocketMQ 失败的业务消息。

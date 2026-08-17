@@ -17,8 +17,8 @@ Forge 把“已有代码实现”“协议兼容 profile”“目标环境实测
 | DB | GaussDB | Adapter slot | 同上 |
 | Cache | Redis | Built-in | standalone/Sentinel/Cluster 按部署形态验证 |
 | Registry/Config | Nacos | Built-in | 目标 Nacos 版本、鉴权、TLS、集群故障验证 |
-| MQ | Kafka | Built-in | broker/version/security/rebalance test |
-| MQ | RocketMQ 5.x | Adapter slot | 官方 client + 目标集群验证 |
+| Business MQ | RocketMQ 5.x | Built-in engineering baseline | Proxy/版本/ACL2/TLS/FIFO/延时/事务/消费重试与故障验证 |
+| Data streaming | Kafka | Built-in optional | broker/version/security/rebalance/吞吐与保留策略验证 |
 | Search | Elasticsearch/OpenSearch | Built-in basic REST | mapping/security/HA/version test |
 | Crypto | SHA-256/AES-GCM | Built-in | key management + crypto policy review |
 | Crypto | SM3/SM4-GCM | GM baseline | 密评场景还需 SM2/证书/密码机等方案 |

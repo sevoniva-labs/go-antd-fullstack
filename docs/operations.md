@@ -34,7 +34,7 @@
 - API：QPS、5xx 比例、p95/p99 延迟、并发、响应大小
 - 资源：CPU、内存、FD、goroutine、GC
 - DB：连接池、慢 SQL、锁、复制/集群状态
-- Redis/Kafka/RocketMQ/Search/S3：连接、延迟、积压/失败、容量
+- Redis/RocketMQ Business MQ/Kafka Streaming/Search/S3：连接、延迟、积压/失败、重试、死信和容量
 - 安全：登录失败、账号锁定、权限拒绝、Token 创建/撤销、审计写入失败
 - 业务：项目自行定义 SLI/SLO 和关键交易指标
 
