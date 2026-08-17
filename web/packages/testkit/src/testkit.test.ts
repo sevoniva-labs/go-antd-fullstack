@@ -6,9 +6,8 @@ import { createValidatedMicroAppManifest } from './manifest'
 describe('micro-app test factory', () => {
   it('produces a manifest accepted by the production validator', () => {
     const manifest = createValidatedMicroAppManifest({}, {
-      shellOrigin: 'https://forge.bank.example',
+      shellOrigin: 'https://portal.bank.example',
       production: true,
-      trustedWujieOrigins: ['https://apps.bank.example'],
     })
     expect(manifest.name).toBe('example-remote')
   })

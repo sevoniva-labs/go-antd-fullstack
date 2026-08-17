@@ -2,72 +2,115 @@ import {
   validateMicroAppManifest,
   type ManifestValidationOptions,
   type MicroAppManifest,
+  type MicroAppRelease,
 } from '@forge/app-contract'
+
+type ReleaseOverride = Partial<Omit<MicroAppRelease, 'resources'>> & {
+  resources?: MicroAppRelease['resources']
+}
 
 export type ManifestOverrides = Partial<Omit<
   MicroAppManifest,
-  'artifact' | 'compatibility' | 'rollout' | 'health' | 'csp'
+  'releases' | 'compatibility' | 'rollout' | 'health' | 'csp' | 'events'
 >> & {
-  artifact?: Partial<MicroAppManifest['artifact']>
+  releases?: {
+    primary?: ReleaseOverride
+    rollback?: ReleaseOverride | null
+  }
   compatibility?: Partial<MicroAppManifest['compatibility']>
   rollout?: Partial<MicroAppManifest['rollout']>
   health?: Partial<MicroAppManifest['health']>
   csp?: Partial<MicroAppManifest['csp']>
+  events?: Partial<MicroAppManifest['events']>
 }
 
+const integrityA = 'sha256-' + 'A'.repeat(43) + '='
+const integrityB = 'sha256-' + 'B'.repeat(43) + '='
+
 export function createMicroAppManifest(overrides: ManifestOverrides = {}): MicroAppManifest {
+  const primary: MicroAppRelease = {
+    version: '1.0.0',
+    entry: 'https://portal.bank.example/microapps/example-remote/1.0.0/index.html',
+    healthUrl: 'https://portal.bank.example/microapps/example-remote/1.0.0/healthz',
+    digest: 'sha256:' + 'a'.repeat(64),
+    resources: [{
+      url: 'https://portal.bank.example/microapps/example-remote/1.0.0/index.html',
+      integrity: integrityA,
+      maxBytes: 2 * 1024 * 1024,
+    }],
+  }
+  const rollback: MicroAppRelease = {
+    version: '0.9.0',
+    entry: 'https://portal.bank.example/microapps/example-remote/0.9.0/index.html',
+    healthUrl: 'https://portal.bank.example/microapps/example-remote/0.9.0/healthz',
+    digest: 'sha256:' + 'b'.repeat(64),
+    resources: [{
+      url: 'https://portal.bank.example/microapps/example-remote/0.9.0/index.html',
+      integrity: integrityB,
+      maxBytes: 2 * 1024 * 1024,
+    }],
+  }
   const base: MicroAppManifest = {
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
     name: 'example-remote',
     displayName: '示例远程应用',
     runtime: 'wujie',
+    trust: 'trusted-internal',
     status: 'active',
-    entry: 'https://apps.bank.example/example-remote/1.0.0/',
-    routePrefix: '/example-remote',
+    routePrefix: '/apps/example-remote',
     requiredPermissions: ['example.remote.read'],
-    requiredDataScopes: ['organization'],
+    requiredDataScopes: ['organization.current'],
     allowedApiPrefixes: ['/api/v1/example-remote'],
+    events: {
+      publish: ['example.record-updated'],
+      subscribe: ['shell.theme-changed'],
+    },
     featureFlag: 'micro_frontend.example_remote',
     owner: 'platform-team',
-    artifact: {
-      version: '1.0.0',
-      digest: 'sha256:' + 'a'.repeat(64),
-      integrity: 'sha384-' + 'A'.repeat(64),
-      signature: 'test-signature',
-      keyId: 'test-release-key',
-      rollbackVersion: '0.9.0',
-    },
+    releases: { primary, rollback },
     compatibility: {
-      shell: '1.x',
-      react: '19.x',
-      designSystem: '0.2.x',
-      apiContract: '1.x',
+      shellApi: 1,
+      hostSdkApi: 1,
+      designSystemApi: 1,
+      apiContract: 'v1',
+      reactMajor: 19,
     },
     rollout: {
       strategy: 'stable',
       percentage: 100,
       cohortKey: 'user_id',
+      salt: 'example-remote-2026-01',
     },
     health: {
-      timeoutMs: 8000,
+      timeoutMs: 3000,
+      startupTimeoutMs: 8000,
       maxFailures: 3,
-      recoverySeconds: 60,
+      failureWindowSeconds: 60,
+      recoverySeconds: 120,
     },
     csp: {
       connectSrc: ["'self'"],
       imgSrc: ["'self'", 'data:'],
-      frameSrc: [],
+      frameSrc: ["'self'"],
     },
     fallbackPath: '/micro-app-unavailable',
   }
+
+  const rollbackOverride = overrides.releases?.rollback
   return {
     ...base,
     ...overrides,
-    artifact: { ...base.artifact, ...overrides.artifact },
+    releases: {
+      primary: { ...primary, ...overrides.releases?.primary },
+      ...(rollbackOverride === null
+        ? {}
+        : { rollback: { ...rollback, ...rollbackOverride } }),
+    },
     compatibility: { ...base.compatibility, ...overrides.compatibility },
     rollout: { ...base.rollout, ...overrides.rollout },
     health: { ...base.health, ...overrides.health },
     csp: { ...base.csp, ...overrides.csp },
+    events: { ...base.events, ...overrides.events },
   }
 }
 
