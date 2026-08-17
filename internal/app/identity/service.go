@@ -40,6 +40,16 @@ type resolvedPolicy struct {
 	maxConcurrent  int
 }
 
+const (
+	minimumPasswordLength     = 12
+	minimumPasswordHistory    = 5
+	maximumPasswordAgeDays    = 90
+	maximumLoginFailures      = 5
+	minimumLoginLockDuration  = 15 * time.Minute
+	maximumSessionTTL         = 12 * time.Hour
+	maximumConcurrentSessions = 5
+)
+
 type Options struct {
 	MinLength     int
 	RequireUpper  bool
@@ -161,14 +171,14 @@ func (s *Service) defaultPolicy() resolvedPolicy {
 		lockDuration:   s.lockDuration,
 		maxAge:         s.maxAge,
 		history:        s.history,
-		maxConcurrent:  0,
+		maxConcurrent:  maximumConcurrentSessions,
 	}
 }
 
 func (s *Service) resolveSecurityPolicy(ctx context.Context, orgID string) (resolvedPolicy, error) {
 	out := s.defaultPolicy()
 	if orgID == "" {
-		return out, nil
+		return out, validateResolvedPolicy(out)
 	}
 	settings, err := s.repo.SecuritySettings(ctx, orgID)
 	if err != nil {
@@ -251,6 +261,9 @@ func (s *Service) resolveSecurityPolicy(ctx context.Context, orgID string) (reso
 		}
 		out.maxConcurrent = parsed
 	}
+	if err := validateResolvedPolicy(out); err != nil {
+		return resolvedPolicy{}, err
+	}
 	return out, nil
 }
 
@@ -305,11 +318,8 @@ func (s *Service) SecurityPolicy(ctx context.Context, orgID string) (domain.Secu
 }
 
 func (s *Service) UpdateSecurityPolicy(ctx context.Context, orgID, updatedBy string, policy domain.SecurityPolicy) (domain.SecurityPolicy, error) {
-	if policy.PasswordMinLength < 1 {
-		return domain.SecurityPolicy{}, fmt.Errorf("%w: password_min_length", ErrInvalidSecurityPolicy)
-	}
-	if policy.PasswordHistory < 0 || policy.PasswordMaxAgeDays < 0 || policy.LoginMaxFailures < 0 || policy.LoginLockDurationSeconds < 0 || policy.MaxConcurrentSessions < 0 || policy.SessionTTLSeconds <= 0 {
-		return domain.SecurityPolicy{}, fmt.Errorf("%w: invalid security policy", ErrInvalidSecurityPolicy)
+	if err := validateSecurityPolicy(policy); err != nil {
+		return domain.SecurityPolicy{}, err
 	}
 	payload := map[string]string{
 		domain.SecuritySettingPasswordMinLength:     strconv.Itoa(policy.PasswordMinLength),
@@ -328,6 +338,45 @@ func (s *Service) UpdateSecurityPolicy(ctx context.Context, orgID, updatedBy str
 		return domain.SecurityPolicy{}, err
 	}
 	return s.SecurityPolicy(ctx, orgID)
+}
+
+func validateResolvedPolicy(policy resolvedPolicy) error {
+	return validateSecurityPolicy(domain.SecurityPolicy{
+		PasswordMinLength:        policy.passwordPolicy.MinLength,
+		PasswordRequireUpper:     policy.passwordPolicy.RequireUpper,
+		PasswordRequireLower:     policy.passwordPolicy.RequireLower,
+		PasswordRequireDigit:     policy.passwordPolicy.RequireDigit,
+		PasswordRequireSymbol:    policy.passwordPolicy.RequireSymbol,
+		PasswordHistory:          policy.history,
+		PasswordMaxAgeDays:       int(policy.maxAge.Hours()) / 24,
+		LoginMaxFailures:         policy.maxFailures,
+		LoginLockDurationSeconds: int64(policy.lockDuration.Seconds()),
+		SessionTTLSeconds:        int64(policy.sessionTTL.Seconds()),
+		MaxConcurrentSessions:    policy.maxConcurrent,
+	})
+}
+
+func validateSecurityPolicy(policy domain.SecurityPolicy) error {
+	switch {
+	case policy.PasswordMinLength < minimumPasswordLength:
+		return fmt.Errorf("%w: password_min_length must be at least %d", ErrInvalidSecurityPolicy, minimumPasswordLength)
+	case !policy.PasswordRequireUpper || !policy.PasswordRequireLower || !policy.PasswordRequireDigit || !policy.PasswordRequireSymbol:
+		return fmt.Errorf("%w: password character-class requirements cannot be disabled", ErrInvalidSecurityPolicy)
+	case policy.PasswordHistory < minimumPasswordHistory:
+		return fmt.Errorf("%w: password_history must be at least %d", ErrInvalidSecurityPolicy, minimumPasswordHistory)
+	case policy.PasswordMaxAgeDays < 1 || policy.PasswordMaxAgeDays > maximumPasswordAgeDays:
+		return fmt.Errorf("%w: password_max_age_days must be between 1 and %d", ErrInvalidSecurityPolicy, maximumPasswordAgeDays)
+	case policy.LoginMaxFailures < 1 || policy.LoginMaxFailures > maximumLoginFailures:
+		return fmt.Errorf("%w: login_max_failures must be between 1 and %d", ErrInvalidSecurityPolicy, maximumLoginFailures)
+	case time.Duration(policy.LoginLockDurationSeconds)*time.Second < minimumLoginLockDuration:
+		return fmt.Errorf("%w: login_lock_duration_seconds must be at least %d", ErrInvalidSecurityPolicy, int64(minimumLoginLockDuration.Seconds()))
+	case policy.SessionTTLSeconds < 1 || time.Duration(policy.SessionTTLSeconds)*time.Second > maximumSessionTTL:
+		return fmt.Errorf("%w: session_ttl_seconds must be between 1 and %d", ErrInvalidSecurityPolicy, int64(maximumSessionTTL.Seconds()))
+	case policy.MaxConcurrentSessions < 1 || policy.MaxConcurrentSessions > maximumConcurrentSessions:
+		return fmt.Errorf("%w: max_active_sessions must be between 1 and %d", ErrInvalidSecurityPolicy, maximumConcurrentSessions)
+	default:
+		return nil
+	}
 }
 
 func (s *Service) UpdateOrganization(ctx context.Context, orgID string, req domain.Organization) (domain.Organization, error) {
