@@ -191,6 +191,11 @@ config:
   nacosNamespace: ""
   nacosGroup: DEFAULT_GROUP
   nacosCluster: DEFAULT
+  nacosTLSRequired: "false"
+  nacosTLSCAFile: ""
+  nacosTLSCertFile: ""
+  nacosTLSKeyFile: ""
+  nacosTLSServerName: ""
   remoteConfigProvider: disabled
   nacosConfigGroup: DEFAULT_GROUP
   nacosConfigDataID: ""

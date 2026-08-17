@@ -147,17 +147,27 @@ type Discovery struct {
 	Metadata      map[string]string `yaml:"metadata"`
 	Username      string            `yaml:"-"`
 	Password      string            `yaml:"-"`
+	TLSRequired   bool              `yaml:"tls_required"`
+	TLSCAFile     string            `yaml:"tls_ca_file"`
+	TLSCertFile   string            `yaml:"tls_cert_file"`
+	TLSKeyFile    string            `yaml:"tls_key_file"`
+	TLSServerName string            `yaml:"tls_server_name"`
 }
 
 type RemoteConfig struct {
-	Provider  string   `yaml:"provider"` // disabled | nacos
-	Servers   []string `yaml:"servers"`
-	Namespace string   `yaml:"namespace"`
-	Group     string   `yaml:"group"`
-	DataID    string   `yaml:"data_id"`
-	FailFast  bool     `yaml:"fail_fast"`
-	Username  string   `yaml:"-"`
-	Password  string   `yaml:"-"`
+	Provider      string   `yaml:"provider"` // disabled | nacos
+	Servers       []string `yaml:"servers"`
+	Namespace     string   `yaml:"namespace"`
+	Group         string   `yaml:"group"`
+	DataID        string   `yaml:"data_id"`
+	FailFast      bool     `yaml:"fail_fast"`
+	Username      string   `yaml:"-"`
+	Password      string   `yaml:"-"`
+	TLSRequired   bool     `yaml:"tls_required"`
+	TLSCAFile     string   `yaml:"tls_ca_file"`
+	TLSCertFile   string   `yaml:"tls_cert_file"`
+	TLSKeyFile    string   `yaml:"tls_key_file"`
+	TLSServerName string   `yaml:"tls_server_name"`
 }
 
 type Security struct {
@@ -412,6 +422,11 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Discovery.ServiceName, "FORGE_DISCOVERY_SERVICE_NAME")
 	overrideString(&cfg.Discovery.AdvertiseIP, "FORGE_DISCOVERY_ADVERTISE_IP")
 	overrideUint64(&cfg.Discovery.AdvertisePort, "FORGE_DISCOVERY_ADVERTISE_PORT")
+	overrideBool(&cfg.Discovery.TLSRequired, "FORGE_NACOS_TLS_REQUIRED")
+	overrideString(&cfg.Discovery.TLSCAFile, "FORGE_NACOS_TLS_CA_FILE")
+	overrideString(&cfg.Discovery.TLSCertFile, "FORGE_NACOS_TLS_CERT_FILE")
+	overrideString(&cfg.Discovery.TLSKeyFile, "FORGE_NACOS_TLS_KEY_FILE")
+	overrideString(&cfg.Discovery.TLSServerName, "FORGE_NACOS_TLS_SERVER_NAME")
 
 	overrideString(&cfg.RemoteConfig.Provider, "FORGE_REMOTE_CONFIG_PROVIDER")
 	overrideCSV(&cfg.RemoteConfig.Servers, "FORGE_NACOS_SERVERS")
@@ -419,6 +434,11 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.RemoteConfig.Group, "FORGE_NACOS_CONFIG_GROUP")
 	overrideString(&cfg.RemoteConfig.DataID, "FORGE_NACOS_CONFIG_DATA_ID")
 	overrideBool(&cfg.RemoteConfig.FailFast, "FORGE_REMOTE_CONFIG_FAIL_FAST")
+	overrideBool(&cfg.RemoteConfig.TLSRequired, "FORGE_NACOS_TLS_REQUIRED")
+	overrideString(&cfg.RemoteConfig.TLSCAFile, "FORGE_NACOS_TLS_CA_FILE")
+	overrideString(&cfg.RemoteConfig.TLSCertFile, "FORGE_NACOS_TLS_CERT_FILE")
+	overrideString(&cfg.RemoteConfig.TLSKeyFile, "FORGE_NACOS_TLS_KEY_FILE")
+	overrideString(&cfg.RemoteConfig.TLSServerName, "FORGE_NACOS_TLS_SERVER_NAME")
 
 	overrideDuration(&cfg.Security.SessionTTL, "FORGE_SESSION_TTL")
 	overrideInt(&cfg.Security.PasswordMinLength, "FORGE_PASSWORD_MIN_LENGTH")

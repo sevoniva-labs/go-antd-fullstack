@@ -31,6 +31,7 @@ config:
   nacosServers: "https://nacos.internal.example:8848"
   nacosGroup: FORGE
   nacosCluster: DEFAULT
+  nacosTLSRequired: "true"
   remoteConfigProvider: nacos
   nacosConfigGroup: FORGE
   nacosConfigDataID: forge-prod.yaml

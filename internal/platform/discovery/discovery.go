@@ -28,6 +28,8 @@ func New(cfg config.Discovery, appName, version, env string) (Registry, error) {
 		cc, servers, err := nacosx.Build(nacosx.ClientSettings{
 			Servers: cfg.Servers, Namespace: cfg.Namespace,
 			Username: cfg.Username, Password: cfg.Password, LogLevel: "warn",
+			TLSRequired: cfg.TLSRequired, TLSCAFile: cfg.TLSCAFile,
+			TLSCertFile: cfg.TLSCertFile, TLSKeyFile: cfg.TLSKeyFile, TLSServerName: cfg.TLSServerName,
 		})
 		if err != nil {
 			return nil, err

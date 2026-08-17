@@ -71,6 +71,11 @@ data:
   FORGE_NACOS_NAMESPACE: {{ .Values.config.nacosNamespace | quote }}
   FORGE_NACOS_GROUP: {{ .Values.config.nacosGroup | quote }}
   FORGE_NACOS_CLUSTER: {{ .Values.config.nacosCluster | quote }}
+  FORGE_NACOS_TLS_REQUIRED: {{ .Values.config.nacosTLSRequired | quote }}
+  FORGE_NACOS_TLS_CA_FILE: {{ .Values.config.nacosTLSCAFile | quote }}
+  FORGE_NACOS_TLS_CERT_FILE: {{ .Values.config.nacosTLSCertFile | quote }}
+  FORGE_NACOS_TLS_KEY_FILE: {{ .Values.config.nacosTLSKeyFile | quote }}
+  FORGE_NACOS_TLS_SERVER_NAME: {{ .Values.config.nacosTLSServerName | quote }}
   FORGE_REMOTE_CONFIG_PROVIDER: {{ .Values.config.remoteConfigProvider | quote }}
   FORGE_NACOS_CONFIG_GROUP: {{ .Values.config.nacosConfigGroup | quote }}
   FORGE_NACOS_CONFIG_DATA_ID: {{ .Values.config.nacosConfigDataID | quote }}

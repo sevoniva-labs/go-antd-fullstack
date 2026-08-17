@@ -36,7 +36,8 @@ storage:
   path_style: true
 discovery:
   provider: nacos
-  servers: ["http://nacos.example.internal:8848"]
+  servers: ["https://nacos.example.internal:8848"]
+  tls_required: true
   namespace: ""
   group: FORGE
   cluster: DEFAULT
@@ -45,7 +46,8 @@ discovery:
   advertise_port: 8080
 remote_config:
   provider: nacos
-  servers: ["http://nacos.example.internal:8848"]
+  servers: ["https://nacos.example.internal:8848"]
+  tls_required: true
   namespace: ""
   group: FORGE
   data_id: forge-prod.yaml
