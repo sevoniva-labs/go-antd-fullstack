@@ -3,43 +3,43 @@ package identity
 import "time"
 
 type Organization struct {
-	ID        string    `json:"id"`
-	Key       string    `json:"org_key"`
-	Name      string    `json:"name"`
-	Status    string    `json:"status"`
-	Description string  `json:"description"`
-	MaxUsers  int       `json:"max_users"`
-	MaxSessions int     `json:"max_active_sessions"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          string    `json:"id"`
+	Key         string    `json:"org_key"`
+	Name        string    `json:"name"`
+	Status      string    `json:"status"`
+	Description string    `json:"description"`
+	MaxUsers    int       `json:"max_users"`
+	MaxSessions int       `json:"max_active_sessions"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type SecurityPolicy struct {
-	PasswordMinLength       int    `json:"password_min_length"`
-	PasswordRequireUpper     bool   `json:"password_require_upper"`
-	PasswordRequireLower     bool   `json:"password_require_lower"`
-	PasswordRequireDigit     bool   `json:"password_require_digit"`
-	PasswordRequireSymbol    bool   `json:"password_require_symbol"`
-	PasswordHistory          int    `json:"password_history"`
-	PasswordMaxAgeDays       int    `json:"password_max_age_days"`
-	LoginMaxFailures         int    `json:"login_max_failures"`
-	LoginLockDurationSeconds int64  `json:"login_lock_duration_seconds"`
-	SessionTTLSeconds        int64  `json:"session_ttl_seconds"`
-	MaxConcurrentSessions    int    `json:"max_active_sessions"`
+	PasswordMinLength        int   `json:"password_min_length"`
+	PasswordRequireUpper     bool  `json:"password_require_upper"`
+	PasswordRequireLower     bool  `json:"password_require_lower"`
+	PasswordRequireDigit     bool  `json:"password_require_digit"`
+	PasswordRequireSymbol    bool  `json:"password_require_symbol"`
+	PasswordHistory          int   `json:"password_history"`
+	PasswordMaxAgeDays       int   `json:"password_max_age_days"`
+	LoginMaxFailures         int   `json:"login_max_failures"`
+	LoginLockDurationSeconds int64 `json:"login_lock_duration_seconds"`
+	SessionTTLSeconds        int64 `json:"session_ttl_seconds"`
+	MaxConcurrentSessions    int   `json:"max_active_sessions"`
 }
 
 const (
-	SecuritySettingPasswordMinLength       = "security.password_min_length"
-	SecuritySettingPasswordRequireUpper    = "security.password_require_upper"
-	SecuritySettingPasswordRequireLower    = "security.password_require_lower"
-	SecuritySettingPasswordRequireDigit    = "security.password_require_digit"
-	SecuritySettingPasswordRequireSymbol   = "security.password_require_symbol"
-	SecuritySettingPasswordHistory         = "security.password_history"
-	SecuritySettingPasswordMaxAgeDays      = "security.password_max_age_days"
-	SecuritySettingLoginMaxFailures        = "security.login_max_failures"
-	SecuritySettingLoginLockDurationSec    = "security.login_lock_duration_seconds"
-	SecuritySettingSessionTTLSeconds       = "security.session_ttl_seconds"
-	SecuritySettingMaxConcurrentSessions   = "security.max_active_sessions"
+	SecuritySettingPasswordMinLength     = "security.password_min_length"
+	SecuritySettingPasswordRequireUpper  = "security.password_require_upper"
+	SecuritySettingPasswordRequireLower  = "security.password_require_lower"
+	SecuritySettingPasswordRequireDigit  = "security.password_require_digit"
+	SecuritySettingPasswordRequireSymbol = "security.password_require_symbol"
+	SecuritySettingPasswordHistory       = "security.password_history"
+	SecuritySettingPasswordMaxAgeDays    = "security.password_max_age_days"
+	SecuritySettingLoginMaxFailures      = "security.login_max_failures"
+	SecuritySettingLoginLockDurationSec  = "security.login_lock_duration_seconds"
+	SecuritySettingSessionTTLSeconds     = "security.session_ttl_seconds"
+	SecuritySettingMaxConcurrentSessions = "security.max_active_sessions"
 )
 
 type Permission struct {
