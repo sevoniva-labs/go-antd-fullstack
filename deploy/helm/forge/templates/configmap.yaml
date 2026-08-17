@@ -1,3 +1,9 @@
+{{- if and .Values.config.webCSPWujieEnabled (empty .Values.config.webCSPWujieApprovalRef) -}}
+{{- fail "config.webCSPWujieEnabled requires config.webCSPWujieApprovalRef" -}}
+{{- end -}}
+{{- if and (not .Values.config.webCSPWujieEnabled) (not (empty .Values.config.webCSPWujieApprovalRef)) -}}
+{{- fail "config.webCSPWujieApprovalRef requires config.webCSPWujieEnabled=true" -}}
+{{- end -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,6 +17,9 @@ data:
   FORGE_ZONE: {{ .Values.config.zone | quote }}
   FORGE_PUBLIC_URL: {{ .Values.config.publicURL | quote }}
   FORGE_WEB_DIR: {{ .Values.config.webDir | quote }}
+  FORGE_WEB_CSP_FRAME_SOURCES: {{ .Values.config.webCSPFrameSources | quote }}
+  FORGE_WEB_CSP_WUJIE_ENABLED: {{ .Values.config.webCSPWujieEnabled | quote }}
+  FORGE_WEB_CSP_WUJIE_APPROVAL_REF: {{ .Values.config.webCSPWujieApprovalRef | quote }}
 
   FORGE_DATABASE_PROVIDER: {{ .Values.config.databaseProvider | quote }}
   FORGE_DATABASE_MAX_OPEN_CONNS: {{ .Values.config.databaseMaxOpenConns | quote }}

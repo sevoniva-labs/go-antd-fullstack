@@ -133,6 +133,11 @@ config:
   zone: zone-a
   publicURL: https://forge.example.com
   webDir: /app/web
+  # Comma-separated exact iframe origins. Production origins must use HTTPS.
+  webCSPFrameSources: ""
+  # Wujie relaxes inline script/style CSP and is disabled unless separately approved.
+  webCSPWujieEnabled: false
+  webCSPWujieApprovalRef: ""
 
   databaseProvider: postgres
   databaseMaxOpenConns: "50"

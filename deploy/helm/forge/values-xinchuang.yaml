@@ -43,6 +43,9 @@ image:
 
 config:
   environment: production
+  webCSPFrameSources: ""
+  webCSPWujieEnabled: false
+  webCSPWujieApprovalRef: ""
   databaseProvider: oceanbase
   cacheProvider: redis
   redisMode: sentinel
