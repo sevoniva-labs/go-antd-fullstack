@@ -21,6 +21,7 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
 const OperationPlatformServiceCreatePosition = "/forge.v1.PlatformService/CreatePosition"
+const OperationPlatformServiceCreateTemporaryRoleGrant = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
 const OperationPlatformServiceCreateUser = "/forge.v1.PlatformService/CreateUser"
 const OperationPlatformServiceCreateUserGroup = "/forge.v1.PlatformService/CreateUserGroup"
 const OperationPlatformServiceExportAuditLogs = "/forge.v1.PlatformService/ExportAuditLogs"
@@ -32,12 +33,14 @@ const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListP
 const OperationPlatformServiceListPositions = "/forge.v1.PlatformService/ListPositions"
 const OperationPlatformServiceListRoles = "/forge.v1.PlatformService/ListRoles"
 const OperationPlatformServiceListSessions = "/forge.v1.PlatformService/ListSessions"
+const OperationPlatformServiceListTemporaryRoleGrants = "/forge.v1.PlatformService/ListTemporaryRoleGrants"
 const OperationPlatformServiceListUserAssignments = "/forge.v1.PlatformService/ListUserAssignments"
 const OperationPlatformServiceListUserGroups = "/forge.v1.PlatformService/ListUserGroups"
 const OperationPlatformServiceListUsers = "/forge.v1.PlatformService/ListUsers"
 const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformService/ReplaceUserAssignments"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
+const OperationPlatformServiceRevokeTemporaryRoleGrant = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
 const OperationPlatformServiceUnlockUser = "/forge.v1.PlatformService/UnlockUser"
 const OperationPlatformServiceUpdateDepartment = "/forge.v1.PlatformService/UpdateDepartment"
 const OperationPlatformServiceUpdateOrganization = "/forge.v1.PlatformService/UpdateOrganization"
@@ -54,6 +57,7 @@ const OperationPlatformServiceUpdateUserStatus = "/forge.v1.PlatformService/Upda
 type PlatformServiceHTTPServer interface {
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
+	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	CreateUserGroup(context.Context, *CreateUserGroupRequest) (*CreateUserGroupResponse, error)
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
@@ -65,12 +69,14 @@ type PlatformServiceHTTPServer interface {
 	ListPositions(context.Context, *ListPositionsRequest) (*ListPositionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	ListTemporaryRoleGrants(context.Context, *ListTemporaryRoleGrantsRequest) (*ListTemporaryRoleGrantsResponse, error)
 	ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error)
 	ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
+	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
 	UnlockUser(context.Context, *UnlockUserRequest) (*UnlockUserResponse, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*UpdateOrganizationResponse, error)
@@ -118,6 +124,9 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.DELETE("/api/v1/admin/sessions/{session_id}", _PlatformService_RevokeSession0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/audit-logs", _PlatformService_ListAuditLogs0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/audit-logs/export", _PlatformService_ExportAuditLogs0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/temporary-role-grants", _PlatformService_ListTemporaryRoleGrants0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/temporary-role-grants", _PlatformService_CreateTemporaryRoleGrant0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/temporary-role-grants/{grant_id}:revoke", _PlatformService_RevokeTemporaryRoleGrant0_HTTP_Handler(srv))
 }
 
 func _PlatformService_ListUsers0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
@@ -805,9 +814,76 @@ func _PlatformService_ExportAuditLogs0_HTTP_Handler(srv PlatformServiceHTTPServe
 	}
 }
 
+func _PlatformService_ListTemporaryRoleGrants0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListTemporaryRoleGrantsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListTemporaryRoleGrants)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListTemporaryRoleGrants(ctx, req.(*ListTemporaryRoleGrantsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListTemporaryRoleGrantsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_CreateTemporaryRoleGrant0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateTemporaryRoleGrantRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceCreateTemporaryRoleGrant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateTemporaryRoleGrant(ctx, req.(*CreateTemporaryRoleGrantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateTemporaryRoleGrantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_RevokeTemporaryRoleGrant0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RevokeTemporaryRoleGrantRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceRevokeTemporaryRoleGrant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RevokeTemporaryRoleGrant(ctx, req.(*RevokeTemporaryRoleGrantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RevokeTemporaryRoleGrantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PlatformServiceHTTPClient interface {
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
+	CreateTemporaryRoleGrant(ctx context.Context, req *CreateTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *CreateTemporaryRoleGrantResponse, err error)
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
 	CreateUserGroup(ctx context.Context, req *CreateUserGroupRequest, opts ...http.CallOption) (rsp *CreateUserGroupResponse, err error)
 	ExportAuditLogs(ctx context.Context, req *ExportAuditLogsRequest, opts ...http.CallOption) (rsp *ExportAuditLogsResponse, err error)
@@ -819,12 +895,14 @@ type PlatformServiceHTTPClient interface {
 	ListPositions(ctx context.Context, req *ListPositionsRequest, opts ...http.CallOption) (rsp *ListPositionsResponse, err error)
 	ListRoles(ctx context.Context, req *ListRolesRequest, opts ...http.CallOption) (rsp *ListRolesResponse, err error)
 	ListSessions(ctx context.Context, req *ListSessionsRequest, opts ...http.CallOption) (rsp *ListSessionsResponse, err error)
+	ListTemporaryRoleGrants(ctx context.Context, req *ListTemporaryRoleGrantsRequest, opts ...http.CallOption) (rsp *ListTemporaryRoleGrantsResponse, err error)
 	ListUserAssignments(ctx context.Context, req *ListUserAssignmentsRequest, opts ...http.CallOption) (rsp *ListUserAssignmentsResponse, err error)
 	ListUserGroups(ctx context.Context, req *ListUserGroupsRequest, opts ...http.CallOption) (rsp *ListUserGroupsResponse, err error)
 	ListUsers(ctx context.Context, req *ListUsersRequest, opts ...http.CallOption) (rsp *ListUsersResponse, err error)
 	ReplaceUserAssignments(ctx context.Context, req *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (rsp *ReplaceUserAssignmentsResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
+	RevokeTemporaryRoleGrant(ctx context.Context, req *RevokeTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *RevokeTemporaryRoleGrantResponse, err error)
 	UnlockUser(ctx context.Context, req *UnlockUserRequest, opts ...http.CallOption) (rsp *UnlockUserResponse, err error)
 	UpdateDepartment(ctx context.Context, req *UpdateDepartmentRequest, opts ...http.CallOption) (rsp *UpdateDepartmentResponse, err error)
 	UpdateOrganization(ctx context.Context, req *UpdateOrganizationRequest, opts ...http.CallOption) (rsp *UpdateOrganizationResponse, err error)
@@ -865,6 +943,19 @@ func (c *PlatformServiceHTTPClientImpl) CreatePosition(ctx context.Context, in *
 	pattern := "/api/v1/admin/positions"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceCreatePosition))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) CreateTemporaryRoleGrant(ctx context.Context, in *CreateTemporaryRoleGrantRequest, opts ...http.CallOption) (*CreateTemporaryRoleGrantResponse, error) {
+	var out CreateTemporaryRoleGrantResponse
+	pattern := "/api/v1/admin/temporary-role-grants"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceCreateTemporaryRoleGrant))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -1016,6 +1107,19 @@ func (c *PlatformServiceHTTPClientImpl) ListSessions(ctx context.Context, in *Li
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) ListTemporaryRoleGrants(ctx context.Context, in *ListTemporaryRoleGrantsRequest, opts ...http.CallOption) (*ListTemporaryRoleGrantsResponse, error) {
+	var out ListTemporaryRoleGrantsResponse
+	pattern := "/api/v1/admin/temporary-role-grants"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListTemporaryRoleGrants))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListUserAssignments(ctx context.Context, in *ListUserAssignmentsRequest, opts ...http.CallOption) (*ListUserAssignmentsResponse, error) {
 	var out ListUserAssignmentsResponse
 	pattern := "/api/v1/admin/users/{user_id}/assignments"
@@ -1088,6 +1192,19 @@ func (c *PlatformServiceHTTPClientImpl) RevokeSession(ctx context.Context, in *R
 	opts = append(opts, http.Operation(OperationPlatformServiceRevokeSession))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) RevokeTemporaryRoleGrant(ctx context.Context, in *RevokeTemporaryRoleGrantRequest, opts ...http.CallOption) (*RevokeTemporaryRoleGrantResponse, error) {
+	var out RevokeTemporaryRoleGrantResponse
+	pattern := "/api/v1/admin/temporary-role-grants/{grant_id}:revoke"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceRevokeTemporaryRoleGrant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
