@@ -155,6 +155,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		SessionTTL:    cfg.Security.SessionTTL,
 		MaxFailures:   cfg.Security.LoginMaxFailures,
 		LockDuration:  cfg.Security.LoginLockDuration,
+		Crypto:        crypt,
 	})
 	orgKey := env("FORGE_BOOTSTRAP_ORG_KEY", "default")
 	orgName := env("FORGE_BOOTSTRAP_ORG_NAME", cfg.App.Name)

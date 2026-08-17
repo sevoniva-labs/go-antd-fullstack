@@ -861,6 +861,83 @@ paths:
             security:
                 - SessionCookie: []
                 - BearerAuth: []
+    /api/v1/mfa:
+        get:
+            tags:
+                - IdentityService
+            operationId: IdentityService_GetMFAStatus
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.GetMFAStatusResponse'
+            security:
+                - SessionCookie: []
+    /api/v1/mfa/totp/disable:
+        post:
+            tags:
+                - IdentityService
+            operationId: IdentityService_DisableMFA
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.DisableMFARequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.DisableMFAResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/mfa/totp/enrollment:
+        post:
+            tags:
+                - IdentityService
+            operationId: IdentityService_BeginMFAEnrollment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.BeginMFAEnrollmentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.BeginMFAEnrollmentResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/mfa/totp/enrollment/confirmation:
+        post:
+            tags:
+                - IdentityService
+            operationId: IdentityService_ConfirmMFAEnrollment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.ConfirmMFAEnrollmentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ConfirmMFAEnrollmentResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
     /api/v1/system/health:
         get:
             tags:
@@ -955,6 +1032,18 @@ components:
                     type: string
                 detailsJson:
                     type: string
+        forge.v1.BeginMFAEnrollmentRequest:
+            type: object
+            properties:
+                currentPassword:
+                    type: string
+        forge.v1.BeginMFAEnrollmentResponse:
+            type: object
+            properties:
+                secret:
+                    type: string
+                provisioningUri:
+                    type: string
         forge.v1.ChangePasswordRequest:
             type: object
             properties:
@@ -965,6 +1054,18 @@ components:
         forge.v1.ChangePasswordResponse:
             type: object
             properties: {}
+        forge.v1.ConfirmMFAEnrollmentRequest:
+            type: object
+            properties:
+                code:
+                    type: string
+        forge.v1.ConfirmMFAEnrollmentResponse:
+            type: object
+            properties:
+                recoveryCodes:
+                    type: array
+                    items:
+                        type: string
         forge.v1.CreateApiTokenRequest:
             type: object
             properties:
@@ -1088,6 +1189,18 @@ components:
                     type: string
                 message:
                     type: string
+        forge.v1.DisableMFARequest:
+            type: object
+            properties:
+                currentPassword:
+                    type: string
+                code:
+                    type: string
+                recoveryCode:
+                    type: string
+        forge.v1.DisableMFAResponse:
+            type: object
+            properties: {}
         forge.v1.EffectiveDataScope:
             type: object
             properties:
@@ -1114,6 +1227,11 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.GetMFAStatusResponse:
+            type: object
+            properties:
+                enabled:
+                    type: boolean
         forge.v1.GetOrganizationResponse:
             type: object
             properties:
@@ -1234,6 +1352,10 @@ components:
                 loginName:
                     type: string
                 password:
+                    type: string
+                mfaCode:
+                    type: string
+                recoveryCode:
                     type: string
         forge.v1.LoginResponse:
             type: object

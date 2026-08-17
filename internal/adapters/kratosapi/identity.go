@@ -62,8 +62,8 @@ func (s *IdentityService) Login(ctx context.Context, req *forgev1.LoginRequest) 
 	var loginErr error
 	event.OrganizationID = organizationID
 	txErr := s.db.WithinTx(ctx, func(txCtx context.Context) error {
-		principal, sessionToken, csrfToken, expiresAt, loginErr = s.identity.Login(
-			txCtx, organizationID, req.GetLoginName(), req.GetPassword(), event.ClientIP, requestHeader(ctx, "User-Agent", 512),
+		principal, sessionToken, csrfToken, expiresAt, loginErr = s.identity.LoginWithMFA(
+			txCtx, organizationID, req.GetLoginName(), req.GetPassword(), req.GetMfaCode(), req.GetRecoveryCode(), event.ClientIP, requestHeader(ctx, "User-Agent", 512),
 		)
 		if loginErr != nil && !expectedLoginFailure(loginErr) {
 			return loginErr
@@ -80,6 +80,12 @@ func (s *IdentityService) Login(ctx context.Context, req *forgev1.LoginRequest) 
 		return nil, internalError(txErr)
 	}
 	if loginErr != nil {
+		if errors.Is(loginErr, appidentity.ErrMFARequired) {
+			return nil, kerrors.New(http.StatusPreconditionRequired, "MFA_REQUIRED", "multi-factor authentication is required")
+		}
+		if errors.Is(loginErr, appidentity.ErrInvalidMFA) {
+			return nil, kerrors.Unauthorized("INVALID_MFA", "invalid multi-factor authentication code")
+		}
 		if errors.Is(loginErr, appidentity.ErrLocked) {
 			return nil, kerrors.New(http.StatusLocked, "ACCOUNT_LOCKED", "account is locked")
 		}
@@ -87,6 +93,75 @@ func (s *IdentityService) Login(ctx context.Context, req *forgev1.LoginRequest) 
 	}
 	s.setLoginCookies(ctx, sessionToken, csrfToken, expiresAt)
 	return &forgev1.LoginResponse{User: principalUser(principal), CsrfToken: csrfToken}, nil
+}
+
+func (s *IdentityService) GetMFAStatus(ctx context.Context, _ *forgev1.GetMFAStatusRequest) (*forgev1.GetMFAStatusResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	enabled, err := s.identity.MFAEnabled(ctx, principal)
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.GetMFAStatusResponse{Enabled: enabled}, nil
+}
+
+func (s *IdentityService) BeginMFAEnrollment(ctx context.Context, req *forgev1.BeginMFAEnrollmentRequest) (*forgev1.BeginMFAEnrollmentResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "auth.mfa.enrollment.begin", "user", principal.UserID, nil)
+	var enrollment domain.MFAEnrollment
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var enrollErr error
+		enrollment, enrollErr = s.identity.BeginMFAEnrollment(txCtx, principal, req.GetCurrentPassword())
+		return enrollErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.BeginMFAEnrollmentResponse{Secret: enrollment.Secret, ProvisioningUri: enrollment.URL}, nil
+}
+
+func (s *IdentityService) ConfirmMFAEnrollment(ctx context.Context, req *forgev1.ConfirmMFAEnrollmentRequest) (*forgev1.ConfirmMFAEnrollmentResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.allow(ctx, "mfa-confirm:user:"+principal.UserID, 5, 5*time.Minute, "300"); err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "auth.mfa.enrollment.confirm", "user", principal.UserID, nil)
+	var recoveryCodes []string
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var confirmErr error
+		recoveryCodes, confirmErr = s.identity.ConfirmMFAEnrollment(txCtx, principal, req.GetCode())
+		return confirmErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.ConfirmMFAEnrollmentResponse{RecoveryCodes: recoveryCodes}, nil
+}
+
+func (s *IdentityService) DisableMFA(ctx context.Context, req *forgev1.DisableMFARequest) (*forgev1.DisableMFAResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.allow(ctx, "mfa-disable:user:"+principal.UserID, 5, 15*time.Minute, "900"); err != nil {
+		return nil, err
+	}
+	event := newAuditEvent(ctx, principal, "auth.mfa.disable", "user", principal.UserID, nil)
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		return s.identity.DisableMFA(txCtx, principal, req.GetCurrentPassword(), req.GetCode(), req.GetRecoveryCode())
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.DisableMFAResponse{}, nil
 }
 
 func (s *IdentityService) Logout(ctx context.Context, _ *forgev1.LogoutRequest) (*forgev1.LogoutResponse, error) {
@@ -313,5 +388,5 @@ func parseSameSite(value string) http.SameSite {
 }
 
 func expectedLoginFailure(err error) bool {
-	return errors.Is(err, appidentity.ErrInvalidCredentials) || errors.Is(err, appidentity.ErrLocked) || errors.Is(err, appidentity.ErrDisabled)
+	return errors.Is(err, appidentity.ErrInvalidCredentials) || errors.Is(err, appidentity.ErrLocked) || errors.Is(err, appidentity.ErrDisabled) || errors.Is(err, appidentity.ErrMFARequired) || errors.Is(err, appidentity.ErrInvalidMFA)
 }

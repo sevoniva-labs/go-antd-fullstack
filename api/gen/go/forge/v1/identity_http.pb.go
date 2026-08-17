@@ -19,18 +19,26 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationIdentityServiceBeginMFAEnrollment = "/forge.v1.IdentityService/BeginMFAEnrollment"
 const OperationIdentityServiceChangePassword = "/forge.v1.IdentityService/ChangePassword"
+const OperationIdentityServiceConfirmMFAEnrollment = "/forge.v1.IdentityService/ConfirmMFAEnrollment"
 const OperationIdentityServiceCreateApiToken = "/forge.v1.IdentityService/CreateApiToken"
+const OperationIdentityServiceDisableMFA = "/forge.v1.IdentityService/DisableMFA"
 const OperationIdentityServiceGetCurrentUser = "/forge.v1.IdentityService/GetCurrentUser"
+const OperationIdentityServiceGetMFAStatus = "/forge.v1.IdentityService/GetMFAStatus"
 const OperationIdentityServiceListApiTokens = "/forge.v1.IdentityService/ListApiTokens"
 const OperationIdentityServiceLogin = "/forge.v1.IdentityService/Login"
 const OperationIdentityServiceLogout = "/forge.v1.IdentityService/Logout"
 const OperationIdentityServiceRevokeApiToken = "/forge.v1.IdentityService/RevokeApiToken"
 
 type IdentityServiceHTTPServer interface {
+	BeginMFAEnrollment(context.Context, *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
+	ConfirmMFAEnrollment(context.Context, *ConfirmMFAEnrollmentRequest) (*ConfirmMFAEnrollmentResponse, error)
 	CreateApiToken(context.Context, *CreateApiTokenRequest) (*CreateApiTokenResponse, error)
+	DisableMFA(context.Context, *DisableMFARequest) (*DisableMFAResponse, error)
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
+	GetMFAStatus(context.Context, *GetMFAStatusRequest) (*GetMFAStatusResponse, error)
 	ListApiTokens(context.Context, *ListApiTokensRequest) (*ListApiTokensResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
@@ -43,6 +51,10 @@ func RegisterIdentityServiceHTTPServer(s *http.Server, srv IdentityServiceHTTPSe
 	r.POST("/api/v1/auth/logout", _IdentityService_Logout0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/auth/password", _IdentityService_ChangePassword0_HTTP_Handler(srv))
 	r.GET("/api/v1/me", _IdentityService_GetCurrentUser0_HTTP_Handler(srv))
+	r.GET("/api/v1/mfa", _IdentityService_GetMFAStatus0_HTTP_Handler(srv))
+	r.POST("/api/v1/mfa/totp/enrollment", _IdentityService_BeginMFAEnrollment0_HTTP_Handler(srv))
+	r.POST("/api/v1/mfa/totp/enrollment/confirmation", _IdentityService_ConfirmMFAEnrollment0_HTTP_Handler(srv))
+	r.POST("/api/v1/mfa/totp/disable", _IdentityService_DisableMFA0_HTTP_Handler(srv))
 	r.GET("/api/v1/api-tokens", _IdentityService_ListApiTokens0_HTTP_Handler(srv))
 	r.POST("/api/v1/api-tokens", _IdentityService_CreateApiToken0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/api-tokens/{token_id}", _IdentityService_RevokeApiToken0_HTTP_Handler(srv))
@@ -133,6 +145,91 @@ func _IdentityService_GetCurrentUser0_HTTP_Handler(srv IdentityServiceHTTPServer
 	}
 }
 
+func _IdentityService_GetMFAStatus0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMFAStatusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceGetMFAStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMFAStatus(ctx, req.(*GetMFAStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMFAStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_BeginMFAEnrollment0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in BeginMFAEnrollmentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceBeginMFAEnrollment)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.BeginMFAEnrollment(ctx, req.(*BeginMFAEnrollmentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*BeginMFAEnrollmentResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_ConfirmMFAEnrollment0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ConfirmMFAEnrollmentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceConfirmMFAEnrollment)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ConfirmMFAEnrollment(ctx, req.(*ConfirmMFAEnrollmentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ConfirmMFAEnrollmentResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_DisableMFA0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DisableMFARequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceDisableMFA)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DisableMFA(ctx, req.(*DisableMFARequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DisableMFAResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _IdentityService_ListApiTokens0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ListApiTokensRequest
@@ -197,9 +294,13 @@ func _IdentityService_RevokeApiToken0_HTTP_Handler(srv IdentityServiceHTTPServer
 }
 
 type IdentityServiceHTTPClient interface {
+	BeginMFAEnrollment(ctx context.Context, req *BeginMFAEnrollmentRequest, opts ...http.CallOption) (rsp *BeginMFAEnrollmentResponse, err error)
 	ChangePassword(ctx context.Context, req *ChangePasswordRequest, opts ...http.CallOption) (rsp *ChangePasswordResponse, err error)
+	ConfirmMFAEnrollment(ctx context.Context, req *ConfirmMFAEnrollmentRequest, opts ...http.CallOption) (rsp *ConfirmMFAEnrollmentResponse, err error)
 	CreateApiToken(ctx context.Context, req *CreateApiTokenRequest, opts ...http.CallOption) (rsp *CreateApiTokenResponse, err error)
+	DisableMFA(ctx context.Context, req *DisableMFARequest, opts ...http.CallOption) (rsp *DisableMFAResponse, err error)
 	GetCurrentUser(ctx context.Context, req *GetCurrentUserRequest, opts ...http.CallOption) (rsp *GetCurrentUserResponse, err error)
+	GetMFAStatus(ctx context.Context, req *GetMFAStatusRequest, opts ...http.CallOption) (rsp *GetMFAStatusResponse, err error)
 	ListApiTokens(ctx context.Context, req *ListApiTokensRequest, opts ...http.CallOption) (rsp *ListApiTokensResponse, err error)
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
@@ -214,6 +315,19 @@ func NewIdentityServiceHTTPClient(client *http.Client) IdentityServiceHTTPClient
 	return &IdentityServiceHTTPClientImpl{client}
 }
 
+func (c *IdentityServiceHTTPClientImpl) BeginMFAEnrollment(ctx context.Context, in *BeginMFAEnrollmentRequest, opts ...http.CallOption) (*BeginMFAEnrollmentResponse, error) {
+	var out BeginMFAEnrollmentResponse
+	pattern := "/api/v1/mfa/totp/enrollment"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationIdentityServiceBeginMFAEnrollment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *IdentityServiceHTTPClientImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...http.CallOption) (*ChangePasswordResponse, error) {
 	var out ChangePasswordResponse
 	pattern := "/api/v1/auth/password"
@@ -221,6 +335,19 @@ func (c *IdentityServiceHTTPClientImpl) ChangePassword(ctx context.Context, in *
 	opts = append(opts, http.Operation(OperationIdentityServiceChangePassword))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *IdentityServiceHTTPClientImpl) ConfirmMFAEnrollment(ctx context.Context, in *ConfirmMFAEnrollmentRequest, opts ...http.CallOption) (*ConfirmMFAEnrollmentResponse, error) {
+	var out ConfirmMFAEnrollmentResponse
+	pattern := "/api/v1/mfa/totp/enrollment/confirmation"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationIdentityServiceConfirmMFAEnrollment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -240,11 +367,37 @@ func (c *IdentityServiceHTTPClientImpl) CreateApiToken(ctx context.Context, in *
 	return &out, nil
 }
 
+func (c *IdentityServiceHTTPClientImpl) DisableMFA(ctx context.Context, in *DisableMFARequest, opts ...http.CallOption) (*DisableMFAResponse, error) {
+	var out DisableMFAResponse
+	pattern := "/api/v1/mfa/totp/disable"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationIdentityServiceDisableMFA))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *IdentityServiceHTTPClientImpl) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...http.CallOption) (*GetCurrentUserResponse, error) {
 	var out GetCurrentUserResponse
 	pattern := "/api/v1/me"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationIdentityServiceGetCurrentUser))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *IdentityServiceHTTPClientImpl) GetMFAStatus(ctx context.Context, in *GetMFAStatusRequest, opts ...http.CallOption) (*GetMFAStatusResponse, error) {
+	var out GetMFAStatusResponse
+	pattern := "/api/v1/mfa"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationIdentityServiceGetMFAStatus))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

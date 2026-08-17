@@ -18,6 +18,7 @@ type IdentityRepo struct{ db *database.DB }
 
 var ErrLastSystemAdmin = errors.New("cannot remove or disable the last active system administrator")
 var ErrPasswordStateChanged = errors.New("password state changed concurrently")
+var ErrMFAAlreadyEnabled = errors.New("multi-factor authentication is already enabled")
 
 func NewIdentityRepo(db *database.DB) *IdentityRepo { return &IdentityRepo{db: db} }
 
@@ -1361,4 +1362,100 @@ func ensurePasswordState(expected, actual string) error {
 		return ErrPasswordStateChanged
 	}
 	return nil
+}
+
+func (r *IdentityRepo) MFAEnabled(ctx context.Context, userID string) (bool, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM user_mfa_factors WHERE user_id=? AND status='ACTIVE'`), userID).Scan(&count)
+	return count == 1, err
+}
+
+func (r *IdentityRepo) ActiveMFAFactor(ctx context.Context, userID string) (identity.MFAFactor, error) {
+	return r.mfaFactor(ctx, userID, "ACTIVE")
+}
+
+func (r *IdentityRepo) PendingMFAFactor(ctx context.Context, userID string) (identity.MFAFactor, error) {
+	factor, err := r.mfaFactor(ctx, userID, "PENDING")
+	if err == nil && !factor.PendingExpiresAt.After(time.Now().UTC()) {
+		return identity.MFAFactor{}, sql.ErrNoRows
+	}
+	return factor, err
+}
+
+func (r *IdentityRepo) mfaFactor(ctx context.Context, userID, status string) (identity.MFAFactor, error) {
+	var factor identity.MFAFactor
+	var confirmed sql.NullTime
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT user_id,status,secret_ciphertext,key_version,pending_expires_at,confirmed_at FROM user_mfa_factors WHERE user_id=? AND status=?`), userID, status).Scan(
+		&factor.UserID, &factor.Status, &factor.SecretCiphertext, &factor.KeyVersion, &factor.PendingExpiresAt, &confirmed,
+	)
+	if confirmed.Valid {
+		value := confirmed.Time
+		factor.ConfirmedAt = &value
+	}
+	return factor, err
+}
+
+func (r *IdentityRepo) SavePendingMFAFactor(ctx context.Context, userID, ciphertext, keyVersion string, expiresAt time.Time) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		var status string
+		err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT status FROM user_mfa_factors WHERE user_id=? FOR UPDATE`), userID).Scan(&status)
+		switch {
+		case err == nil && status == "ACTIVE":
+			return ErrMFAAlreadyEnabled
+		case err == nil:
+			_, err = tx.ExecContext(ctx, r.db.Rebind(`UPDATE user_mfa_factors SET status='PENDING',secret_ciphertext=?,key_version=?,pending_expires_at=?,confirmed_at=NULL,updated_at=? WHERE user_id=?`), ciphertext, keyVersion, expiresAt, time.Now().UTC(), userID)
+			return err
+		case !errors.Is(err, sql.ErrNoRows):
+			return err
+		default:
+			now := time.Now().UTC()
+			_, err = tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO user_mfa_factors(user_id,status,secret_ciphertext,key_version,pending_expires_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?)`), userID, "PENDING", ciphertext, keyVersion, expiresAt, now, now)
+			return err
+		}
+	})
+}
+
+func (r *IdentityRepo) ActivateMFAFactor(ctx context.Context, userID string, recoveryCodeHashes []string) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		now := time.Now().UTC()
+		result, err := tx.ExecContext(ctx, r.db.Rebind(`UPDATE user_mfa_factors SET status='ACTIVE',confirmed_at=?,updated_at=? WHERE user_id=? AND status='PENDING' AND pending_expires_at>?`), now, now, userID, now)
+		if err != nil {
+			return err
+		}
+		count, err := result.RowsAffected()
+		if err != nil || count != 1 {
+			if err != nil {
+				return err
+			}
+			return sql.ErrNoRows
+		}
+		if _, err = tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM mfa_recovery_codes WHERE user_id=?`), userID); err != nil {
+			return err
+		}
+		for _, hash := range recoveryCodeHashes {
+			if _, err = tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO mfa_recovery_codes(id,user_id,code_hash,created_at) VALUES(?,?,?,?)`), uuid.NewString(), userID, hash, now); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (r *IdentityRepo) ConsumeMFARecoveryCode(ctx context.Context, userID, hash string) (bool, error) {
+	result, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE mfa_recovery_codes SET used_at=? WHERE user_id=? AND code_hash=? AND used_at IS NULL`), time.Now().UTC(), userID, hash)
+	if err != nil {
+		return false, err
+	}
+	count, err := result.RowsAffected()
+	return count == 1, err
+}
+
+func (r *IdentityRepo) DeleteMFAAndOtherSessions(ctx context.Context, userID, currentSessionID string) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM user_mfa_factors WHERE user_id=?`), userID); err != nil {
+			return err
+		}
+		_, err := tx.ExecContext(ctx, r.db.Rebind(`DELETE FROM sessions WHERE user_id=? AND id<>?`), userID, currentSessionID)
+		return err
+	})
 }

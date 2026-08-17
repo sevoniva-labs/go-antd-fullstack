@@ -39,7 +39,7 @@
 | Identity | Browser Session | Built-in | Server-side Session + CSRF |
 | Identity | API Token | Built-in | machine identity, hash-at-rest, scopes |
 | Authorization | Permission RBAC | Built-in | 组织隔离角色 + 三员基线 + 可扩展 permission |
-| MFA | TOTP utility | Built-in primitive | 可供业务接入；默认登录流未强制 MFA |
+| MFA | TOTP + recovery codes | Built-in login integration | 秘钥由标准/国密提供者加密；已启用账号登录时强制校验 |
 | Feature | DB feature flags | Built-in | 环境/组织扩展可继续加 |
 | Commercial | Offline license verifier | Built-in extension | Ed25519 claims primitive；业务 entitlement 自定义 |
 

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListUserAssignmentsData, PlatformServiceListUserAssignmentsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceReplaceUserAssignmentsData, PlatformServiceReplaceUserAssignmentsResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRoleDataScopeData, PlatformServiceUpdateRoleDataScopeResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
+import type { IdentityServiceBeginMfaEnrollmentData, IdentityServiceBeginMfaEnrollmentResponses, IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceConfirmMfaEnrollmentData, IdentityServiceConfirmMfaEnrollmentResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceDisableMfaData, IdentityServiceDisableMfaResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceGetMfaStatusData, IdentityServiceGetMfaStatusResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListUserAssignmentsData, PlatformServiceListUserAssignmentsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceReplaceUserAssignmentsData, PlatformServiceReplaceUserAssignmentsResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRoleDataScopeData, PlatformServiceUpdateRoleDataScopeResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -568,6 +568,58 @@ export const identityServiceGetCurrentUser = <ThrowOnError extends boolean = fal
         }, { scheme: 'bearer', type: 'http' }],
     url: '/api/v1/me',
     ...options
+});
+
+export const identityServiceGetMfaStatus = <ThrowOnError extends boolean = false>(options?: Options<IdentityServiceGetMfaStatusData, ThrowOnError>): RequestResult<IdentityServiceGetMfaStatusResponses, unknown, ThrowOnError> => (options?.client ?? client).get<IdentityServiceGetMfaStatusResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }],
+    url: '/api/v1/mfa',
+    ...options
+});
+
+export const identityServiceDisableMfa = <ThrowOnError extends boolean = false>(options: Options<IdentityServiceDisableMfaData, ThrowOnError>): RequestResult<IdentityServiceDisableMfaResponses, unknown, ThrowOnError> => (options.client ?? client).post<IdentityServiceDisableMfaResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }, { name: 'X-CSRF-Token', type: 'apiKey' }],
+    url: '/api/v1/mfa/totp/disable',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const identityServiceBeginMfaEnrollment = <ThrowOnError extends boolean = false>(options: Options<IdentityServiceBeginMfaEnrollmentData, ThrowOnError>): RequestResult<IdentityServiceBeginMfaEnrollmentResponses, unknown, ThrowOnError> => (options.client ?? client).post<IdentityServiceBeginMfaEnrollmentResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }, { name: 'X-CSRF-Token', type: 'apiKey' }],
+    url: '/api/v1/mfa/totp/enrollment',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const identityServiceConfirmMfaEnrollment = <ThrowOnError extends boolean = false>(options: Options<IdentityServiceConfirmMfaEnrollmentData, ThrowOnError>): RequestResult<IdentityServiceConfirmMfaEnrollmentResponses, unknown, ThrowOnError> => (options.client ?? client).post<IdentityServiceConfirmMfaEnrollmentResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }, { name: 'X-CSRF-Token', type: 'apiKey' }],
+    url: '/api/v1/mfa/totp/enrollment/confirmation',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**

@@ -29,6 +29,15 @@ export type ForgeV1AuditEvent = {
     detailsJson?: string;
 };
 
+export type ForgeV1BeginMfaEnrollmentRequest = {
+    currentPassword?: string;
+};
+
+export type ForgeV1BeginMfaEnrollmentResponse = {
+    secret?: string;
+    provisioningUri?: string;
+};
+
 export type ForgeV1ChangePasswordRequest = {
     currentPassword?: string;
     newPassword?: string;
@@ -36,6 +45,14 @@ export type ForgeV1ChangePasswordRequest = {
 
 export type ForgeV1ChangePasswordResponse = {
     [key: string]: unknown;
+};
+
+export type ForgeV1ConfirmMfaEnrollmentRequest = {
+    code?: string;
+};
+
+export type ForgeV1ConfirmMfaEnrollmentResponse = {
+    recoveryCodes?: Array<string>;
 };
 
 export type ForgeV1CreateApiTokenRequest = {
@@ -114,6 +131,16 @@ export type ForgeV1DependencyStatus = {
     message?: string;
 };
 
+export type ForgeV1DisableMfaRequest = {
+    currentPassword?: string;
+    code?: string;
+    recoveryCode?: string;
+};
+
+export type ForgeV1DisableMfaResponse = {
+    [key: string]: unknown;
+};
+
 export type ForgeV1EffectiveDataScope = {
     organizationWide?: boolean;
     self?: boolean;
@@ -128,6 +155,10 @@ export type ForgeV1ExportAuditLogsResponse = {
 
 export type ForgeV1GetCurrentUserResponse = {
     user?: ForgeV1User;
+};
+
+export type ForgeV1GetMfaStatusResponse = {
+    enabled?: boolean;
 };
 
 export type ForgeV1GetOrganizationResponse = {
@@ -206,6 +237,8 @@ export type ForgeV1LoginRequest = {
     organization?: string;
     loginName?: string;
     password?: string;
+    mfaCode?: string;
+    recoveryCode?: string;
 };
 
 export type ForgeV1LoginResponse = {
@@ -1154,6 +1187,70 @@ export type IdentityServiceGetCurrentUserResponses = {
 };
 
 export type IdentityServiceGetCurrentUserResponse = IdentityServiceGetCurrentUserResponses[keyof IdentityServiceGetCurrentUserResponses];
+
+export type IdentityServiceGetMfaStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/mfa';
+};
+
+export type IdentityServiceGetMfaStatusResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1GetMfaStatusResponse;
+};
+
+export type IdentityServiceGetMfaStatusResponse = IdentityServiceGetMfaStatusResponses[keyof IdentityServiceGetMfaStatusResponses];
+
+export type IdentityServiceDisableMfaData = {
+    body: ForgeV1DisableMfaRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/mfa/totp/disable';
+};
+
+export type IdentityServiceDisableMfaResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1DisableMfaResponse;
+};
+
+export type IdentityServiceDisableMfaResponse = IdentityServiceDisableMfaResponses[keyof IdentityServiceDisableMfaResponses];
+
+export type IdentityServiceBeginMfaEnrollmentData = {
+    body: ForgeV1BeginMfaEnrollmentRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/mfa/totp/enrollment';
+};
+
+export type IdentityServiceBeginMfaEnrollmentResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1BeginMfaEnrollmentResponse;
+};
+
+export type IdentityServiceBeginMfaEnrollmentResponse = IdentityServiceBeginMfaEnrollmentResponses[keyof IdentityServiceBeginMfaEnrollmentResponses];
+
+export type IdentityServiceConfirmMfaEnrollmentData = {
+    body: ForgeV1ConfirmMfaEnrollmentRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/mfa/totp/enrollment/confirmation';
+};
+
+export type IdentityServiceConfirmMfaEnrollmentResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ConfirmMfaEnrollmentResponse;
+};
+
+export type IdentityServiceConfirmMfaEnrollmentResponse = IdentityServiceConfirmMfaEnrollmentResponses[keyof IdentityServiceConfirmMfaEnrollmentResponses];
 
 export type SystemServiceHealthData = {
     body?: never;

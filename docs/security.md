@@ -6,7 +6,7 @@
 - Machine：Bearer API Token，原文只在创建时返回一次，数据库仅存 SHA-256 hash；支持 scope 和撤销。
 - RBAC 使用 Permission，不在 handler 中散落角色字符串。
 - 默认角色：`system_admin`、`security_admin`、`auditor`、`user`，用于“三员分立”起点；角色按组织隔离，Permission 标识全局定义；具体岗位按组织制度继续细分。
-- 提供 TOTP primitive，但脚手架默认登录流未强制 MFA；金融高风险操作应结合统一身份平台/MFA/强认证策略落地。
+- 提供 TOTP 注册、确认、加密存储、一次性恢复码和登录强制校验闭环；组织级强制策略与高风险操作 step-up 仍须按部署制度启用和验证。
 
 ## 口令与会话
 

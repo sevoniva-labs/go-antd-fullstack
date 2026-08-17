@@ -660,6 +660,12 @@ func serviceError(err error) error {
 		return kratoserrors.Forbidden("INTERACTIVE_SESSION_REQUIRED", "interactive session is required")
 	case errors.Is(err, appidentity.ErrInvalidCredentials):
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
+	case errors.Is(err, appidentity.ErrInvalidMFA):
+		return kratoserrors.Unauthorized("INVALID_MFA", "invalid multi-factor authentication code")
+	case errors.Is(err, appidentity.ErrMFAAlreadyEnabled):
+		return kratoserrors.Conflict("MFA_ALREADY_ENABLED", "multi-factor authentication is already enabled")
+	case errors.Is(err, appidentity.ErrMFANotPending):
+		return kratoserrors.BadRequest("MFA_ENROLLMENT_NOT_PENDING", "multi-factor authentication enrollment is not pending")
 	case errors.Is(err, appidentity.ErrInvalidRole), errors.Is(err, appidentity.ErrInvalidLoginName),
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
 		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment),

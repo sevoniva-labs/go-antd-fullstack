@@ -94,6 +94,87 @@ service IdentityService {
       ]
     };
   }
+  rpc GetMFAStatus(GetMFAStatusRequest) returns (GetMFAStatusResponse) {
+    option (google.api.http) = {get: "/api/v1/mfa"};
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  rpc BeginMFAEnrollment(BeginMFAEnrollmentRequest) returns (BeginMFAEnrollmentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/mfa/totp/enrollment"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            },
+            {
+              name: "CsrfToken"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  rpc ConfirmMFAEnrollment(ConfirmMFAEnrollmentRequest) returns (ConfirmMFAEnrollmentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/mfa/totp/enrollment/confirmation"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            },
+            {
+              name: "CsrfToken"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  rpc DisableMFA(DisableMFARequest) returns (DisableMFAResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/mfa/totp/disable"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            },
+            {
+              name: "CsrfToken"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
   rpc ListApiTokens(ListApiTokensRequest) returns (ListApiTokensResponse) {
     option (google.api.http) = {get: "/api/v1/api-tokens"};
     option (openapi.v3.operation) = {
@@ -166,6 +247,8 @@ message LoginRequest {
   string organization = 1;
   string login_name = 2;
   string password = 3;
+  string mfa_code = 4;
+  string recovery_code = 5;
 }
 
 message LoginResponse {
@@ -187,6 +270,33 @@ message GetCurrentUserRequest {}
 message GetCurrentUserResponse {
   User user = 1;
 }
+
+message GetMFAStatusRequest {}
+message GetMFAStatusResponse {
+  bool enabled = 1;
+}
+
+message BeginMFAEnrollmentRequest {
+  string current_password = 1;
+}
+message BeginMFAEnrollmentResponse {
+  string secret = 1;
+  string provisioning_uri = 2;
+}
+
+message ConfirmMFAEnrollmentRequest {
+  string code = 1;
+}
+message ConfirmMFAEnrollmentResponse {
+  repeated string recovery_codes = 1;
+}
+
+message DisableMFARequest {
+  string current_password = 1;
+  string code = 2;
+  string recovery_code = 3;
+}
+message DisableMFAResponse {}
 
 message ListApiTokensRequest {}
 

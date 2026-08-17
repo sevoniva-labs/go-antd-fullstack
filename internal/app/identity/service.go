@@ -14,6 +14,8 @@ import (
 
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
+	appcrypto "github.com/sevoniva-labs/forge/internal/platform/security/crypto"
+	"github.com/sevoniva-labs/forge/internal/platform/security/mfa"
 	"github.com/sevoniva-labs/forge/internal/platform/security/password"
 )
 
@@ -34,6 +36,11 @@ var ErrInvalidPosition = errors.New("invalid position")
 var ErrInvalidUserGroup = errors.New("invalid user group")
 var ErrInvalidUserAssignment = errors.New("invalid user assignment")
 var ErrInvalidDataScope = errors.New("invalid data scope")
+var ErrMFARequired = errors.New("multi-factor authentication required")
+var ErrInvalidMFA = errors.New("invalid multi-factor authentication code")
+var ErrMFAAlreadyEnabled = repository.ErrMFAAlreadyEnabled
+var ErrMFANotPending = errors.New("multi-factor authentication enrollment is not pending")
+var ErrMFAUnavailable = errors.New("multi-factor authentication encryption is unavailable")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -66,6 +73,7 @@ type Options struct {
 	SessionTTL    time.Duration
 	MaxFailures   int
 	LockDuration  time.Duration
+	Crypto        appcrypto.Provider
 }
 
 type Service struct {
@@ -77,6 +85,8 @@ type Service struct {
 	lockDuration time.Duration
 	history      int
 	maxAge       time.Duration
+	crypt        appcrypto.Provider
+	totp         mfa.TOTP
 }
 
 func NewService(repo *repository.IdentityRepo, opt Options) *Service {
@@ -85,6 +95,7 @@ func NewService(repo *repository.IdentityRepo, opt Options) *Service {
 		policy:     password.Policy{MinLength: opt.MinLength, RequireUpper: opt.RequireUpper, RequireLower: opt.RequireLower, RequireDigit: opt.RequireDigit, RequireSymbol: opt.RequireSymbol},
 		sessionTTL: opt.SessionTTL, maxFailures: opt.MaxFailures, lockDuration: opt.LockDuration, history: opt.History,
 		maxAge: time.Duration(opt.MaxAgeDays) * 24 * time.Hour,
+		crypt:  opt.Crypto,
 	}
 }
 
@@ -439,6 +450,10 @@ func (s *Service) passwordExpiredAt(t time.Time, maxAge time.Duration) bool {
 }
 
 func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (domain.Principal, string, string, time.Time, error) {
+	return s.LoginWithMFA(ctx, orgID, login, raw, "", "", ip, ua)
+}
+
+func (s *Service) LoginWithMFA(ctx context.Context, orgID, login, raw, mfaCode, recoveryCode, ip, ua string) (domain.Principal, string, string, time.Time, error) {
 	row, err := s.repo.UserByLogin(ctx, orgID, strings.TrimSpace(login))
 	if err != nil {
 		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
@@ -466,6 +481,14 @@ func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (
 		}
 		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
 	}
+	if err := s.verifyLoginMFA(ctx, row.User.ID, mfaCode, recoveryCode); err != nil {
+		if errors.Is(err, ErrInvalidMFA) {
+			if recordErr := s.repo.RecordLoginFailure(ctx, row.User.ID, policy.maxFailures, policy.lockDuration); recordErr != nil {
+				return domain.Principal{}, "", "", time.Time{}, recordErr
+			}
+		}
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
 	if err := s.repo.ResetLoginFailure(ctx, row.User.ID); err != nil {
 		return domain.Principal{}, "", "", time.Time{}, err
 	}
@@ -489,6 +512,134 @@ func (s *Service) Login(ctx context.Context, orgID, login, raw, ip, ua string) (
 	mustChange := row.User.MustChangePassword || s.passwordExpiredAt(row.User.PasswordChangedAt, policy.maxAge)
 	p := domain.Principal{Type: "USER", UserID: row.User.ID, OrganizationID: row.User.OrganizationID, LoginName: row.User.LoginName, DisplayName: row.User.DisplayName, Roles: row.User.Roles, Permissions: row.User.Permissions, MustChangePassword: mustChange, SessionID: sessionID, PasswordChangedAt: row.User.PasswordChangedAt}
 	return p, token, csrf, expires, nil
+}
+
+func (s *Service) verifyLoginMFA(ctx context.Context, userID, code, recoveryCode string) error {
+	factor, err := s.repo.ActiveMFAFactor(ctx, userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if strings.TrimSpace(code) == "" && strings.TrimSpace(recoveryCode) == "" {
+		return ErrMFARequired
+	}
+	return s.verifyMFAFactor(ctx, factor, code, recoveryCode)
+}
+
+func (s *Service) verifyMFAFactor(ctx context.Context, factor domain.MFAFactor, code, recoveryCode string) error {
+	if s.crypt == nil {
+		return ErrMFAUnavailable
+	}
+	if code = strings.TrimSpace(code); code != "" {
+		secret, err := s.crypt.Decrypt(factor.SecretCiphertext, []byte("mfa:totp:"+factor.UserID))
+		if err != nil {
+			return err
+		}
+		if s.totp.Validate(code, string(secret)) {
+			return nil
+		}
+	}
+	if recoveryCode = strings.TrimSpace(recoveryCode); recoveryCode != "" {
+		consumed, err := s.repo.ConsumeMFARecoveryCode(ctx, factor.UserID, s.recoveryCodeHash(factor.UserID, recoveryCode))
+		if err != nil {
+			return err
+		}
+		if consumed {
+			return nil
+		}
+	}
+	return ErrInvalidMFA
+}
+
+func (s *Service) MFAEnabled(ctx context.Context, actor domain.Principal) (bool, error) {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return false, err
+	}
+	return s.repo.MFAEnabled(ctx, actor.UserID)
+}
+
+func (s *Service) BeginMFAEnrollment(ctx context.Context, actor domain.Principal, currentPassword string) (domain.MFAEnrollment, error) {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return domain.MFAEnrollment{}, err
+	}
+	if s.crypt == nil {
+		return domain.MFAEnrollment{}, ErrMFAUnavailable
+	}
+	hash, err := s.repo.PasswordHashByID(ctx, actor.UserID)
+	if err != nil {
+		return domain.MFAEnrollment{}, err
+	}
+	if !s.hasher.Verify(currentPassword, hash) {
+		return domain.MFAEnrollment{}, ErrInvalidCredentials
+	}
+	secret, url, err := s.totp.Generate("Sevoniva Forge", actor.LoginName)
+	if err != nil {
+		return domain.MFAEnrollment{}, err
+	}
+	ciphertext, err := s.crypt.Encrypt([]byte(secret), []byte("mfa:totp:"+actor.UserID))
+	if err != nil {
+		return domain.MFAEnrollment{}, err
+	}
+	if err := s.repo.SavePendingMFAFactor(ctx, actor.UserID, ciphertext, s.crypt.KeyVersion(), time.Now().UTC().Add(10*time.Minute)); err != nil {
+		return domain.MFAEnrollment{}, err
+	}
+	return domain.MFAEnrollment{Secret: secret, URL: url}, nil
+}
+
+func (s *Service) ConfirmMFAEnrollment(ctx context.Context, actor domain.Principal, code string) ([]string, error) {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return nil, err
+	}
+	factor, err := s.repo.PendingMFAFactor(ctx, actor.UserID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrMFANotPending
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := s.verifyMFAFactor(ctx, factor, code, ""); err != nil {
+		return nil, err
+	}
+	codes := make([]string, 10)
+	hashes := make([]string, len(codes))
+	for index := range codes {
+		codes[index], err = randomToken(12)
+		if err != nil {
+			return nil, err
+		}
+		hashes[index] = s.recoveryCodeHash(actor.UserID, codes[index])
+	}
+	if err := s.repo.ActivateMFAFactor(ctx, actor.UserID, hashes); err != nil {
+		return nil, err
+	}
+	return codes, nil
+}
+
+func (s *Service) DisableMFA(ctx context.Context, actor domain.Principal, currentPassword, code, recoveryCode string) error {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return err
+	}
+	hash, err := s.repo.PasswordHashByID(ctx, actor.UserID)
+	if err != nil {
+		return err
+	}
+	if !s.hasher.Verify(currentPassword, hash) {
+		return ErrInvalidCredentials
+	}
+	factor, err := s.repo.ActiveMFAFactor(ctx, actor.UserID)
+	if err != nil {
+		return err
+	}
+	if err := s.verifyMFAFactor(ctx, factor, code, recoveryCode); err != nil {
+		return err
+	}
+	return s.repo.DeleteMFAAndOtherSessions(ctx, actor.UserID, actor.SessionID)
+}
+
+func (s *Service) recoveryCodeHash(userID, code string) string {
+	return hex.EncodeToString(s.crypt.Hash([]byte("mfa-recovery:" + userID + ":" + strings.TrimSpace(code))))
 }
 func (s *Service) Authenticate(ctx context.Context, token string) (domain.Principal, error) {
 	if token == "" {

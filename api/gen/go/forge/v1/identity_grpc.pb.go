@@ -19,13 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	IdentityService_Login_FullMethodName          = "/forge.v1.IdentityService/Login"
-	IdentityService_Logout_FullMethodName         = "/forge.v1.IdentityService/Logout"
-	IdentityService_ChangePassword_FullMethodName = "/forge.v1.IdentityService/ChangePassword"
-	IdentityService_GetCurrentUser_FullMethodName = "/forge.v1.IdentityService/GetCurrentUser"
-	IdentityService_ListApiTokens_FullMethodName  = "/forge.v1.IdentityService/ListApiTokens"
-	IdentityService_CreateApiToken_FullMethodName = "/forge.v1.IdentityService/CreateApiToken"
-	IdentityService_RevokeApiToken_FullMethodName = "/forge.v1.IdentityService/RevokeApiToken"
+	IdentityService_Login_FullMethodName                = "/forge.v1.IdentityService/Login"
+	IdentityService_Logout_FullMethodName               = "/forge.v1.IdentityService/Logout"
+	IdentityService_ChangePassword_FullMethodName       = "/forge.v1.IdentityService/ChangePassword"
+	IdentityService_GetCurrentUser_FullMethodName       = "/forge.v1.IdentityService/GetCurrentUser"
+	IdentityService_GetMFAStatus_FullMethodName         = "/forge.v1.IdentityService/GetMFAStatus"
+	IdentityService_BeginMFAEnrollment_FullMethodName   = "/forge.v1.IdentityService/BeginMFAEnrollment"
+	IdentityService_ConfirmMFAEnrollment_FullMethodName = "/forge.v1.IdentityService/ConfirmMFAEnrollment"
+	IdentityService_DisableMFA_FullMethodName           = "/forge.v1.IdentityService/DisableMFA"
+	IdentityService_ListApiTokens_FullMethodName        = "/forge.v1.IdentityService/ListApiTokens"
+	IdentityService_CreateApiToken_FullMethodName       = "/forge.v1.IdentityService/CreateApiToken"
+	IdentityService_RevokeApiToken_FullMethodName       = "/forge.v1.IdentityService/RevokeApiToken"
 )
 
 // IdentityServiceClient is the client API for IdentityService service.
@@ -36,6 +40,10 @@ type IdentityServiceClient interface {
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error)
+	GetMFAStatus(ctx context.Context, in *GetMFAStatusRequest, opts ...grpc.CallOption) (*GetMFAStatusResponse, error)
+	BeginMFAEnrollment(ctx context.Context, in *BeginMFAEnrollmentRequest, opts ...grpc.CallOption) (*BeginMFAEnrollmentResponse, error)
+	ConfirmMFAEnrollment(ctx context.Context, in *ConfirmMFAEnrollmentRequest, opts ...grpc.CallOption) (*ConfirmMFAEnrollmentResponse, error)
+	DisableMFA(ctx context.Context, in *DisableMFARequest, opts ...grpc.CallOption) (*DisableMFAResponse, error)
 	ListApiTokens(ctx context.Context, in *ListApiTokensRequest, opts ...grpc.CallOption) (*ListApiTokensResponse, error)
 	CreateApiToken(ctx context.Context, in *CreateApiTokenRequest, opts ...grpc.CallOption) (*CreateApiTokenResponse, error)
 	RevokeApiToken(ctx context.Context, in *RevokeApiTokenRequest, opts ...grpc.CallOption) (*RevokeApiTokenResponse, error)
@@ -89,6 +97,46 @@ func (c *identityServiceClient) GetCurrentUser(ctx context.Context, in *GetCurre
 	return out, nil
 }
 
+func (c *identityServiceClient) GetMFAStatus(ctx context.Context, in *GetMFAStatusRequest, opts ...grpc.CallOption) (*GetMFAStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMFAStatusResponse)
+	err := c.cc.Invoke(ctx, IdentityService_GetMFAStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) BeginMFAEnrollment(ctx context.Context, in *BeginMFAEnrollmentRequest, opts ...grpc.CallOption) (*BeginMFAEnrollmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BeginMFAEnrollmentResponse)
+	err := c.cc.Invoke(ctx, IdentityService_BeginMFAEnrollment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) ConfirmMFAEnrollment(ctx context.Context, in *ConfirmMFAEnrollmentRequest, opts ...grpc.CallOption) (*ConfirmMFAEnrollmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfirmMFAEnrollmentResponse)
+	err := c.cc.Invoke(ctx, IdentityService_ConfirmMFAEnrollment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) DisableMFA(ctx context.Context, in *DisableMFARequest, opts ...grpc.CallOption) (*DisableMFAResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DisableMFAResponse)
+	err := c.cc.Invoke(ctx, IdentityService_DisableMFA_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *identityServiceClient) ListApiTokens(ctx context.Context, in *ListApiTokensRequest, opts ...grpc.CallOption) (*ListApiTokensResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListApiTokensResponse)
@@ -127,6 +175,10 @@ type IdentityServiceServer interface {
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
+	GetMFAStatus(context.Context, *GetMFAStatusRequest) (*GetMFAStatusResponse, error)
+	BeginMFAEnrollment(context.Context, *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error)
+	ConfirmMFAEnrollment(context.Context, *ConfirmMFAEnrollmentRequest) (*ConfirmMFAEnrollmentResponse, error)
+	DisableMFA(context.Context, *DisableMFARequest) (*DisableMFAResponse, error)
 	ListApiTokens(context.Context, *ListApiTokensRequest) (*ListApiTokensResponse, error)
 	CreateApiToken(context.Context, *CreateApiTokenRequest) (*CreateApiTokenResponse, error)
 	RevokeApiToken(context.Context, *RevokeApiTokenRequest) (*RevokeApiTokenResponse, error)
@@ -151,6 +203,18 @@ func (UnimplementedIdentityServiceServer) ChangePassword(context.Context, *Chang
 }
 func (UnimplementedIdentityServiceServer) GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentUser not implemented")
+}
+func (UnimplementedIdentityServiceServer) GetMFAStatus(context.Context, *GetMFAStatusRequest) (*GetMFAStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMFAStatus not implemented")
+}
+func (UnimplementedIdentityServiceServer) BeginMFAEnrollment(context.Context, *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BeginMFAEnrollment not implemented")
+}
+func (UnimplementedIdentityServiceServer) ConfirmMFAEnrollment(context.Context, *ConfirmMFAEnrollmentRequest) (*ConfirmMFAEnrollmentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConfirmMFAEnrollment not implemented")
+}
+func (UnimplementedIdentityServiceServer) DisableMFA(context.Context, *DisableMFARequest) (*DisableMFAResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DisableMFA not implemented")
 }
 func (UnimplementedIdentityServiceServer) ListApiTokens(context.Context, *ListApiTokensRequest) (*ListApiTokensResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListApiTokens not implemented")
@@ -254,6 +318,78 @@ func _IdentityService_GetCurrentUser_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IdentityService_GetMFAStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMFAStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).GetMFAStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_GetMFAStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).GetMFAStatus(ctx, req.(*GetMFAStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_BeginMFAEnrollment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BeginMFAEnrollmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).BeginMFAEnrollment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_BeginMFAEnrollment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).BeginMFAEnrollment(ctx, req.(*BeginMFAEnrollmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_ConfirmMFAEnrollment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmMFAEnrollmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).ConfirmMFAEnrollment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_ConfirmMFAEnrollment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).ConfirmMFAEnrollment(ctx, req.(*ConfirmMFAEnrollmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_DisableMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableMFARequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).DisableMFA(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_DisableMFA_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).DisableMFA(ctx, req.(*DisableMFARequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _IdentityService_ListApiTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListApiTokensRequest)
 	if err := dec(in); err != nil {
@@ -330,6 +466,22 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCurrentUser",
 			Handler:    _IdentityService_GetCurrentUser_Handler,
+		},
+		{
+			MethodName: "GetMFAStatus",
+			Handler:    _IdentityService_GetMFAStatus_Handler,
+		},
+		{
+			MethodName: "BeginMFAEnrollment",
+			Handler:    _IdentityService_BeginMFAEnrollment_Handler,
+		},
+		{
+			MethodName: "ConfirmMFAEnrollment",
+			Handler:    _IdentityService_ConfirmMFAEnrollment_Handler,
+		},
+		{
+			MethodName: "DisableMFA",
+			Handler:    _IdentityService_DisableMFA_Handler,
 		},
 		{
 			MethodName: "ListApiTokens",

@@ -16,6 +16,20 @@ type EffectiveDataScope struct {
 	DepartmentIDs    []string `json:"department_ids"`
 }
 
+type MFAFactor struct {
+	UserID           string
+	Status           string
+	SecretCiphertext string
+	KeyVersion       string
+	PendingExpiresAt time.Time
+	ConfirmedAt      *time.Time
+}
+
+type MFAEnrollment struct {
+	Secret string
+	URL    string
+}
+
 func (scope EffectiveDataScope) Allows(userID, departmentID, actorUserID string) bool {
 	if scope.OrganizationWide {
 		return true
