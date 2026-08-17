@@ -1,5 +1,3 @@
-import { runtimeConfig } from '../app/config/runtime'
-
 export interface ApiEnvelope<T = unknown> {
   code: string
   message: string
@@ -9,6 +7,25 @@ export interface ApiEnvelope<T = unknown> {
   trace_id?: string
   timestamp: string
   field_errors?: Array<{ path: string; code: string; message?: string }>
+}
+
+export interface ApiClientOptions {
+  baseUrl: string
+}
+
+let apiBaseUrl = '/api/v1'
+
+export function configureApiClient(options: ApiClientOptions) {
+  const value = options.baseUrl.trim()
+  if (!value) throw new Error('API base URL is required')
+  const resolved = new URL(value, window.location.origin)
+  if (resolved.origin !== window.location.origin) {
+    throw new Error('API base URL must use the Shell origin')
+  }
+  if (resolved.username || resolved.password || resolved.search || resolved.hash) {
+    throw new Error('API base URL cannot contain credentials, query, or fragment')
+  }
+  apiBaseUrl = resolved.pathname.replace(/\/+$/, '') || '/'
 }
 
 export class ApiError extends Error {
@@ -40,8 +57,7 @@ function csrfToken(): string {
 }
 
 function endpoint(path: string) {
-  const base = runtimeConfig.apiBaseUrl.replace(/\/+$/, '')
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`
+  return `${apiBaseUrl}${path.startsWith('/') ? path : `/${path}`}`
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {

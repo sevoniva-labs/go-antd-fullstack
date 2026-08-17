@@ -1,4 +1,4 @@
-import type { Principal } from '../api/types'
+import type { Principal } from '@forge/api-client'
 
 export function can(me: Principal | undefined, permission: string): boolean {
   if (!me) return false

@@ -1,7 +1,7 @@
 import { Spin } from 'antd'
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { ApiError } from '../api/client'
+import { ApiError } from '@forge/api-client'
 import { useMe } from './useMe'
 
 export function RequireAuth({ children }: { children: ReactNode }) {

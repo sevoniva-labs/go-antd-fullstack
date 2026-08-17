@@ -1,5 +1,5 @@
 import { Button, Result, Space, Typography } from 'antd'
-import { ApiError } from '../../api/client'
+import { ApiError } from '@forge/api-client'
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const apiError = error instanceof ApiError ? error : undefined

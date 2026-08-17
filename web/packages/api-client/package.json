@@ -1,0 +1,25 @@
+{
+  "name": "@forge/api-client",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated": "./src/generated/index.ts"
+  },
+  "scripts": {
+    "api:types": "openapi-ts -i ../../../api/gen/openapi/openapi.yaml -o src/generated",
+    "lint": "oxlint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/node": "24.13.3",
+    "jsdom": "27.2.0",
+    "oxlint": "1.75.0",
+    "typescript": "6.0.2",
+    "vite": "8.2.0",
+    "vitest": "4.0.18"
+  }
+}

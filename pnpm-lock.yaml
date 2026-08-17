@@ -16,6 +16,9 @@ importers:
       '@ant-design/pro-components':
         specifier: 3.1.14-6
         version: 3.1.14-6(antd@6.6.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)
+      '@forge/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@tanstack/react-query':
         specifier: 5.101.4
         version: 5.101.4(react@19.2.8)
@@ -35,9 +38,6 @@ importers:
         specifier: 7.18.2
         version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
-      '@hey-api/openapi-ts':
-        specifier: 0.99.0
-        version: 0.99.0(typescript@6.0.2)
       '@testing-library/jest-dom':
         specifier: 6.9.1
         version: 6.9.1
@@ -56,6 +56,30 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.0.4
         version: 6.0.4(vite@8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0))
+      jsdom:
+        specifier: 27.2.0
+        version: 27.2.0(supports-color@10.2.2)
+      oxlint:
+        specifier: 1.75.0
+        version: 1.75.0
+      typescript:
+        specifier: 6.0.2
+        version: 6.0.2
+      vite:
+        specifier: 8.2.0
+        version: 8.2.0(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)
+      vitest:
+        specifier: 4.0.18
+        version: 4.0.18(@types/node@24.13.3)(jiti@2.7.0)(jsdom@27.2.0(supports-color@10.2.2))(lightningcss@1.33.0)
+
+  web/packages/api-client:
+    devDependencies:
+      '@hey-api/openapi-ts':
+        specifier: 0.99.0
+        version: 0.99.0(typescript@6.0.2)
+      '@types/node':
+        specifier: 24.13.3
+        version: 24.13.3
       jsdom:
         specifier: 27.2.0
         version: 27.2.0(supports-color@10.2.2)

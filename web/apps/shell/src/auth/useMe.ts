@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { api } from '../api/api'
-import { queryKeys } from '../api/queryKeys'
+import { api } from '@forge/api-client'
+import { queryKeys } from '@forge/api-client'
 
 export function useMe() {
   return useQuery({

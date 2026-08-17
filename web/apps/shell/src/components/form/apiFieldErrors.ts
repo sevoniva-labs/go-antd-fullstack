@@ -1,5 +1,5 @@
 import type { FormInstance } from 'antd'
-import { ApiError } from '../../api/client'
+import { ApiError } from '@forge/api-client'
 
 export function applyApiFieldErrors(form: FormInstance, error: unknown): boolean {
   if (!(error instanceof ApiError) || !error.fieldErrors?.length) return false

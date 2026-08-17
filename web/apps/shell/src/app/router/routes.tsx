@@ -14,7 +14,7 @@ import {
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react'
 import { lazy } from 'react'
 import { matchPath } from 'react-router-dom'
-import type { Principal } from '../../api/types'
+import type { Principal } from '@forge/api-client'
 import { can } from '../../auth/access'
 import { runtimeConfig } from '../config/runtime'
 

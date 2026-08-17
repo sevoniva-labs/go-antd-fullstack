@@ -1,8 +1,8 @@
 import { ProForm, ProFormText } from '@ant-design/pro-components'
 import { Alert, App, Card, Descriptions, Tag } from 'antd'
 import { useQueryClient } from '@tanstack/react-query'
-import { api } from '../api/api'
-import { queryKeys } from '../api/queryKeys'
+import { api } from '@forge/api-client'
+import { queryKeys } from '@forge/api-client'
 import { useMe } from '../auth/useMe'
 import { AppPageContainer } from '../components/layout/AppPageContainer'
 

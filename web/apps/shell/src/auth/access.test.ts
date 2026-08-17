@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { can } from './access'
-import type { Principal } from '../api/types'
+import type { Principal } from '@forge/api-client'
 
 const base: Principal = {
   principal_type: 'USER',
