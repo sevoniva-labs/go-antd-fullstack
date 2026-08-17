@@ -212,7 +212,7 @@ func (s *Server) auth(next http.Handler) http.Handler {
 			httpx.Error(w, 401, "UNAUTHENTICATED", "会话已失效", RequestID(r), TraceID(r))
 			return
 		}
-		if p.MustChangePassword && isWrite(r.Method) && r.URL.Path != "/api/v1/auth/password" && r.URL.Path != "/api/v1/auth/logout" {
+		if p.MustChangePassword && !allowedBeforePasswordChange(r.Method, r.URL.Path) {
 			httpx.Error(w, 403, "PASSWORD_CHANGE_REQUIRED", "首次登录必须先修改密码", RequestID(r), TraceID(r))
 			return
 		}
@@ -226,6 +226,12 @@ func (s *Server) auth(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r.WithContext(withPrincipal(r.Context(), p)))
 	})
+}
+
+func allowedBeforePasswordChange(method, path string) bool {
+	return (method == http.MethodGet && path == "/api/v1/me") ||
+		(method == http.MethodPatch && path == "/api/v1/auth/password") ||
+		(method == http.MethodPost && path == "/api/v1/auth/logout")
 }
 
 func requireRoles(keys ...string) func(http.Handler) http.Handler {
