@@ -288,8 +288,21 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	u, err := s.identity.CreateUser(r.Context(), *p, p.OrganizationID, req.LoginName, req.DisplayName, req.Password, req.Roles)
+	var u domain.User
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.create", ResourceType: "user", ClientIP: s.clientIP(r)}
+	err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		var err error
+		u, err = s.identity.CreateUser(ctx, *p, p.OrganizationID, req.LoginName, req.DisplayName, req.Password, req.Roles)
+		if err == nil {
+			event.ResourceID = u.ID
+			event.Details = map[string]any{"login_name": u.LoginName, "roles": u.Roles}
+		}
+		return err
+	})
 	if err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		code, msg, status := "CREATE_USER_FAILED", "创建用户失败", http.StatusBadRequest
 		switch {
 		case errors.Is(err, appidentity.ErrInvalidRole):
@@ -308,9 +321,6 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.create", ResourceType: "user", ResourceID: u.ID, ClientIP: s.clientIP(r), Details: map[string]any{"login_name": u.LoginName, "roles": u.Roles}})
 	}
 	httpx.Success(w, 201, u, RequestID(r), TraceID(r))
 }
@@ -340,14 +350,26 @@ func (s *Server) updateOrganization(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	item, err := s.identity.UpdateOrganization(r.Context(), p.OrganizationID, domain.Organization{
-		Name:        req.Name,
-		Description: req.Description,
-		Status:      req.Status,
-		MaxUsers:    req.MaxUsers,
-		MaxSessions: req.MaxActiveSessions,
+	var item domain.Organization
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "organization.update", ResourceType: "organization", ResourceID: p.OrganizationID, ClientIP: s.clientIP(r), Details: map[string]any{
+		"name": req.Name, "description": req.Description, "status": req.Status,
+		"max_users": req.MaxUsers, "max_active_sessions": req.MaxActiveSessions,
+	}}
+	err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		var err error
+		item, err = s.identity.UpdateOrganization(ctx, p.OrganizationID, domain.Organization{
+			Name: req.Name, Description: req.Description, Status: req.Status,
+			MaxUsers: req.MaxUsers, MaxSessions: req.MaxActiveSessions,
+		})
+		if err == nil {
+			event.ResourceID = item.ID
+		}
+		return err
 	})
 	if err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		switch {
 		case strings.Contains(err.Error(), "invalid organization"):
 			httpx.Error(w, 400, "INVALID_ORGANIZATION", "组织参数不合法", RequestID(r), TraceID(r))
@@ -356,15 +378,6 @@ func (s *Server) updateOrganization(w http.ResponseWriter, r *http.Request) {
 			httpx.Error(w, 500, "INTERNAL", "更新组织信息失败", RequestID(r), TraceID(r))
 		}
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "organization.update", ResourceType: "organization", ResourceID: item.ID, ClientIP: s.clientIP(r), Details: map[string]any{
-			"name":                req.Name,
-			"description":         req.Description,
-			"status":              req.Status,
-			"max_users":           req.MaxUsers,
-			"max_active_sessions": req.MaxActiveSessions,
-		}})
 	}
 	httpx.Success(w, 200, item, RequestID(r), TraceID(r))
 }
@@ -401,20 +414,32 @@ func (s *Server) updateSecurityConfig(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	policy, err := s.identity.UpdateSecurityPolicy(r.Context(), p.OrganizationID, p.UserID, domain.SecurityPolicy{
-		PasswordMinLength:        req.PasswordMinLength,
-		PasswordRequireUpper:     req.PasswordRequireUpper,
-		PasswordRequireLower:     req.PasswordRequireLower,
-		PasswordRequireDigit:     req.PasswordRequireDigit,
-		PasswordRequireSymbol:    req.PasswordRequireSymbol,
-		PasswordHistory:          req.PasswordHistory,
-		PasswordMaxAgeDays:       req.PasswordMaxAgeDays,
-		LoginMaxFailures:         req.LoginMaxFailures,
-		LoginLockDurationSeconds: req.LoginLockDurationSeconds,
-		SessionTTLSeconds:        req.SessionTTLSeconds,
-		MaxConcurrentSessions:    req.MaxConcurrentSessions,
+	requestedPolicy := domain.SecurityPolicy{
+		PasswordMinLength: req.PasswordMinLength, PasswordRequireUpper: req.PasswordRequireUpper,
+		PasswordRequireLower: req.PasswordRequireLower, PasswordRequireDigit: req.PasswordRequireDigit,
+		PasswordRequireSymbol: req.PasswordRequireSymbol, PasswordHistory: req.PasswordHistory,
+		PasswordMaxAgeDays: req.PasswordMaxAgeDays, LoginMaxFailures: req.LoginMaxFailures,
+		LoginLockDurationSeconds: req.LoginLockDurationSeconds, SessionTTLSeconds: req.SessionTTLSeconds,
+		MaxConcurrentSessions: req.MaxConcurrentSessions,
+	}
+	var policy domain.SecurityPolicy
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.config.update", ResourceType: "security", ResourceID: "policy", ClientIP: s.clientIP(r), Details: map[string]any{
+		"password_min_length": req.PasswordMinLength, "password_require_upper": req.PasswordRequireUpper,
+		"password_require_lower": req.PasswordRequireLower, "password_require_digit": req.PasswordRequireDigit,
+		"password_require_symbol": req.PasswordRequireSymbol, "password_history": req.PasswordHistory,
+		"password_max_age_days": req.PasswordMaxAgeDays, "login_max_failures": req.LoginMaxFailures,
+		"login_lock_duration_seconds": req.LoginLockDurationSeconds, "session_ttl_seconds": req.SessionTTLSeconds,
+		"max_active_sessions": req.MaxConcurrentSessions,
+	}}
+	err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		var err error
+		policy, err = s.identity.UpdateSecurityPolicy(ctx, p.OrganizationID, p.UserID, requestedPolicy)
+		return err
 	})
 	if err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		if errors.Is(err, appidentity.ErrInvalidSecurityPolicy) {
 			httpx.Error(w, 400, "INVALID_SECURITY_CONFIG", "安全配置参数不合法", RequestID(r), TraceID(r))
 			return
@@ -422,21 +447,6 @@ func (s *Server) updateSecurityConfig(w http.ResponseWriter, r *http.Request) {
 		s.log.Error("update security config failed", "err", err, "request_id", RequestID(r), "trace_id", TraceID(r))
 		httpx.Error(w, 500, "INTERNAL", "更新安全配置失败", RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.config.update", ResourceType: "security", ResourceID: "policy", ClientIP: s.clientIP(r), Details: map[string]any{
-			"password_min_length":         req.PasswordMinLength,
-			"password_require_upper":      req.PasswordRequireUpper,
-			"password_require_lower":      req.PasswordRequireLower,
-			"password_require_digit":      req.PasswordRequireDigit,
-			"password_require_symbol":     req.PasswordRequireSymbol,
-			"password_history":            req.PasswordHistory,
-			"password_max_age_days":       req.PasswordMaxAgeDays,
-			"login_max_failures":          req.LoginMaxFailures,
-			"login_lock_duration_seconds": req.LoginLockDurationSeconds,
-			"session_ttl_seconds":         req.SessionTTLSeconds,
-			"max_active_sessions":         req.MaxConcurrentSessions,
-		}})
 	}
 	httpx.Success(w, 200, policy, RequestID(r), TraceID(r))
 }
@@ -472,7 +482,13 @@ func (s *Server) updateRolePermissions(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.UpdateRolePermissions(r.Context(), *p, p.OrganizationID, roleKey, req.Permissions); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "role.permissions.update", ResourceType: "role", ResourceID: roleKey, ClientIP: s.clientIP(r), Details: map[string]any{"permissions": req.Permissions}}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.UpdateRolePermissions(ctx, *p, p.OrganizationID, roleKey, req.Permissions)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		code, msg, status := "ROLE_PERMISSION_UPDATE_FAILED", "角色权限更新失败", http.StatusBadRequest
 		if errors.Is(err, appidentity.ErrInvalidRole) {
 			code, msg = "INVALID_ROLE", "角色或权限不合法"
@@ -481,9 +497,6 @@ func (s *Server) updateRolePermissions(w http.ResponseWriter, r *http.Request) {
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "role.permissions.update", ResourceType: "role", ResourceID: roleKey, ClientIP: s.clientIP(r), Details: map[string]any{"permissions": req.Permissions}})
 	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
@@ -504,7 +517,13 @@ func (s *Server) updateUserRoles(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.UpdateUserRoles(r.Context(), *p, p.OrganizationID, userID, req.Roles); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.roles.update", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r), Details: map[string]any{"roles": req.Roles}}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.UpdateUserRoles(ctx, *p, p.OrganizationID, userID, req.Roles)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		code, msg, status := "USER_ROLE_UPDATE_FAILED", "用户角色更新失败", http.StatusBadRequest
 		if errors.Is(err, appidentity.ErrInvalidRole) {
 			code, msg = "INVALID_ROLE", "角色不合法"
@@ -517,9 +536,6 @@ func (s *Server) updateUserRoles(w http.ResponseWriter, r *http.Request) {
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.roles.update", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r), Details: map[string]any{"roles": req.Roles}})
 	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
@@ -540,7 +556,13 @@ func (s *Server) updateUserStatus(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.SetUserStatus(r.Context(), p.OrganizationID, userID, req.Status); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.status.update", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r), Details: map[string]any{"status": req.Status}}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.SetUserStatus(ctx, p.OrganizationID, userID, req.Status)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		if errors.Is(err, sql.ErrNoRows) {
 			httpx.Error(w, http.StatusNotFound, "NOT_FOUND", "用户不存在", RequestID(r), TraceID(r))
 			return
@@ -552,25 +574,25 @@ func (s *Server) updateUserStatus(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, http.StatusBadRequest, "USER_STATUS_UPDATE_FAILED", "用户状态更新失败", RequestID(r), TraceID(r))
 		return
 	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.status.update", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r), Details: map[string]any{"status": req.Status}})
-	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
 
 func (s *Server) unlockUser(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	userID := chi.URLParam(r, "userID")
-	if err := s.identity.UnlockUser(r.Context(), p.OrganizationID, userID); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.unlock", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r)}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.UnlockUser(ctx, p.OrganizationID, userID)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		if errors.Is(err, sql.ErrNoRows) {
 			httpx.Error(w, http.StatusNotFound, "NOT_FOUND", "用户不存在", RequestID(r), TraceID(r))
 			return
 		}
 		httpx.Error(w, http.StatusBadRequest, "USER_UNLOCK_FAILED", "账号解锁失败", RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.unlock", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r)})
 	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
