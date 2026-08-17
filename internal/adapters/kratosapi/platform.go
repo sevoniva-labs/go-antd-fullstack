@@ -122,6 +122,73 @@ func (s *PlatformService) UpdateDepartment(ctx context.Context, req *forgev1.Upd
 	return &forgev1.UpdateDepartmentResponse{Department: departmentProto(updated)}, nil
 }
 
+func (s *PlatformService) ListPositions(ctx context.Context, _ *forgev1.ListPositionsRequest) (*forgev1.ListPositionsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := s.identity.ListPositions(ctx, principal.OrganizationID)
+	if err != nil {
+		return nil, internalError(err)
+	}
+	reply := &forgev1.ListPositionsResponse{Positions: make([]*forgev1.Position, 0, len(items))}
+	for _, item := range items {
+		reply.Positions = append(reply.Positions, positionProto(item))
+	}
+	return reply, nil
+}
+
+func (s *PlatformService) CreatePosition(ctx context.Context, req *forgev1.CreatePositionRequest) (*forgev1.CreatePositionResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	sortOrder, err := checkedInt(req.GetSortOrder())
+	if err != nil {
+		return nil, err
+	}
+	var created domain.Position
+	event := newAuditEvent(ctx, principal, "position.create", "position", "", map[string]any{"position_key": req.GetPositionKey(), "department_id": req.GetDepartmentId()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var createErr error
+		created, createErr = s.identity.CreatePosition(txCtx, principal, principal.OrganizationID, domain.Position{
+			DepartmentID: req.GetDepartmentId(), Key: req.GetPositionKey(), Name: req.GetName(), Description: req.GetDescription(), Status: req.GetStatus(), SortOrder: sortOrder,
+		})
+		if createErr == nil {
+			event.ResourceID = created.ID
+		}
+		return createErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.CreatePositionResponse{Position: positionProto(created)}, nil
+}
+
+func (s *PlatformService) UpdatePosition(ctx context.Context, req *forgev1.UpdatePositionRequest) (*forgev1.UpdatePositionResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	sortOrder, err := checkedInt(req.GetSortOrder())
+	if err != nil {
+		return nil, err
+	}
+	var updated domain.Position
+	event := newAuditEvent(ctx, principal, "position.update", "position", req.GetPositionId(), map[string]any{"department_id": req.GetDepartmentId(), "status": req.GetStatus()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var updateErr error
+		updated, updateErr = s.identity.UpdatePosition(txCtx, principal, principal.OrganizationID, req.GetPositionId(), domain.Position{
+			DepartmentID: req.GetDepartmentId(), Name: req.GetName(), Description: req.GetDescription(), Status: req.GetStatus(), SortOrder: sortOrder,
+		})
+		return updateErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdatePositionResponse{Position: positionProto(updated)}, nil
+}
+
 func (s *PlatformService) UpdateOrganization(ctx context.Context, req *forgev1.UpdateOrganizationRequest) (*forgev1.UpdateOrganizationResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -452,7 +519,8 @@ func serviceError(err error) error {
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 	case errors.Is(err, appidentity.ErrInvalidRole), errors.Is(err, appidentity.ErrInvalidLoginName),
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
-		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment):
+		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment),
+		errors.Is(err, appidentity.ErrInvalidPosition):
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	default:
 		return internalError(err)
@@ -500,6 +568,14 @@ func departmentProto(department domain.Department) *forgev1.Department {
 		Id: department.ID, OrganizationId: department.OrganizationID, ParentId: department.ParentID,
 		DepartmentKey: department.Key, Name: department.Name, Status: department.Status,
 		SortOrder: int64(department.SortOrder), CreatedAt: timestamp(department.CreatedAt), UpdatedAt: timestamp(department.UpdatedAt),
+	}
+}
+
+func positionProto(position domain.Position) *forgev1.Position {
+	return &forgev1.Position{
+		Id: position.ID, OrganizationId: position.OrganizationID, DepartmentId: position.DepartmentID,
+		PositionKey: position.Key, Name: position.Name, Description: position.Description, Status: position.Status,
+		SortOrder: int64(position.SortOrder), CreatedAt: timestamp(position.CreatedAt), UpdatedAt: timestamp(position.UpdatedAt),
 	}
 }
 

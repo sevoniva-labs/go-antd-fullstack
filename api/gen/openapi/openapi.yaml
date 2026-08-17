@@ -169,6 +169,70 @@ paths:
             security:
                 - SessionCookie: []
                 - BearerAuth: []
+    /api/v1/admin/positions:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListPositions
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListPositionsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreatePosition
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreatePositionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreatePositionResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/positions/{positionId}:
+        patch:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdatePosition
+            parameters:
+                - name: positionId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdatePositionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdatePositionResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/roles:
         get:
             tags:
@@ -742,6 +806,26 @@ components:
             properties:
                 department:
                     $ref: '#/components/schemas/forge.v1.Department'
+        forge.v1.CreatePositionRequest:
+            type: object
+            properties:
+                positionKey:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                departmentId:
+                    type: string
+                status:
+                    type: string
+                sortOrder:
+                    type: string
+        forge.v1.CreatePositionResponse:
+            type: object
+            properties:
+                position:
+                    $ref: '#/components/schemas/forge.v1.Position'
         forge.v1.CreateUserRequest:
             type: object
             properties:
@@ -877,6 +961,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.Permission'
+        forge.v1.ListPositionsResponse:
+            type: object
+            properties:
+                positions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.Position'
         forge.v1.ListRolesResponse:
             type: object
             properties:
@@ -956,6 +1047,31 @@ components:
                     type: string
                 action:
                     type: string
+        forge.v1.Position:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                departmentId:
+                    type: string
+                positionKey:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                sortOrder:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
         forge.v1.ReadinessResponse:
             type: object
             properties:
@@ -1110,6 +1226,26 @@ components:
             properties:
                 organization:
                     $ref: '#/components/schemas/forge.v1.Organization'
+        forge.v1.UpdatePositionRequest:
+            type: object
+            properties:
+                positionId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                departmentId:
+                    type: string
+                status:
+                    type: string
+                sortOrder:
+                    type: string
+        forge.v1.UpdatePositionResponse:
+            type: object
+            properties:
+                position:
+                    $ref: '#/components/schemas/forge.v1.Position'
         forge.v1.UpdateRolePermissionsRequest:
             type: object
             properties:

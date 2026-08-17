@@ -61,6 +61,19 @@ export type ForgeV1CreateDepartmentResponse = {
     department?: ForgeV1Department;
 };
 
+export type ForgeV1CreatePositionRequest = {
+    positionKey?: string;
+    name?: string;
+    description?: string;
+    departmentId?: string;
+    status?: string;
+    sortOrder?: string;
+};
+
+export type ForgeV1CreatePositionResponse = {
+    position?: ForgeV1Position;
+};
+
 export type ForgeV1CreateUserRequest = {
     loginName?: string;
     displayName?: string;
@@ -148,6 +161,10 @@ export type ForgeV1ListPermissionsResponse = {
     permissions?: Array<ForgeV1Permission>;
 };
 
+export type ForgeV1ListPositionsResponse = {
+    positions?: Array<ForgeV1Position>;
+};
+
 export type ForgeV1ListRolesResponse = {
     roles?: Array<ForgeV1Role>;
 };
@@ -197,6 +214,19 @@ export type ForgeV1Permission = {
     description?: string;
     resource?: string;
     action?: string;
+};
+
+export type ForgeV1Position = {
+    id?: string;
+    organizationId?: string;
+    departmentId?: string;
+    positionKey?: string;
+    name?: string;
+    description?: string;
+    status?: string;
+    sortOrder?: string;
+    createdAt?: string;
+    updatedAt?: string;
 };
 
 export type ForgeV1ReadinessResponse = {
@@ -298,6 +328,19 @@ export type ForgeV1UpdateOrganizationRequest = {
 
 export type ForgeV1UpdateOrganizationResponse = {
     organization?: ForgeV1Organization;
+};
+
+export type ForgeV1UpdatePositionRequest = {
+    positionId?: string;
+    name?: string;
+    description?: string;
+    departmentId?: string;
+    status?: string;
+    sortOrder?: string;
+};
+
+export type ForgeV1UpdatePositionResponse = {
+    position?: ForgeV1Position;
 };
 
 export type ForgeV1UpdateRolePermissionsRequest = {
@@ -479,6 +522,56 @@ export type PlatformServiceListPermissionsResponses = {
 };
 
 export type PlatformServiceListPermissionsResponse = PlatformServiceListPermissionsResponses[keyof PlatformServiceListPermissionsResponses];
+
+export type PlatformServiceListPositionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/positions';
+};
+
+export type PlatformServiceListPositionsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListPositionsResponse;
+};
+
+export type PlatformServiceListPositionsResponse = PlatformServiceListPositionsResponses[keyof PlatformServiceListPositionsResponses];
+
+export type PlatformServiceCreatePositionData = {
+    body: ForgeV1CreatePositionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/positions';
+};
+
+export type PlatformServiceCreatePositionResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreatePositionResponse;
+};
+
+export type PlatformServiceCreatePositionResponse = PlatformServiceCreatePositionResponses[keyof PlatformServiceCreatePositionResponses];
+
+export type PlatformServiceUpdatePositionData = {
+    body: ForgeV1UpdatePositionRequest;
+    path: {
+        positionId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/positions/{positionId}';
+};
+
+export type PlatformServiceUpdatePositionResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdatePositionResponse;
+};
+
+export type PlatformServiceUpdatePositionResponse = PlatformServiceUpdatePositionResponses[keyof PlatformServiceUpdatePositionResponses];
 
 export type PlatformServiceListRolesData = {
     body?: never;

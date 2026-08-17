@@ -21,6 +21,8 @@ CSRF_REQUIRED = {
     ("post", "/api/v1/admin/users"),
     ("post", "/api/v1/admin/departments"),
     ("patch", "/api/v1/admin/departments/{department_id}"),
+    ("post", "/api/v1/admin/positions"),
+    ("patch", "/api/v1/admin/positions/{position_id}"),
     ("patch", "/api/v1/admin/organization"),
     ("put", "/api/v1/admin/security-config"),
     ("put", "/api/v1/admin/roles/{role_key}/permissions"),

@@ -155,6 +155,33 @@ service PlatformService {
       ]
     };
   }
+  rpc ListPositions(ListPositionsRequest) returns (ListPositionsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/positions"};
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
+  rpc CreatePosition(CreatePositionRequest) returns (CreatePositionResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/positions" body: "*"};
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
+  rpc UpdatePosition(UpdatePositionRequest) returns (UpdatePositionResponse) {
+    option (google.api.http) = {patch: "/api/v1/admin/positions/{position_id}" body: "*"};
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
   rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
     option (google.api.http) = {get: "/api/v1/admin/organization"};
     option (openapi.v3.operation) = {
@@ -677,6 +704,33 @@ message UpdateDepartmentRequest {
 }
 message UpdateDepartmentResponse {
   Department department = 1;
+}
+
+message ListPositionsRequest {}
+message ListPositionsResponse {
+  repeated Position positions = 1;
+}
+message CreatePositionRequest {
+  string position_key = 1;
+  string name = 2;
+  string description = 3;
+  string department_id = 4;
+  string status = 5;
+  int64 sort_order = 6;
+}
+message CreatePositionResponse {
+  Position position = 1;
+}
+message UpdatePositionRequest {
+  string position_id = 1;
+  string name = 2;
+  string description = 3;
+  string department_id = 4;
+  string status = 5;
+  int64 sort_order = 6;
+}
+message UpdatePositionResponse {
+  Position position = 1;
 }
 
 message GetOrganizationRequest {}

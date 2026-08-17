@@ -221,7 +221,7 @@ func (w *responseRecorder) Unwrap() http.ResponseWriter { return w.ResponseWrite
 
 func metricRoute(path string) string {
 	for _, prefix := range []string{
-		"/api/v1/admin/users/", "/api/v1/admin/departments/", "/api/v1/admin/sessions/", "/api/v1/admin/roles/", "/api/v1/api-tokens/",
+		"/api/v1/admin/users/", "/api/v1/admin/departments/", "/api/v1/admin/positions/", "/api/v1/admin/sessions/", "/api/v1/admin/roles/", "/api/v1/api-tokens/",
 	} {
 		if strings.HasPrefix(path, prefix) {
 			return prefix + ":id"
@@ -230,7 +230,7 @@ func metricRoute(path string) string {
 	for _, exact := range []string{
 		"/api/v1/system/health", "/api/v1/system/ready", "/api/v1/system/info", "/api/v1/auth/login",
 		"/api/v1/auth/logout", "/api/v1/auth/password", "/api/v1/me", "/api/v1/api-tokens",
-		"/api/v1/admin/users", "/api/v1/admin/departments", "/api/v1/admin/organization", "/api/v1/admin/security-config",
+		"/api/v1/admin/users", "/api/v1/admin/departments", "/api/v1/admin/positions", "/api/v1/admin/organization", "/api/v1/admin/security-config",
 		"/api/v1/admin/roles", "/api/v1/admin/permissions", "/api/v1/admin/sessions",
 		"/api/v1/admin/audit-logs", "/api/v1/admin/audit-logs/export", "/metrics",
 	} {

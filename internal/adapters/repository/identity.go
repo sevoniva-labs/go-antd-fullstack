@@ -531,6 +531,66 @@ func nullableString(value string) any {
 	return value
 }
 
+func (r *IdentityRepo) ListPositions(ctx context.Context, orgID string) ([]identity.Position, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,department_id,position_key,name,description,status,sort_order,created_at,updated_at FROM positions WHERE organization_id=? ORDER BY sort_order,position_key`), orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]identity.Position, 0)
+	for rows.Next() {
+		var item identity.Position
+		if err := rows.Scan(&item.ID, &item.OrganizationID, &item.DepartmentID, &item.Key, &item.Name, &item.Description, &item.Status, &item.SortOrder, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, item)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) PositionByID(ctx context.Context, orgID, positionID string) (identity.Position, error) {
+	var out identity.Position
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,organization_id,department_id,position_key,name,description,status,sort_order,created_at,updated_at FROM positions WHERE organization_id=? AND id=?`), orgID, positionID).
+		Scan(&out.ID, &out.OrganizationID, &out.DepartmentID, &out.Key, &out.Name, &out.Description, &out.Status, &out.SortOrder, &out.CreatedAt, &out.UpdatedAt)
+	return out, err
+}
+
+func (r *IdentityRepo) CreatePosition(ctx context.Context, req identity.Position) (identity.Position, error) {
+	now := time.Now().UTC()
+	req.ID = uuid.NewString()
+	req.CreatedAt = now
+	req.UpdatedAt = now
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO positions(id,organization_id,department_id,position_key,name,description,status,sort_order,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)`),
+		req.ID, req.OrganizationID, req.DepartmentID, req.Key, req.Name, req.Description, req.Status, req.SortOrder, now, now)
+	if err != nil {
+		return identity.Position{}, err
+	}
+	return req, nil
+}
+
+func (r *IdentityRepo) UpdatePosition(ctx context.Context, req identity.Position) (identity.Position, error) {
+	now := time.Now().UTC()
+	result, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE positions SET department_id=?,name=?,description=?,status=?,sort_order=?,updated_at=? WHERE organization_id=? AND id=?`),
+		req.DepartmentID, req.Name, req.Description, req.Status, req.SortOrder, now, req.OrganizationID, req.ID)
+	if err != nil {
+		return identity.Position{}, err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return identity.Position{}, err
+	}
+	if count != 1 {
+		return identity.Position{}, sql.ErrNoRows
+	}
+	return r.PositionByID(ctx, req.OrganizationID, req.ID)
+}
+
+func (r *IdentityRepo) CountActivePositions(ctx context.Context, orgID, departmentID string) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM positions WHERE organization_id=? AND department_id=? AND status='ACTIVE'`), orgID, departmentID).Scan(&count)
+	return count, err
+}
+
 func (r *IdentityRepo) ListUserSessionIDs(ctx context.Context, userID string) ([]string, error) {
 	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id FROM sessions WHERE user_id=? AND expires_at>? ORDER BY created_at ASC`), userID, time.Now().UTC())
 	if err != nil {

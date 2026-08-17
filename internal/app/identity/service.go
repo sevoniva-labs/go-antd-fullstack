@@ -30,6 +30,7 @@ var ErrLastSystemAdmin = repository.ErrLastSystemAdmin
 var ErrPasswordStateChanged = repository.ErrPasswordStateChanged
 var ErrInteractiveSessionRequired = errors.New("interactive user session required")
 var ErrInvalidDepartment = errors.New("invalid department")
+var ErrInvalidPosition = errors.New("invalid position")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -89,6 +90,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.role.read", "查看角色权限"}, {"system.role.manage", "管理角色权限"},
 	{"system.organization.read", "查看组织信息"}, {"system.organization.manage", "管理组织信息"},
 	{"system.department.read", "查看部门"}, {"system.department.manage", "管理部门"},
+	{"system.position.read", "查看岗位"}, {"system.position.manage", "管理岗位"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
 	{"system.audit.read", "查看审计日志"}, {"system.audit.export", "导出审计日志"},
 	{"system.config.read", "查看系统配置"}, {"system.security.manage", "管理安全配置"},
@@ -112,7 +114,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.session.read", "system.session.revoke", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
@@ -767,6 +769,15 @@ func (s *Service) UpdateDepartment(ctx context.Context, actor domain.Principal, 
 	if err := validateDepartmentHierarchy(items, clean, false); err != nil {
 		return domain.Department{}, err
 	}
+	if clean.Status == "DISABLED" {
+		active, err := s.repo.CountActivePositions(ctx, orgID, clean.ID)
+		if err != nil {
+			return domain.Department{}, err
+		}
+		if active > 0 {
+			return domain.Department{}, ErrInvalidDepartment
+		}
+	}
 	return s.repo.UpdateDepartment(ctx, clean)
 }
 
@@ -842,6 +853,95 @@ func validateDepartmentHierarchy(items []domain.Department, candidate domain.Dep
 		}
 	}
 	return nil
+}
+
+func (s *Service) ListPositions(ctx context.Context, orgID string) ([]domain.Position, error) {
+	return s.repo.ListPositions(ctx, orgID)
+}
+
+func (s *Service) CreatePosition(ctx context.Context, actor domain.Principal, orgID string, req domain.Position) (domain.Position, error) {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return domain.Position{}, err
+	}
+	req.OrganizationID = orgID
+	clean, err := normalizePosition(req, true)
+	if err != nil {
+		return domain.Position{}, err
+	}
+	departments, err := s.repo.ListDepartmentsForUpdate(ctx, orgID)
+	if err != nil {
+		return domain.Position{}, err
+	}
+	if err := validatePositionDepartment(departments, clean); err != nil {
+		return domain.Position{}, err
+	}
+	return s.repo.CreatePosition(ctx, clean)
+}
+
+func (s *Service) UpdatePosition(ctx context.Context, actor domain.Principal, orgID, positionID string, req domain.Position) (domain.Position, error) {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return domain.Position{}, err
+	}
+	positionID = strings.TrimSpace(positionID)
+	if positionID == "" {
+		return domain.Position{}, ErrInvalidPosition
+	}
+	current, err := s.repo.PositionByID(ctx, orgID, positionID)
+	if err != nil {
+		return domain.Position{}, err
+	}
+	req.ID = current.ID
+	req.OrganizationID = orgID
+	req.Key = current.Key
+	req.CreatedAt = current.CreatedAt
+	clean, err := normalizePosition(req, false)
+	if err != nil {
+		return domain.Position{}, err
+	}
+	departments, err := s.repo.ListDepartmentsForUpdate(ctx, orgID)
+	if err != nil {
+		return domain.Position{}, err
+	}
+	if err := validatePositionDepartment(departments, clean); err != nil {
+		return domain.Position{}, err
+	}
+	return s.repo.UpdatePosition(ctx, clean)
+}
+
+func normalizePosition(req domain.Position, creating bool) (domain.Position, error) {
+	req.ID = strings.TrimSpace(req.ID)
+	req.OrganizationID = strings.TrimSpace(req.OrganizationID)
+	req.DepartmentID = strings.TrimSpace(req.DepartmentID)
+	req.Key = strings.TrimSpace(req.Key)
+	req.Name = strings.TrimSpace(req.Name)
+	req.Description = strings.TrimSpace(req.Description)
+	req.Status = strings.ToUpper(strings.TrimSpace(req.Status))
+	if creating && req.Status == "" {
+		req.Status = "ACTIVE"
+	}
+	if req.OrganizationID == "" || req.DepartmentID == "" || req.Name == "" || len(req.Name) > 200 || len(req.Description) > 500 || req.SortOrder < 0 || req.SortOrder > 1_000_000 {
+		return domain.Position{}, ErrInvalidPosition
+	}
+	if req.Status != "ACTIVE" && req.Status != "DISABLED" {
+		return domain.Position{}, ErrInvalidPosition
+	}
+	if creating && (req.Key == "" || len(req.Key) > 100 || !validDirectoryKey(req.Key)) {
+		return domain.Position{}, ErrInvalidPosition
+	}
+	return req, nil
+}
+
+func validatePositionDepartment(departments []domain.Department, position domain.Position) error {
+	for _, department := range departments {
+		if department.ID != position.DepartmentID {
+			continue
+		}
+		if department.OrganizationID != position.OrganizationID || (position.Status == "ACTIVE" && department.Status != "ACTIVE") {
+			return ErrInvalidPosition
+		}
+		return nil
+	}
+	return ErrInvalidPosition
 }
 
 func (s *Service) ListRoles(ctx context.Context, orgID string) ([]domain.Role, error) {

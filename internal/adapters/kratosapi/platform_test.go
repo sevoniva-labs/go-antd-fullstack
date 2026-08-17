@@ -24,6 +24,10 @@ func TestPlatformProtoMappings(t *testing.T) {
 	if department.Id != "dept-1" || department.ParentId != "dept-0" || department.DepartmentKey != "risk" || department.SortOrder != 10 {
 		t.Fatalf("unexpected department mapping: %+v", department)
 	}
+	position := positionProto(domain.Position{ID: "position-1", OrganizationID: "org-1", DepartmentID: "dept-1", Key: "reviewer", Name: "Reviewer", Status: "ACTIVE", SortOrder: 20, CreatedAt: now})
+	if position.Id != "position-1" || position.DepartmentId != "dept-1" || position.PositionKey != "reviewer" || position.SortOrder != 20 {
+		t.Fatalf("unexpected position mapping: %+v", position)
+	}
 	policy := securityPolicyProto(domain.SecurityPolicy{PasswordMinLength: 14, SessionTTLSeconds: 3600, MaxConcurrentSessions: 2})
 	if policy.PasswordMinLength != 14 || policy.SessionTtlSeconds != 3600 || policy.MaxActiveSessions != 2 {
 		t.Fatalf("unexpected policy mapping: %+v", policy)

@@ -26,6 +26,19 @@ type Department struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+type Position struct {
+	ID             string    `json:"id"`
+	OrganizationID string    `json:"organization_id"`
+	DepartmentID   string    `json:"department_id"`
+	Key            string    `json:"position_key"`
+	Name           string    `json:"name"`
+	Description    string    `json:"description"`
+	Status         string    `json:"status"`
+	SortOrder      int       `json:"sort_order"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type SecurityPolicy struct {
 	PasswordMinLength        int   `json:"password_min_length"`
 	PasswordRequireUpper     bool  `json:"password_require_upper"`
