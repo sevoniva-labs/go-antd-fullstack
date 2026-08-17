@@ -2,10 +2,10 @@ SHELL := /bin/bash
 APP ?= forge
 MODULE ?= github.com/sevoniva-labs/forge
 GOPROXY ?= https://goproxy.cn
-GOSUMDB ?= sum.golang.google.cn
+GOSUMDB ?= sum.golang.org https://goproxy.cn/sumdb/sum.golang.org
 NPM_REGISTRY ?= https://registry.npmmirror.com
 PNPM = corepack pnpm
-GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
+GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
@@ -129,7 +129,7 @@ ci-deploy: ci-policy
 	helm template forge deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml >/tmp/forge-rendered.yaml
 
 security-tools: ci-policy
-	$(TOOL_RUN) github.com/securego/gosec/v2/cmd/gosec ./...
+	$(TOOL_RUN) github.com/securego/gosec/v2/cmd/gosec -exclude-generated ./...
 	$(TOOL_RUN) golang.org/x/vuln/cmd/govulncheck ./...
 	$(TOOL_RUN) honnef.co/go/tools/cmd/staticcheck ./...
 	$(TOOL_RUN) github.com/golangci/golangci-lint/v2/cmd/golangci-lint run ./...

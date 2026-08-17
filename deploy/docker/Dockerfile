@@ -15,7 +15,7 @@ RUN pnpm --filter sevoniva-forge-web build
 FROM ${GO_IMAGE} AS go-build
 ARG VERSION=container
 ARG GOPROXY=https://goproxy.cn
-ARG GOSUMDB=sum.golang.google.cn
+ARG GOSUMDB="sum.golang.org https://goproxy.cn/sumdb/sum.golang.org"
 ENV GOPROXY=${GOPROXY} GOSUMDB=${GOSUMDB}
 WORKDIR /src
 COPY go.mod go.sum ./

@@ -5,7 +5,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 
 export GOPROXY=${GOPROXY:-https://goproxy.cn}
-export GOSUMDB=${GOSUMDB:-sum.golang.google.cn}
+export GOSUMDB="${GOSUMDB:-sum.golang.org https://goproxy.cn/sumdb/sum.golang.org}"
 export npm_config_registry=${NPM_REGISTRY:-https://registry.npmmirror.com}
 OUT=${EVIDENCE_DIR:-.evidence}
 TOOL_RUN=(go run -modfile=tools/go.mod)
