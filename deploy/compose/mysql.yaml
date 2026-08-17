@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql:8.4
+    image: ${MYSQL_IMAGE:?set MYSQL_IMAGE to an internal Harbor digest}
     environment:
       MYSQL_DATABASE: forge
       MYSQL_USER: forge

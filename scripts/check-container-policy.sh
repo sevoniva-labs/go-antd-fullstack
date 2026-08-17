@@ -21,8 +21,8 @@ for text in "${required[@]}"; do
 done
 
 for forbidden in 'apt-get' 'docker.io' 'ghcr.io' ':latest'; do
-  if rg -Fq "$forbidden" deploy/docker/Dockerfile; then
-    echo "Dockerfile contains forbidden floating or online dependency: $forbidden" >&2
+  if rg -Fq "$forbidden" deploy/docker/Dockerfile deploy/compose; then
+    echo "container configuration contains forbidden floating or online dependency: $forbidden" >&2
     exit 1
   fi
 done
@@ -31,6 +31,18 @@ if rg -n '(^|[[:space:]])npm[[:space:]]+(install|ci)([[:space:]]|$)' deploy/dock
   echo "Dockerfile must use frozen pnpm installation, not npm install/ci" >&2
   exit 1
 fi
+
+if rg -n '^\s*image:\s+[^$]' deploy/compose --glob '*.{yaml,yml}'; then
+  echo "Compose images must be supplied as internal digest variables" >&2
+  exit 1
+fi
+
+while IFS= read -r image_line; do
+  [[ "$image_line" == *':?'* ]] || {
+    echo "Compose image variables must fail when unset: $image_line" >&2
+    exit 1
+  }
+done < <(rg '^\s*image:' deploy/compose --glob '*.{yaml,yml}')
 
 if rg -n '^FROM[[:space:]]+[^$]' deploy/docker/Dockerfile; then
   echo "every base image must be supplied as an internal digest build argument" >&2

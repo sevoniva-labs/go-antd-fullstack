@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    image: ${POSTGRES_IMAGE:?set POSTGRES_IMAGE to an internal Harbor digest}
     environment:
       POSTGRES_DB: forge
       POSTGRES_USER: forge
@@ -13,7 +13,7 @@ services:
     volumes: ["postgres_data:/var/lib/postgresql/data"]
 
   redis:
-    image: ${REDIS_IMAGE:-redis:8-alpine}
+    image: ${REDIS_IMAGE:?set REDIS_IMAGE to an internal Harbor digest}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -22,7 +22,7 @@ services:
     volumes: ["redis_data:/data"]
 
   kafka:
-    image: ${KAFKA_IMAGE:-apache/kafka:4.1.0}
+    image: ${KAFKA_IMAGE:?set KAFKA_IMAGE to an internal Harbor digest}
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -39,7 +39,7 @@ services:
       retries: 20
 
   elasticsearch:
-    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:9.1.3}
+    image: ${ELASTICSEARCH_IMAGE:?set ELASTICSEARCH_IMAGE to an internal Harbor digest}
     environment:
       discovery.type: single-node
       xpack.security.enabled: "false"
@@ -52,7 +52,7 @@ services:
     volumes: ["es_data:/usr/share/elasticsearch/data"]
 
   s3:
-    image: ${S3_IMAGE:-minio/minio:latest}
+    image: ${S3_IMAGE:?set S3_IMAGE to an internal Harbor digest}
     command: server /data --console-address :9001
     environment:
       MINIO_ROOT_USER: ${FORGE_STORAGE_ACCESS_KEY:?set FORGE_STORAGE_ACCESS_KEY in .env}
@@ -60,7 +60,7 @@ services:
     volumes: ["s3_data:/data"]
 
   s3-init:
-    image: ${S3_MC_IMAGE:-minio/mc:latest}
+    image: ${S3_MC_IMAGE:?set S3_MC_IMAGE to an internal Harbor digest}
     environment:
       FORGE_STORAGE_ENDPOINT: ${FORGE_STORAGE_ENDPOINT:-http://s3:9000}
       FORGE_STORAGE_BUCKET: ${FORGE_STORAGE_BUCKET:-forge}

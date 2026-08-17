@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    image: ${POSTGRES_IMAGE:?set POSTGRES_IMAGE to an internal Harbor digest}
     environment:
       POSTGRES_DB: forge
       POSTGRES_USER: forge

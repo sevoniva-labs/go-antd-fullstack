@@ -2,7 +2,7 @@
 # authentication, TLS/network controls, backup and HA according to local policy.
 services:
   nacos:
-    image: ${NACOS_IMAGE:-nacos/nacos-server:v3.2.3}
+    image: ${NACOS_IMAGE:?set NACOS_IMAGE to an internal Harbor digest}
     environment:
       MODE: standalone
       NACOS_AUTH_ENABLE: "true"
