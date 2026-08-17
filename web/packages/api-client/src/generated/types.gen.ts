@@ -550,6 +550,7 @@ export type ForgeV1UpdateUserGroupRolesResponse = {
 export type ForgeV1UpdateUserRolesRequest = {
     userId?: string;
     roles?: Array<string>;
+    approvalId?: string;
 };
 
 export type ForgeV1UpdateUserRolesResponse = {

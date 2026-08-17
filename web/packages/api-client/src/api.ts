@@ -108,8 +108,8 @@ export const api = {
   users: () => apiFetch<{ items: User[] }>('/admin/users'),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
-  updateUserRoles: (userId: string, roles: string[]) =>
-    apiFetch<void>(`/admin/users/${userId}/roles`, { method: 'PATCH', body: JSON.stringify({ roles }) }),
+  updateUserRoles: (userId: string, roles: string[], approvalId: string) =>
+    apiFetch<void>(`/admin/users/${userId}/roles`, { method: 'PATCH', body: JSON.stringify({ roles, approval_id: approvalId }) }),
   updateUserStatus: (userId: string, status: 'ACTIVE' | 'DISABLED') =>
     apiFetch<void>(`/admin/users/${userId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   unlockUser: (userId: string) =>

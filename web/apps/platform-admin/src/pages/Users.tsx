@@ -41,7 +41,7 @@ export function UsersPage() {
     },
   })
   const updateRoles = useMutation({
-    mutationFn: ({ userId, roleKeys }: { userId: string; roleKeys: string[] }) => api.updateUserRoles(userId, roleKeys),
+    mutationFn: ({ userId, roleKeys, approvalId }: { userId: string; roleKeys: string[]; approvalId: string }) => api.updateUserRoles(userId, roleKeys, approvalId),
     onSuccess: async () => {
       message.success('用户角色已更新')
       await refresh()
@@ -114,11 +114,17 @@ export function UsersPage() {
               trigger={<Button type="link" icon={<EditOutlined />}>角色</Button>}
               initialValues={{ roles: row.roles }}
               onFinish={async (values) => {
-                await updateRoles.mutateAsync({ userId: row.id, roleKeys: values.roles || ['user'] })
+                await updateRoles.mutateAsync({ userId: row.id, roleKeys: values.roles || ['user'], approvalId: values.approval_id })
                 return true
               }}
             >
               <ProFormSelect name="roles" label="角色" fieldProps={{ mode: 'multiple' }} options={roleOptions} rules={[{ required: true }]} />
+              <ProFormText
+                name="approval_id"
+                label="审批执行票据"
+                tooltip="请先在审批中心创建 USER_ROLE_CHANGE 申请；操作 user.roles.update，资源 user，资源 ID 为当前用户 ID，载荷为按角色标识排序后的 roles 数组。"
+                rules={[{ required: true, message: '请输入已通过审批的执行票据 ID' }]}
+              />
             </ModalForm>}
 
             {!isSelf && canUpdate && (
