@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,8 +34,11 @@ func (w *Writer) Write(ctx context.Context, e Event) error {
 	if e.Result == "" {
 		e.Result = "SUCCESS"
 	}
-	raw, _ := json.Marshal(e.Details)
-	_, err := w.db.ExecContext(ctx, w.db.Rebind(`INSERT INTO audit_logs(id,occurred_at,request_id,organization_id,actor_id,actor_name,action,resource_type,resource_id,result,client_ip,details_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`), uuid.NewString(), time.Now().UTC(), e.RequestID, nullIfEmpty(e.OrganizationID), nullIfEmpty(e.ActorID), e.ActorName, e.Action, e.ResourceType, e.ResourceID, e.Result, e.ClientIP, string(raw))
+	raw, err := json.Marshal(e.Details)
+	if err != nil {
+		return fmt.Errorf("encode audit details: %w", err)
+	}
+	_, err = w.db.ExecContext(ctx, w.db.Rebind(`INSERT INTO audit_logs(id,occurred_at,request_id,organization_id,actor_id,actor_name,action,resource_type,resource_id,result,client_ip,details_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`), uuid.NewString(), time.Now().UTC(), e.RequestID, nullIfEmpty(e.OrganizationID), nullIfEmpty(e.ActorID), e.ActorName, e.Action, e.ResourceType, e.ResourceID, e.Result, e.ClientIP, string(raw))
 	return err
 }
 

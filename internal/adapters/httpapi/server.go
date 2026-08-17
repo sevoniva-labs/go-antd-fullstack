@@ -232,7 +232,13 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.ChangePassword(r.Context(), *p, req.CurrentPassword, req.NewPassword); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "auth.password.change", ClientIP: s.clientIP(r)}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.ChangePassword(ctx, *p, req.CurrentPassword, req.NewPassword)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		code, msg := "PASSWORD_CHANGE_FAILED", "密码修改失败"
 		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
 			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "修改密码仅允许交互式用户会话", RequestID(r), TraceID(r))
@@ -246,9 +252,6 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 		}
 		httpx.Error(w, 400, code, msg, RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "auth.password.change", ClientIP: s.clientIP(r)})
 	}
 	httpx.Success(w, http.StatusOK, nil, RequestID(r), TraceID(r))
 }
@@ -588,7 +591,13 @@ func (s *Server) resetUserPassword(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.AdminResetPassword(r.Context(), p.OrganizationID, userID, req.Password); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.password.reset", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r)}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.AdminResetPassword(ctx, p.OrganizationID, userID, req.Password)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		code, msg, status := "PASSWORD_RESET_FAILED", "密码重置失败", http.StatusBadRequest
 		if errors.Is(err, appidentity.ErrPasswordPolicy) {
 			code, msg = "PASSWORD_POLICY_VIOLATION", "新密码不符合安全策略"
@@ -601,9 +610,6 @@ func (s *Server) resetUserPassword(w http.ResponseWriter, r *http.Request) {
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "user.password.reset", ResourceType: "user", ResourceID: userID, ClientIP: s.clientIP(r)})
 	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
@@ -621,16 +627,19 @@ func (s *Server) listSessions(w http.ResponseWriter, r *http.Request) {
 func (s *Server) revokeSession(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	sessionID := chi.URLParam(r, "sessionID")
-	if err := s.identity.RevokeSession(r.Context(), p.OrganizationID, sessionID, p.SessionID); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "session.revoke", ResourceType: "session", ResourceID: sessionID, ClientIP: s.clientIP(r)}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.RevokeSession(ctx, p.OrganizationID, sessionID, p.SessionID)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		status, code, msg := http.StatusBadRequest, "SESSION_REVOKE_FAILED", "会话下线失败"
 		if errors.Is(err, sql.ErrNoRows) {
 			status, code, msg = http.StatusNotFound, "NOT_FOUND", "会话不存在"
 		}
 		httpx.Error(w, status, code, msg, RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "session.revoke", ResourceType: "session", ResourceID: sessionID, ClientIP: s.clientIP(r)})
 	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
@@ -865,8 +874,22 @@ func (s *Server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 	if days == 0 {
 		days = 90
 	}
-	t, raw, err := s.identity.CreateAPIToken(r.Context(), *p, req.Name, req.Scopes, time.Duration(days)*24*time.Hour)
+	var t domain.APIToken
+	var raw string
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.api_token.create", ResourceType: "api_token", ClientIP: s.clientIP(r)}
+	err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		var err error
+		t, raw, err = s.identity.CreateAPIToken(ctx, *p, req.Name, req.Scopes, time.Duration(days)*24*time.Hour)
+		if err == nil {
+			event.ResourceID = t.ID
+			event.Details = map[string]any{"name": t.Name, "scopes": t.Scopes}
+		}
+		return err
+	})
 	if err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
 			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "API Token 管理仅允许交互式用户会话", RequestID(r), TraceID(r))
 			return
@@ -874,24 +897,24 @@ func (s *Server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_REQUEST", "API Token 创建失败", RequestID(r), TraceID(r))
 		return
 	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.api_token.create", ResourceType: "api_token", ResourceID: t.ID, ClientIP: s.clientIP(r), Details: map[string]any{"name": t.Name, "scopes": t.Scopes}})
-	}
 	httpx.Success(w, http.StatusCreated, map[string]any{"token": t, "secret": raw, "warning": "secret 仅本次返回，请立即保存"}, RequestID(r), TraceID(r))
 }
 func (s *Server) revokeAPIToken(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	tokenID := chi.URLParam(r, "tokenID")
-	if err := s.identity.RevokeAPIToken(r.Context(), *p, tokenID); err != nil {
+	event := &audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.api_token.revoke", ResourceType: "api_token", ResourceID: tokenID, ClientIP: s.clientIP(r)}
+	if err := s.audited(r.Context(), event, func(ctx context.Context) error {
+		return s.identity.RevokeAPIToken(ctx, *p, tokenID)
+	}); err != nil {
+		if s.rejectAuditFailure(w, r, err) {
+			return
+		}
 		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
 			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "API Token 管理仅允许交互式用户会话", RequestID(r), TraceID(r))
 			return
 		}
 		httpx.Error(w, 404, "NOT_FOUND", "API Token 不存在", RequestID(r), TraceID(r))
 		return
-	}
-	if s.audit != nil {
-		_ = s.audit.Write(r.Context(), audit.Event{RequestID: RequestID(r), OrganizationID: p.OrganizationID, ActorID: p.UserID, ActorName: p.LoginName, Action: "security.api_token.revoke", ResourceType: "api_token", ResourceID: tokenID, ClientIP: s.clientIP(r)})
 	}
 	httpx.Success(w, 200, nil, RequestID(r), TraceID(r))
 }
