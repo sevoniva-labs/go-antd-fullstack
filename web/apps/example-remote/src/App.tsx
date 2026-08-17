@@ -140,7 +140,7 @@ export function App() {
             </Typography.Paragraph>
             <Button
               type="primary"
-              onClick={() => void hostSdk.navigate('/apps/example-remote/workbench')}
+              onClick={() => void hostSdk.navigate('/apps/example-remote')}
             >
               打开受控工作区
             </Button>

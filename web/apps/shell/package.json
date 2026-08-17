@@ -14,9 +14,13 @@
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "dependencies": {
+    "@forge/app-contract": "workspace:*",
     "@forge/api-client": "workspace:*",
     "@forge/auth-sdk": "workspace:*",
     "@forge/design-system": "workspace:*",
+    "@forge/host-sdk": "workspace:*",
+    "@forge/manifest-security": "workspace:*",
+    "@forge/microapp-runtime": "workspace:*",
     "@forge/observability": "workspace:*",
     "@forge/platform-admin": "workspace:*",
     "@ant-design/icons": "6.3.2",

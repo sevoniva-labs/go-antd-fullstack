@@ -117,12 +117,24 @@ importers:
       '@forge/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@forge/app-contract':
+        specifier: workspace:*
+        version: link:../../packages/app-contract
       '@forge/auth-sdk':
         specifier: workspace:*
         version: link:../../packages/auth-sdk
       '@forge/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@forge/host-sdk':
+        specifier: workspace:*
+        version: link:../../packages/host-sdk
+      '@forge/manifest-security':
+        specifier: workspace:*
+        version: link:../../packages/manifest-security
+      '@forge/microapp-runtime':
+        specifier: workspace:*
+        version: link:../../packages/microapp-runtime
       '@forge/observability':
         specifier: workspace:*
         version: link:../../packages/observability

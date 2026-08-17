@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  AppstoreOutlined,
   AuditOutlined,
   DashboardOutlined,
   FileProtectOutlined,
@@ -31,6 +32,7 @@ const SystemStatusPage = lazy(() => import('@forge/platform-admin/system-status'
 const AccountSecurityPage = lazy(() => import('../../pages/AccountSecurity').then((m) => ({ default: m.AccountSecurityPage })))
 const ApiTokensPage = lazy(() => import('../../pages/ApiTokens').then((m) => ({ default: m.ApiTokensPage })))
 const ComponentShowcasePage = lazy(() => import('../../pages/ComponentShowcase').then((m) => ({ default: m.ComponentShowcasePage })))
+const MicroAppPage = lazy(() => import('../../pages/MicroApp').then((m) => ({ default: m.MicroAppPage })))
 
 export interface AppRoute {
   path: string
@@ -78,6 +80,8 @@ export const appRoutes: AppRoute[] = [
 
   { path: '/account/security', name: '账号安全', icon: <LockOutlined />, group: '个人中心', menu: true, component: AccountSecurityPage },
   { path: '/account/api-tokens', name: 'API Token', icon: <KeyOutlined />, group: '个人中心', menu: true, component: ApiTokensPage },
+
+  ...(runtimeConfig.microFrontendsEnabled ? [{ path: '/apps/example-remote', name: '示例微应用', icon: <AppstoreOutlined />, permission: 'example.remote.read', group: '业务应用', menu: true, component: MicroAppPage } satisfies AppRoute] : []),
 
   ...(runtimeConfig.componentPlayground ? [{ path: '/dev/components', name: '组件示例', icon: <CodeOutlined />, group: '开发工具', menu: true, component: ComponentShowcasePage } satisfies AppRoute] : []),
 ]

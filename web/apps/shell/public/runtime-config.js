@@ -17,5 +17,8 @@ window.__FORGE_CONFIG__ = {
   pageTabs: true,
   showEnvironmentBadge: true,
   componentPlayground: true,
+  microFrontendsEnabled: false,
+  microAppManifestUrl: '/microapps/example-remote/manifest.bundle.json',
+  microAppFeatureFlags: [],
   footerText: ''
 }

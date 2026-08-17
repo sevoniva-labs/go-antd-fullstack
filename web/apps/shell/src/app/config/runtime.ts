@@ -20,6 +20,9 @@ export interface RuntimeConfig {
   pageTabs: boolean
   showEnvironmentBadge: boolean
   componentPlayground: boolean
+  microFrontendsEnabled: boolean
+  microAppManifestUrl: string
+  microAppFeatureFlags: string[]
   footerText: string
 }
 
@@ -42,6 +45,9 @@ const defaults: RuntimeConfig = {
   pageTabs: true,
   showEnvironmentBadge: true,
   componentPlayground: true,
+  microFrontendsEnabled: false,
+  microAppManifestUrl: '/microapps/example-remote/manifest.bundle.json',
+  microAppFeatureFlags: [],
   footerText: '',
 }
 
