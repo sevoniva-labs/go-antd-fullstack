@@ -61,6 +61,20 @@ export interface Position {
   updated_at: string
 }
 
+export interface UserGroup {
+  id: string
+  organization_id: string
+  group_key: string
+  name: string
+  description: string
+  status: 'ACTIVE' | 'DISABLED'
+  roles: string[]
+  member_ids: string[]
+  member_count: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Permission {
   id: string
   permission_key: string

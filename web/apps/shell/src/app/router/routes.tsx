@@ -12,6 +12,7 @@ import {
   SettingOutlined,
   TeamOutlined,
   UserSwitchOutlined,
+  UsergroupAddOutlined,
   CodeOutlined,
 } from '@ant-design/icons'
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react'
@@ -29,6 +30,7 @@ const PermissionsPage = lazy(() => import('@forge/platform-admin/permissions').t
 const OrganizationPage = lazy(() => import('@forge/platform-admin/organization').then((m) => ({ default: m.OrganizationPage })))
 const DepartmentsPage = lazy(() => import('@forge/platform-admin/departments').then((m) => ({ default: m.DepartmentsPage })))
 const PositionsPage = lazy(() => import('@forge/platform-admin/positions').then((m) => ({ default: m.PositionsPage })))
+const UserGroupsPage = lazy(() => import('@forge/platform-admin/user-groups').then((m) => ({ default: m.UserGroupsPage })))
 const SessionsPage = lazy(() => import('@forge/platform-admin/sessions').then((m) => ({ default: m.SessionsPage })))
 const AuditLogsPage = lazy(() => import('@forge/platform-admin/audit-logs').then((m) => ({ default: m.AuditLogsPage })))
 const SecurityPage = lazy(() => import('@forge/platform-admin/security').then((m) => ({ default: m.SecurityPage })))
@@ -55,6 +57,7 @@ const platformAdminComponents: Record<PlatformAdminModuleKey, LazyExoticComponen
   organization: OrganizationPage,
   departments: DepartmentsPage,
   positions: PositionsPage,
+  'user-groups': UserGroupsPage,
   security: SecurityPage,
   sessions: SessionsPage,
   'audit-logs': AuditLogsPage,
@@ -68,6 +71,7 @@ const platformAdminIcons: Record<PlatformAdminModuleKey, ReactNode> = {
   organization: <ApartmentOutlined />,
   departments: <PartitionOutlined />,
   positions: <IdcardOutlined />,
+  'user-groups': <UsergroupAddOutlined />,
   security: <SafetyCertificateOutlined />,
   sessions: <LockOutlined />,
   'audit-logs': <AuditOutlined />,

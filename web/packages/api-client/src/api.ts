@@ -4,6 +4,7 @@ import type {
   AuditEvent,
   Department,
   Position,
+  UserGroup,
   Organization,
   Permission,
   Principal,
@@ -69,6 +70,15 @@ export const api = {
     status: 'ACTIVE' | 'DISABLED'
     sort_order: number
   }) => apiFetch<Position>(`/admin/positions/${encodeURIComponent(positionId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  userGroups: () => apiFetch<{ items: UserGroup[] }>('/admin/user-groups'),
+  createUserGroup: (payload: { group_key: string; name: string; description: string; status: 'ACTIVE' | 'DISABLED' }) =>
+    apiFetch<UserGroup>('/admin/user-groups', { method: 'POST', body: JSON.stringify(payload) }),
+  updateUserGroup: (groupId: string, payload: { name: string; description: string; status: 'ACTIVE' | 'DISABLED' }) =>
+    apiFetch<UserGroup>(`/admin/user-groups/${encodeURIComponent(groupId)}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  updateUserGroupMembers: (groupId: string, userIds: string[]) =>
+    apiFetch<void>(`/admin/user-groups/${encodeURIComponent(groupId)}/members`, { method: 'PUT', body: JSON.stringify({ user_ids: userIds }) }),
+  updateUserGroupRoles: (groupId: string, roles: string[]) =>
+    apiFetch<void>(`/admin/user-groups/${encodeURIComponent(groupId)}/roles`, { method: 'PUT', body: JSON.stringify({ roles }) }),
   securityConfig: () => apiFetch<SecurityPolicy>('/admin/security-config'),
   updateSecurityConfig: (payload: SecurityPolicy) =>
     apiFetch<SecurityPolicy>('/admin/security-config', { method: 'PUT', body: JSON.stringify(payload) }),

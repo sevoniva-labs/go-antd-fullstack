@@ -5,6 +5,7 @@ export type PlatformAdminModuleKey =
   | 'organization'
   | 'departments'
   | 'positions'
+  | 'user-groups'
   | 'security'
   | 'sessions'
   | 'audit-logs'
@@ -25,6 +26,7 @@ export const platformAdminModules: readonly PlatformAdminModule[] = [
   { key: 'organization', path: '/admin/organization', name: '组织信息', group: '系统管理', permission: 'system.organization.read' },
   { key: 'departments', path: '/admin/departments', name: '部门管理', group: '系统管理', permission: 'system.department.read' },
   { key: 'positions', path: '/admin/positions', name: '岗位管理', group: '系统管理', permission: 'system.position.read' },
+  { key: 'user-groups', path: '/admin/user-groups', name: '用户组管理', group: '系统管理', permission: 'system.user_group.read' },
   { key: 'security', path: '/security', name: '安全基线', group: '安全中心', permission: 'system.config.read' },
   { key: 'sessions', path: '/admin/sessions', name: '在线会话', group: '安全中心', permission: 'system.session.read' },
   { key: 'audit-logs', path: '/admin/audit-logs', name: '审计日志', group: '安全中心', permission: 'system.audit.read' },

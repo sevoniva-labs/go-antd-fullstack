@@ -15,7 +15,8 @@
     "./security": "./src/pages/Security.tsx",
     "./sessions": "./src/pages/Sessions.tsx",
     "./system-status": "./src/pages/SystemStatus.tsx",
-    "./users": "./src/pages/Users.tsx"
+    "./users": "./src/pages/Users.tsx",
+    "./user-groups": "./src/pages/UserGroups.tsx"
   },
   "scripts": {
     "build": "vite build",
