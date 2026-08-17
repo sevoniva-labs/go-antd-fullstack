@@ -31,6 +31,7 @@ import (
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
 	"github.com/sevoniva-labs/forge/internal/platform/metrics"
 	"github.com/sevoniva-labs/forge/internal/platform/observability"
+	"github.com/sevoniva-labs/forge/internal/platform/ratelimit"
 	"github.com/sevoniva-labs/forge/internal/platform/remoteconfig"
 	"github.com/sevoniva-labs/forge/internal/platform/search"
 	"github.com/sevoniva-labs/forge/internal/platform/securefile"
@@ -208,7 +209,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
 	platformService := kratosapi.NewPlatformService(identitySvc, auditWriter, db)
-	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db)
+	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db, ratelimit.New(c), cfg.Security.SecureCookies, cfg.Security.SameSite)
 	securityMiddleware := selector.Server(authn.Server(identitySvc), authz.Server(authz.PlatformRules())).Match(func(_ context.Context, operation string) bool {
 		switch operation {
 		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
