@@ -61,20 +61,57 @@ func (s *Service) Create(ctx context.Context, actor identitydomain.Principal, in
 	input.ResourceID = strings.TrimSpace(input.ResourceID)
 	input.Summary = strings.TrimSpace(input.Summary)
 	input.Mode = strings.ToUpper(strings.TrimSpace(input.Mode))
-	if len(input.PayloadJSON) == 0 || len(input.PayloadJSON) > 64*1024 || len(input.RequestType) > 100 || len(input.Action) > 160 || len(input.Resource) > 160 || len(input.ResourceID) > 160 || len(input.Summary) > 500 || input.ExpiresIn < time.Minute || input.ExpiresIn > 30*24*time.Hour {
+	if len(input.PayloadJSON) == 0 || len(input.PayloadJSON) > 16*1024 || len(input.RequestType) > 100 || len(input.Action) > 160 || len(input.Resource) > 160 || len(input.ResourceID) > 160 || len(input.Summary) > 500 || input.ExpiresIn < time.Minute || input.ExpiresIn > 30*24*time.Hour {
 		return domain.Request{}, domain.ErrInvalidRequest
 	}
 	canonical, err := canonicalJSON([]byte(input.PayloadJSON))
-	if err != nil {
+	if err != nil || validateReviewablePayload(canonical) != nil {
 		return domain.Request{}, domain.ErrInvalidRequest
 	}
 	digest := requestDigest(input.RequestType, input.Action, input.Resource, input.ResourceID, canonical)
 	now := time.Now().UTC()
-	request := domain.Request{ID: uuid.NewString(), OrganizationID: actor.OrganizationID, RequestType: input.RequestType, Action: input.Action, Resource: input.Resource, ResourceID: input.ResourceID, Summary: input.Summary, RequestDigest: digest, ApplicantID: actor.UserID, Mode: input.Mode, RequiredApprovals: input.RequiredApprovals, Status: domain.StatusPending, ExpiresAt: now.Add(input.ExpiresIn), CreatedAt: now, UpdatedAt: now}
+	request := domain.Request{ID: uuid.NewString(), OrganizationID: actor.OrganizationID, RequestType: input.RequestType, Action: input.Action, Resource: input.Resource, ResourceID: input.ResourceID, Summary: input.Summary, PayloadJSON: string(canonical), RequestDigest: digest, ApplicantID: actor.UserID, Mode: input.Mode, RequiredApprovals: input.RequiredApprovals, Status: domain.StatusPending, ExpiresAt: now.Add(input.ExpiresIn), CreatedAt: now, UpdatedAt: now}
 	if err := domain.ValidateCreation(request, input.ApproverIDs); err != nil {
 		return domain.Request{}, err
 	}
 	return s.repo.Create(ctx, request, input.ApproverIDs)
+}
+
+func validateReviewablePayload(canonical []byte) error {
+	var payload map[string]any
+	decoder := json.NewDecoder(bytes.NewReader(canonical))
+	decoder.UseNumber()
+	if err := decoder.Decode(&payload); err != nil || payload == nil {
+		return domain.ErrInvalidRequest
+	}
+	blocked := map[string]struct{}{
+		"password": {}, "passwd": {}, "secret": {}, "clientsecret": {}, "accesstoken": {}, "refreshtoken": {},
+		"credential": {}, "credentials": {}, "privatekey": {}, "recoverycode": {}, "mfacode": {},
+		"authorization": {}, "cookie": {}, "sessiontoken": {},
+	}
+	var inspect func(any) error
+	inspect = func(value any) error {
+		switch typed := value.(type) {
+		case map[string]any:
+			for key, child := range typed {
+				normalized := strings.NewReplacer("_", "", "-", "", ".", "", " ", "").Replace(strings.ToLower(key))
+				if _, denied := blocked[normalized]; denied {
+					return domain.ErrInvalidRequest
+				}
+				if err := inspect(child); err != nil {
+					return err
+				}
+			}
+		case []any:
+			for _, child := range typed {
+				if err := inspect(child); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+	return inspect(payload)
 }
 
 func (s *Service) AuthorizeExecution(ctx context.Context, actor identitydomain.Principal, approvalID string, input ExecutionInput) error {

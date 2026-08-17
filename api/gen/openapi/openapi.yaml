@@ -1272,6 +1272,8 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.ApprovalTask'
+                payloadJson:
+                    type: string
         forge.v1.ApprovalTask:
             type: object
             properties:

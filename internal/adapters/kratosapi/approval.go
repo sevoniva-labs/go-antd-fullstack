@@ -143,7 +143,7 @@ func (s *ApprovalService) audited(ctx context.Context, event *audit.Event, opera
 }
 
 func approvalProto(request domain.Request) *forgev1.ApprovalRequest {
-	out := &forgev1.ApprovalRequest{Id: request.ID, OrganizationId: request.OrganizationID, RequestType: request.RequestType, Action: request.Action, Resource: request.Resource, ResourceId: request.ResourceID, Summary: request.Summary, RequestDigest: request.RequestDigest, ApplicantId: request.ApplicantID, Mode: request.Mode, RequiredApprovals: int32(request.RequiredApprovals), Status: request.Status, ExpiresAt: timestamp(request.ExpiresAt), CreatedAt: timestamp(request.CreatedAt), UpdatedAt: timestamp(request.UpdatedAt), Tasks: make([]*forgev1.ApprovalTask, 0, len(request.Tasks))}
+	out := &forgev1.ApprovalRequest{Id: request.ID, OrganizationId: request.OrganizationID, RequestType: request.RequestType, Action: request.Action, Resource: request.Resource, ResourceId: request.ResourceID, Summary: request.Summary, PayloadJson: request.PayloadJSON, RequestDigest: request.RequestDigest, ApplicantId: request.ApplicantID, Mode: request.Mode, RequiredApprovals: int32(request.RequiredApprovals), Status: request.Status, ExpiresAt: timestamp(request.ExpiresAt), CreatedAt: timestamp(request.CreatedAt), UpdatedAt: timestamp(request.UpdatedAt), Tasks: make([]*forgev1.ApprovalTask, 0, len(request.Tasks))}
 	for _, task := range request.Tasks {
 		out.Tasks = append(out.Tasks, &forgev1.ApprovalTask{Id: task.ID, AssigneeId: task.AssigneeID, Status: task.Status, Decision: task.Decision, Comment: task.Comment, TransferredFrom: task.TransferredFrom, DecidedAt: optionalTimestamp(task.DecidedAt)})
 	}

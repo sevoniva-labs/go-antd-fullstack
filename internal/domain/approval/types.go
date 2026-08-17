@@ -36,6 +36,7 @@ type Request struct {
 	Resource          string
 	ResourceID        string
 	Summary           string
+	PayloadJSON       string
 	RequestDigest     string
 	ApplicantID       string
 	Mode              string

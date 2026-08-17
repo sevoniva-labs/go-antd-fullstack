@@ -62,6 +62,7 @@ message ApprovalRequest {
   google.protobuf.Timestamp created_at = 14;
   google.protobuf.Timestamp updated_at = 15;
   repeated ApprovalTask tasks = 16;
+  string payload_json = 17;
 }
 
 message CreateApprovalRequest {

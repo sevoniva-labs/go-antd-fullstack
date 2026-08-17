@@ -134,6 +134,7 @@ type ApprovalRequest struct {
 	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	Tasks             []*ApprovalTask        `protobuf:"bytes,16,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	PayloadJson       string                 `protobuf:"bytes,17,opt,name=payload_json,json=payloadJson,proto3" json:"payload_json,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -278,6 +279,13 @@ func (x *ApprovalRequest) GetTasks() []*ApprovalTask {
 		return x.Tasks
 	}
 	return nil
+}
+
+func (x *ApprovalRequest) GetPayloadJson() string {
+	if x != nil {
+		return x.PayloadJson
+	}
+	return ""
 }
 
 type CreateApprovalRequest struct {
@@ -926,7 +934,7 @@ const file_forge_v1_approval_proto_rawDesc = "" +
 	"\acomment\x18\x05 \x01(\tR\acomment\x12)\n" +
 	"\x10transferred_from\x18\x06 \x01(\tR\x0ftransferredFrom\x129\n" +
 	"\n" +
-	"decided_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdecidedAt\"\xe0\x04\n" +
+	"decided_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdecidedAt\"\x83\x05\n" +
 	"\x0fApprovalRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12!\n" +
@@ -948,7 +956,8 @@ const file_forge_v1_approval_proto_rawDesc = "" +
 	"created_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12,\n" +
-	"\x05tasks\x18\x10 \x03(\v2\x16.forge.v1.ApprovalTaskR\x05tasks\"\xe0\x02\n" +
+	"\x05tasks\x18\x10 \x03(\v2\x16.forge.v1.ApprovalTaskR\x05tasks\x12!\n" +
+	"\fpayload_json\x18\x11 \x01(\tR\vpayloadJson\"\xe0\x02\n" +
 	"\x15CreateApprovalRequest\x12!\n" +
 	"\frequest_type\x18\x01 \x01(\tR\vrequestType\x12\x16\n" +
 	"\x06action\x18\x02 \x01(\tR\x06action\x12\x1a\n" +
