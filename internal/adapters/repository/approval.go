@@ -229,6 +229,34 @@ func (r *ApprovalRepo) Withdraw(ctx context.Context, orgID, requestID, actorID, 
 	return r.ByID(ctx, orgID, requestID)
 }
 
+func (r *ApprovalRepo) ClaimExecution(ctx context.Context, orgID, requestID, actorID, expectedDigest string) error {
+	return r.db.WithTx(ctx, func(tx *sql.Tx) error {
+		var applicantID, status, actualDigest string
+		var expiresAt time.Time
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT applicant_id,status,request_digest,expires_at FROM approval_requests WHERE id=? AND organization_id=? FOR UPDATE`), requestID, orgID).Scan(&applicantID, &status, &actualDigest, &expiresAt); err != nil {
+			return err
+		}
+		if applicantID != actorID {
+			return domain.ErrMakerChecker
+		}
+		if status != domain.StatusApproved || !expiresAt.After(time.Now().UTC()) {
+			return domain.ErrNotPending
+		}
+		if actualDigest != expectedDigest {
+			return domain.ErrDigestMismatch
+		}
+		var count int
+		if err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT COUNT(*) FROM approval_executions WHERE request_id=?`), requestID).Scan(&count); err != nil {
+			return err
+		}
+		if count > 0 {
+			return domain.ErrAlreadyExecuted
+		}
+		_, err := tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO approval_executions(id,request_id,executed_by,request_digest,executed_at) VALUES(?,?,?,?,?)`), uuid.NewString(), requestID, actorID, expectedDigest, time.Now().UTC())
+		return err
+	})
+}
+
 func (r *ApprovalRepo) lockRequest(ctx context.Context, tx *sql.Tx, orgID, requestID string) (domain.Request, error) {
 	var request domain.Request
 	err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT id,organization_id,applicant_id,required_approvals,status,expires_at FROM approval_requests WHERE id=? AND organization_id=? FOR UPDATE`), requestID, orgID).Scan(&request.ID, &request.OrganizationID, &request.ApplicantID, &request.RequiredApprovals, &request.Status, &request.ExpiresAt)

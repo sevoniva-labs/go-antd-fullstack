@@ -37,6 +37,14 @@ type CreateInput struct {
 	ExpiresIn         time.Duration
 }
 
+type ExecutionInput struct {
+	RequestType string
+	Action      string
+	Resource    string
+	ResourceID  string
+	PayloadJSON string
+}
+
 func (s *Service) Create(ctx context.Context, actor identitydomain.Principal, input CreateInput) (domain.Request, error) {
 	if err := requireActor(actor); err != nil {
 		return domain.Request{}, err
@@ -57,14 +65,28 @@ func (s *Service) Create(ctx context.Context, actor identitydomain.Principal, in
 	if err != nil {
 		return domain.Request{}, domain.ErrInvalidRequest
 	}
-	digestInput, _ := json.Marshal([]any{input.RequestType, input.Action, input.Resource, input.ResourceID, canonical})
-	digest := sha256.Sum256(digestInput)
+	digest := requestDigest(input.RequestType, input.Action, input.Resource, input.ResourceID, canonical)
 	now := time.Now().UTC()
-	request := domain.Request{ID: uuid.NewString(), OrganizationID: actor.OrganizationID, RequestType: input.RequestType, Action: input.Action, Resource: input.Resource, ResourceID: input.ResourceID, Summary: input.Summary, RequestDigest: hex.EncodeToString(digest[:]), ApplicantID: actor.UserID, Mode: input.Mode, RequiredApprovals: input.RequiredApprovals, Status: domain.StatusPending, ExpiresAt: now.Add(input.ExpiresIn), CreatedAt: now, UpdatedAt: now}
+	request := domain.Request{ID: uuid.NewString(), OrganizationID: actor.OrganizationID, RequestType: input.RequestType, Action: input.Action, Resource: input.Resource, ResourceID: input.ResourceID, Summary: input.Summary, RequestDigest: digest, ApplicantID: actor.UserID, Mode: input.Mode, RequiredApprovals: input.RequiredApprovals, Status: domain.StatusPending, ExpiresAt: now.Add(input.ExpiresIn), CreatedAt: now, UpdatedAt: now}
 	if err := domain.ValidateCreation(request, input.ApproverIDs); err != nil {
 		return domain.Request{}, err
 	}
 	return s.repo.Create(ctx, request, input.ApproverIDs)
+}
+
+func (s *Service) AuthorizeExecution(ctx context.Context, actor identitydomain.Principal, approvalID string, input ExecutionInput) error {
+	if err := requireActor(actor); err != nil {
+		return err
+	}
+	if err := identityapp.RequireRecentMFA(actor); err != nil {
+		return err
+	}
+	canonical, err := canonicalJSON([]byte(input.PayloadJSON))
+	if err != nil {
+		return domain.ErrInvalidRequest
+	}
+	digest := requestDigest(strings.TrimSpace(input.RequestType), strings.TrimSpace(input.Action), strings.TrimSpace(input.Resource), strings.TrimSpace(input.ResourceID), canonical)
+	return s.repo.ClaimExecution(ctx, actor.OrganizationID, strings.TrimSpace(approvalID), actor.UserID, digest)
 }
 
 func (s *Service) Get(ctx context.Context, actor identitydomain.Principal, requestID string) (domain.Request, error) {
@@ -147,4 +169,10 @@ func canonicalJSON(raw []byte) ([]byte, error) {
 		return nil, err
 	}
 	return json.Marshal(value)
+}
+
+func requestDigest(requestType, action, resource, resourceID string, canonicalPayload []byte) string {
+	digestInput, _ := json.Marshal([]any{requestType, action, resource, resourceID, canonicalPayload})
+	digest := sha256.Sum256(digestInput)
+	return hex.EncodeToString(digest[:])
 }

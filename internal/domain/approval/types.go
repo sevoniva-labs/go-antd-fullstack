@@ -25,6 +25,8 @@ var ErrInvalidRequest = errors.New("invalid approval request")
 var ErrMakerChecker = errors.New("maker cannot approve own request")
 var ErrNotPending = errors.New("approval request is not pending")
 var ErrTaskNotAssigned = errors.New("approval task is not assigned to actor")
+var ErrDigestMismatch = errors.New("approval request digest does not match command")
+var ErrAlreadyExecuted = errors.New("approval request was already executed")
 
 type Request struct {
 	ID                string

@@ -18,3 +18,15 @@ func TestCanonicalJSONIsStableAndPreservesLargeIntegers(t *testing.T) {
 		t.Fatalf("large integer changed: %s", left)
 	}
 }
+
+func TestRequestDigestBindsCommandMetadataAndCanonicalPayload(t *testing.T) {
+	left, _ := canonicalJSON([]byte(`{"b":2,"a":1}`))
+	right, _ := canonicalJSON([]byte(`{"a":1,"b":2}`))
+	base := requestDigest("ROLE_GRANT", "user.roles.update", "user", "user-1", left)
+	if base != requestDigest("ROLE_GRANT", "user.roles.update", "user", "user-1", right) {
+		t.Fatal("equivalent payloads produced different digests")
+	}
+	if base == requestDigest("ROLE_GRANT", "user.roles.update", "user", "user-2", right) {
+		t.Fatal("resource identity was not bound into digest")
+	}
+}
