@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -17,6 +17,7 @@ help:
 	@echo "  make worker        Run reliable-message/background worker"
 	@echo "  make migrate       Run one-shot database migrations"
 	@echo "  make web-dev       Run frontend"
+	@echo "  make web-budget    Enforce production frontend bundle budgets"
 	@echo "  make test          Run Go tests"
 	@echo "  make contract      Check API error-code contract"
 	@echo "  make check         Format, vet, test, contract, frontend lint/build"
@@ -58,6 +59,9 @@ web-dev:
 
 web-build:
 	$(PNPM) --filter @forge/shell build
+
+web-budget:
+	node scripts/check-web-bundle-budget.mjs
 
 contract:
 	python3 scripts/check-error-codes.py
@@ -116,6 +120,7 @@ check: fmt contract
 	$(PNPM) -r --if-present run typecheck
 	$(PNPM) -r --if-present run test
 	$(PNPM) -r --if-present run build
+	node scripts/check-web-bundle-budget.mjs
 
 ci-policy:
 	bash scripts/check-ci-policy.sh
