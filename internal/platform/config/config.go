@@ -41,6 +41,7 @@ type App struct {
 
 type Server struct {
 	ListenAddr       string        `yaml:"listen_addr"`
+	GRPCListenAddr   string        `yaml:"grpc_listen_addr"`
 	PublicURL        string        `yaml:"public_url"`
 	WebDir           string        `yaml:"web_dir"`
 	ReadTimeout      time.Duration `yaml:"read_timeout"`
@@ -232,7 +233,7 @@ func Default() Config {
 	return Config{
 		App: App{Name: "Sevoniva Forge", Environment: "development"},
 		Server: Server{
-			ListenAddr: ":8080", PublicURL: "http://localhost:8080", WebDir: "./web/dist",
+			ListenAddr: ":8080", GRPCListenAddr: ":9090", PublicURL: "http://localhost:8080", WebDir: "./web/dist",
 			ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
 			ShutdownTimeout: 15 * time.Second, MaxBodyBytes: 8 << 20,
 		},
@@ -367,6 +368,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.App.Zone, "FORGE_ZONE")
 
 	overrideString(&cfg.Server.ListenAddr, "FORGE_SERVER_LISTEN")
+	overrideString(&cfg.Server.GRPCListenAddr, "FORGE_GRPC_LISTEN")
 	overrideString(&cfg.Server.PublicURL, "FORGE_PUBLIC_URL")
 	overrideString(&cfg.Server.WebDir, "FORGE_WEB_DIR")
 	overrideBool(&cfg.Server.TLSEnabled, "FORGE_TLS_ENABLED")
@@ -648,6 +650,9 @@ func (c Config) Validate() error {
 	}
 	if c.Server.ListenAddr == "" {
 		errs = append(errs, "server.listen_addr is required")
+	}
+	if c.Server.GRPCListenAddr == "" {
+		errs = append(errs, "server.grpc_listen_addr is required")
 	}
 	if c.Server.TLSEnabled && (c.Server.TLSCertFile == "" || c.Server.TLSKeyFile == "") {
 		errs = append(errs, "tls enabled requires tls_cert_file and tls_key_file")

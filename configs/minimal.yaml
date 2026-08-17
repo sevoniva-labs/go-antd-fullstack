@@ -5,6 +5,7 @@ app:
   zone: local-a
 server:
   listen_addr: ":8080"
+  grpc_listen_addr: ":9090"
   public_url: "http://localhost:8080"
   web_dir: "web/dist"
   read_timeout: 30s

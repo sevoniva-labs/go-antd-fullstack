@@ -6,12 +6,16 @@ import (
 	"crypto/x509"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/go-kratos/kratos/v2"
+	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	khttp "github.com/go-kratos/kratos/v2/transport/http"
+	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
 	"github.com/sevoniva-labs/forge/internal/adapters/httpapi"
+	"github.com/sevoniva-labs/forge/internal/adapters/kratosapi"
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
@@ -19,12 +23,14 @@ import (
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
 	"github.com/sevoniva-labs/forge/internal/platform/discovery"
+	"github.com/sevoniva-labs/forge/internal/platform/health"
 	"github.com/sevoniva-labs/forge/internal/platform/logx"
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
 	"github.com/sevoniva-labs/forge/internal/platform/metrics"
 	"github.com/sevoniva-labs/forge/internal/platform/observability"
 	"github.com/sevoniva-labs/forge/internal/platform/remoteconfig"
 	"github.com/sevoniva-labs/forge/internal/platform/search"
+	"github.com/sevoniva-labs/forge/internal/platform/securefile"
 	appcrypto "github.com/sevoniva-labs/forge/internal/platform/security/crypto"
 	"github.com/sevoniva-labs/forge/internal/platform/storage"
 )
@@ -34,7 +40,7 @@ type Options struct{ Version string }
 type App struct {
 	cfg           config.Config
 	log           *slog.Logger
-	server        *http.Server
+	runtime       *kratos.App
 	db            *database.DB
 	cache         cache.Cache
 	bus           messaging.Bus
@@ -173,47 +179,57 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	srv := &http.Server{
-		Addr: cfg.Server.ListenAddr, Handler: api,
-		ReadHeaderTimeout: 10 * time.Second, ReadTimeout: cfg.Server.ReadTimeout,
-		WriteTimeout: cfg.Server.WriteTimeout, IdleTimeout: cfg.Server.IdleTimeout,
-		TLSConfig: tlsCfg,
+	httpOpts := []khttp.ServerOption{khttp.Address(cfg.Server.ListenAddr), khttp.Timeout(cfg.Server.WriteTimeout)}
+	grpcOpts := []kgrpc.ServerOption{kgrpc.Address(cfg.Server.GRPCListenAddr), kgrpc.Timeout(cfg.Server.WriteTimeout)}
+	if tlsCfg != nil {
+		httpOpts = append(httpOpts, khttp.TLSConfig(tlsCfg.Clone()))
+		grpcOpts = append(grpcOpts, kgrpc.TLSConfig(tlsCfg.Clone()))
 	}
-	return &App{cfg: cfg, log: log, server: srv, db: db, cache: c, bus: bus, registry: reg, traceShutdown: traceShutdown}, nil
+	httpServer := khttp.NewServer(httpOpts...)
+	httpServer.ReadHeaderTimeout = 10 * time.Second
+	httpServer.ReadTimeout = cfg.Server.ReadTimeout
+	httpServer.WriteTimeout = cfg.Server.WriteTimeout
+	httpServer.IdleTimeout = cfg.Server.IdleTimeout
+	httpServer.HandlePrefix("/", api)
+
+	checks := []health.Check{
+		{Name: "database", Provider: cfg.Database.Provider, Ping: db.PingContext},
+		{Name: "cache", Provider: c.Provider(), Ping: c.Ping},
+		{Name: "messaging", Provider: bus.Provider(), Ping: bus.Ping},
+		{Name: "search", Provider: se.Provider(), Ping: se.Ping},
+		{Name: "storage", Provider: st.Provider(), Ping: st.Ping},
+	}
+	providers := map[string]string{
+		"database": cfg.Database.Provider, "cache": c.Provider(), "messaging": bus.Provider(),
+		"search": se.Provider(), "storage": st.Provider(), "discovery": reg.Provider(),
+	}
+	systemService := kratosapi.NewSystemService(cfg, opts.Version, identitySvc, checks, providers)
+	grpcServer := kgrpc.NewServer(grpcOpts...)
+	forgev1.RegisterSystemServiceServer(grpcServer, systemService)
+	runtime := kratos.New(
+		kratos.Context(ctx), kratos.Name(cfg.App.Name), kratos.Version(opts.Version),
+		kratos.Metadata(map[string]string{"environment": cfg.App.Environment, "region": cfg.App.Region, "zone": cfg.App.Zone}),
+		kratos.Server(httpServer, grpcServer), kratos.StopTimeout(cfg.Server.ShutdownTimeout),
+	)
+	return &App{cfg: cfg, log: log, runtime: runtime, db: db, cache: c, bus: bus, registry: reg, traceShutdown: traceShutdown}, nil
 }
 
 func (a *App) Run(ctx context.Context) error {
 	if err := a.registry.Register(ctx); err != nil {
 		return fmt.Errorf("service register: %w", err)
 	}
-	errCh := make(chan error, 1)
-	go func() {
-		a.log.Info("server listening",
-			"addr", a.cfg.Server.ListenAddr, "public_url", a.cfg.Server.PublicURL,
-			"database", a.cfg.Database.Provider, "cache", a.cache.Provider(),
-			"messaging", a.bus.Provider(), "discovery", a.registry.Provider(),
-			"tls", a.cfg.Server.TLSEnabled)
-		if a.cfg.Server.TLSEnabled {
-			errCh <- a.server.ListenAndServeTLS(a.cfg.Server.TLSCertFile, a.cfg.Server.TLSKeyFile)
-		} else {
-			errCh <- a.server.ListenAndServe()
-		}
-	}()
-	select {
-	case <-ctx.Done():
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), a.cfg.Server.ShutdownTimeout)
-		defer cancel()
-		_ = a.registry.Deregister(shutdownCtx)
-		return a.server.Shutdown(shutdownCtx)
-	case err := <-errCh:
-		_ = a.registry.Deregister(context.Background())
-		if err == http.ErrServerClosed {
-			return nil
-		}
-		return err
-	}
+	defer func() { _ = a.registry.Deregister(context.Background()) }()
+	a.log.Info("Kratos servers starting",
+		"http_addr", a.cfg.Server.ListenAddr, "grpc_addr", a.cfg.Server.GRPCListenAddr,
+		"public_url", a.cfg.Server.PublicURL, "database", a.cfg.Database.Provider,
+		"cache", a.cache.Provider(), "messaging", a.bus.Provider(),
+		"discovery", a.registry.Provider(), "tls", a.cfg.Server.TLSEnabled)
+	return a.runtime.Run()
 }
 func (a *App) Close() {
+	if a.runtime != nil {
+		_ = a.runtime.Stop()
+	}
 	if a.registry != nil {
 		_ = a.registry.Deregister(context.Background())
 	}
@@ -237,7 +253,11 @@ func serverTLSConfig(cfg config.Server) (*tls.Config, error) {
 	if !cfg.TLSEnabled {
 		return nil, nil
 	}
-	t := &tls.Config{MinVersion: tls.VersionTLS12}
+	certificate, err := tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("load server certificate: %w", err)
+	}
+	t := &tls.Config{MinVersion: tls.VersionTLS12, Certificates: []tls.Certificate{certificate}}
 	if cfg.RequireClientTLS {
 		raw, err := os.ReadFile(cfg.TLSClientCAFile)
 		if err != nil {
@@ -261,7 +281,7 @@ func env(k, d string) string {
 }
 func secret(k string) string {
 	if p := strings.TrimSpace(os.Getenv(k + "_FILE")); p != "" {
-		if b, e := os.ReadFile(p); e == nil {
+		if b, e := securefile.Read(p); e == nil {
 			return strings.TrimSpace(string(b))
 		}
 	}

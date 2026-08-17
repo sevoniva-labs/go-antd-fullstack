@@ -22,6 +22,7 @@ spec:
   ingress:
     - ports:
         - { protocol: TCP, port: 8080 }
+        - { protocol: TCP, port: 9090 }
       {{- with .Values.networkPolicy.ingressFrom }}
       from:
         {{- toYaml . | nindent 8 }}
