@@ -28,6 +28,7 @@ var ErrPasswordReused = errors.New("password was used recently")
 var ErrInvalidSecurityPolicy = errors.New("invalid security policy")
 var ErrLastSystemAdmin = repository.ErrLastSystemAdmin
 var ErrPasswordStateChanged = repository.ErrPasswordStateChanged
+var ErrInteractiveSessionRequired = errors.New("interactive user session required")
 
 type resolvedPolicy struct {
 	passwordPolicy password.Policy
@@ -548,12 +549,15 @@ func randomToken(n int) (string, error) {
 }
 func hashToken(v string) string { x := sha256.Sum256([]byte(v)); return hex.EncodeToString(x[:]) }
 
-func (s *Service) CreateAPIToken(ctx context.Context, userID, name string, scopes []string, ttl time.Duration) (domain.APIToken, string, error) {
+func (s *Service) CreateAPIToken(ctx context.Context, actor domain.Principal, name string, scopes []string, ttl time.Duration) (domain.APIToken, string, error) {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return domain.APIToken{}, "", err
+	}
 	name = strings.TrimSpace(name)
 	if name == "" || len(name) > 120 {
 		return domain.APIToken{}, "", errors.New("invalid token name")
 	}
-	u, err := s.repo.UserByID(ctx, userID)
+	u, err := s.repo.UserByID(ctx, actor.UserID)
 	if err != nil {
 		return domain.APIToken{}, "", err
 	}
@@ -599,14 +603,27 @@ func (s *Service) CreateAPIToken(ctx context.Context, userID, name string, scope
 	if len(prefix) > 15 {
 		prefix = prefix[:15]
 	}
-	t, err := s.repo.CreateAPIToken(ctx, userID, name, prefix, hashToken(raw), scopes, &expires)
+	t, err := s.repo.CreateAPIToken(ctx, actor.UserID, name, prefix, hashToken(raw), scopes, &expires)
 	return t, raw, err
 }
-func (s *Service) ListAPITokens(ctx context.Context, userID string) ([]domain.APIToken, error) {
-	return s.repo.ListAPITokens(ctx, userID)
+func (s *Service) ListAPITokens(ctx context.Context, actor domain.Principal) ([]domain.APIToken, error) {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return nil, err
+	}
+	return s.repo.ListAPITokens(ctx, actor.UserID)
 }
-func (s *Service) RevokeAPIToken(ctx context.Context, userID, tokenID string) error {
-	return s.repo.RevokeAPIToken(ctx, userID, tokenID)
+func (s *Service) RevokeAPIToken(ctx context.Context, actor domain.Principal, tokenID string) error {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return err
+	}
+	return s.repo.RevokeAPIToken(ctx, actor.UserID, tokenID)
+}
+
+func requireInteractivePrincipal(actor domain.Principal) error {
+	if actor.Type != "USER" || actor.UserID == "" || actor.OrganizationID == "" || actor.SessionID == "" {
+		return ErrInteractiveSessionRequired
+	}
+	return nil
 }
 func (s *Service) AuthenticateAPIToken(ctx context.Context, raw string) (domain.Principal, error) {
 	if !strings.HasPrefix(raw, "fg_") {

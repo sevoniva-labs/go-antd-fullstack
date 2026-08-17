@@ -840,8 +840,12 @@ type createAPITokenRequest struct {
 
 func (s *Server) listAPITokens(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
-	items, err := s.identity.ListAPITokens(r.Context(), p.UserID)
+	items, err := s.identity.ListAPITokens(r.Context(), *p)
 	if err != nil {
+		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
+			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "API Token 管理仅允许交互式用户会话", RequestID(r), TraceID(r))
+			return
+		}
 		httpx.Error(w, 500, "INTERNAL", "查询 API Token 失败", RequestID(r), TraceID(r))
 		return
 	}
@@ -849,10 +853,6 @@ func (s *Server) listAPITokens(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
-	if p.Type == "TOKEN" {
-		httpx.Error(w, 403, "PERMISSION_DENIED", "API Token 不能继续签发 Token", RequestID(r), TraceID(r))
-		return
-	}
 	var req createAPITokenRequest
 	if err := httpx.DecodeJSON(w, r, 64<<10, &req); err != nil {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
@@ -862,8 +862,12 @@ func (s *Server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 	if days == 0 {
 		days = 90
 	}
-	t, raw, err := s.identity.CreateAPIToken(r.Context(), p.UserID, req.Name, req.Scopes, time.Duration(days)*24*time.Hour)
+	t, raw, err := s.identity.CreateAPIToken(r.Context(), *p, req.Name, req.Scopes, time.Duration(days)*24*time.Hour)
 	if err != nil {
+		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
+			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "API Token 管理仅允许交互式用户会话", RequestID(r), TraceID(r))
+			return
+		}
 		httpx.Error(w, 400, "INVALID_REQUEST", "API Token 创建失败", RequestID(r), TraceID(r))
 		return
 	}
@@ -875,7 +879,11 @@ func (s *Server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 func (s *Server) revokeAPIToken(w http.ResponseWriter, r *http.Request) {
 	p := Principal(r)
 	tokenID := chi.URLParam(r, "tokenID")
-	if err := s.identity.RevokeAPIToken(r.Context(), p.UserID, tokenID); err != nil {
+	if err := s.identity.RevokeAPIToken(r.Context(), *p, tokenID); err != nil {
+		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
+			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "API Token 管理仅允许交互式用户会话", RequestID(r), TraceID(r))
+			return
+		}
 		httpx.Error(w, 404, "NOT_FOUND", "API Token 不存在", RequestID(r), TraceID(r))
 		return
 	}
