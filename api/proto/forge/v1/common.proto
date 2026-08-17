@@ -32,6 +32,18 @@ message Organization {
   google.protobuf.Timestamp updated_at = 9;
 }
 
+message Department {
+  string id = 1;
+  string organization_id = 2;
+  string parent_id = 3;
+  string department_key = 4;
+  string name = 5;
+  string status = 6;
+  int64 sort_order = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
 message SecurityPolicy {
   int64 password_min_length = 1;
   bool password_require_upper = 2;

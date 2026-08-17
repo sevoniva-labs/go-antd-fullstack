@@ -49,6 +49,18 @@ export type ForgeV1CreateApiTokenResponse = {
     secret?: string;
 };
 
+export type ForgeV1CreateDepartmentRequest = {
+    departmentKey?: string;
+    name?: string;
+    parentId?: string;
+    status?: string;
+    sortOrder?: string;
+};
+
+export type ForgeV1CreateDepartmentResponse = {
+    department?: ForgeV1Department;
+};
+
 export type ForgeV1CreateUserRequest = {
     loginName?: string;
     displayName?: string;
@@ -58,6 +70,18 @@ export type ForgeV1CreateUserRequest = {
 
 export type ForgeV1CreateUserResponse = {
     user?: ForgeV1User;
+};
+
+export type ForgeV1Department = {
+    id?: string;
+    organizationId?: string;
+    parentId?: string;
+    departmentKey?: string;
+    name?: string;
+    status?: string;
+    sortOrder?: string;
+    createdAt?: string;
+    updatedAt?: string;
 };
 
 export type ForgeV1DependencyStatus = {
@@ -114,6 +138,10 @@ export type ForgeV1ListApiTokensResponse = {
 
 export type ForgeV1ListAuditLogsResponse = {
     events?: Array<ForgeV1AuditEvent>;
+};
+
+export type ForgeV1ListDepartmentsResponse = {
+    departments?: Array<ForgeV1Department>;
 };
 
 export type ForgeV1ListPermissionsResponse = {
@@ -248,6 +276,18 @@ export type ForgeV1UnlockUserResponse = {
     user?: ForgeV1User;
 };
 
+export type ForgeV1UpdateDepartmentRequest = {
+    departmentId?: string;
+    name?: string;
+    parentId?: string;
+    status?: string;
+    sortOrder?: string;
+};
+
+export type ForgeV1UpdateDepartmentResponse = {
+    department?: ForgeV1Department;
+};
+
 export type ForgeV1UpdateOrganizationRequest = {
     name?: string;
     description?: string;
@@ -341,6 +381,56 @@ export type PlatformServiceExportAuditLogsResponses = {
 };
 
 export type PlatformServiceExportAuditLogsResponse = PlatformServiceExportAuditLogsResponses[keyof PlatformServiceExportAuditLogsResponses];
+
+export type PlatformServiceListDepartmentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/departments';
+};
+
+export type PlatformServiceListDepartmentsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListDepartmentsResponse;
+};
+
+export type PlatformServiceListDepartmentsResponse = PlatformServiceListDepartmentsResponses[keyof PlatformServiceListDepartmentsResponses];
+
+export type PlatformServiceCreateDepartmentData = {
+    body: ForgeV1CreateDepartmentRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/departments';
+};
+
+export type PlatformServiceCreateDepartmentResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateDepartmentResponse;
+};
+
+export type PlatformServiceCreateDepartmentResponse = PlatformServiceCreateDepartmentResponses[keyof PlatformServiceCreateDepartmentResponses];
+
+export type PlatformServiceUpdateDepartmentData = {
+    body: ForgeV1UpdateDepartmentRequest;
+    path: {
+        departmentId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/departments/{departmentId}';
+};
+
+export type PlatformServiceUpdateDepartmentResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdateDepartmentResponse;
+};
+
+export type PlatformServiceUpdateDepartmentResponse = PlatformServiceUpdateDepartmentResponses[keyof PlatformServiceUpdateDepartmentResponses];
 
 export type PlatformServiceGetOrganizationData = {
     body?: never;

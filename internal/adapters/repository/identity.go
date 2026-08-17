@@ -449,6 +449,88 @@ func (r *IdentityRepo) UpdateOrganization(ctx context.Context, orgID string, req
 	return r.OrganizationByID(ctx, orgID)
 }
 
+func (r *IdentityRepo) ListDepartments(ctx context.Context, orgID string) ([]identity.Department, error) {
+	return r.listDepartments(ctx, orgID, false)
+}
+
+func (r *IdentityRepo) ListDepartmentsForUpdate(ctx context.Context, orgID string) ([]identity.Department, error) {
+	return r.listDepartments(ctx, orgID, true)
+}
+
+func (r *IdentityRepo) listDepartments(ctx context.Context, orgID string, forUpdate bool) ([]identity.Department, error) {
+	query := `SELECT id,organization_id,parent_id,department_key,name,status,sort_order,created_at,updated_at
+		FROM departments WHERE organization_id=? ORDER BY sort_order,department_key`
+	if forUpdate {
+		query += ` FOR UPDATE`
+	}
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(query), orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	out := make([]identity.Department, 0)
+	for rows.Next() {
+		var item identity.Department
+		var parent sql.NullString
+		if err := rows.Scan(&item.ID, &item.OrganizationID, &parent, &item.Key, &item.Name, &item.Status, &item.SortOrder, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if parent.Valid {
+			item.ParentID = parent.String
+		}
+		out = append(out, item)
+	}
+	return out, rows.Err()
+}
+
+func (r *IdentityRepo) DepartmentByID(ctx context.Context, orgID, departmentID string) (identity.Department, error) {
+	var out identity.Department
+	var parent sql.NullString
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,organization_id,parent_id,department_key,name,status,sort_order,created_at,updated_at FROM departments WHERE organization_id=? AND id=?`), orgID, departmentID).
+		Scan(&out.ID, &out.OrganizationID, &parent, &out.Key, &out.Name, &out.Status, &out.SortOrder, &out.CreatedAt, &out.UpdatedAt)
+	if parent.Valid {
+		out.ParentID = parent.String
+	}
+	return out, err
+}
+
+func (r *IdentityRepo) CreateDepartment(ctx context.Context, req identity.Department) (identity.Department, error) {
+	now := time.Now().UTC()
+	req.ID = uuid.NewString()
+	req.CreatedAt = now
+	req.UpdatedAt = now
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO departments(id,organization_id,parent_id,department_key,name,status,sort_order,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)`),
+		req.ID, req.OrganizationID, nullableString(req.ParentID), req.Key, req.Name, req.Status, req.SortOrder, now, now)
+	if err != nil {
+		return identity.Department{}, err
+	}
+	return req, nil
+}
+
+func (r *IdentityRepo) UpdateDepartment(ctx context.Context, req identity.Department) (identity.Department, error) {
+	now := time.Now().UTC()
+	result, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE departments SET parent_id=?,name=?,status=?,sort_order=?,updated_at=? WHERE organization_id=? AND id=?`),
+		nullableString(req.ParentID), req.Name, req.Status, req.SortOrder, now, req.OrganizationID, req.ID)
+	if err != nil {
+		return identity.Department{}, err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return identity.Department{}, err
+	}
+	if count != 1 {
+		return identity.Department{}, sql.ErrNoRows
+	}
+	return r.DepartmentByID(ctx, req.OrganizationID, req.ID)
+}
+
+func nullableString(value string) any {
+	if value == "" {
+		return nil
+	}
+	return value
+}
+
 func (r *IdentityRepo) ListUserSessionIDs(ctx context.Context, userID string) ([]string, error) {
 	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id FROM sessions WHERE user_id=? AND expires_at>? ORDER BY created_at ASC`), userID, time.Now().UTC())
 	if err != nil {

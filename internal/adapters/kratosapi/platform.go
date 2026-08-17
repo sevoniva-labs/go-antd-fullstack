@@ -55,6 +55,73 @@ func (s *PlatformService) CreateUser(ctx context.Context, req *forgev1.CreateUse
 	return &forgev1.CreateUserResponse{User: userProto(created)}, nil
 }
 
+func (s *PlatformService) ListDepartments(ctx context.Context, _ *forgev1.ListDepartmentsRequest) (*forgev1.ListDepartmentsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := s.identity.ListDepartments(ctx, principal.OrganizationID)
+	if err != nil {
+		return nil, internalError(err)
+	}
+	reply := &forgev1.ListDepartmentsResponse{Departments: make([]*forgev1.Department, 0, len(items))}
+	for _, item := range items {
+		reply.Departments = append(reply.Departments, departmentProto(item))
+	}
+	return reply, nil
+}
+
+func (s *PlatformService) CreateDepartment(ctx context.Context, req *forgev1.CreateDepartmentRequest) (*forgev1.CreateDepartmentResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	sortOrder, err := checkedInt(req.GetSortOrder())
+	if err != nil {
+		return nil, err
+	}
+	var created domain.Department
+	event := newAuditEvent(ctx, principal, "department.create", "department", "", map[string]any{"department_key": req.GetDepartmentKey(), "parent_id": req.GetParentId()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var createErr error
+		created, createErr = s.identity.CreateDepartment(txCtx, principal, principal.OrganizationID, domain.Department{
+			ParentID: req.GetParentId(), Key: req.GetDepartmentKey(), Name: req.GetName(), Status: req.GetStatus(), SortOrder: sortOrder,
+		})
+		if createErr == nil {
+			event.ResourceID = created.ID
+		}
+		return createErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.CreateDepartmentResponse{Department: departmentProto(created)}, nil
+}
+
+func (s *PlatformService) UpdateDepartment(ctx context.Context, req *forgev1.UpdateDepartmentRequest) (*forgev1.UpdateDepartmentResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	sortOrder, err := checkedInt(req.GetSortOrder())
+	if err != nil {
+		return nil, err
+	}
+	var updated domain.Department
+	event := newAuditEvent(ctx, principal, "department.update", "department", req.GetDepartmentId(), map[string]any{"parent_id": req.GetParentId(), "status": req.GetStatus()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		var updateErr error
+		updated, updateErr = s.identity.UpdateDepartment(txCtx, principal, principal.OrganizationID, req.GetDepartmentId(), domain.Department{
+			ParentID: req.GetParentId(), Name: req.GetName(), Status: req.GetStatus(), SortOrder: sortOrder,
+		})
+		return updateErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateDepartmentResponse{Department: departmentProto(updated)}, nil
+}
+
 func (s *PlatformService) UpdateOrganization(ctx context.Context, req *forgev1.UpdateOrganizationRequest) (*forgev1.UpdateOrganizationResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -385,7 +452,7 @@ func serviceError(err error) error {
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 	case errors.Is(err, appidentity.ErrInvalidRole), errors.Is(err, appidentity.ErrInvalidLoginName),
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
-		errors.Is(err, appidentity.ErrInvalidSecurityPolicy):
+		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment):
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	default:
 		return internalError(err)
@@ -425,6 +492,14 @@ func organizationProto(organization domain.Organization) *forgev1.Organization {
 		Description: organization.Description, Status: organization.Status, MaxUsers: int64(organization.MaxUsers),
 		MaxActiveSessions: int64(organization.MaxSessions), CreatedAt: timestamp(organization.CreatedAt),
 		UpdatedAt: timestamp(organization.UpdatedAt),
+	}
+}
+
+func departmentProto(department domain.Department) *forgev1.Department {
+	return &forgev1.Department{
+		Id: department.ID, OrganizationId: department.OrganizationID, ParentId: department.ParentID,
+		DepartmentKey: department.Key, Name: department.Name, Status: department.Status,
+		SortOrder: int64(department.SortOrder), CreatedAt: timestamp(department.CreatedAt), UpdatedAt: timestamp(department.UpdatedAt),
 	}
 }
 

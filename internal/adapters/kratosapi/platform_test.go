@@ -20,6 +20,10 @@ func TestPlatformProtoMappings(t *testing.T) {
 	if user.Id != "user-1" || user.OrganizationId != "org-1" || user.LockedUntil.AsTime() != locked {
 		t.Fatalf("unexpected user mapping: %+v", user)
 	}
+	department := departmentProto(domain.Department{ID: "dept-1", OrganizationID: "org-1", ParentID: "dept-0", Key: "risk", Name: "Risk", Status: "ACTIVE", SortOrder: 10, CreatedAt: now})
+	if department.Id != "dept-1" || department.ParentId != "dept-0" || department.DepartmentKey != "risk" || department.SortOrder != 10 {
+		t.Fatalf("unexpected department mapping: %+v", department)
+	}
 	policy := securityPolicyProto(domain.SecurityPolicy{PasswordMinLength: 14, SessionTTLSeconds: 3600, MaxConcurrentSessions: 2})
 	if policy.PasswordMinLength != 14 || policy.SessionTtlSeconds != 3600 || policy.MaxActiveSessions != 2 {
 		t.Fatalf("unexpected policy mapping: %+v", policy)

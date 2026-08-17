@@ -54,6 +54,70 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/departments:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListDepartments
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListDepartmentsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreateDepartment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateDepartmentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateDepartmentResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/departments/{departmentId}:
+        patch:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdateDepartment
+            parameters:
+                - name: departmentId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdateDepartmentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdateDepartmentResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/organization:
         get:
             tags:
@@ -660,6 +724,24 @@ components:
                     $ref: '#/components/schemas/forge.v1.ApiToken'
                 secret:
                     type: string
+        forge.v1.CreateDepartmentRequest:
+            type: object
+            properties:
+                departmentKey:
+                    type: string
+                name:
+                    type: string
+                parentId:
+                    type: string
+                status:
+                    type: string
+                sortOrder:
+                    type: string
+        forge.v1.CreateDepartmentResponse:
+            type: object
+            properties:
+                department:
+                    $ref: '#/components/schemas/forge.v1.Department'
         forge.v1.CreateUserRequest:
             type: object
             properties:
@@ -678,6 +760,29 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.Department:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                parentId:
+                    type: string
+                departmentKey:
+                    type: string
+                name:
+                    type: string
+                status:
+                    type: string
+                sortOrder:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
         forge.v1.DependencyStatus:
             type: object
             properties:
@@ -758,6 +863,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.AuditEvent'
+        forge.v1.ListDepartmentsResponse:
+            type: object
+            properties:
+                departments:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.Department'
         forge.v1.ListPermissionsResponse:
             type: object
             properties:
@@ -962,6 +1074,24 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.UpdateDepartmentRequest:
+            type: object
+            properties:
+                departmentId:
+                    type: string
+                name:
+                    type: string
+                parentId:
+                    type: string
+                status:
+                    type: string
+                sortOrder:
+                    type: string
+        forge.v1.UpdateDepartmentResponse:
+            type: object
+            properties:
+                department:
+                    $ref: '#/components/schemas/forge.v1.Department'
         forge.v1.UpdateOrganizationRequest:
             type: object
             properties:

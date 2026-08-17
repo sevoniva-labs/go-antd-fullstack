@@ -72,6 +72,89 @@ service PlatformService {
       ]
     };
   }
+  rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/departments"};
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            }
+          ]
+        },
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  rpc CreateDepartment(CreateDepartmentRequest) returns (CreateDepartmentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/admin/departments"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            },
+            {
+              name: "CsrfToken"
+              value: {value: []}
+            }
+          ]
+        },
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
+  rpc UpdateDepartment(UpdateDepartmentRequest) returns (UpdateDepartmentResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/admin/departments/{department_id}"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {value: []}
+            },
+            {
+              name: "CsrfToken"
+              value: {value: []}
+            }
+          ]
+        },
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {value: []}
+            }
+          ]
+        }
+      ]
+    };
+  }
   rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
     option (google.api.http) = {get: "/api/v1/admin/organization"};
     option (openapi.v3.operation) = {
@@ -569,6 +652,31 @@ message CreateUserRequest {
 }
 message CreateUserResponse {
   User user = 1;
+}
+
+message ListDepartmentsRequest {}
+message ListDepartmentsResponse {
+  repeated Department departments = 1;
+}
+message CreateDepartmentRequest {
+  string department_key = 1;
+  string name = 2;
+  string parent_id = 3;
+  string status = 4;
+  int64 sort_order = 5;
+}
+message CreateDepartmentResponse {
+  Department department = 1;
+}
+message UpdateDepartmentRequest {
+  string department_id = 1;
+  string name = 2;
+  string parent_id = 3;
+  string status = 4;
+  int64 sort_order = 5;
+}
+message UpdateDepartmentResponse {
+  Department department = 1;
 }
 
 message GetOrganizationRequest {}

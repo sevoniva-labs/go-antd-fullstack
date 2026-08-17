@@ -19,11 +19,13 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
 const OperationPlatformServiceCreateUser = "/forge.v1.PlatformService/CreateUser"
 const OperationPlatformServiceExportAuditLogs = "/forge.v1.PlatformService/ExportAuditLogs"
 const OperationPlatformServiceGetOrganization = "/forge.v1.PlatformService/GetOrganization"
 const OperationPlatformServiceGetSecurityPolicy = "/forge.v1.PlatformService/GetSecurityPolicy"
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
+const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
 const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListPermissions"
 const OperationPlatformServiceListRoles = "/forge.v1.PlatformService/ListRoles"
 const OperationPlatformServiceListSessions = "/forge.v1.PlatformService/ListSessions"
@@ -31,6 +33,7 @@ const OperationPlatformServiceListUsers = "/forge.v1.PlatformService/ListUsers"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
 const OperationPlatformServiceUnlockUser = "/forge.v1.PlatformService/UnlockUser"
+const OperationPlatformServiceUpdateDepartment = "/forge.v1.PlatformService/UpdateDepartment"
 const OperationPlatformServiceUpdateOrganization = "/forge.v1.PlatformService/UpdateOrganization"
 const OperationPlatformServiceUpdateRolePermissions = "/forge.v1.PlatformService/UpdateRolePermissions"
 const OperationPlatformServiceUpdateSecurityPolicy = "/forge.v1.PlatformService/UpdateSecurityPolicy"
@@ -38,11 +41,13 @@ const OperationPlatformServiceUpdateUserRoles = "/forge.v1.PlatformService/Updat
 const OperationPlatformServiceUpdateUserStatus = "/forge.v1.PlatformService/UpdateUserStatus"
 
 type PlatformServiceHTTPServer interface {
+	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
+	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
@@ -50,6 +55,7 @@ type PlatformServiceHTTPServer interface {
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	UnlockUser(context.Context, *UnlockUserRequest) (*UnlockUserResponse, error)
+	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*UpdateOrganizationResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateSecurityPolicy(context.Context, *UpdateSecurityPolicyRequest) (*UpdateSecurityPolicyResponse, error)
@@ -61,6 +67,9 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r := s.Route("/")
 	r.GET("/api/v1/admin/users", _PlatformService_ListUsers0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/users", _PlatformService_CreateUser0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/departments", _PlatformService_ListDepartments0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/departments", _PlatformService_CreateDepartment0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/admin/departments/{department_id}", _PlatformService_UpdateDepartment0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/organization", _PlatformService_GetOrganization0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/organization", _PlatformService_UpdateOrganization0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/security-config", _PlatformService_GetSecurityPolicy0_HTTP_Handler(srv))
@@ -115,6 +124,72 @@ func _PlatformService_CreateUser0_HTTP_Handler(srv PlatformServiceHTTPServer) fu
 			return err
 		}
 		reply := out.(*CreateUserResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ListDepartments0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListDepartmentsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListDepartments)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListDepartments(ctx, req.(*ListDepartmentsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListDepartmentsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_CreateDepartment0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateDepartmentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceCreateDepartment)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateDepartment(ctx, req.(*CreateDepartmentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateDepartmentResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UpdateDepartment0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateDepartmentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUpdateDepartment)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateDepartment(ctx, req.(*UpdateDepartmentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateDepartmentResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -444,11 +519,13 @@ func _PlatformService_ExportAuditLogs0_HTTP_Handler(srv PlatformServiceHTTPServe
 }
 
 type PlatformServiceHTTPClient interface {
+	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
 	ExportAuditLogs(ctx context.Context, req *ExportAuditLogsRequest, opts ...http.CallOption) (rsp *ExportAuditLogsResponse, err error)
 	GetOrganization(ctx context.Context, req *GetOrganizationRequest, opts ...http.CallOption) (rsp *GetOrganizationResponse, err error)
 	GetSecurityPolicy(ctx context.Context, req *GetSecurityPolicyRequest, opts ...http.CallOption) (rsp *GetSecurityPolicyResponse, err error)
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
+	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
 	ListPermissions(ctx context.Context, req *ListPermissionsRequest, opts ...http.CallOption) (rsp *ListPermissionsResponse, err error)
 	ListRoles(ctx context.Context, req *ListRolesRequest, opts ...http.CallOption) (rsp *ListRolesResponse, err error)
 	ListSessions(ctx context.Context, req *ListSessionsRequest, opts ...http.CallOption) (rsp *ListSessionsResponse, err error)
@@ -456,6 +533,7 @@ type PlatformServiceHTTPClient interface {
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
 	UnlockUser(ctx context.Context, req *UnlockUserRequest, opts ...http.CallOption) (rsp *UnlockUserResponse, err error)
+	UpdateDepartment(ctx context.Context, req *UpdateDepartmentRequest, opts ...http.CallOption) (rsp *UpdateDepartmentResponse, err error)
 	UpdateOrganization(ctx context.Context, req *UpdateOrganizationRequest, opts ...http.CallOption) (rsp *UpdateOrganizationResponse, err error)
 	UpdateRolePermissions(ctx context.Context, req *UpdateRolePermissionsRequest, opts ...http.CallOption) (rsp *UpdateRolePermissionsResponse, err error)
 	UpdateSecurityPolicy(ctx context.Context, req *UpdateSecurityPolicyRequest, opts ...http.CallOption) (rsp *UpdateSecurityPolicyResponse, err error)
@@ -469,6 +547,19 @@ type PlatformServiceHTTPClientImpl struct {
 
 func NewPlatformServiceHTTPClient(client *http.Client) PlatformServiceHTTPClient {
 	return &PlatformServiceHTTPClientImpl{client}
+}
+
+func (c *PlatformServiceHTTPClientImpl) CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...http.CallOption) (*CreateDepartmentResponse, error) {
+	var out CreateDepartmentResponse
+	pattern := "/api/v1/admin/departments"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceCreateDepartment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *PlatformServiceHTTPClientImpl) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...http.CallOption) (*CreateUserResponse, error) {
@@ -528,6 +619,19 @@ func (c *PlatformServiceHTTPClientImpl) ListAuditLogs(ctx context.Context, in *L
 	pattern := "/api/v1/admin/audit-logs"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlatformServiceListAuditLogs))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...http.CallOption) (*ListDepartmentsResponse, error) {
+	var out ListDepartmentsResponse
+	pattern := "/api/v1/admin/departments"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListDepartments))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -621,6 +725,19 @@ func (c *PlatformServiceHTTPClientImpl) UnlockUser(ctx context.Context, in *Unlo
 	opts = append(opts, http.Operation(OperationPlatformServiceUnlockUser))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...http.CallOption) (*UpdateDepartmentResponse, error) {
+	var out UpdateDepartmentResponse
+	pattern := "/api/v1/admin/departments/{department_id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUpdateDepartment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

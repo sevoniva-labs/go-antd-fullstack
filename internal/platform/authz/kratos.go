@@ -54,6 +54,9 @@ func PlatformRules() map[string][]string {
 	return map[string][]string{
 		forgev1.OperationPlatformServiceListUsers:             {"system.user.read"},
 		forgev1.OperationPlatformServiceCreateUser:            {"system.user.create"},
+		forgev1.OperationPlatformServiceListDepartments:       {"system.department.read"},
+		forgev1.OperationPlatformServiceCreateDepartment:      {"system.department.manage"},
+		forgev1.OperationPlatformServiceUpdateDepartment:      {"system.department.manage"},
 		forgev1.OperationPlatformServiceGetOrganization:       {"system.organization.read"},
 		forgev1.OperationPlatformServiceUpdateOrganization:    {"system.organization.manage"},
 		forgev1.OperationPlatformServiceGetSecurityPolicy:     {"system.config.read"},

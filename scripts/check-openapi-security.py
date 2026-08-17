@@ -19,6 +19,8 @@ CSRF_REQUIRED = {
     ("post", "/api/v1/api-tokens"),
     ("delete", "/api/v1/api-tokens/{token_id}"),
     ("post", "/api/v1/admin/users"),
+    ("post", "/api/v1/admin/departments"),
+    ("patch", "/api/v1/admin/departments/{department_id}"),
     ("patch", "/api/v1/admin/organization"),
     ("put", "/api/v1/admin/security-config"),
     ("put", "/api/v1/admin/roles/{role_key}/permissions"),
