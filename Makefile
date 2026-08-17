@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -46,6 +46,12 @@ tidy:
 
 web-install:
 	$(PNPM) install --frozen-lockfile --registry=$(NPM_REGISTRY)
+
+web-api-generate:
+	$(PNPM) --filter @forge/api-client api:types
+
+web-api-check:
+	bash scripts/check-generated-web-api.sh
 
 web-dev:
 	$(PNPM) --filter @forge/shell dev
@@ -121,7 +127,7 @@ ci-go: ci-policy contract proto-check module-boundaries
 	$(GO_ENV) go test ./...
 	$(GO_ENV) go test -race ./...
 
-ci-web: ci-policy web-install
+ci-web: ci-policy web-install web-api-check
 	$(PNPM) --filter @forge/shell lint
 	$(PNPM) --filter @forge/shell typecheck
 	$(PNPM) --filter @forge/shell test

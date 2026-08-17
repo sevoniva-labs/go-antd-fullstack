@@ -84,6 +84,13 @@ export type ForgeV1GetSecurityPolicyResponse = {
     policy?: ForgeV1SecurityPolicy;
 };
 
+/**
+ * GetSettlementResponse wraps the settlement projection.
+ */
+export type ForgeV1GetSettlementResponse = {
+    settlement?: ForgeV1Settlement;
+};
+
 export type ForgeV1GetSystemInfoResponse = {
     service?: string;
     version?: string;
@@ -218,6 +225,19 @@ export type ForgeV1Session = {
     expiresAt?: string;
     lastSeenAt?: string;
     current?: boolean;
+};
+
+/**
+ * Settlement is a read-only reference projection used by the split-service example.
+ */
+export type ForgeV1Settlement = {
+    id?: string;
+    organizationId?: string;
+    status?: string;
+    currency?: string;
+    amountMinor?: string;
+    version?: string;
+    updatedAt?: string;
 };
 
 export type ForgeV1UnlockUserRequest = {
@@ -675,6 +695,25 @@ export type IdentityServiceChangePasswordResponses = {
 };
 
 export type IdentityServiceChangePasswordResponse = IdentityServiceChangePasswordResponses[keyof IdentityServiceChangePasswordResponses];
+
+export type ReferenceSettlementServiceGetSettlementData = {
+    body?: never;
+    path: {
+        organizationId: string;
+        settlementId: string;
+    };
+    query?: never;
+    url: '/api/v1/example/organizations/{organizationId}/settlements/{settlementId}';
+};
+
+export type ReferenceSettlementServiceGetSettlementResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1GetSettlementResponse;
+};
+
+export type ReferenceSettlementServiceGetSettlementResponse = ReferenceSettlementServiceGetSettlementResponses[keyof ReferenceSettlementServiceGetSettlementResponses];
 
 export type IdentityServiceGetCurrentUserData = {
     body?: never;
