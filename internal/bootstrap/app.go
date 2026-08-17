@@ -195,6 +195,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	httpSecurity := selector.Server(authn.Server(identitySvc), csrf.Server(), authz.Server(authz.PlatformRules())).Match(publicOperation).Build()
 	httpOpts := []khttp.ServerOption{
 		khttp.Address(cfg.Server.ListenAddr), khttp.Timeout(cfg.Server.WriteTimeout), khttp.Middleware(httpSecurity),
+		khttp.ResponseEncoder(httpserver.EncodeResponse), khttp.ErrorEncoder(httpserver.EncodeError),
 		khttp.Filter(httpserver.Filters(httpserver.FilterOptions{
 			Log: log, Metrics: met, Secure: cfg.Security.SecureCookies,
 			AllowedOrigins: cfg.Security.AllowedOrigins, MaxBodyBytes: cfg.Server.MaxBodyBytes, ServiceName: cfg.App.Name,
