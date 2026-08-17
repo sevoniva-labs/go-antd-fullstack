@@ -115,6 +115,11 @@ data:
   FORGE_METRICS_PATH: {{ .Values.config.metricsPath | quote }}
   FORGE_TRACING_ENABLED: {{ .Values.config.tracingEnabled | quote }}
   FORGE_OTLP_ENDPOINT: {{ .Values.config.otlpEndpoint | quote }}
+  FORGE_OTLP_TLS: {{ .Values.config.otlpTLS | quote }}
+  FORGE_OTLP_TLS_CA_FILE: {{ .Values.config.otlpTLSCAFile | quote }}
+  FORGE_OTLP_TLS_CERT_FILE: {{ .Values.config.otlpTLSCertFile | quote }}
+  FORGE_OTLP_TLS_KEY_FILE: {{ .Values.config.otlpTLSKeyFile | quote }}
+  FORGE_OTLP_TLS_SERVER_NAME: {{ .Values.config.otlpTLSServerName | quote }}
   FORGE_PPROF_ENABLED: {{ .Values.config.pprofEnabled | quote }}
 
   FORGE_DEPENDENCY_TIMEOUT: {{ .Values.config.dependencyTimeout | quote }}

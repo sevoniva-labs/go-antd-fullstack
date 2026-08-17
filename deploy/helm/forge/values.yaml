@@ -238,6 +238,11 @@ config:
   metricsPath: /metrics
   tracingEnabled: "false"
   otlpEndpoint: ""
+  otlpTLS: "true"
+  otlpTLSCAFile: ""
+  otlpTLSCertFile: ""
+  otlpTLSKeyFile: ""
+  otlpTLSServerName: ""
   pprofEnabled: "false"
 
   dependencyTimeout: 8s
