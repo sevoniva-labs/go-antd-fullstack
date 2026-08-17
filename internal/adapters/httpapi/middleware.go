@@ -286,6 +286,32 @@ func loginRateLimit(l *ratelimit.Limiter, ip func(*http.Request) string, next ht
 	}
 }
 
+func passwordChangeRateLimit(l *ratelimit.Limiter, ip func(*http.Request) string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			p := Principal(r)
+			if p == nil || p.UserID == "" {
+				httpx.Error(w, http.StatusUnauthorized, "UNAUTHENTICATED", "未认证", RequestID(r), TraceID(r))
+				return
+			}
+			keys := []string{"password-change:user:" + p.UserID, "password-change:ip:" + ip(r)}
+			for _, key := range keys {
+				ok, err := l.Allow(r.Context(), key, 5, 15*time.Minute, time.Now())
+				if err != nil {
+					httpx.Error(w, http.StatusServiceUnavailable, "DEPENDENCY_UNAVAILABLE", "安全限流服务暂不可用", RequestID(r), TraceID(r))
+					return
+				}
+				if !ok {
+					w.Header().Set("Retry-After", "900")
+					httpx.Error(w, http.StatusTooManyRequests, "RATE_LIMITED", "密码修改请求过于频繁", RequestID(r), TraceID(r))
+					return
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func isWrite(method string) bool {
 	return method == http.MethodPost || method == http.MethodPut || method == http.MethodPatch || method == http.MethodDelete
 }

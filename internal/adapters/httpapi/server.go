@@ -88,7 +88,7 @@ func New(d Dependencies) *Server {
 		r.Get("/api/v1/me", s.me)
 		r.Get("/api/v1/system/info", s.info)
 		r.Post("/api/v1/auth/logout", s.logout)
-		r.Patch("/api/v1/auth/password", s.changePassword)
+		r.With(passwordChangeRateLimit(s.limiter, s.clientIP)).Patch("/api/v1/auth/password", s.changePassword)
 		r.Get("/api/v1/api-tokens", s.listAPITokens)
 		r.Post("/api/v1/api-tokens", s.createAPIToken)
 		r.Delete("/api/v1/api-tokens/{tokenID}", s.revokeAPIToken)
@@ -232,9 +232,12 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, 400, "INVALID_JSON", "请求格式错误", RequestID(r), TraceID(r))
 		return
 	}
-	if err := s.identity.ChangePassword(r.Context(), p.UserID, p.SessionID, req.CurrentPassword, req.NewPassword); err != nil {
+	if err := s.identity.ChangePassword(r.Context(), *p, req.CurrentPassword, req.NewPassword); err != nil {
 		code, msg := "PASSWORD_CHANGE_FAILED", "密码修改失败"
-		if errors.Is(err, appidentity.ErrInvalidCredentials) {
+		if errors.Is(err, appidentity.ErrInteractiveSessionRequired) {
+			httpx.Error(w, http.StatusForbidden, "INTERACTIVE_SESSION_REQUIRED", "修改密码仅允许交互式用户会话", RequestID(r), TraceID(r))
+			return
+		} else if errors.Is(err, appidentity.ErrInvalidCredentials) {
 			code, msg = "CURRENT_PASSWORD_INVALID", "当前密码错误"
 		} else if errors.Is(err, appidentity.ErrPasswordPolicy) {
 			code, msg = "PASSWORD_POLICY_VIOLATION", "新密码不符合安全策略"

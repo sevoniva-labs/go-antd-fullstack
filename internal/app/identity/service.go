@@ -498,8 +498,11 @@ func (s *Service) CreateUser(ctx context.Context, actor domain.Principal, orgID,
 	}
 	return s.repo.CreateUserWithRoles(ctx, orgID, login, display, h, true, roles)
 }
-func (s *Service) ChangePassword(ctx context.Context, userID, sessionID, current, next string) error {
-	user, err := s.repo.UserByID(ctx, userID)
+func (s *Service) ChangePassword(ctx context.Context, actor domain.Principal, current, next string) error {
+	if err := requireInteractivePrincipal(actor); err != nil {
+		return err
+	}
+	user, err := s.repo.UserByID(ctx, actor.UserID)
 	if err != nil {
 		return err
 	}
@@ -513,7 +516,7 @@ func (s *Service) ChangePassword(ctx context.Context, userID, sessionID, current
 	if err := policy.passwordPolicy.Validate(next); err != nil {
 		return fmt.Errorf("%w: %v", ErrPasswordPolicy, err)
 	}
-	currentHash, err := s.repo.PasswordHashByID(ctx, userID)
+	currentHash, err := s.repo.PasswordHashByID(ctx, actor.UserID)
 	if err != nil {
 		return err
 	}
@@ -524,7 +527,7 @@ func (s *Service) ChangePassword(ctx context.Context, userID, sessionID, current
 		return ErrPasswordReused
 	}
 	if policy.history > 0 {
-		history, err := s.repo.PasswordHistory(ctx, userID, policy.history)
+		history, err := s.repo.PasswordHistory(ctx, actor.UserID, policy.history)
 		if err != nil {
 			return err
 		}
@@ -538,7 +541,7 @@ func (s *Service) ChangePassword(ctx context.Context, userID, sessionID, current
 	if err != nil {
 		return err
 	}
-	return s.repo.UpdatePasswordAndRevokeOtherSessions(ctx, userID, sessionID, currentHash, nextHash)
+	return s.repo.UpdatePasswordAndRevokeOtherSessions(ctx, actor.UserID, actor.SessionID, currentHash, nextHash)
 }
 func randomToken(n int) (string, error) {
 	b := make([]byte, n)

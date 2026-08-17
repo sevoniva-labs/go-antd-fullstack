@@ -2,7 +2,11 @@ package httpapi
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
+	"github.com/sevoniva-labs/forge/internal/platform/ratelimit"
 )
 
 func TestAllowedBeforePasswordChange(t *testing.T) {
@@ -27,5 +31,32 @@ func TestAllowedBeforePasswordChange(t *testing.T) {
 				t.Fatalf("allowedBeforePasswordChange(%q, %q) = %v, want %v", tt.method, tt.path, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestPasswordChangeRateLimit(t *testing.T) {
+	limiter := ratelimit.New(nil)
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+	handler := passwordChangeRateLimit(limiter, func(*http.Request) string { return "192.0.2.10" })(next)
+	principal := domain.Principal{Type: "USER", UserID: "u1", OrganizationID: "org1", SessionID: "session1"}
+
+	for attempt := 1; attempt <= 6; attempt++ {
+		req := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/password", nil)
+		req = req.WithContext(withPrincipal(req.Context(), principal))
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, req)
+		if attempt <= 5 && res.Code != http.StatusNoContent {
+			t.Fatalf("attempt %d status = %d, want %d", attempt, res.Code, http.StatusNoContent)
+		}
+		if attempt == 6 {
+			if res.Code != http.StatusTooManyRequests {
+				t.Fatalf("attempt %d status = %d, want %d", attempt, res.Code, http.StatusTooManyRequests)
+			}
+			if got := res.Header().Get("Retry-After"); got != "900" {
+				t.Fatalf("Retry-After = %q, want 900", got)
+			}
+		}
 	}
 }
