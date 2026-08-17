@@ -1,5 +1,6 @@
 import {
   CheckCircleOutlined,
+  BranchesOutlined,
   EditOutlined,
   LockOutlined,
   PlusOutlined,
@@ -21,6 +22,7 @@ import { AppPageContainer } from '@forge/design-system'
 import { ErrorState } from '@forge/design-system'
 import { ConfirmAction } from '@forge/design-system'
 import { AppProTable } from '@forge/design-system'
+import { UserAssignmentsModal } from './UserAssignmentsModal'
 
 export function UsersPage() {
   const queryClient = useQueryClient()
@@ -100,11 +102,13 @@ export function UsersPage() {
       render: (_, row) => {
         const canUpdate = can(me, 'system.user.update')
         const canManageRoles = can(me, 'system.user.role.manage')
-        if (!canUpdate && !canManageRoles) return null
+        const canManageAssignments = can(me, 'system.user.assignment.manage')
+        if (!canUpdate && !canManageRoles && !canManageAssignments) return null
         const isSelf = row.id === me?.user_id
         const locked = Boolean(row.locked_until && new Date(row.locked_until).getTime() > Date.now())
         return (
           <Space size={0} wrap>
+            {canManageAssignments && <UserAssignmentsModal user={row} trigger={<Button type="link" icon={<BranchesOutlined />}>任职</Button>} />}
             {!isSelf && canManageRoles && <ModalForm
               title={`调整角色 · ${row.display_name || row.login_name}`}
               trigger={<Button type="link" icon={<EditOutlined />}>角色</Button>}

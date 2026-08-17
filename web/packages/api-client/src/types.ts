@@ -75,6 +75,18 @@ export interface UserGroup {
   updated_at: string
 }
 
+export interface UserAssignment {
+  id: string
+  organization_id: string
+  user_id: string
+  department_id: string
+  position_id?: string
+  primary: boolean
+  valid_from: string
+  valid_until?: string
+  created_at: string
+}
+
 export interface Permission {
   id: string
   permission_key: string

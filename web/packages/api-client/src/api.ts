@@ -5,6 +5,7 @@ import type {
   Department,
   Position,
   UserGroup,
+  UserAssignment,
   Organization,
   Permission,
   Principal,
@@ -93,6 +94,15 @@ export const api = {
     apiFetch<void>(`/admin/users/${userId}/unlock`, { method: 'POST' }),
   resetUserPassword: (userId: string, password: string) =>
     apiFetch<void>(`/admin/users/${userId}/reset-password`, { method: 'POST', body: JSON.stringify({ password }) }),
+  userAssignments: (userId: string) =>
+    apiFetch<{ items: UserAssignment[] }>(`/admin/users/${encodeURIComponent(userId)}/assignments`),
+  replaceUserAssignments: (userId: string, assignments: Array<{
+    department_id: string
+    position_id?: string
+    primary: boolean
+    valid_from?: string
+    valid_until?: string
+  }>) => apiFetch<void>(`/admin/users/${encodeURIComponent(userId)}/assignments`, { method: 'PUT', body: JSON.stringify({ assignments }) }),
 
   roles: () => apiFetch<{ items: Role[] }>('/admin/roles'),
   permissions: () => apiFetch<{ items: Permission[] }>('/admin/permissions'),
