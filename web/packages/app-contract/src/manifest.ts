@@ -287,7 +287,12 @@ function validateRelease(
   return { version, entry: entry.href, healthUrl: healthUrl.href, digest, resources }
 }
 
-function validateCspSource(value: string, name: string, allowData: boolean): string {
+function validateCspSource(
+  value: string,
+  name: string,
+  allowData: boolean,
+  options: ManifestValidationOptions,
+): string {
   if (value === "'self'" || value === "'none'" || (allowData && value === 'data:')) return value
   if (value.includes('*') || value.includes('unsafe-') || value.includes('nonce-') || value.includes('sha')) {
     throw new ManifestValidationError(name + ' contains a forbidden CSP expression')
@@ -298,15 +303,29 @@ function validateCspSource(value: string, name: string, allowData: boolean): str
   } catch {
     throw new ManifestValidationError(name + ' must contain exact HTTPS origins')
   }
-  if (url.protocol !== 'https:' || url.origin !== value || url.username || url.password) {
+  const localDevelopment =
+    !options.production &&
+    url.protocol === 'http:' &&
+    ['127.0.0.1', 'localhost'].includes(url.hostname)
+  if (
+    (url.protocol !== 'https:' && !localDevelopment) ||
+    url.origin !== value ||
+    url.username ||
+    url.password
+  ) {
     throw new ManifestValidationError(name + ' must contain exact HTTPS origins')
   }
   return url.origin
 }
 
-function validateCspList(value: unknown, name: string, allowData = false): string[] {
+function validateCspList(
+  value: unknown,
+  name: string,
+  options: ManifestValidationOptions,
+  allowData = false,
+): string[] {
   const values = stringList(value, name, { maximum: 32, minimum: 1 })
-    .map((source) => validateCspSource(source, name, allowData))
+    .map((source) => validateCspSource(source, name, allowData, options))
   if (values.includes("'none'") && values.length !== 1) {
     throw new ManifestValidationError(name + " cannot combine 'none' with other sources")
   }
@@ -396,9 +415,9 @@ export function validateMicroAppManifest(
   const cspSource = record(source.csp, 'csp')
   exactKeys(cspSource, ['connectSrc', 'imgSrc', 'frameSrc'], 'csp')
   const csp: MicroAppCSP = {
-    connectSrc: validateCspList(cspSource.connectSrc, 'csp.connectSrc'),
-    imgSrc: validateCspList(cspSource.imgSrc, 'csp.imgSrc', true),
-    frameSrc: validateCspList(cspSource.frameSrc, 'csp.frameSrc'),
+    connectSrc: validateCspList(cspSource.connectSrc, 'csp.connectSrc', options),
+    imgSrc: validateCspList(cspSource.imgSrc, 'csp.imgSrc', options, true),
+    frameSrc: validateCspList(cspSource.frameSrc, 'csp.frameSrc', options),
   }
   const requiredFrameSource = runtime === 'wujie' ? "'self'" : new URL(primary.entry).origin
   if (!csp.frameSrc.includes(requiredFrameSource)) {

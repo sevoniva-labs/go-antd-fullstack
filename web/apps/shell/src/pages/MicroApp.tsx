@@ -170,7 +170,7 @@ export function MicroAppPage() {
   const usingRollback = activePlan.releaseId === releaseSet.rollback?.releaseId
 
   return (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+    <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
       <Space align="center" wrap>
         <Typography.Title level={3} style={{ margin: 0 }}>
           {releaseSet.metadata.displayName}
@@ -184,7 +184,7 @@ export function MicroAppPage() {
         <Alert
           showIcon
           type="warning"
-          message="主发布启动失败，已切换至签名清单指定的回滚版本"
+          title="主发布启动失败，已切换至签名清单指定的回滚版本"
         />
       ) : null}
       <GovernedMicroApp

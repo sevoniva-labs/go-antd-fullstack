@@ -1,0 +1,22 @@
+{
+  "name": "@forge/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:install:cn": "PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright playwright install chromium",
+    "fixture:prepare": "pnpm --filter @forge/example-remote build && node scripts/prepare-fixtures.mjs",
+    "fixture:serve": "node scripts/start-servers.mjs",
+    "lint": "oxlint src tests playwright.config.ts",
+    "test": "vitest run src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "oxlint": "1.75.0",
+    "typescript": "6.0.2",
+    "vitest": "4.0.18"
+  }
+}

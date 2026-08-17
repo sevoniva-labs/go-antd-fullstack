@@ -10,6 +10,9 @@ Thumbs.db
 # Frontend build artifacts
 /web/dist/
 /web/**/dist/
+/web/apps/shell/public/microapps/
+/web/packages/e2e/playwright-report/
+/web/packages/e2e/test-results/
 /.evidence/
 __pycache__/
 /.tools/

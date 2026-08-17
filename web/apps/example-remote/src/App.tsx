@@ -107,7 +107,7 @@ export function App() {
         <Alert
           showIcon
           type="info"
-          message="凭证隔离生效"
+          title="凭证隔离生效"
           description="子应用只拿到经过裁剪的用户上下文和授权能力，不接触 Cookie、Token 或任意请求头。"
         />
 

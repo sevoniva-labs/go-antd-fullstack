@@ -24,4 +24,14 @@ export default defineConfig({
       'X-Content-Type-Options': 'nosniff',
     },
   },
+  preview: {
+    cors: {
+      origin: ['http://localhost:5173', 'http://127.0.0.1:4173'],
+    },
+    headers: {
+      'Cache-Control': 'no-store',
+      'Referrer-Policy': 'no-referrer',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  },
 });

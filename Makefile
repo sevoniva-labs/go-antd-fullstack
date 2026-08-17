@@ -45,7 +45,7 @@ tidy:
 	go mod tidy
 
 web-install:
-	$(PNPM) install --frozen-lockfile --registry=$(NPM_REGISTRY)
+	PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 $(PNPM) install --frozen-lockfile --registry=$(NPM_REGISTRY)
 
 web-api-generate:
 	$(PNPM) --filter @forge/api-client api:types
