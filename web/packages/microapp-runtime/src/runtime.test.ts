@@ -10,6 +10,7 @@ import {
 
 import { MicroAppCircuitBreaker } from './circuit-breaker';
 import { createMicroAppIntegrityFetch } from './integrity-fetch';
+import { evaluateMicroAppLaunch } from './launch';
 import {
   authorizeMicroAppLaunch,
   isAuthorizedMicroAppLaunchPlan,
@@ -203,5 +204,55 @@ describe('signed resource inventory fetch', () => {
     await expect(
       guardedFetch(authorized.entryUrl, { headers: { Authorization: 'Bearer forbidden' } }),
     ).rejects.toMatchObject({ code: 'RESOURCE_REQUEST_DENIED' });
+  });
+});
+
+describe('launch evaluation', () => {
+  it('fails closed before network access when permissions are missing', async () => {
+    const authorized = await plan();
+    const fetcher = vi.fn();
+
+    await expect(
+      evaluateMicroAppLaunch({
+        plan: authorized,
+        subjectId: 'user-1',
+        permissions: new Set(),
+        circuitBreaker: new MicroAppCircuitBreaker(),
+        fetcher,
+      }),
+    ).resolves.toEqual({ allowed: false, reason: 'permission-denied' });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('preflights an isolated iframe without sending credentials', async () => {
+    const body = '<!doctype html><title>external</title>';
+    const external = await plan({
+      runtime: 'iframe',
+      trust: 'untrusted-external',
+      entryUrl: 'https://partner.example.cn/apps/risk/index.html',
+      health: { url: 'https://partner.example.cn/apps/risk/healthz', timeoutMs: 1_000 },
+      resources: [{
+        url: 'https://partner.example.cn/apps/risk/index.html',
+        integrity: await sha256Integrity(new TextEncoder().encode(body)),
+      }],
+    });
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) =>
+      init?.method === 'HEAD' ? new Response(null, { status: 204 }) : new Response(body),
+    );
+
+    await expect(
+      evaluateMicroAppLaunch({
+        plan: external,
+        subjectId: 'user-1',
+        permissions: new Set(['risk.case.read']),
+        circuitBreaker: new MicroAppCircuitBreaker(),
+        fetcher,
+      }),
+    ).resolves.toEqual({ allowed: true });
+    expect(fetcher).toHaveBeenNthCalledWith(
+      1,
+      external.health.url,
+      expect.objectContaining({ credentials: 'omit', method: 'HEAD', redirect: 'error' }),
+    );
   });
 });
