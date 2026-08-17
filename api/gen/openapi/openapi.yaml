@@ -761,6 +761,19 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
     /api/v1/approvals:
+        get:
+            tags:
+                - ApprovalService
+            operationId: ApprovalService_ListApprovals
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListApprovalsResponse'
+            security:
+                - SessionCookie: []
         post:
             tags:
                 - ApprovalService
@@ -1533,6 +1546,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.ApiToken'
+        forge.v1.ListApprovalsResponse:
+            type: object
+            properties:
+                approvals:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.ApprovalRequest'
         forge.v1.ListAuditLogsResponse:
             type: object
             properties:

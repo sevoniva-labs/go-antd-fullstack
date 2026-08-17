@@ -60,6 +60,22 @@ func (s *ApprovalService) GetApproval(ctx context.Context, req *forgev1.GetAppro
 	return &forgev1.GetApprovalResponse{Approval: approvalProto(item)}, nil
 }
 
+func (s *ApprovalService) ListApprovals(ctx context.Context, _ *forgev1.ListApprovalsRequest) (*forgev1.ListApprovalsResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := s.approval.List(ctx, principal)
+	if err != nil {
+		return nil, approvalServiceError(err)
+	}
+	reply := &forgev1.ListApprovalsResponse{Approvals: make([]*forgev1.ApprovalRequest, 0, len(items))}
+	for _, item := range items {
+		reply.Approvals = append(reply.Approvals, approvalProto(item))
+	}
+	return reply, nil
+}
+
 func (s *ApprovalService) DecideApproval(ctx context.Context, req *forgev1.DecideApprovalRequest) (*forgev1.DecideApprovalResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {

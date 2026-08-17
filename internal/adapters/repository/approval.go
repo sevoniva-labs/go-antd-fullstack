@@ -57,6 +57,47 @@ func (r *ApprovalRepo) ByID(ctx context.Context, orgID, requestID string) (domai
 	return request, err
 }
 
+func (r *ApprovalRepo) List(ctx context.Context, orgID, userID string, organizationWide bool, limit int) ([]domain.Request, error) {
+	if limit <= 0 || limit > 500 {
+		limit = 200
+	}
+	now := time.Now().UTC()
+	_, _ = r.db.ExecContext(ctx, r.db.Rebind(`UPDATE approval_requests SET status='EXPIRED',updated_at=? WHERE organization_id=? AND status='PENDING' AND expires_at<=?`), now, orgID, now)
+	query := `SELECT DISTINCT ar.id,ar.organization_id,ar.request_type,ar.action,ar.resource,ar.resource_id,ar.summary,ar.request_digest,ar.applicant_id,ar.approval_mode,ar.required_approvals,ar.status,ar.expires_at,ar.created_at,ar.updated_at FROM approval_requests ar`
+	args := []any{orgID}
+	if !organizationWide {
+		query += ` LEFT JOIN approval_tasks at ON at.request_id=ar.id WHERE ar.organization_id=? AND (ar.applicant_id=? OR at.assignee_id=? OR at.transferred_from=?)`
+		args = append(args, userID, userID, userID)
+	} else {
+		query += ` WHERE ar.organization_id=?`
+	}
+	query += ` ORDER BY ar.created_at DESC LIMIT ?`
+	args = append(args, limit)
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(query), args...)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.Request, 0)
+	for rows.Next() {
+		var request domain.Request
+		if err := rows.Scan(&request.ID, &request.OrganizationID, &request.RequestType, &request.Action, &request.Resource, &request.ResourceID, &request.Summary, &request.RequestDigest, &request.ApplicantID, &request.Mode, &request.RequiredApprovals, &request.Status, &request.ExpiresAt, &request.CreatedAt, &request.UpdatedAt); err != nil {
+			_ = rows.Close()
+			return nil, err
+		}
+		out = append(out, request)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	for index := range out {
+		out[index].Tasks, err = r.tasks(ctx, out[index].ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
 func (r *ApprovalRepo) tasks(ctx context.Context, requestID string) ([]domain.Task, error) {
 	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,request_id,assignee_id,status,decision,comment,transferred_from,decided_at,created_at,updated_at FROM approval_tasks WHERE request_id=? ORDER BY created_at,id`), requestID)
 	if err != nil {

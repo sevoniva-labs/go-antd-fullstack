@@ -86,6 +86,7 @@ func PlatformRules() map[string][]string {
 		forgev1.OperationPlatformServiceExportAuditLogs:        {"system.audit.export"},
 		forgev1.OperationApprovalServiceCreateApproval:         {"approval.request.create"},
 		forgev1.OperationApprovalServiceGetApproval:            {"approval.request.read"},
+		forgev1.OperationApprovalServiceListApprovals:          {"approval.request.read"},
 		forgev1.OperationApprovalServiceDecideApproval:         {"approval.task.decide"},
 		forgev1.OperationApprovalServiceTransferApproval:       {"approval.task.transfer"},
 		forgev1.OperationApprovalServiceWithdrawApproval:       {"approval.request.withdraw"},

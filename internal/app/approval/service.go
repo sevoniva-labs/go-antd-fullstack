@@ -81,6 +81,13 @@ func (s *Service) Get(ctx context.Context, actor identitydomain.Principal, reque
 	return request, nil
 }
 
+func (s *Service) List(ctx context.Context, actor identitydomain.Principal) ([]domain.Request, error) {
+	if err := requireActor(actor); err != nil {
+		return nil, err
+	}
+	return s.repo.List(ctx, actor.OrganizationID, actor.UserID, actor.HasRole("system_admin", "auditor"), 200)
+}
+
 func (s *Service) Decide(ctx context.Context, actor identitydomain.Principal, requestID, decision, comment string) (domain.Request, error) {
 	if err := requireActor(actor); err != nil {
 		return domain.Request{}, err

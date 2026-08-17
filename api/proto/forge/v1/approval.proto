@@ -17,6 +17,10 @@ service ApprovalService {
     option (google.api.http) = {get: "/api/v1/approvals/{approval_id}"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}]};
   }
+  rpc ListApprovals(ListApprovalsRequest) returns (ListApprovalsResponse) {
+    option (google.api.http) = {get: "/api/v1/approvals"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}]};
+  }
   rpc DecideApproval(DecideApprovalRequest) returns (DecideApprovalResponse) {
     option (google.api.http) = {post: "/api/v1/approvals/{approval_id}/decisions" body: "*"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
@@ -75,6 +79,8 @@ message CreateApprovalRequest {
 message CreateApprovalResponse { ApprovalRequest approval = 1; }
 message GetApprovalRequest { string approval_id = 1; }
 message GetApprovalResponse { ApprovalRequest approval = 1; }
+message ListApprovalsRequest {}
+message ListApprovalsResponse { repeated ApprovalRequest approvals = 1; }
 message DecideApprovalRequest { string approval_id = 1; string decision = 2; string comment = 3; }
 message DecideApprovalResponse { ApprovalRequest approval = 1; }
 message TransferApprovalRequest { string approval_id = 1; string new_assignee_id = 2; string comment = 3; }

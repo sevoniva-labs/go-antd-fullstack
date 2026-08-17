@@ -257,6 +257,10 @@ export type ForgeV1ListApiTokensResponse = {
     tokens?: Array<ForgeV1ApiToken>;
 };
 
+export type ForgeV1ListApprovalsResponse = {
+    approvals?: Array<ForgeV1ApprovalRequest>;
+};
+
 export type ForgeV1ListAuditLogsResponse = {
     events?: Array<ForgeV1AuditEvent>;
 };
@@ -1195,6 +1199,22 @@ export type IdentityServiceRevokeApiTokenResponses = {
 };
 
 export type IdentityServiceRevokeApiTokenResponse = IdentityServiceRevokeApiTokenResponses[keyof IdentityServiceRevokeApiTokenResponses];
+
+export type ApprovalServiceListApprovalsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/approvals';
+};
+
+export type ApprovalServiceListApprovalsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListApprovalsResponse;
+};
+
+export type ApprovalServiceListApprovalsResponse = ApprovalServiceListApprovalsResponses[keyof ApprovalServiceListApprovalsResponses];
 
 export type ApprovalServiceCreateApprovalData = {
     body: ForgeV1CreateApprovalRequest;

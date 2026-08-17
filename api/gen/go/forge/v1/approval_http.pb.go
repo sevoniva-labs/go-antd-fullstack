@@ -22,6 +22,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationApprovalServiceCreateApproval = "/forge.v1.ApprovalService/CreateApproval"
 const OperationApprovalServiceDecideApproval = "/forge.v1.ApprovalService/DecideApproval"
 const OperationApprovalServiceGetApproval = "/forge.v1.ApprovalService/GetApproval"
+const OperationApprovalServiceListApprovals = "/forge.v1.ApprovalService/ListApprovals"
 const OperationApprovalServiceTransferApproval = "/forge.v1.ApprovalService/TransferApproval"
 const OperationApprovalServiceWithdrawApproval = "/forge.v1.ApprovalService/WithdrawApproval"
 
@@ -29,6 +30,7 @@ type ApprovalServiceHTTPServer interface {
 	CreateApproval(context.Context, *CreateApprovalRequest) (*CreateApprovalResponse, error)
 	DecideApproval(context.Context, *DecideApprovalRequest) (*DecideApprovalResponse, error)
 	GetApproval(context.Context, *GetApprovalRequest) (*GetApprovalResponse, error)
+	ListApprovals(context.Context, *ListApprovalsRequest) (*ListApprovalsResponse, error)
 	TransferApproval(context.Context, *TransferApprovalRequest) (*TransferApprovalResponse, error)
 	WithdrawApproval(context.Context, *WithdrawApprovalRequest) (*WithdrawApprovalResponse, error)
 }
@@ -37,6 +39,7 @@ func RegisterApprovalServiceHTTPServer(s *http.Server, srv ApprovalServiceHTTPSe
 	r := s.Route("/")
 	r.POST("/api/v1/approvals", _ApprovalService_CreateApproval0_HTTP_Handler(srv))
 	r.GET("/api/v1/approvals/{approval_id}", _ApprovalService_GetApproval0_HTTP_Handler(srv))
+	r.GET("/api/v1/approvals", _ApprovalService_ListApprovals0_HTTP_Handler(srv))
 	r.POST("/api/v1/approvals/{approval_id}/decisions", _ApprovalService_DecideApproval0_HTTP_Handler(srv))
 	r.POST("/api/v1/approvals/{approval_id}/transfer", _ApprovalService_TransferApproval0_HTTP_Handler(srv))
 	r.POST("/api/v1/approvals/{approval_id}/withdraw", _ApprovalService_WithdrawApproval0_HTTP_Handler(srv))
@@ -82,6 +85,25 @@ func _ApprovalService_GetApproval0_HTTP_Handler(srv ApprovalServiceHTTPServer) f
 			return err
 		}
 		reply := out.(*GetApprovalResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ApprovalService_ListApprovals0_HTTP_Handler(srv ApprovalServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListApprovalsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationApprovalServiceListApprovals)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListApprovals(ctx, req.(*ListApprovalsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListApprovalsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -165,6 +187,7 @@ type ApprovalServiceHTTPClient interface {
 	CreateApproval(ctx context.Context, req *CreateApprovalRequest, opts ...http.CallOption) (rsp *CreateApprovalResponse, err error)
 	DecideApproval(ctx context.Context, req *DecideApprovalRequest, opts ...http.CallOption) (rsp *DecideApprovalResponse, err error)
 	GetApproval(ctx context.Context, req *GetApprovalRequest, opts ...http.CallOption) (rsp *GetApprovalResponse, err error)
+	ListApprovals(ctx context.Context, req *ListApprovalsRequest, opts ...http.CallOption) (rsp *ListApprovalsResponse, err error)
 	TransferApproval(ctx context.Context, req *TransferApprovalRequest, opts ...http.CallOption) (rsp *TransferApprovalResponse, err error)
 	WithdrawApproval(ctx context.Context, req *WithdrawApprovalRequest, opts ...http.CallOption) (rsp *WithdrawApprovalResponse, err error)
 }
@@ -208,6 +231,19 @@ func (c *ApprovalServiceHTTPClientImpl) GetApproval(ctx context.Context, in *Get
 	pattern := "/api/v1/approvals/{approval_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationApprovalServiceGetApproval))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ApprovalServiceHTTPClientImpl) ListApprovals(ctx context.Context, in *ListApprovalsRequest, opts ...http.CallOption) (*ListApprovalsResponse, error) {
+	var out ListApprovalsResponse
+	pattern := "/api/v1/approvals"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationApprovalServiceListApprovals))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -528,6 +528,86 @@ func (x *GetApprovalResponse) GetApproval() *ApprovalRequest {
 	return nil
 }
 
+type ListApprovalsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListApprovalsRequest) Reset() {
+	*x = ListApprovalsRequest{}
+	mi := &file_forge_v1_approval_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListApprovalsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListApprovalsRequest) ProtoMessage() {}
+
+func (x *ListApprovalsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_approval_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListApprovalsRequest.ProtoReflect.Descriptor instead.
+func (*ListApprovalsRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{6}
+}
+
+type ListApprovalsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approvals     []*ApprovalRequest     `protobuf:"bytes,1,rep,name=approvals,proto3" json:"approvals,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListApprovalsResponse) Reset() {
+	*x = ListApprovalsResponse{}
+	mi := &file_forge_v1_approval_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListApprovalsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListApprovalsResponse) ProtoMessage() {}
+
+func (x *ListApprovalsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_approval_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListApprovalsResponse.ProtoReflect.Descriptor instead.
+func (*ListApprovalsResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListApprovalsResponse) GetApprovals() []*ApprovalRequest {
+	if x != nil {
+		return x.Approvals
+	}
+	return nil
+}
+
 type DecideApprovalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ApprovalId    string                 `protobuf:"bytes,1,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
@@ -539,7 +619,7 @@ type DecideApprovalRequest struct {
 
 func (x *DecideApprovalRequest) Reset() {
 	*x = DecideApprovalRequest{}
-	mi := &file_forge_v1_approval_proto_msgTypes[6]
+	mi := &file_forge_v1_approval_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -551,7 +631,7 @@ func (x *DecideApprovalRequest) String() string {
 func (*DecideApprovalRequest) ProtoMessage() {}
 
 func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_approval_proto_msgTypes[6]
+	mi := &file_forge_v1_approval_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -564,7 +644,7 @@ func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideApprovalRequest.ProtoReflect.Descriptor instead.
 func (*DecideApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_approval_proto_rawDescGZIP(), []int{6}
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DecideApprovalRequest) GetApprovalId() string {
@@ -597,7 +677,7 @@ type DecideApprovalResponse struct {
 
 func (x *DecideApprovalResponse) Reset() {
 	*x = DecideApprovalResponse{}
-	mi := &file_forge_v1_approval_proto_msgTypes[7]
+	mi := &file_forge_v1_approval_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -609,7 +689,7 @@ func (x *DecideApprovalResponse) String() string {
 func (*DecideApprovalResponse) ProtoMessage() {}
 
 func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_approval_proto_msgTypes[7]
+	mi := &file_forge_v1_approval_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -622,7 +702,7 @@ func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideApprovalResponse.ProtoReflect.Descriptor instead.
 func (*DecideApprovalResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_approval_proto_rawDescGZIP(), []int{7}
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DecideApprovalResponse) GetApproval() *ApprovalRequest {
@@ -643,7 +723,7 @@ type TransferApprovalRequest struct {
 
 func (x *TransferApprovalRequest) Reset() {
 	*x = TransferApprovalRequest{}
-	mi := &file_forge_v1_approval_proto_msgTypes[8]
+	mi := &file_forge_v1_approval_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -655,7 +735,7 @@ func (x *TransferApprovalRequest) String() string {
 func (*TransferApprovalRequest) ProtoMessage() {}
 
 func (x *TransferApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_approval_proto_msgTypes[8]
+	mi := &file_forge_v1_approval_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -668,7 +748,7 @@ func (x *TransferApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferApprovalRequest.ProtoReflect.Descriptor instead.
 func (*TransferApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_approval_proto_rawDescGZIP(), []int{8}
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *TransferApprovalRequest) GetApprovalId() string {
@@ -701,7 +781,7 @@ type TransferApprovalResponse struct {
 
 func (x *TransferApprovalResponse) Reset() {
 	*x = TransferApprovalResponse{}
-	mi := &file_forge_v1_approval_proto_msgTypes[9]
+	mi := &file_forge_v1_approval_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -713,7 +793,7 @@ func (x *TransferApprovalResponse) String() string {
 func (*TransferApprovalResponse) ProtoMessage() {}
 
 func (x *TransferApprovalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_approval_proto_msgTypes[9]
+	mi := &file_forge_v1_approval_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -726,7 +806,7 @@ func (x *TransferApprovalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferApprovalResponse.ProtoReflect.Descriptor instead.
 func (*TransferApprovalResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_approval_proto_rawDescGZIP(), []int{9}
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *TransferApprovalResponse) GetApproval() *ApprovalRequest {
@@ -746,7 +826,7 @@ type WithdrawApprovalRequest struct {
 
 func (x *WithdrawApprovalRequest) Reset() {
 	*x = WithdrawApprovalRequest{}
-	mi := &file_forge_v1_approval_proto_msgTypes[10]
+	mi := &file_forge_v1_approval_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -758,7 +838,7 @@ func (x *WithdrawApprovalRequest) String() string {
 func (*WithdrawApprovalRequest) ProtoMessage() {}
 
 func (x *WithdrawApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_approval_proto_msgTypes[10]
+	mi := &file_forge_v1_approval_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -771,7 +851,7 @@ func (x *WithdrawApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WithdrawApprovalRequest.ProtoReflect.Descriptor instead.
 func (*WithdrawApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_approval_proto_rawDescGZIP(), []int{10}
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *WithdrawApprovalRequest) GetApprovalId() string {
@@ -797,7 +877,7 @@ type WithdrawApprovalResponse struct {
 
 func (x *WithdrawApprovalResponse) Reset() {
 	*x = WithdrawApprovalResponse{}
-	mi := &file_forge_v1_approval_proto_msgTypes[11]
+	mi := &file_forge_v1_approval_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -809,7 +889,7 @@ func (x *WithdrawApprovalResponse) String() string {
 func (*WithdrawApprovalResponse) ProtoMessage() {}
 
 func (x *WithdrawApprovalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_approval_proto_msgTypes[11]
+	mi := &file_forge_v1_approval_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -822,7 +902,7 @@ func (x *WithdrawApprovalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WithdrawApprovalResponse.ProtoReflect.Descriptor instead.
 func (*WithdrawApprovalResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_approval_proto_rawDescGZIP(), []int{11}
+	return file_forge_v1_approval_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *WithdrawApprovalResponse) GetApproval() *ApprovalRequest {
@@ -888,7 +968,10 @@ const file_forge_v1_approval_proto_rawDesc = "" +
 	"\vapproval_id\x18\x01 \x01(\tR\n" +
 	"approvalId\"L\n" +
 	"\x13GetApprovalResponse\x125\n" +
-	"\bapproval\x18\x01 \x01(\v2\x19.forge.v1.ApprovalRequestR\bapproval\"n\n" +
+	"\bapproval\x18\x01 \x01(\v2\x19.forge.v1.ApprovalRequestR\bapproval\"\x16\n" +
+	"\x14ListApprovalsRequest\"P\n" +
+	"\x15ListApprovalsResponse\x127\n" +
+	"\tapprovals\x18\x01 \x03(\v2\x19.forge.v1.ApprovalRequestR\tapprovals\"n\n" +
 	"\x15DecideApprovalRequest\x12\x1f\n" +
 	"\vapproval_id\x18\x01 \x01(\tR\n" +
 	"approvalId\x12\x1a\n" +
@@ -908,7 +991,7 @@ const file_forge_v1_approval_proto_rawDesc = "" +
 	"approvalId\x12\x18\n" +
 	"\acomment\x18\x02 \x01(\tR\acomment\"Q\n" +
 	"\x18WithdrawApprovalResponse\x125\n" +
-	"\bapproval\x18\x01 \x01(\v2\x19.forge.v1.ApprovalRequestR\bapproval2\xdd\x06\n" +
+	"\bapproval\x18\x01 \x01(\v2\x19.forge.v1.ApprovalRequestR\bapproval2\xe3\a\n" +
 	"\x0fApprovalService\x12\x98\x01\n" +
 	"\x0eCreateApproval\x12\x1f.forge.v1.CreateApprovalRequest\x1a .forge.v1.CreateApprovalResponse\"C\xbaG$Z\"\n" +
 	"\x11\n" +
@@ -917,7 +1000,10 @@ const file_forge_v1_approval_proto_rawDesc = "" +
 	"\tCsrfToken\x12\x00\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/approvals\x12\x8b\x01\n" +
 	"\vGetApproval\x12\x1c.forge.v1.GetApprovalRequest\x1a\x1d.forge.v1.GetApprovalResponse\"?\xbaG\x15Z\x13\n" +
 	"\x11\n" +
-	"\rSessionCookie\x12\x00\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/approvals/{approval_id}\x12\xb0\x01\n" +
+	"\rSessionCookie\x12\x00\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/approvals/{approval_id}\x12\x83\x01\n" +
+	"\rListApprovals\x12\x1e.forge.v1.ListApprovalsRequest\x1a\x1f.forge.v1.ListApprovalsResponse\"1\xbaG\x15Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/approvals\x12\xb0\x01\n" +
 	"\x0eDecideApproval\x12\x1f.forge.v1.DecideApprovalRequest\x1a .forge.v1.DecideApprovalResponse\"[\xbaG$Z\"\n" +
 	"\x11\n" +
 	"\rSessionCookie\x12\x00\n" +
@@ -946,7 +1032,7 @@ func file_forge_v1_approval_proto_rawDescGZIP() []byte {
 	return file_forge_v1_approval_proto_rawDescData
 }
 
-var file_forge_v1_approval_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_forge_v1_approval_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_forge_v1_approval_proto_goTypes = []any{
 	(*ApprovalTask)(nil),             // 0: forge.v1.ApprovalTask
 	(*ApprovalRequest)(nil),          // 1: forge.v1.ApprovalRequest
@@ -954,40 +1040,45 @@ var file_forge_v1_approval_proto_goTypes = []any{
 	(*CreateApprovalResponse)(nil),   // 3: forge.v1.CreateApprovalResponse
 	(*GetApprovalRequest)(nil),       // 4: forge.v1.GetApprovalRequest
 	(*GetApprovalResponse)(nil),      // 5: forge.v1.GetApprovalResponse
-	(*DecideApprovalRequest)(nil),    // 6: forge.v1.DecideApprovalRequest
-	(*DecideApprovalResponse)(nil),   // 7: forge.v1.DecideApprovalResponse
-	(*TransferApprovalRequest)(nil),  // 8: forge.v1.TransferApprovalRequest
-	(*TransferApprovalResponse)(nil), // 9: forge.v1.TransferApprovalResponse
-	(*WithdrawApprovalRequest)(nil),  // 10: forge.v1.WithdrawApprovalRequest
-	(*WithdrawApprovalResponse)(nil), // 11: forge.v1.WithdrawApprovalResponse
-	(*timestamppb.Timestamp)(nil),    // 12: google.protobuf.Timestamp
+	(*ListApprovalsRequest)(nil),     // 6: forge.v1.ListApprovalsRequest
+	(*ListApprovalsResponse)(nil),    // 7: forge.v1.ListApprovalsResponse
+	(*DecideApprovalRequest)(nil),    // 8: forge.v1.DecideApprovalRequest
+	(*DecideApprovalResponse)(nil),   // 9: forge.v1.DecideApprovalResponse
+	(*TransferApprovalRequest)(nil),  // 10: forge.v1.TransferApprovalRequest
+	(*TransferApprovalResponse)(nil), // 11: forge.v1.TransferApprovalResponse
+	(*WithdrawApprovalRequest)(nil),  // 12: forge.v1.WithdrawApprovalRequest
+	(*WithdrawApprovalResponse)(nil), // 13: forge.v1.WithdrawApprovalResponse
+	(*timestamppb.Timestamp)(nil),    // 14: google.protobuf.Timestamp
 }
 var file_forge_v1_approval_proto_depIdxs = []int32{
-	12, // 0: forge.v1.ApprovalTask.decided_at:type_name -> google.protobuf.Timestamp
-	12, // 1: forge.v1.ApprovalRequest.expires_at:type_name -> google.protobuf.Timestamp
-	12, // 2: forge.v1.ApprovalRequest.created_at:type_name -> google.protobuf.Timestamp
-	12, // 3: forge.v1.ApprovalRequest.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: forge.v1.ApprovalTask.decided_at:type_name -> google.protobuf.Timestamp
+	14, // 1: forge.v1.ApprovalRequest.expires_at:type_name -> google.protobuf.Timestamp
+	14, // 2: forge.v1.ApprovalRequest.created_at:type_name -> google.protobuf.Timestamp
+	14, // 3: forge.v1.ApprovalRequest.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 4: forge.v1.ApprovalRequest.tasks:type_name -> forge.v1.ApprovalTask
 	1,  // 5: forge.v1.CreateApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
 	1,  // 6: forge.v1.GetApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
-	1,  // 7: forge.v1.DecideApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
-	1,  // 8: forge.v1.TransferApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
-	1,  // 9: forge.v1.WithdrawApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
-	2,  // 10: forge.v1.ApprovalService.CreateApproval:input_type -> forge.v1.CreateApprovalRequest
-	4,  // 11: forge.v1.ApprovalService.GetApproval:input_type -> forge.v1.GetApprovalRequest
-	6,  // 12: forge.v1.ApprovalService.DecideApproval:input_type -> forge.v1.DecideApprovalRequest
-	8,  // 13: forge.v1.ApprovalService.TransferApproval:input_type -> forge.v1.TransferApprovalRequest
-	10, // 14: forge.v1.ApprovalService.WithdrawApproval:input_type -> forge.v1.WithdrawApprovalRequest
-	3,  // 15: forge.v1.ApprovalService.CreateApproval:output_type -> forge.v1.CreateApprovalResponse
-	5,  // 16: forge.v1.ApprovalService.GetApproval:output_type -> forge.v1.GetApprovalResponse
-	7,  // 17: forge.v1.ApprovalService.DecideApproval:output_type -> forge.v1.DecideApprovalResponse
-	9,  // 18: forge.v1.ApprovalService.TransferApproval:output_type -> forge.v1.TransferApprovalResponse
-	11, // 19: forge.v1.ApprovalService.WithdrawApproval:output_type -> forge.v1.WithdrawApprovalResponse
-	15, // [15:20] is the sub-list for method output_type
-	10, // [10:15] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	1,  // 7: forge.v1.ListApprovalsResponse.approvals:type_name -> forge.v1.ApprovalRequest
+	1,  // 8: forge.v1.DecideApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
+	1,  // 9: forge.v1.TransferApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
+	1,  // 10: forge.v1.WithdrawApprovalResponse.approval:type_name -> forge.v1.ApprovalRequest
+	2,  // 11: forge.v1.ApprovalService.CreateApproval:input_type -> forge.v1.CreateApprovalRequest
+	4,  // 12: forge.v1.ApprovalService.GetApproval:input_type -> forge.v1.GetApprovalRequest
+	6,  // 13: forge.v1.ApprovalService.ListApprovals:input_type -> forge.v1.ListApprovalsRequest
+	8,  // 14: forge.v1.ApprovalService.DecideApproval:input_type -> forge.v1.DecideApprovalRequest
+	10, // 15: forge.v1.ApprovalService.TransferApproval:input_type -> forge.v1.TransferApprovalRequest
+	12, // 16: forge.v1.ApprovalService.WithdrawApproval:input_type -> forge.v1.WithdrawApprovalRequest
+	3,  // 17: forge.v1.ApprovalService.CreateApproval:output_type -> forge.v1.CreateApprovalResponse
+	5,  // 18: forge.v1.ApprovalService.GetApproval:output_type -> forge.v1.GetApprovalResponse
+	7,  // 19: forge.v1.ApprovalService.ListApprovals:output_type -> forge.v1.ListApprovalsResponse
+	9,  // 20: forge.v1.ApprovalService.DecideApproval:output_type -> forge.v1.DecideApprovalResponse
+	11, // 21: forge.v1.ApprovalService.TransferApproval:output_type -> forge.v1.TransferApprovalResponse
+	13, // 22: forge.v1.ApprovalService.WithdrawApproval:output_type -> forge.v1.WithdrawApprovalResponse
+	17, // [17:23] is the sub-list for method output_type
+	11, // [11:17] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_forge_v1_approval_proto_init() }
@@ -1001,7 +1092,7 @@ func file_forge_v1_approval_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_forge_v1_approval_proto_rawDesc), len(file_forge_v1_approval_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
