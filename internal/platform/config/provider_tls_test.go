@@ -18,9 +18,9 @@ func TestValidateRequiresProviderTLSInProduction(t *testing.T) {
 		want    string
 		prepare func(*Config)
 	}{
-		{name: "kafka", want: "messaging.tls", prepare: func(c *Config) {
-			c.Messaging.Provider = "kafka"
-			c.Messaging.Brokers = []string{"kafka:9092"}
+		{name: "kafka", want: "streaming.tls", prepare: func(c *Config) {
+			c.Streaming.Provider = "kafka"
+			c.Streaming.Brokers = []string{"kafka:9092"}
 		}},
 		{name: "rocketmq", want: "messaging.tls", prepare: func(c *Config) {
 			c.Messaging.Provider = "rocketmq"
@@ -69,7 +69,7 @@ func TestValidateRequiresProviderTLSInProduction(t *testing.T) {
 
 func TestValidateAllowsSecureProvidersInProduction(t *testing.T) {
 	cfg := productionConfig()
-	cfg.Messaging = Messaging{Provider: "kafka", Brokers: []string{"kafka:9093"}, TLS: true}
+	cfg.Streaming = Streaming{Provider: "kafka", Brokers: []string{"kafka:9093"}, TLS: true}
 	cfg.Search = Search{Provider: "opensearch", URLs: []string{"https://search:9200"}, TLS: true}
 	cfg.Storage = Storage{Provider: "ceph-rgw", Endpoint: "https://rgw.internal", Bucket: "documents", TLS: true}
 	cfg.Observability.TracingEnabled = true
@@ -84,7 +84,7 @@ func TestValidateAllowsSecureProvidersInProduction(t *testing.T) {
 func TestValidateAllowsPlaintextProvidersInDevelopment(t *testing.T) {
 	cfg := Default()
 	cfg.Database.DSN = "postgres://user:secret@db/app?sslmode=disable"
-	cfg.Messaging = Messaging{Provider: "kafka", Brokers: []string{"kafka:9092"}}
+	cfg.Streaming = Streaming{Provider: "kafka", Brokers: []string{"kafka:9092"}}
 	cfg.Search = Search{Provider: "elasticsearch", URLs: []string{"http://search:9200"}}
 	cfg.Storage = Storage{Provider: "s3-compatible", Endpoint: "http://s3:9000", Bucket: "documents"}
 	cfg.Observability.TracingEnabled = true

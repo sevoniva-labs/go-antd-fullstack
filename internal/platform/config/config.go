@@ -21,6 +21,7 @@ type Config struct {
 	Database      Database      `yaml:"database"`
 	Cache         Cache         `yaml:"cache"`
 	Messaging     Messaging     `yaml:"messaging"`
+	Streaming     Streaming     `yaml:"streaming"`
 	Search        Search        `yaml:"search"`
 	Storage       Storage       `yaml:"storage"`
 	Discovery     Discovery     `yaml:"discovery"`
@@ -85,15 +86,9 @@ type Cache struct {
 }
 
 type Messaging struct {
-	Provider string `yaml:"provider"` // disabled | kafka | rocketmq
+	Provider string `yaml:"provider"` // disabled | rocketmq
 
-	// Kafka
-	Brokers  []string `yaml:"brokers"`
-	ClientID string   `yaml:"client_id"`
-	Username string   `yaml:"-"`
-	Password string   `yaml:"-"`
-
-	// Shared transport TLS for Kafka or the RocketMQ 5 gRPC Proxy.
+	// RocketMQ 5 gRPC Proxy transport security.
 	TLS           bool   `yaml:"tls"`
 	TLSCAFile     string `yaml:"tls_ca_file"`
 	TLSCertFile   string `yaml:"tls_cert_file"`
@@ -111,6 +106,19 @@ type Messaging struct {
 	RocketMQBatchSize         int           `yaml:"rocketmq_batch_size"`
 	RocketMQInvisibleDuration time.Duration `yaml:"rocketmq_invisible_duration"`
 	RocketMQAwaitDuration     time.Duration `yaml:"rocketmq_await_duration"`
+}
+
+type Streaming struct {
+	Provider      string   `yaml:"provider"` // disabled | kafka
+	Brokers       []string `yaml:"brokers"`
+	ClientID      string   `yaml:"client_id"`
+	Username      string   `yaml:"-"`
+	Password      string   `yaml:"-"`
+	TLS           bool     `yaml:"tls"`
+	TLSCAFile     string   `yaml:"tls_ca_file"`
+	TLSCertFile   string   `yaml:"tls_cert_file"`
+	TLSKeyFile    string   `yaml:"tls_key_file"`
+	TLSServerName string   `yaml:"tls_server_name"`
 }
 
 type Search struct {
@@ -246,9 +254,10 @@ func Default() Config {
 		Database: Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: true},
 		Cache:    Cache{Provider: "memory", Mode: "standalone", Prefix: "forge:", TTL: 10 * time.Minute},
 		Messaging: Messaging{
-			Provider: "disabled", ClientID: "forge", RocketMQBatchSize: 16,
+			Provider: "disabled", RocketMQBatchSize: 16,
 			RocketMQInvisibleDuration: 30 * time.Second, RocketMQAwaitDuration: 5 * time.Second,
 		},
+		Streaming:    Streaming{Provider: "disabled", ClientID: "forge"},
 		Search:       Search{Provider: "disabled"},
 		Storage:      Storage{Provider: "local", LocalRoot: "./data"},
 		Discovery:    Discovery{Provider: "disabled", Group: "DEFAULT_GROUP", Cluster: "DEFAULT", Weight: 1, Metadata: map[string]string{}},
@@ -357,10 +366,10 @@ func ApplyEnvironment(cfg *Config) {
 	cfg.Database.ReadOnlyDSN = secret("FORGE_DATABASE_READONLY_DSN")
 	cfg.Cache.Username = secret("FORGE_REDIS_USERNAME")
 	cfg.Cache.Password = secret("FORGE_REDIS_PASSWORD")
-	cfg.Messaging.Username = secret("FORGE_KAFKA_USERNAME")
-	cfg.Messaging.Password = secret("FORGE_KAFKA_PASSWORD")
 	cfg.Messaging.RocketMQAccessKey = secret("FORGE_ROCKETMQ_ACCESS_KEY")
 	cfg.Messaging.RocketMQSecretKey = secret("FORGE_ROCKETMQ_SECRET_KEY")
+	cfg.Streaming.Username = secret("FORGE_KAFKA_USERNAME")
+	cfg.Streaming.Password = secret("FORGE_KAFKA_PASSWORD")
 	cfg.Search.Username = secret("FORGE_SEARCH_USERNAME")
 	cfg.Search.Password = secret("FORGE_SEARCH_PASSWORD")
 	cfg.Storage.AccessKey = secret("FORGE_STORAGE_ACCESS_KEY")
@@ -409,20 +418,11 @@ func ApplyEnvironment(cfg *Config) {
 	overrideDuration(&cfg.Cache.TTL, "FORGE_CACHE_DEFAULT_TTL")
 
 	overrideString(&cfg.Messaging.Provider, "FORGE_MESSAGING_PROVIDER")
-	overrideCSV(&cfg.Messaging.Brokers, "FORGE_KAFKA_BROKERS")
-	overrideString(&cfg.Messaging.ClientID, "FORGE_KAFKA_CLIENT_ID")
-	overrideBool(&cfg.Messaging.TLS, "FORGE_KAFKA_TLS")
-	overrideString(&cfg.Messaging.TLSCAFile, "FORGE_KAFKA_TLS_CA_FILE")
-	overrideString(&cfg.Messaging.TLSCertFile, "FORGE_KAFKA_TLS_CERT_FILE")
-	overrideString(&cfg.Messaging.TLSKeyFile, "FORGE_KAFKA_TLS_KEY_FILE")
-	overrideString(&cfg.Messaging.TLSServerName, "FORGE_KAFKA_TLS_SERVER_NAME")
-	if strings.EqualFold(cfg.Messaging.Provider, "rocketmq") {
-		overrideBool(&cfg.Messaging.TLS, "FORGE_ROCKETMQ_TLS")
-		overrideString(&cfg.Messaging.TLSCAFile, "FORGE_ROCKETMQ_TLS_CA_FILE")
-		overrideString(&cfg.Messaging.TLSCertFile, "FORGE_ROCKETMQ_TLS_CERT_FILE")
-		overrideString(&cfg.Messaging.TLSKeyFile, "FORGE_ROCKETMQ_TLS_KEY_FILE")
-		overrideString(&cfg.Messaging.TLSServerName, "FORGE_ROCKETMQ_TLS_SERVER_NAME")
-	}
+	overrideBool(&cfg.Messaging.TLS, "FORGE_ROCKETMQ_TLS")
+	overrideString(&cfg.Messaging.TLSCAFile, "FORGE_ROCKETMQ_TLS_CA_FILE")
+	overrideString(&cfg.Messaging.TLSCertFile, "FORGE_ROCKETMQ_TLS_CERT_FILE")
+	overrideString(&cfg.Messaging.TLSKeyFile, "FORGE_ROCKETMQ_TLS_KEY_FILE")
+	overrideString(&cfg.Messaging.TLSServerName, "FORGE_ROCKETMQ_TLS_SERVER_NAME")
 	overrideString(&cfg.Messaging.RocketMQEndpoint, "FORGE_ROCKETMQ_ENDPOINT")
 	overrideString(&cfg.Messaging.RocketMQGroup, "FORGE_ROCKETMQ_GROUP")
 	overrideString(&cfg.Messaging.RocketMQNamespace, "FORGE_ROCKETMQ_NAMESPACE")
@@ -430,6 +430,15 @@ func ApplyEnvironment(cfg *Config) {
 	overrideInt(&cfg.Messaging.RocketMQBatchSize, "FORGE_ROCKETMQ_BATCH_SIZE")
 	overrideDuration(&cfg.Messaging.RocketMQInvisibleDuration, "FORGE_ROCKETMQ_INVISIBLE_DURATION")
 	overrideDuration(&cfg.Messaging.RocketMQAwaitDuration, "FORGE_ROCKETMQ_AWAIT_DURATION")
+
+	overrideString(&cfg.Streaming.Provider, "FORGE_STREAMING_PROVIDER")
+	overrideCSV(&cfg.Streaming.Brokers, "FORGE_KAFKA_BROKERS")
+	overrideString(&cfg.Streaming.ClientID, "FORGE_KAFKA_CLIENT_ID")
+	overrideBool(&cfg.Streaming.TLS, "FORGE_KAFKA_TLS")
+	overrideString(&cfg.Streaming.TLSCAFile, "FORGE_KAFKA_TLS_CA_FILE")
+	overrideString(&cfg.Streaming.TLSCertFile, "FORGE_KAFKA_TLS_CERT_FILE")
+	overrideString(&cfg.Streaming.TLSKeyFile, "FORGE_KAFKA_TLS_KEY_FILE")
+	overrideString(&cfg.Streaming.TLSServerName, "FORGE_KAFKA_TLS_SERVER_NAME")
 
 	overrideString(&cfg.Search.Provider, "FORGE_SEARCH_PROVIDER")
 	overrideCSV(&cfg.Search.URLs, "FORGE_SEARCH_URLS")
@@ -571,12 +580,9 @@ func (c Config) Validate() error {
 		errs = append(errs, "cache.mode must be standalone|sentinel|cluster")
 	}
 	switch c.Messaging.Provider {
-	case "disabled", "kafka", "rocketmq":
+	case "disabled", "rocketmq":
 	default:
-		errs = append(errs, "messaging.provider must be disabled|kafka|rocketmq")
-	}
-	if c.Messaging.Provider == "kafka" && len(c.Messaging.Brokers) == 0 {
-		errs = append(errs, "messaging.brokers required for kafka")
+		errs = append(errs, "messaging.provider must be disabled|rocketmq")
 	}
 	if c.Messaging.Provider == "rocketmq" && c.Messaging.RocketMQEndpoint == "" {
 		errs = append(errs, "messaging.rocketmq_endpoint required for rocketmq")
@@ -587,8 +593,19 @@ func (c Config) Validate() error {
 	if c.Messaging.Provider == "rocketmq" && (c.Messaging.RocketMQAccessKey == "" || c.Messaging.RocketMQSecretKey == "") {
 		errs = append(errs, "FORGE_ROCKETMQ_ACCESS_KEY and FORGE_ROCKETMQ_SECRET_KEY are required for rocketmq")
 	}
-	if isProduction(c.App.Environment) && (c.Messaging.Provider == "kafka" || c.Messaging.Provider == "rocketmq") && !c.Messaging.TLS {
+	if isProduction(c.App.Environment) && c.Messaging.Provider == "rocketmq" && !c.Messaging.TLS {
 		errs = append(errs, "messaging.tls must be enabled in production")
+	}
+	switch c.Streaming.Provider {
+	case "disabled", "kafka":
+	default:
+		errs = append(errs, "streaming.provider must be disabled|kafka")
+	}
+	if c.Streaming.Provider == "kafka" && len(c.Streaming.Brokers) == 0 {
+		errs = append(errs, "streaming.brokers required for kafka")
+	}
+	if isProduction(c.App.Environment) && c.Streaming.Provider == "kafka" && !c.Streaming.TLS {
+		errs = append(errs, "streaming.tls must be enabled in production")
 	}
 	switch c.Search.Provider {
 	case "disabled", "elasticsearch", "opensearch":
@@ -670,6 +687,7 @@ func (c Config) Validate() error {
 	for name, pair := range map[string][2]string{
 		"redis":     {c.Cache.TLSCertFile, c.Cache.TLSKeyFile},
 		"messaging": {c.Messaging.TLSCertFile, c.Messaging.TLSKeyFile},
+		"streaming": {c.Streaming.TLSCertFile, c.Streaming.TLSKeyFile},
 		"search":    {c.Search.TLSCertFile, c.Search.TLSKeyFile},
 		"storage":   {c.Storage.TLSCertFile, c.Storage.TLSKeyFile},
 		"otlp":      {c.Observability.OTLPTLSCertFile, c.Observability.OTLPTLSKeyFile},

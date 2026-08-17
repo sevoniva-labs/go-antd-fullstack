@@ -32,8 +32,6 @@ func NewConsumer(cfg config.Messaging) (Consumer, error) {
 	switch cfg.Provider {
 	case "rocketmq":
 		return newRocketMQConsumer(cfg)
-	case "kafka":
-		return nil, fmt.Errorf("kafka is configured only for streaming; business-event consumers require rocketmq")
 	case "disabled", "":
 		return nil, fmt.Errorf("messaging consumer is disabled")
 	default:
