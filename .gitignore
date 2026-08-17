@@ -30,3 +30,7 @@ coverage.out
 
 # Optional local Kubernetes/Helm outputs
 *.tgz
+
+# Local architecture/security plans
+/docs/banking-production-feasibility-plan.local.md
+/docs/banking-production-goal-prompt.local.md
