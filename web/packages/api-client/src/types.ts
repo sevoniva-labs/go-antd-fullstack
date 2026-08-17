@@ -126,6 +126,7 @@ export interface ApprovalRequest {
   resource: string
   resource_id: string
   summary: string
+  payload_json: string
   request_digest: string
   applicant_id: string
   mode: 'ANY' | 'ALL' | 'QUORUM'
@@ -135,6 +136,23 @@ export interface ApprovalRequest {
   created_at: string
   updated_at: string
   tasks: ApprovalTask[]
+}
+
+export interface TemporaryRoleGrant {
+  id: string
+  organization_id: string
+  user_id: string
+  role_key: string
+  requested_by: string
+  approval_id: string
+  reason: string
+  status: 'SCHEDULED' | 'ACTIVE' | 'EXPIRED' | 'REVOKED'
+  valid_from: string
+  valid_until: string
+  revoked_at?: string
+  revoked_by?: string
+  revoke_reason?: string
+  created_at: string
 }
 
 export interface SessionInfo {

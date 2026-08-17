@@ -8,6 +8,7 @@
     "./modules": "./src/modules.ts",
     "./audit-logs": "./src/pages/AuditLogs.tsx",
     "./approvals": "./src/pages/Approvals.tsx",
+    "./temporary-grants": "./src/pages/TemporaryGrants.tsx",
     "./departments": "./src/pages/Departments.tsx",
     "./organization": "./src/pages/Organization.tsx",
     "./permissions": "./src/pages/Permissions.tsx",

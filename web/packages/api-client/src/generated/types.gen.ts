@@ -31,6 +31,7 @@ export type ForgeV1ApprovalRequest = {
     createdAt?: string;
     updatedAt?: string;
     tasks?: Array<ForgeV1ApprovalTask>;
+    payloadJson?: string;
 };
 
 export type ForgeV1ApprovalTask = {
@@ -135,6 +136,19 @@ export type ForgeV1CreatePositionRequest = {
 
 export type ForgeV1CreatePositionResponse = {
     position?: ForgeV1Position;
+};
+
+export type ForgeV1CreateTemporaryRoleGrantRequest = {
+    userId?: string;
+    roleKey?: string;
+    reason?: string;
+    validFrom?: string;
+    validUntil?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1CreateTemporaryRoleGrantResponse = {
+    grant?: ForgeV1TemporaryRoleGrant;
 };
 
 export type ForgeV1CreateUserGroupRequest = {
@@ -285,6 +299,10 @@ export type ForgeV1ListSessionsResponse = {
     sessions?: Array<ForgeV1Session>;
 };
 
+export type ForgeV1ListTemporaryRoleGrantsResponse = {
+    grants?: Array<ForgeV1TemporaryRoleGrant>;
+};
+
 export type ForgeV1ListUserAssignmentsResponse = {
     assignments?: Array<ForgeV1UserAssignment>;
 };
@@ -383,6 +401,15 @@ export type ForgeV1RevokeSessionResponse = {
     [key: string]: unknown;
 };
 
+export type ForgeV1RevokeTemporaryRoleGrantRequest = {
+    grantId?: string;
+    reason?: string;
+};
+
+export type ForgeV1RevokeTemporaryRoleGrantResponse = {
+    [key: string]: unknown;
+};
+
 export type ForgeV1Role = {
     key?: string;
     name?: string;
@@ -439,6 +466,23 @@ export type ForgeV1StepUpAuthenticationRequest = {
 
 export type ForgeV1StepUpAuthenticationResponse = {
     verifiedAt?: string;
+};
+
+export type ForgeV1TemporaryRoleGrant = {
+    id?: string;
+    organizationId?: string;
+    userId?: string;
+    roleKey?: string;
+    requestedBy?: string;
+    approvalId?: string;
+    reason?: string;
+    status?: string;
+    validFrom?: string;
+    validUntil?: string;
+    revokedAt?: string;
+    revokedBy?: string;
+    revokeReason?: string;
+    createdAt?: string;
 };
 
 export type ForgeV1TransferApprovalRequest = {
@@ -928,6 +972,56 @@ export type PlatformServiceRevokeSessionResponses = {
 };
 
 export type PlatformServiceRevokeSessionResponse = PlatformServiceRevokeSessionResponses[keyof PlatformServiceRevokeSessionResponses];
+
+export type PlatformServiceListTemporaryRoleGrantsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/temporary-role-grants';
+};
+
+export type PlatformServiceListTemporaryRoleGrantsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListTemporaryRoleGrantsResponse;
+};
+
+export type PlatformServiceListTemporaryRoleGrantsResponse = PlatformServiceListTemporaryRoleGrantsResponses[keyof PlatformServiceListTemporaryRoleGrantsResponses];
+
+export type PlatformServiceCreateTemporaryRoleGrantData = {
+    body: ForgeV1CreateTemporaryRoleGrantRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/temporary-role-grants';
+};
+
+export type PlatformServiceCreateTemporaryRoleGrantResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateTemporaryRoleGrantResponse;
+};
+
+export type PlatformServiceCreateTemporaryRoleGrantResponse = PlatformServiceCreateTemporaryRoleGrantResponses[keyof PlatformServiceCreateTemporaryRoleGrantResponses];
+
+export type PlatformServiceRevokeTemporaryRoleGrantData = {
+    body: ForgeV1RevokeTemporaryRoleGrantRequest;
+    path: {
+        grantId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/temporary-role-grants/{grantId}:revoke';
+};
+
+export type PlatformServiceRevokeTemporaryRoleGrantResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1RevokeTemporaryRoleGrantResponse;
+};
+
+export type PlatformServiceRevokeTemporaryRoleGrantResponse = PlatformServiceRevokeTemporaryRoleGrantResponses[keyof PlatformServiceRevokeTemporaryRoleGrantResponses];
 
 export type PlatformServiceListUserGroupsData = {
     body?: never;

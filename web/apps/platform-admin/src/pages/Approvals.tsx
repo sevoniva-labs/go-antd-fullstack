@@ -56,6 +56,7 @@ export function ApprovalsPage() {
       rowKey="id" columns={columns} dataSource={query.data?.items ?? []} loading={query.isLoading} search={false}
       expandable={{ expandedRowRender: (row) => <Descriptions size="small" column={1}>
         <Descriptions.Item label="请求摘要"><Typography.Text code copyable>{row.request_digest}</Typography.Text></Descriptions.Item>
+        <Descriptions.Item label="审批业务载荷"><Typography.Paragraph code copyable style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{row.payload_json}</Typography.Paragraph></Descriptions.Item>
         <Descriptions.Item label="申请人">{row.applicant_id}</Descriptions.Item>
         <Descriptions.Item label="审批任务"><Space wrap>{row.tasks.map((task) => <Tag key={task.id}>{task.assignee_id} · {task.status}{task.decision ? ` · ${task.decision}` : ''}</Tag>)}</Space></Descriptions.Item>
       </Descriptions> }}

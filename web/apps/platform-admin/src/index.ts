@@ -1,5 +1,7 @@
 export * from './modules'
 export * from './pages/AuditLogs'
+export * from './pages/Approvals'
+export * from './pages/TemporaryGrants'
 export * from './pages/Organization'
 export * from './pages/Departments'
 export * from './pages/Positions'

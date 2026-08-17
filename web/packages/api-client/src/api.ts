@@ -15,6 +15,7 @@ import type {
   Role,
   SessionInfo,
   SystemInfo,
+  TemporaryRoleGrant,
   User,
 } from './types'
 
@@ -54,6 +55,13 @@ export const api = {
     apiFetch<ApprovalRequest>(`/approvals/${encodeURIComponent(approvalId)}/transfer`, { method: 'POST', body: JSON.stringify({ new_assignee_id: newAssigneeId, comment }) }),
   withdrawApproval: (approvalId: string, comment: string) =>
     apiFetch<ApprovalRequest>(`/approvals/${encodeURIComponent(approvalId)}/withdraw`, { method: 'POST', body: JSON.stringify({ comment }) }),
+
+  temporaryRoleGrants: () => apiFetch<{ items: TemporaryRoleGrant[] }>('/admin/temporary-role-grants'),
+  createTemporaryRoleGrant: (payload: {
+    user_id: string; role_key: string; reason: string; valid_from: string; valid_until: string; approval_id: string;
+  }) => apiFetch<TemporaryRoleGrant>('/admin/temporary-role-grants', { method: 'POST', body: JSON.stringify(payload) }),
+  revokeTemporaryRoleGrant: (grantId: string, reason: string) =>
+    apiFetch<void>(`/admin/temporary-role-grants/${encodeURIComponent(grantId)}:revoke`, { method: 'POST', body: JSON.stringify({ reason }) }),
 
   organization: () => apiFetch<Organization>('/admin/organization'),
   updateOrganization: (payload: {
