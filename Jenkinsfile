@@ -23,5 +23,8 @@ pipeline {
     stage('Deploy') {
       steps { sh 'make ci-deploy' }
     }
+    stage('Security') {
+      steps { sh 'make security-tools' }
+    }
   }
 }

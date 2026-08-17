@@ -8,7 +8,7 @@ PNPM = corepack pnpm
 GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 
-.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools
+.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -19,6 +19,7 @@ help:
 	@echo "  make test          Run Go tests"
 	@echo "  make contract      Check API error-code contract"
 	@echo "  make check         Format, vet, test, contract, frontend lint/build"
+	@echo "  make verify        Run the complete required CI verification gate"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
 
@@ -92,6 +93,8 @@ security-tools: ci-policy
 	$(TOOL_RUN) golang.org/x/vuln/cmd/govulncheck ./...
 	$(TOOL_RUN) honnef.co/go/tools/cmd/staticcheck ./...
 	$(TOOL_RUN) github.com/golangci/golangci-lint/v2/cmd/golangci-lint run ./...
+
+verify: ci-go ci-web ci-deploy security-tools
 
 offline-check: fmt contract
 	python3 -m json.tool web/package.json >/dev/null

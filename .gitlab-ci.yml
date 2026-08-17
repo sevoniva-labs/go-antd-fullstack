@@ -3,6 +3,7 @@ stages:
   - backend
   - frontend
   - deploy
+  - security
 
 default:
   tags: [domestic-offline]
@@ -36,3 +37,8 @@ deploy:
   stage: deploy
   script:
     - make ci-deploy
+
+security:
+  stage: security
+  script:
+    - make security-tools
