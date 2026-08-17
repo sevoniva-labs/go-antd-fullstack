@@ -23,7 +23,6 @@ export default defineConfig({
       chunkSizeWarningLimit: 500,
       rolldownOptions: {
         output: {
-          strictExecutionOrder: true,
           codeSplitting: {
             groups: [
               {
