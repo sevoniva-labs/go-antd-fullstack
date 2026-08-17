@@ -111,10 +111,11 @@ build: web-build
 check: fmt contract
 	go vet ./...
 	go test ./...
-	$(PNPM) --filter @forge/shell lint
-	$(PNPM) --filter @forge/shell typecheck
-	$(PNPM) --filter @forge/shell test
-	$(PNPM) --filter @forge/shell build
+	node scripts/check-web-boundaries.mjs
+	$(PNPM) -r --if-present run lint
+	$(PNPM) -r --if-present run typecheck
+	$(PNPM) -r --if-present run test
+	$(PNPM) -r --if-present run build
 
 ci-policy:
 	bash scripts/check-ci-policy.sh
@@ -128,10 +129,11 @@ ci-go: ci-policy contract proto-check module-boundaries
 	$(GO_ENV) go test -race ./...
 
 ci-web: ci-policy web-install web-api-check
-	$(PNPM) --filter @forge/shell lint
-	$(PNPM) --filter @forge/shell typecheck
-	$(PNPM) --filter @forge/shell test
-	$(PNPM) --filter @forge/shell build
+	node scripts/check-web-boundaries.mjs
+	$(PNPM) -r --if-present run lint
+	$(PNPM) -r --if-present run typecheck
+	$(PNPM) -r --if-present run test
+	$(PNPM) -r --if-present run build
 
 ci-deploy: ci-policy
 	bash scripts/check-observability-policy.sh
