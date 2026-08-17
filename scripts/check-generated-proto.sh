@@ -5,10 +5,10 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 
 snapshot() {
-  if [[ ! -d api/gen/go ]]; then
+  if [[ ! -d api/gen/go || ! -d api/gen/openapi ]]; then
     return
   fi
-  find api/gen/go -type f -print0 | LC_ALL=C sort -z | xargs -0 shasum -a 256
+  find api/gen/go api/gen/openapi -type f -print0 | LC_ALL=C sort -z | xargs -0 shasum -a 256
 }
 
 before=$(snapshot)
@@ -19,4 +19,4 @@ if [[ "$before" != "$after" ]]; then
   exit 1
 fi
 
-echo "generated Proto files are current"
+echo "generated Proto and OpenAPI files are current"

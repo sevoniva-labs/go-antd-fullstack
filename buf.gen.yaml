@@ -14,3 +14,8 @@ plugins:
     out: api/gen/go
     opt:
       - paths=source_relative
+  - local: .tools/bin/protoc-gen-openapi
+    out: api/gen/openapi
+    opt:
+      - fq_schema_naming=true
+      - default_response=false

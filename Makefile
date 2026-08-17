@@ -7,9 +7,9 @@ NPM_REGISTRY ?= https://registry.npmmirror.com
 PNPM = corepack pnpm
 GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB=$(GOSUMDB)
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
-PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http
+PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract proto-tools proto-lint proto-generate proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-dev web-build build check contract proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ci-policy ci-go ci-web ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -56,6 +56,7 @@ web-build:
 contract:
 	python3 scripts/check-error-codes.py
 	python3 scripts/check-contract-coverage.py
+	python3 scripts/check-openapi-security.py
 
 proto-tools: $(PROTO_TOOLS)
 
@@ -75,13 +76,20 @@ proto-tools: $(PROTO_TOOLS)
 	mkdir -p .tools/bin
 	$(GO_ENV) go build -modfile=tools/go.mod -o .tools/bin/protoc-gen-go-http github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2
 
+.tools/bin/protoc-gen-openapi: tools/go.mod tools/go.sum
+	mkdir -p .tools/bin
+	$(GO_ENV) go build -modfile=tools/go.mod -o .tools/bin/protoc-gen-openapi github.com/google/gnostic/cmd/protoc-gen-openapi
+
 proto-lint: proto-tools
 	.tools/bin/buf lint
 
 proto-generate: proto-tools
 	.tools/bin/buf generate --path api/proto/forge
 
-proto-check: proto-lint
+proto-breaking: proto-tools
+	.tools/bin/buf breaking --against api/buf/baseline.binpb
+
+proto-check: proto-lint proto-breaking
 	bash scripts/check-generated-proto.sh
 
 build: web-build

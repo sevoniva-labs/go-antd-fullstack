@@ -7,6 +7,7 @@
 package forgev1
 
 import (
+	_ "github.com/google/gnostic/openapiv3"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -1586,7 +1587,7 @@ var File_forge_v1_platform_proto protoreflect.FileDescriptor
 
 const file_forge_v1_platform_proto_rawDesc = "" +
 	"\n" +
-	"\x17forge/v1/platform.proto\x12\bforge.v1\x1a\x15forge/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\"(\n" +
+	"\x17forge/v1/platform.proto\x12\bforge.v1\x1a\x15forge/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bopenapiv3/annotations.proto\"(\n" +
 	"\x10ListUsersRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x05R\x05limit\"9\n" +
 	"\x11ListUsersResponse\x12$\n" +
@@ -1664,27 +1665,132 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\x17ExportAuditLogsResponse\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\fR\acontent\x12!\n" +
 	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x1a\n" +
-	"\bfilename\x18\x03 \x01(\tR\bfilename2\x8a\x11\n" +
-	"\x0fPlatformService\x12a\n" +
-	"\tListUsers\x12\x1a.forge.v1.ListUsersRequest\x1a\x1b.forge.v1.ListUsersResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/admin/users\x12g\n" +
+	"\bfilename\x18\x03 \x01(\tR\bfilename2\xf4\x17\n" +
+	"\x0fPlatformService\x12\x8b\x01\n" +
+	"\tListUsers\x12\x1a.forge.v1.ListUsersRequest\x1a\x1b.forge.v1.ListUsersResponse\"E\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
 	"\n" +
-	"CreateUser\x12\x1b.forge.v1.CreateUserRequest\x1a\x1c.forge.v1.CreateUserResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/admin/users\x12z\n" +
-	"\x0fGetOrganization\x12 .forge.v1.GetOrganizationRequest\x1a!.forge.v1.GetOrganizationResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/admin/organization\x12\x86\x01\n" +
-	"\x12UpdateOrganization\x12#.forge.v1.UpdateOrganizationRequest\x1a$.forge.v1.UpdateOrganizationResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*2\x1a/api/v1/admin/organization\x12\x83\x01\n" +
-	"\x11GetSecurityPolicy\x12\".forge.v1.GetSecurityPolicyRequest\x1a#.forge.v1.GetSecurityPolicyResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/admin/security-config\x12\x94\x01\n" +
-	"\x14UpdateSecurityPolicy\x12%.forge.v1.UpdateSecurityPolicyRequest\x1a&.forge.v1.UpdateSecurityPolicyResponse\"-\x82\xd3\xe4\x93\x02':\x06policy\x1a\x1d/api/v1/admin/security-config\x12a\n" +
-	"\tListRoles\x12\x1a.forge.v1.ListRolesRequest\x1a\x1b.forge.v1.ListRolesResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/admin/roles\x12y\n" +
-	"\x0fListPermissions\x12 .forge.v1.ListPermissionsRequest\x1a!.forge.v1.ListPermissionsResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/admin/permissions\x12\x9f\x01\n" +
-	"\x15UpdateRolePermissions\x12&.forge.v1.UpdateRolePermissionsRequest\x1a'.forge.v1.UpdateRolePermissionsResponse\"5\x82\xd3\xe4\x93\x02/:\x01*\x1a*/api/v1/admin/roles/{role_key}/permissions\x12\x86\x01\n" +
-	"\x0fUpdateUserRoles\x12 .forge.v1.UpdateUserRolesRequest\x1a!.forge.v1.UpdateUserRolesResponse\".\x82\xd3\xe4\x93\x02(:\x01*2#/api/v1/admin/users/{user_id}/roles\x12\x8a\x01\n" +
-	"\x10UpdateUserStatus\x12!.forge.v1.UpdateUserStatusRequest\x1a\".forge.v1.UpdateUserStatusResponse\"/\x82\xd3\xe4\x93\x02):\x01*2$/api/v1/admin/users/{user_id}/status\x12x\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/admin/users\x12\xa0\x01\n" +
 	"\n" +
-	"UnlockUser\x12\x1b.forge.v1.UnlockUserRequest\x1a\x1c.forge.v1.UnlockUserResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/admin/users/{user_id}/unlock\x12\x95\x01\n" +
-	"\x11ResetUserPassword\x12\".forge.v1.ResetUserPasswordRequest\x1a#.forge.v1.ResetUserPasswordResponse\"7\x82\xd3\xe4\x93\x021:\x01*\",/api/v1/admin/users/{user_id}/reset-password\x12m\n" +
-	"\fListSessions\x12\x1d.forge.v1.ListSessionsRequest\x1a\x1e.forge.v1.ListSessionsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/admin/sessions\x12}\n" +
-	"\rRevokeSession\x12\x1e.forge.v1.RevokeSessionRequest\x1a\x1f.forge.v1.RevokeSessionResponse\"+\x82\xd3\xe4\x93\x02%*#/api/v1/admin/sessions/{session_id}\x12r\n" +
-	"\rListAuditLogs\x12\x1e.forge.v1.ListAuditLogsRequest\x1a\x1f.forge.v1.ListAuditLogsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/admin/audit-logs\x12\x7f\n" +
-	"\x0fExportAuditLogs\x12 .forge.v1.ExportAuditLogsRequest\x1a!.forge.v1.ExportAuditLogsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/admin/audit-logs/exportB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
+	"CreateUser\x12\x1b.forge.v1.CreateUserRequest\x1a\x1c.forge.v1.CreateUserResponse\"W\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/admin/users\x12\xa4\x01\n" +
+	"\x0fGetOrganization\x12 .forge.v1.GetOrganizationRequest\x1a!.forge.v1.GetOrganizationResponse\"L\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/admin/organization\x12\xbf\x01\n" +
+	"\x12UpdateOrganization\x12#.forge.v1.UpdateOrganizationRequest\x1a$.forge.v1.UpdateOrganizationResponse\"^\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f:\x01*2\x1a/api/v1/admin/organization\x12\xad\x01\n" +
+	"\x11GetSecurityPolicy\x12\".forge.v1.GetSecurityPolicyRequest\x1a#.forge.v1.GetSecurityPolicyResponse\"O\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/admin/security-config\x12\xcd\x01\n" +
+	"\x14UpdateSecurityPolicy\x12%.forge.v1.UpdateSecurityPolicyRequest\x1a&.forge.v1.UpdateSecurityPolicyResponse\"f\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02':\x06policy\x1a\x1d/api/v1/admin/security-config\x12\x8b\x01\n" +
+	"\tListRoles\x12\x1a.forge.v1.ListRolesRequest\x1a\x1b.forge.v1.ListRolesResponse\"E\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/admin/roles\x12\xa3\x01\n" +
+	"\x0fListPermissions\x12 .forge.v1.ListPermissionsRequest\x1a!.forge.v1.ListPermissionsResponse\"K\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/admin/permissions\x12\xd8\x01\n" +
+	"\x15UpdateRolePermissions\x12&.forge.v1.UpdateRolePermissionsRequest\x1a'.forge.v1.UpdateRolePermissionsResponse\"n\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02/:\x01*\x1a*/api/v1/admin/roles/{role_key}/permissions\x12\xbf\x01\n" +
+	"\x0fUpdateUserRoles\x12 .forge.v1.UpdateUserRolesRequest\x1a!.forge.v1.UpdateUserRolesResponse\"g\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02(:\x01*2#/api/v1/admin/users/{user_id}/roles\x12\xc3\x01\n" +
+	"\x10UpdateUserStatus\x12!.forge.v1.UpdateUserStatusRequest\x1a\".forge.v1.UpdateUserStatusResponse\"h\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02):\x01*2$/api/v1/admin/users/{user_id}/status\x12\xb1\x01\n" +
+	"\n" +
+	"UnlockUser\x12\x1b.forge.v1.UnlockUserRequest\x1a\x1c.forge.v1.UnlockUserResponse\"h\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/admin/users/{user_id}/unlock\x12\xce\x01\n" +
+	"\x11ResetUserPassword\x12\".forge.v1.ResetUserPasswordRequest\x1a#.forge.v1.ResetUserPasswordResponse\"p\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x021:\x01*\",/api/v1/admin/users/{user_id}/reset-password\x12\x97\x01\n" +
+	"\fListSessions\x12\x1d.forge.v1.ListSessionsRequest\x1a\x1e.forge.v1.ListSessionsResponse\"H\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/admin/sessions\x12\xb6\x01\n" +
+	"\rRevokeSession\x12\x1e.forge.v1.RevokeSessionRequest\x1a\x1f.forge.v1.RevokeSessionResponse\"d\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02%*#/api/v1/admin/sessions/{session_id}\x12\x9c\x01\n" +
+	"\rListAuditLogs\x12\x1e.forge.v1.ListAuditLogsRequest\x1a\x1f.forge.v1.ListAuditLogsResponse\"J\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/admin/audit-logs\x12\xb8\x01\n" +
+	"\x0fExportAuditLogs\x12 .forge.v1.ExportAuditLogsRequest\x1a!.forge.v1.ExportAuditLogsResponse\"`\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/admin/audit-logs/exportB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
 
 var (
 	file_forge_v1_platform_proto_rawDescOnce sync.Once

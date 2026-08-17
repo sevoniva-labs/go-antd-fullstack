@@ -7,6 +7,7 @@
 package forgev1
 
 import (
+	_ "github.com/google/gnostic/openapiv3"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -390,7 +391,7 @@ var File_forge_v1_system_proto protoreflect.FileDescriptor
 
 const file_forge_v1_system_proto_rawDesc = "" +
 	"\n" +
-	"\x15forge/v1/system.proto\x12\bforge.v1\x1a\x1cgoogle/api/annotations.proto\"\x0f\n" +
+	"\x15forge/v1/system.proto\x12\bforge.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bopenapiv3/annotations.proto\"\x0f\n" +
 	"\rHealthRequest\"\\\n" +
 	"\x0eHealthResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x18\n" +
@@ -414,11 +415,30 @@ const file_forge_v1_system_proto_rawDesc = "" +
 	"\tproviders\x18\x06 \x03(\v2..forge.v1.GetSystemInfoResponse.ProvidersEntryR\tproviders\x1a<\n" +
 	"\x0eProvidersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xbe\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xe9\x02\n" +
 	"\rSystemService\x12Z\n" +
 	"\x06Health\x12\x17.forge.v1.HealthRequest\x1a\x18.forge.v1.HealthResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/system/health\x12b\n" +
-	"\tReadiness\x12\x1a.forge.v1.ReadinessRequest\x1a\x1b.forge.v1.ReadinessResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/system/ready\x12m\n" +
-	"\rGetSystemInfo\x12\x1e.forge.v1.GetSystemInfoRequest\x1a\x1f.forge.v1.GetSystemInfoResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/system/infoB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
+	"\tReadiness\x12\x1a.forge.v1.ReadinessRequest\x1a\x1b.forge.v1.ReadinessResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/system/ready\x12\x97\x01\n" +
+	"\rGetSystemInfo\x12\x1e.forge.v1.GetSystemInfoRequest\x1a\x1f.forge.v1.GetSystemInfoResponse\"E\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/system/infoB\x85\x04\xbaG\xc5\x03\x12e\n" +
+	"\x12Sevoniva Forge API\x12HContract-first HTTP API for the Forge enterprise and financial scaffold.2\x051.0.0*\xdb\x02:\xd8\x02\n" +
+	"|\n" +
+	"\rSessionCookie\x12k\n" +
+	"i\n" +
+	"\x06apiKey\x12HInteractive browser session. Mutating operations also require CsrfToken.\x1a\rforge_session\"\x06cookie\n" +
+	"t\n" +
+	"\n" +
+	"BearerAuth\x12f\n" +
+	"d\n" +
+	"\x04http\x12CAPI token constrained by both account permissions and token scopes.*\x06bearer2\x0fForge API Token\n" +
+	"b\n" +
+	"\tCsrfToken\x12U\n" +
+	"S\n" +
+	"\x06apiKey\x123Double-submit token matching the forge_csrf cookie.\x1a\fX-CSRF-Token\"\x06headerZ:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
 
 var (
 	file_forge_v1_system_proto_rawDescOnce sync.Once

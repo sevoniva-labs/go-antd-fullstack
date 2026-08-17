@@ -30,6 +30,7 @@ required_versions=(
 	'github.com/bufbuild/buf v1.72.0'
 	'github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2 v2.0.0-20260404020628-f149714c1d54'
 	'github.com/golangci/golangci-lint/v2 v2.12.2'
+	'github.com/google/gnostic v0.7.1'
 	'github.com/zricethezav/gitleaks/v8 v8.30.1'
   'github.com/securego/gosec/v2 v2.28.0'
   'golang.org/x/vuln v1.7.0'

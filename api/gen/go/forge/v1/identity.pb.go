@@ -7,6 +7,7 @@
 package forgev1
 
 import (
+	_ "github.com/google/gnostic/openapiv3"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -650,7 +651,7 @@ var File_forge_v1_identity_proto protoreflect.FileDescriptor
 
 const file_forge_v1_identity_proto_rawDesc = "" +
 	"\n" +
-	"\x17forge/v1/identity.proto\x12\bforge.v1\x1a\x15forge/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\"m\n" +
+	"\x17forge/v1/identity.proto\x12\bforge.v1\x1a\x15forge/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bopenapiv3/annotations.proto\"m\n" +
 	"\fLoginRequest\x12\"\n" +
 	"\forganization\x18\x01 \x01(\tR\forganization\x12\x1d\n" +
 	"\n" +
@@ -681,16 +682,39 @@ const file_forge_v1_identity_proto_rawDesc = "" +
 	"\x06secret\x18\x02 \x01(\tR\x06secret\"2\n" +
 	"\x15RevokeApiTokenRequest\x12\x19\n" +
 	"\btoken_id\x18\x01 \x01(\tR\atokenId\"\x18\n" +
-	"\x16RevokeApiTokenResponse2\x85\x06\n" +
+	"\x16RevokeApiTokenResponse2\xe9\a\n" +
 	"\x0fIdentityService\x12W\n" +
-	"\x05Login\x12\x16.forge.v1.LoginRequest\x1a\x17.forge.v1.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12[\n" +
-	"\x06Logout\x12\x17.forge.v1.LogoutRequest\x1a\x18.forge.v1.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12u\n" +
-	"\x0eChangePassword\x12\x1f.forge.v1.ChangePasswordRequest\x1a .forge.v1.ChangePasswordResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*2\x15/api/v1/auth/password\x12g\n" +
-	"\x0eGetCurrentUser\x12\x1f.forge.v1.GetCurrentUserRequest\x1a .forge.v1.GetCurrentUserResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
-	"/api/v1/me\x12l\n" +
-	"\rListApiTokens\x12\x1e.forge.v1.ListApiTokensRequest\x1a\x1f.forge.v1.ListApiTokensResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/api-tokens\x12r\n" +
-	"\x0eCreateApiToken\x12\x1f.forge.v1.CreateApiTokenRequest\x1a .forge.v1.CreateApiTokenResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/api-tokens\x12z\n" +
-	"\x0eRevokeApiToken\x12\x1f.forge.v1.RevokeApiTokenRequest\x1a .forge.v1.RevokeApiTokenResponse\"%\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/api-tokens/{token_id}B<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
+	"\x05Login\x12\x16.forge.v1.LoginRequest\x1a\x17.forge.v1.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12\x82\x01\n" +
+	"\x06Logout\x12\x17.forge.v1.LogoutRequest\x1a\x18.forge.v1.LogoutResponse\"E\xbaG$Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12\x9c\x01\n" +
+	"\x0eChangePassword\x12\x1f.forge.v1.ChangePasswordRequest\x1a .forge.v1.ChangePasswordResponse\"G\xbaG$Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00\x82\xd3\xe4\x93\x02\x1a:\x01*2\x15/api/v1/auth/password\x12\x91\x01\n" +
+	"\x0eGetCurrentUser\x12\x1f.forge.v1.GetCurrentUserRequest\x1a .forge.v1.GetCurrentUserResponse\"<\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\f\x12\n" +
+	"/api/v1/me\x12\x84\x01\n" +
+	"\rListApiTokens\x12\x1e.forge.v1.ListApiTokensRequest\x1a\x1f.forge.v1.ListApiTokensResponse\"2\xbaG\x15Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/api-tokens\x12\x99\x01\n" +
+	"\x0eCreateApiToken\x12\x1f.forge.v1.CreateApiTokenRequest\x1a .forge.v1.CreateApiTokenResponse\"D\xbaG$Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/api-tokens\x12\xa1\x01\n" +
+	"\x0eRevokeApiToken\x12\x1f.forge.v1.RevokeApiTokenRequest\x1a .forge.v1.RevokeApiTokenResponse\"L\xbaG$Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/api-tokens/{token_id}B<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
 
 var (
 	file_forge_v1_identity_proto_rawDescOnce sync.Once

@@ -134,7 +134,7 @@ components/
 - 所有 HTTP 请求统一走 `api/client.ts`
 - 统一 Envelope / ApiError
 - Request ID / Trace ID 在错误对象中保留
-- API 契约以 `api/openapi.yaml` 为准
+- API 契约以 `api/gen/openapi/openapi.yaml` 为准，该文件由 Proto 确定性生成
 - `npm run api:types` 生成 OpenAPI TypeScript 类型
 - 新接口必须先更新 OpenAPI，再更新调用层
 

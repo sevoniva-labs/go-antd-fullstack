@@ -10,6 +10,7 @@ require (
 	github.com/emmansun/gmsm v0.44.1
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/go-sql-driver/mysql v1.10.0
+	github.com/google/gnostic v0.7.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/nacos-group/nacos-sdk-go/v2 v2.3.5
@@ -79,6 +80,7 @@ require (
 	github.com/go-playground/form/v4 v4.2.0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -107,6 +109,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect

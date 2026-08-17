@@ -92,7 +92,7 @@ internal/app          应用服务
 internal/adapters     HTTP/Repository
 internal/platform     企业基础设施能力
 web                   React + Ant Design
-api/openapi.yaml      API 契约
+api/gen/openapi/openapi.yaml  由 Proto 生成的 API 契约
 configs               minimal/standard/full/xinchuang
 deploy                Docker/Compose/Helm/systemd/observability
 integrations          RocketMQ/国产 DB/HSM 等明确扩展位

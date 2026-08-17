@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint src",
     "preview": "vite preview",
-    "api:types": "openapi-ts -i ../api/openapi.yaml -o src/api/generated",
+    "api:types": "openapi-ts -i ../api/gen/openapi/openapi.yaml -o src/api/generated",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",

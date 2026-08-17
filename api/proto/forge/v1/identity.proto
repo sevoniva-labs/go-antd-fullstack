@@ -4,30 +4,161 @@ package forge.v1;
 
 import "forge/v1/common.proto";
 import "google/api/annotations.proto";
+import "openapiv3/annotations.proto";
 
 option go_package = "github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1";
 
 service IdentityService {
   rpc Login(LoginRequest) returns (LoginResponse) {
-    option (google.api.http) = {post: "/api/v1/auth/login" body: "*"};
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
   }
   rpc Logout(LogoutRequest) returns (LogoutResponse) {
-    option (google.api.http) = {post: "/api/v1/auth/logout" body: "*"};
+    option (google.api.http) = {
+      post: "/api/v1/auth/logout"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            },
+            {
+              name: "CsrfToken"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
-    option (google.api.http) = {patch: "/api/v1/auth/password" body: "*"};
+    option (google.api.http) = {
+      patch: "/api/v1/auth/password"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            },
+            {
+              name: "CsrfToken"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
   rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
     option (google.api.http) = {get: "/api/v1/me"};
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            }
+          ]
+        },
+        {
+          additional_properties: [
+            {
+              name: "BearerAuth"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
   rpc ListApiTokens(ListApiTokensRequest) returns (ListApiTokensResponse) {
     option (google.api.http) = {get: "/api/v1/api-tokens"};
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
   rpc CreateApiToken(CreateApiTokenRequest) returns (CreateApiTokenResponse) {
-    option (google.api.http) = {post: "/api/v1/api-tokens" body: "*"};
+    option (google.api.http) = {
+      post: "/api/v1/api-tokens"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            },
+            {
+              name: "CsrfToken"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
   rpc RevokeApiToken(RevokeApiTokenRequest) returns (RevokeApiTokenResponse) {
     option (google.api.http) = {delete: "/api/v1/api-tokens/{token_id}"};
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {
+              name: "SessionCookie"
+              value: {
+                value: []
+              }
+            },
+            {
+              name: "CsrfToken"
+              value: {
+                value: []
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
 }
 

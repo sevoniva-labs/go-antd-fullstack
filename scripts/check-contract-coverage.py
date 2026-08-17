@@ -16,25 +16,28 @@ def openapi_operations() -> set[tuple[str, str]]:
     operations: set[tuple[str, str]] = set()
     in_paths = False
     current_path = ""
-    for line in (ROOT / "api/openapi.yaml").read_text(encoding="utf-8").splitlines():
+    path_indent = 0
+    for line in (ROOT / "api/gen/openapi/openapi.yaml").read_text(encoding="utf-8").splitlines():
         if line == "paths:":
             in_paths = True
             continue
         if in_paths and line and not line.startswith(" "):
             break
-        path_match = re.fullmatch(r"  (/[^:]+):", line)
+        path_match = re.fullmatch(r"(\s+)(/[^:]+):", line)
         if path_match:
-            current_path = normalize_path("/api/v1" + path_match.group(1))
+            path_indent = len(path_match.group(1))
+            path = path_match.group(2)
+            current_path = normalize_path(path if path.startswith("/api/v1/") else "/api/v1" + path)
             continue
-        method_match = re.fullmatch(r"    ([a-z]+):", line)
-        if current_path and method_match and method_match.group(1) in METHODS:
-            operations.add((method_match.group(1), current_path))
+        method_match = re.fullmatch(r"(\s+)([a-z]+):", line)
+        if current_path and method_match and len(method_match.group(1)) == path_indent + 4 and method_match.group(2) in METHODS:
+            operations.add((method_match.group(2), current_path))
     return operations
 
 
 def proto_operations() -> set[tuple[str, str]]:
     operations: set[tuple[str, str]] = set()
-    pattern = re.compile(r'option \(google\.api\.http\) = \{(get|post|put|patch|delete): "([^"]+)"')
+    pattern = re.compile(r'option \(google\.api\.http\) = \{\s*(get|post|put|patch|delete):\s*"([^"]+)"')
     for path in sorted((ROOT / "api/proto/forge").rglob("*.proto")):
         for match in pattern.finditer(path.read_text(encoding="utf-8")):
             operations.add((match.group(1), normalize_path(match.group(2))))
