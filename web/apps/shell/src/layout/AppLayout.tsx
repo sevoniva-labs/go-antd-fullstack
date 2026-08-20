@@ -13,12 +13,12 @@ import { ProLayout } from '@ant-design/pro-components'
 import { App, Avatar, Button, Dropdown, Space, Tag, Tooltip } from 'antd'
 import { Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
-import { api } from '@forge/api-client'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { api, queryKeys, type Menu } from '@forge/api-client'
 import { environmentTone, runtimeConfig } from '../app/config/runtime'
 import { buildMenuRoutes, routeByPath } from '../app/router/routes'
 import { useThemeMode } from '../app/providers/ThemeModeProvider'
-import { useMe } from '@forge/auth-sdk'
+import { can, useMe } from '@forge/auth-sdk'
 import { BrandMark } from './BrandMark'
 import { GlobalSearch } from './GlobalSearch'
 import { PageTabs } from './PageTabs'
@@ -31,9 +31,11 @@ export function AppLayout() {
   const queryClient = useQueryClient()
   const { message } = App.useApp()
   const me = useMe().data
+  const menus = useQuery({ queryKey: queryKeys.menus, queryFn: api.menus, enabled: Boolean(me && can(me, 'system.menu.read')) })
   const { mode, compact, toggleMode, setCompact } = useThemeMode()
   const [fullscreen, setFullscreen] = useState(Boolean(document.fullscreenElement))
-  const routes = buildMenuRoutes(me)
+  const catalog: Menu[] | undefined = menus.data ? menus.data.menus ?? menus.data.items ?? [] : undefined
+  const routes = buildMenuRoutes(me, catalog)
 
   useEffect(() => {
     const sync = () => setFullscreen(Boolean(document.fullscreenElement))

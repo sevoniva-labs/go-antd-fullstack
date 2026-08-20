@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Principal } from '@forge/api-client'
+import type { Menu } from '@forge/api-client'
 import { buildMenuRoutes } from './routes'
 
 const principal: Principal = {
@@ -30,5 +31,12 @@ describe('Shell menu authorization', () => {
   it('reveals a platform entry only after the permission is present', () => {
     const paths = visiblePaths(buildMenuRoutes({ ...principal, permissions: ['system.user.read'] }))
     expect(paths).toContain('/admin/users')
+  })
+
+  it('uses the backend catalog only for registered routes', () => {
+    const catalog: Menu[] = [{ id: 'menu-1', organization_id: 'org-1', key: 'custom', parent_key: '', name: '未注册路由', route: '/admin/not-registered', icon: '', permission_key: '', sort_order: 1, status: 'ACTIVE' }]
+    const paths = visiblePaths(buildMenuRoutes({ ...principal, permissions: ['system.user.read'] }, catalog))
+    expect(paths).not.toContain('/admin/not-registered')
+    expect(paths).not.toContain('/admin/users')
   })
 })

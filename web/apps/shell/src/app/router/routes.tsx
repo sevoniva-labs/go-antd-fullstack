@@ -20,7 +20,7 @@ import {
 import type { ComponentType, LazyExoticComponent, ReactNode } from 'react'
 import { lazy } from 'react'
 import { matchPath } from 'react-router-dom'
-import type { Principal } from '@forge/api-client'
+import type { Menu, Principal } from '@forge/api-client'
 import { can } from '@forge/auth-sdk'
 import { platformAdminModules, type PlatformAdminModuleKey } from '@forge/platform-admin/modules'
 import { runtimeConfig } from '../config/runtime'
@@ -121,21 +121,27 @@ export function routeByPath(path: string) {
 }
 
 
-export function buildMenuRoutes(me?: Principal) {
+export function buildMenuRoutes(me?: Principal, catalog?: Menu[]) {
   const visible = appRoutes.filter((route) => route.menu && routeAllowed(route, me))
+  const useCatalog = catalog !== undefined
+  const catalogByRoute = new Map((catalog ?? []).filter((item) => item.status === 'ACTIVE' && item.route).map((item) => [item.route, item]))
+  const catalogNames = new Map((catalog ?? []).map((item) => [item.key, item.name]))
   const result: Array<Record<string, any>> = []
   const groupIndex = new Map<string, { path: string; name: string; routes: Array<Record<string, any>> }>()
 
   for (const route of visible) {
-    const item = { path: route.path, name: route.name, icon: route.icon }
-    if (!route.group) {
+    const catalogItem = catalogByRoute.get(route.path)
+    if (useCatalog && route.path.startsWith('/admin/') && !catalogItem) continue
+    const item = { path: route.path, name: catalogItem?.name ?? route.name, icon: route.icon }
+    const groupName = catalogItem?.parent_key ? catalogNames.get(catalogItem.parent_key) : route.group
+    if (!groupName) {
       result.push(item)
       continue
     }
-    let group = groupIndex.get(route.group)
+    let group = groupIndex.get(groupName)
     if (!group) {
-      group = { path: `/group/${groupIndex.size}`, name: route.group, routes: [] }
-      groupIndex.set(route.group, group)
+      group = { path: `/group/${groupIndex.size}`, name: groupName, routes: [] }
+      groupIndex.set(groupName, group)
       result.push(group)
     }
     group.routes.push(item)

@@ -1665,10 +1665,24 @@ func builtinMenus(orgID string) []domain.Menu {
 	now := time.Now().UTC()
 	return []domain.Menu{
 		{OrganizationID: orgID, Key: "dashboard", Name: "工作台", Route: "/dashboard", Icon: "DashboardOutlined", SortOrder: 10, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
-		{OrganizationID: orgID, Key: "platform", Name: "平台管理", Route: "/group/platform", Icon: "SettingOutlined", PermissionKey: "system.menu.read", SortOrder: 20, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform", Name: "平台管理", Route: "/group/platform", Icon: "SettingOutlined", SortOrder: 20, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		{OrganizationID: orgID, Key: "platform.users", ParentKey: "platform", Name: "用户管理", Route: "/admin/users", Icon: "UserOutlined", PermissionKey: "system.user.read", SortOrder: 21, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		{OrganizationID: orgID, Key: "platform.roles", ParentKey: "platform", Name: "角色权限", Route: "/admin/roles", Icon: "SafetyOutlined", PermissionKey: "system.role.read", SortOrder: 22, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
-		{OrganizationID: orgID, Key: "platform.audit", ParentKey: "platform", Name: "审计日志", Route: "/admin/audit", Icon: "FileSearchOutlined", PermissionKey: "system.audit.read", SortOrder: 23, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.permissions", ParentKey: "platform", Name: "权限清单", Route: "/admin/permissions", Icon: "FileProtectOutlined", PermissionKey: "system.role.read", SortOrder: 23, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.organization", ParentKey: "platform", Name: "组织信息", Route: "/admin/organization", Icon: "ApartmentOutlined", PermissionKey: "system.organization.read", SortOrder: 24, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.departments", ParentKey: "platform", Name: "部门管理", Route: "/admin/departments", Icon: "PartitionOutlined", PermissionKey: "system.department.read", SortOrder: 25, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.positions", ParentKey: "platform", Name: "岗位管理", Route: "/admin/positions", Icon: "IdcardOutlined", PermissionKey: "system.position.read", SortOrder: 26, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.user-groups", ParentKey: "platform", Name: "用户组管理", Route: "/admin/user-groups", Icon: "UsergroupAddOutlined", PermissionKey: "system.user_group.read", SortOrder: 27, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "security", Name: "安全中心", Route: "/group/security", Icon: "SafetyCertificateOutlined", SortOrder: 30, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "security.policy", ParentKey: "security", Name: "安全基线", Route: "/security", Icon: "SafetyCertificateOutlined", PermissionKey: "system.config.read", SortOrder: 31, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "security.sessions", ParentKey: "security", Name: "在线会话", Route: "/admin/sessions", Icon: "LockOutlined", PermissionKey: "system.session.read", SortOrder: 32, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "security.audit-logs", ParentKey: "security", Name: "审计日志", Route: "/admin/audit-logs", Icon: "AuditOutlined", PermissionKey: "system.audit.read", SortOrder: 33, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "governance", Name: "治理中心", Route: "/group/governance", Icon: "CheckSquareOutlined", SortOrder: 40, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "governance.approvals", ParentKey: "governance", Name: "审批中心", Route: "/governance/approvals", Icon: "CheckSquareOutlined", PermissionKey: "approval.request.read", SortOrder: 41, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "governance.temporary-grants", ParentKey: "governance", Name: "临时授权", Route: "/governance/temporary-grants", Icon: "SafetyCertificateOutlined", PermissionKey: "system.temporary_grant.read", SortOrder: 42, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "governance.access-reviews", ParentKey: "governance", Name: "访问复核", Route: "/governance/access-reviews", Icon: "SafetyCertificateOutlined", PermissionKey: "system.access_review.read", SortOrder: 43, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "operations", Name: "运维中心", Route: "/group/operations", Icon: "SettingOutlined", SortOrder: 50, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "operations.status", ParentKey: "operations", Name: "系统状态", Route: "/ops/system", Icon: "SettingOutlined", SortOrder: 51, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 	}
 }
 
