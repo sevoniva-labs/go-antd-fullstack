@@ -13,6 +13,18 @@ An approved release bundle must contain:
 
 The bundle must be built in a controlled network, mirrored into the organization repository, scanned, signed, and transferred through the institution's approved media process. Runtime pods must not download dependencies or modify application files.
 
+## Build
+
+The builder archives the committed `HEAD` only, excludes uncommitted worktree changes, requires an explicit approved `images.lock`, and writes `manifest.sha256` plus `provenance.txt` without contacting a public registry:
+
+```bash
+OFFLINE_IMAGES_LOCK=/secure/release/images.lock \
+OFFLINE_BUNDLE_DIR=/secure/release/forge-bundle \
+make offline-build
+```
+
+The image lock is an input from the organization's approved Harbor import and must contain one internal or approved domestic OCI reference per line, each pinned with `@sha256:<64 hex>`. The builder does not invent image digests or sign a release.
+
 ## Verification
 
 Run:
