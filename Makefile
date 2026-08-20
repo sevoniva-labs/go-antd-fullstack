@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-s3-contract storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check offline-check-certified disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-s3-contract storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract mysql-backup-restore-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check offline-check-certified disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -39,6 +39,7 @@ help:
 	@echo "  make rocketmq-runtime-contract  Start and probe the local RocketMQ 5 contract overlay"
 	@echo "  make otel-runtime-contract  Start and probe the local OTel Collector contract overlay"
 	@echo "  make mysql-runtime-contract  Start MySQL and run the migration/schema contract"
+	@echo "  make mysql-backup-restore-contract  Run local MySQL backup and restore contract"
 	@echo "  make kafka-runtime-contract  Start Kafka and run the franz-go stream contract"
 	@echo "  make s3-local-advanced-contract  Run generic S3 advanced capability contract locally"
 	@echo "  make apisix-runtime-contract  Run APISIX route and Admin API boundary contract"
@@ -158,6 +159,9 @@ otel-runtime-contract:
 
 mysql-runtime-contract:
 	bash scripts/test-mysql-contract.sh
+
+mysql-backup-restore-contract:
+	bash scripts/test-mysql-backup-restore-contract.sh
 
 kafka-runtime-contract:
 	bash scripts/test-kafka-contract.sh
