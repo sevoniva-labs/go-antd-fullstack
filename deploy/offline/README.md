@@ -35,6 +35,23 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 
 The check rejects public OCI registries, missing provenance, unpinned images, and any file whose SHA-256 differs from `manifest.sha256`. Without `OFFLINE_BUNDLE_DIR`, `make offline-check` only checks repository prerequisites and explicitly does not produce offline evidence.
 
+The certified gate is deliberately separate:
+
+```bash
+OFFLINE_IMAGES_LOCK=/secure/release/images.lock \
+OFFLINE_SBOM_FILE=/secure/release/sbom.cdx.json \
+OFFLINE_SIGNATURE_FILE=/secure/release/release.sig \
+OFFLINE_SOURCE_MIRROR_REF=harbor-import-2026-08-21 \
+OFFLINE_APPROVAL_REF=change-approval-123 \
+OFFLINE_REQUIRE_CERTIFIED=true \
+OFFLINE_BUNDLE_DIR=/secure/release/forge-bundle \
+make offline-build
+
+OFFLINE_BUNDLE_DIR=/secure/release/forge-bundle make offline-check-certified
+```
+
+`offline-check-certified` requires signed release metadata, an SBOM, source-mirror and approval references, and `release_status=Target-tested`. It still does not replace a dated air-gapped install, upgrade, rollback, recovery, or Xinchuang target report.
+
 ## Status labels
 
 - `Built-in`: repository lockfiles, domestic source policy, digest and manifest verification

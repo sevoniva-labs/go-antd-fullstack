@@ -32,7 +32,12 @@ check_public_oci_sources() {
 check_public_oci_sources "$ROOT"
 
 bundle=${OFFLINE_BUNDLE_DIR:-}
+require_certified=${OFFLINE_REQUIRE_CERTIFIED:-false}
 if [[ -z "$bundle" ]]; then
+  if [[ "$require_certified" == "true" ]]; then
+    echo "OFFLINE_BUNDLE_DIR is required for certified offline evidence" >&2
+    exit 1
+  fi
   echo "offline repository prerequisites OK; OFFLINE_BUNDLE_DIR not supplied, bundle evidence not claimed"
   exit 0
 fi
@@ -40,6 +45,20 @@ fi
 [[ -s "$bundle/manifest.sha256" ]] || { echo "offline bundle manifest.sha256 is required" >&2; exit 1; }
 [[ -s "$bundle/provenance.txt" ]] || { echo "offline bundle provenance.txt is required" >&2; exit 1; }
 [[ -s "$bundle/images.lock" ]] || { echo "offline bundle images.lock is required" >&2; exit 1; }
+if [[ "$require_certified" == "true" ]]; then
+  [[ -s "$bundle/release-signature" ]] || { echo "certified offline bundle release-signature is required" >&2; exit 1; }
+  [[ -s "$bundle/sbom.cdx.json" ]] || { echo "certified offline bundle sbom.cdx.json is required" >&2; exit 1; }
+  rg -q '^release_status=Target-tested$' "$bundle/provenance.txt" || {
+    echo "certified offline bundle must have release_status=Target-tested" >&2
+    exit 1
+  }
+  for key in source_mirror_ref approval_ref; do
+    rg -q "^${key}=[^[:space:]]+" "$bundle/provenance.txt" || {
+      echo "certified offline bundle provenance is missing $key" >&2
+      exit 1
+    }
+  done
+fi
 check_public_oci_sources "$bundle"
 if rg -n -I 'docker\.io|ghcr\.io|quay\.io|registry-1\.docker\.io' "$bundle/images.lock"; then
   echo "public OCI source found in offline image lock" >&2
