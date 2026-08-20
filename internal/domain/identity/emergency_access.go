@@ -30,6 +30,27 @@ type EmergencyAccessRequest struct {
 	ExpiresAt      time.Time
 }
 
+type EmergencyAccessGrant struct {
+	ID             string     `json:"id"`
+	OrganizationID string     `json:"organization_id"`
+	RequesterID    string     `json:"requester_id"`
+	TargetUserID   string     `json:"target_user_id,omitempty"`
+	Scope          string     `json:"scope"`
+	ApprovalID     string     `json:"approval_id"`
+	Reason         string     `json:"reason"`
+	PrivilegeKeys  []string   `json:"privilege_keys"`
+	RequestedAt    time.Time  `json:"requested_at"`
+	ExpiresAt      time.Time  `json:"expires_at"`
+	RevokedAt      *time.Time `json:"revoked_at,omitempty"`
+	RevokedBy      string     `json:"revoked_by,omitempty"`
+	RevokeReason   string     `json:"revoke_reason,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+}
+
+func (g EmergencyAccessGrant) ActiveAt(now time.Time) bool {
+	return g.RevokedAt == nil && now.UTC().After(g.RequestedAt) && now.UTC().Before(g.ExpiresAt)
+}
+
 func (r EmergencyAccessRequest) Validate(actor Principal, now time.Time) error {
 	now = now.UTC()
 	if now.IsZero() || actor.Type != "USER" || strings.TrimSpace(actor.UserID) == "" || strings.TrimSpace(actor.OrganizationID) == "" || strings.TrimSpace(actor.SessionID) == "" {
