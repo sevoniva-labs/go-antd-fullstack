@@ -21,6 +21,7 @@ import (
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	appapproval "github.com/sevoniva-labs/forge/internal/app/approval"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
+	appdatapolicy "github.com/sevoniva-labs/forge/internal/app/datapolicy"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/authn"
 	"github.com/sevoniva-labs/forge/internal/platform/authz"
@@ -151,6 +152,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 
 	repo := repository.NewIdentityRepo(db)
 	approvalSvc := appapproval.NewService(repository.NewApprovalRepo(db))
+	dataPolicySvc := appdatapolicy.NewService(repository.NewDataPolicyRepo(db))
 	identitySvc := appidentity.NewService(repo, appidentity.Options{
 		MinLength:     cfg.Security.PasswordMinLength,
 		RequireUpper:  cfg.Security.PasswordUpper,
@@ -239,7 +241,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		"discovery": reg.Provider(), "remote_config": cfg.RemoteConfig.Provider,
 	}
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
-	platformService := kratosapi.NewPlatformService(identitySvc, approvalSvc, auditWriter, db)
+	platformService := kratosapi.NewPlatformService(identitySvc, approvalSvc, dataPolicySvc, auditWriter, db)
 	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db, ratelimit.New(c), cfg.Security.SecureCookies, cfg.Security.SameSite)
 	identityService.ConfigureFederatedLogin(kratosapi.FederatedLoginOptions{Cache: c, OIDC: oidcProviders, LDAP: ldapProviders})
 	approvalService := kratosapi.NewApprovalService(approvalSvc, auditWriter, db)

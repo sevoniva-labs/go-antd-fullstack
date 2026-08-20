@@ -88,6 +88,19 @@ export type ForgeV1AuditEvent = {
     eventHash?: string;
 };
 
+export type ForgeV1AuthorizeDataExportRequest = {
+    fieldKeys?: Array<string>;
+    purpose?: string;
+    approvalId?: string;
+    watermark?: string;
+};
+
+export type ForgeV1AuthorizeDataExportResponse = {
+    authorized?: boolean;
+    purpose?: string;
+    watermark?: string;
+};
+
 export type ForgeV1BeginMfaEnrollmentRequest = {
     currentPassword?: string;
 };
@@ -224,6 +237,23 @@ export type ForgeV1CreateUserRequest = {
 
 export type ForgeV1CreateUserResponse = {
     user?: ForgeV1User;
+};
+
+export type ForgeV1DataFieldPolicy = {
+    id?: string;
+    organizationId?: string;
+    fieldKey?: string;
+    classification?: string;
+    owner?: string;
+    purpose?: string;
+    residency?: string;
+    retentionDays?: string;
+    tags?: Array<string>;
+    maskStrategy?: string;
+    exportApproval?: boolean;
+    watermark?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 };
 
 export type ForgeV1DecideAccessReviewItemRequest = {
@@ -373,6 +403,10 @@ export type ForgeV1ListApprovalsResponse = {
 
 export type ForgeV1ListAuditLogsResponse = {
     events?: Array<ForgeV1AuditEvent>;
+};
+
+export type ForgeV1ListDataFieldPoliciesResponse = {
+    policies?: Array<ForgeV1DataFieldPolicy>;
 };
 
 export type ForgeV1ListDepartmentsResponse = {
@@ -766,6 +800,15 @@ export type ForgeV1UpdateUserStatusResponse = {
     user?: ForgeV1User;
 };
 
+export type ForgeV1UpsertDataFieldPolicyRequest = {
+    policy?: ForgeV1DataFieldPolicy;
+    approvalId?: string;
+};
+
+export type ForgeV1UpsertDataFieldPolicyResponse = {
+    policy?: ForgeV1DataFieldPolicy;
+};
+
 export type ForgeV1User = {
     id?: string;
     organizationId?: string;
@@ -944,6 +987,56 @@ export type PlatformServiceVerifyAuditIntegrityResponses = {
 };
 
 export type PlatformServiceVerifyAuditIntegrityResponse = PlatformServiceVerifyAuditIntegrityResponses[keyof PlatformServiceVerifyAuditIntegrityResponses];
+
+export type PlatformServiceAuthorizeDataExportData = {
+    body: ForgeV1AuthorizeDataExportRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/data-exports/authorize';
+};
+
+export type PlatformServiceAuthorizeDataExportResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1AuthorizeDataExportResponse;
+};
+
+export type PlatformServiceAuthorizeDataExportResponse = PlatformServiceAuthorizeDataExportResponses[keyof PlatformServiceAuthorizeDataExportResponses];
+
+export type PlatformServiceListDataFieldPoliciesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/data-policies';
+};
+
+export type PlatformServiceListDataFieldPoliciesResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListDataFieldPoliciesResponse;
+};
+
+export type PlatformServiceListDataFieldPoliciesResponse = PlatformServiceListDataFieldPoliciesResponses[keyof PlatformServiceListDataFieldPoliciesResponses];
+
+export type PlatformServiceUpsertDataFieldPolicyData = {
+    body: ForgeV1UpsertDataFieldPolicyRequest;
+    path: {
+        'policy.field_key': string;
+    };
+    query?: never;
+    url: '/api/v1/admin/data-policies/{policy.field_key}';
+};
+
+export type PlatformServiceUpsertDataFieldPolicyResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpsertDataFieldPolicyResponse;
+};
+
+export type PlatformServiceUpsertDataFieldPolicyResponse = PlatformServiceUpsertDataFieldPolicyResponses[keyof PlatformServiceUpsertDataFieldPolicyResponses];
 
 export type PlatformServiceListDepartmentsData = {
     body?: never;

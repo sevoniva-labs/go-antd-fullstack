@@ -76,6 +76,8 @@ var codeMap = map[string]string{
 	"INVALID_FEDERATED_IDENTITY":    "100014",
 	"INVALID_TEMPORARY_GRANT":       "100015",
 	"MFA_ENROLLMENT_NOT_PENDING":    "100016",
+	"INVALID_DATA_POLICY":           "100017",
+	"DATA_POLICY_UNAVAILABLE":       "400006",
 }
 
 func NumericCode(symbol string) string {

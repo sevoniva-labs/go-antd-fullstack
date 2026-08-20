@@ -34,6 +34,8 @@ var protectedOperations = map[string]struct{}{
 	forgev1.OperationPlatformServiceUnlockUser:               {},
 	forgev1.OperationPlatformServiceResetUserPassword:        {},
 	forgev1.OperationPlatformServiceRevokeSession:            {},
+	forgev1.OperationPlatformServiceUpsertDataFieldPolicy:    {},
+	forgev1.OperationPlatformServiceAuthorizeDataExport:      {},
 	forgev1.OperationPlatformServiceExportAuditLogs:          {},
 	forgev1.OperationPlatformServiceCreateTemporaryRoleGrant: {},
 	forgev1.OperationPlatformServiceRevokeTemporaryRoleGrant: {},

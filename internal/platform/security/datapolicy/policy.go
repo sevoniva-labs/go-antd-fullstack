@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/sevoniva-labs/forge/internal/platform/security/masking"
 )
@@ -42,6 +43,16 @@ type FieldPolicy struct {
 	Mask           MaskStrategy
 	ExportApproval bool
 	Watermark      bool
+}
+
+// Record adds tenant and lifecycle metadata to a field policy persisted by the
+// platform. The policy itself remains independent from transport and storage.
+type Record struct {
+	ID             string
+	OrganizationID string
+	FieldPolicy
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type ExportRequest struct {

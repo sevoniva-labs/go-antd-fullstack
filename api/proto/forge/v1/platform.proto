@@ -436,6 +436,49 @@ service PlatformService {
       ]
     };
   }
+  rpc ListDataFieldPolicies(ListDataFieldPoliciesRequest) returns (ListDataFieldPoliciesResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/data-policies"};
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
+  rpc UpsertDataFieldPolicy(UpsertDataFieldPolicyRequest) returns (UpsertDataFieldPolicyResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/admin/data-policies/{policy.field_key}"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {name: "SessionCookie" value: {value: []}},
+            {name: "CsrfToken" value: {value: []}}
+          ]
+        },
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
+  rpc AuthorizeDataExport(AuthorizeDataExportRequest) returns (AuthorizeDataExportResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/admin/data-exports/authorize"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {name: "SessionCookie" value: {value: []}},
+            {name: "CsrfToken" value: {value: []}}
+          ]
+        },
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
   rpc UpdateRoleDataScope(UpdateRoleDataScopeRequest) returns (UpdateRoleDataScopeResponse) {
     option (google.api.http) = {
       put: "/api/v1/admin/roles/{role_key}/data-scope"
@@ -1000,6 +1043,48 @@ message UpdateMenuRequest {
 }
 message UpdateMenuResponse {
   Menu menu = 1;
+}
+
+message ListDataFieldPoliciesRequest {}
+message ListDataFieldPoliciesResponse {
+  repeated DataFieldPolicy policies = 1;
+}
+
+message DataFieldPolicy {
+  string id = 1;
+  string organization_id = 2;
+  string field_key = 3;
+  string classification = 4;
+  string owner = 5;
+  string purpose = 6;
+  string residency = 7;
+  int64 retention_days = 8;
+  repeated string tags = 9;
+  string mask_strategy = 10;
+  bool export_approval = 11;
+  bool watermark = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message UpsertDataFieldPolicyRequest {
+  DataFieldPolicy policy = 1;
+  string approval_id = 2;
+}
+message UpsertDataFieldPolicyResponse {
+  DataFieldPolicy policy = 1;
+}
+
+message AuthorizeDataExportRequest {
+  repeated string field_keys = 1;
+  string purpose = 2;
+  string approval_id = 3;
+  string watermark = 4;
+}
+message AuthorizeDataExportResponse {
+  bool authorized = 1;
+  string purpose = 2;
+  string watermark = 3;
 }
 
 message UpdateRolePermissionsRequest {

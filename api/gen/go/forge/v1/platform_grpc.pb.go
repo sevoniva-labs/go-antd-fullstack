@@ -42,6 +42,9 @@ const (
 	PlatformService_ListPermissions_FullMethodName            = "/forge.v1.PlatformService/ListPermissions"
 	PlatformService_ListMenus_FullMethodName                  = "/forge.v1.PlatformService/ListMenus"
 	PlatformService_UpdateMenu_FullMethodName                 = "/forge.v1.PlatformService/UpdateMenu"
+	PlatformService_ListDataFieldPolicies_FullMethodName      = "/forge.v1.PlatformService/ListDataFieldPolicies"
+	PlatformService_UpsertDataFieldPolicy_FullMethodName      = "/forge.v1.PlatformService/UpsertDataFieldPolicy"
+	PlatformService_AuthorizeDataExport_FullMethodName        = "/forge.v1.PlatformService/AuthorizeDataExport"
 	PlatformService_UpdateRoleDataScope_FullMethodName        = "/forge.v1.PlatformService/UpdateRoleDataScope"
 	PlatformService_UpdateRolePermissions_FullMethodName      = "/forge.v1.PlatformService/UpdateRolePermissions"
 	PlatformService_UpdateUserRoles_FullMethodName            = "/forge.v1.PlatformService/UpdateUserRoles"
@@ -92,6 +95,9 @@ type PlatformServiceClient interface {
 	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
 	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
 	UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*UpdateMenuResponse, error)
+	ListDataFieldPolicies(ctx context.Context, in *ListDataFieldPoliciesRequest, opts ...grpc.CallOption) (*ListDataFieldPoliciesResponse, error)
+	UpsertDataFieldPolicy(ctx context.Context, in *UpsertDataFieldPolicyRequest, opts ...grpc.CallOption) (*UpsertDataFieldPolicyResponse, error)
+	AuthorizeDataExport(ctx context.Context, in *AuthorizeDataExportRequest, opts ...grpc.CallOption) (*AuthorizeDataExportResponse, error)
 	UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(ctx context.Context, in *UpdateUserRolesRequest, opts ...grpc.CallOption) (*UpdateUserRolesResponse, error)
@@ -353,6 +359,36 @@ func (c *platformServiceClient) UpdateMenu(ctx context.Context, in *UpdateMenuRe
 	return out, nil
 }
 
+func (c *platformServiceClient) ListDataFieldPolicies(ctx context.Context, in *ListDataFieldPoliciesRequest, opts ...grpc.CallOption) (*ListDataFieldPoliciesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDataFieldPoliciesResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListDataFieldPolicies_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) UpsertDataFieldPolicy(ctx context.Context, in *UpsertDataFieldPolicyRequest, opts ...grpc.CallOption) (*UpsertDataFieldPolicyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertDataFieldPolicyResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UpsertDataFieldPolicy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) AuthorizeDataExport(ctx context.Context, in *AuthorizeDataExportRequest, opts ...grpc.CallOption) (*AuthorizeDataExportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthorizeDataExportResponse)
+	err := c.cc.Invoke(ctx, PlatformService_AuthorizeDataExport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformServiceClient) UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateRoleDataScopeResponse)
@@ -590,6 +626,9 @@ type PlatformServiceServer interface {
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	UpdateMenu(context.Context, *UpdateMenuRequest) (*UpdateMenuResponse, error)
+	ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error)
+	UpsertDataFieldPolicy(context.Context, *UpsertDataFieldPolicyRequest) (*UpsertDataFieldPolicyResponse, error)
+	AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error)
 	UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
@@ -689,6 +728,15 @@ func (UnimplementedPlatformServiceServer) ListMenus(context.Context, *ListMenusR
 }
 func (UnimplementedPlatformServiceServer) UpdateMenu(context.Context, *UpdateMenuRequest) (*UpdateMenuResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMenu not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDataFieldPolicies not implemented")
+}
+func (UnimplementedPlatformServiceServer) UpsertDataFieldPolicy(context.Context, *UpsertDataFieldPolicyRequest) (*UpsertDataFieldPolicyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpsertDataFieldPolicy not implemented")
+}
+func (UnimplementedPlatformServiceServer) AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AuthorizeDataExport not implemented")
 }
 func (UnimplementedPlatformServiceServer) UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateRoleDataScope not implemented")
@@ -1188,6 +1236,60 @@ func _PlatformService_UpdateMenu_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_ListDataFieldPolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDataFieldPoliciesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListDataFieldPolicies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListDataFieldPolicies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListDataFieldPolicies(ctx, req.(*ListDataFieldPoliciesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_UpsertDataFieldPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertDataFieldPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UpsertDataFieldPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UpsertDataFieldPolicy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UpsertDataFieldPolicy(ctx, req.(*UpsertDataFieldPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_AuthorizeDataExport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthorizeDataExportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).AuthorizeDataExport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_AuthorizeDataExport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).AuthorizeDataExport(ctx, req.(*AuthorizeDataExportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlatformService_UpdateRoleDataScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRoleDataScopeRequest)
 	if err := dec(in); err != nil {
@@ -1664,6 +1766,18 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateMenu",
 			Handler:    _PlatformService_UpdateMenu_Handler,
+		},
+		{
+			MethodName: "ListDataFieldPolicies",
+			Handler:    _PlatformService_ListDataFieldPolicies_Handler,
+		},
+		{
+			MethodName: "UpsertDataFieldPolicy",
+			Handler:    _PlatformService_UpsertDataFieldPolicy_Handler,
+		},
+		{
+			MethodName: "AuthorizeDataExport",
+			Handler:    _PlatformService_AuthorizeDataExport_Handler,
 		},
 		{
 			MethodName: "UpdateRoleDataScope",

@@ -19,6 +19,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationPlatformServiceAuthorizeDataExport = "/forge.v1.PlatformService/AuthorizeDataExport"
 const OperationPlatformServiceCreateAccessReview = "/forge.v1.PlatformService/CreateAccessReview"
 const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
 const OperationPlatformServiceCreatePosition = "/forge.v1.PlatformService/CreatePosition"
@@ -33,6 +34,7 @@ const OperationPlatformServiceLinkFederatedIdentity = "/forge.v1.PlatformService
 const OperationPlatformServiceListAccessReviewItems = "/forge.v1.PlatformService/ListAccessReviewItems"
 const OperationPlatformServiceListAccessReviews = "/forge.v1.PlatformService/ListAccessReviews"
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
+const OperationPlatformServiceListDataFieldPolicies = "/forge.v1.PlatformService/ListDataFieldPolicies"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
 const OperationPlatformServiceListFederatedIdentityLinks = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
 const OperationPlatformServiceListMenus = "/forge.v1.PlatformService/ListMenus"
@@ -62,9 +64,11 @@ const OperationPlatformServiceUpdateUserGroupMembers = "/forge.v1.PlatformServic
 const OperationPlatformServiceUpdateUserGroupRoles = "/forge.v1.PlatformService/UpdateUserGroupRoles"
 const OperationPlatformServiceUpdateUserRoles = "/forge.v1.PlatformService/UpdateUserRoles"
 const OperationPlatformServiceUpdateUserStatus = "/forge.v1.PlatformService/UpdateUserStatus"
+const OperationPlatformServiceUpsertDataFieldPolicy = "/forge.v1.PlatformService/UpsertDataFieldPolicy"
 const OperationPlatformServiceVerifyAuditIntegrity = "/forge.v1.PlatformService/VerifyAuditIntegrity"
 
 type PlatformServiceHTTPServer interface {
+	AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error)
 	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
@@ -79,6 +83,7 @@ type PlatformServiceHTTPServer interface {
 	ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error)
 	ListAccessReviews(context.Context, *ListAccessReviewsRequest) (*ListAccessReviewsResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
+	ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
@@ -108,6 +113,7 @@ type PlatformServiceHTTPServer interface {
 	UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
 	UpdateUserStatus(context.Context, *UpdateUserStatusRequest) (*UpdateUserStatusResponse, error)
+	UpsertDataFieldPolicy(context.Context, *UpsertDataFieldPolicyRequest) (*UpsertDataFieldPolicyResponse, error)
 	VerifyAuditIntegrity(context.Context, *VerifyAuditIntegrityRequest) (*VerifyAuditIntegrityResponse, error)
 }
 
@@ -136,6 +142,9 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/permissions", _PlatformService_ListPermissions0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/menus", _PlatformService_ListMenus0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/menus/{menu_key}", _PlatformService_UpdateMenu0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/data-policies", _PlatformService_ListDataFieldPolicies0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/data-policies/{policy.field_key}", _PlatformService_UpsertDataFieldPolicy0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/data-exports/authorize", _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/data-scope", _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/permissions", _PlatformService_UpdateRolePermissions0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/users/{user_id}/roles", _PlatformService_UpdateUserRoles0_HTTP_Handler(srv))
@@ -659,6 +668,72 @@ func _PlatformService_UpdateMenu0_HTTP_Handler(srv PlatformServiceHTTPServer) fu
 	}
 }
 
+func _PlatformService_ListDataFieldPolicies0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListDataFieldPoliciesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListDataFieldPolicies)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListDataFieldPolicies(ctx, req.(*ListDataFieldPoliciesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListDataFieldPoliciesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UpsertDataFieldPolicy0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpsertDataFieldPolicyRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUpsertDataFieldPolicy)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpsertDataFieldPolicy(ctx, req.(*UpsertDataFieldPolicyRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpsertDataFieldPolicyResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AuthorizeDataExportRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceAuthorizeDataExport)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AuthorizeDataExport(ctx, req.(*AuthorizeDataExportRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AuthorizeDataExportResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in UpdateRoleDataScopeRequest
@@ -1128,6 +1203,7 @@ func _PlatformService_DecideAccessReviewItem0_HTTP_Handler(srv PlatformServiceHT
 }
 
 type PlatformServiceHTTPClient interface {
+	AuthorizeDataExport(ctx context.Context, req *AuthorizeDataExportRequest, opts ...http.CallOption) (rsp *AuthorizeDataExportResponse, err error)
 	CreateAccessReview(ctx context.Context, req *CreateAccessReviewRequest, opts ...http.CallOption) (rsp *CreateAccessReviewResponse, err error)
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
@@ -1142,6 +1218,7 @@ type PlatformServiceHTTPClient interface {
 	ListAccessReviewItems(ctx context.Context, req *ListAccessReviewItemsRequest, opts ...http.CallOption) (rsp *ListAccessReviewItemsResponse, err error)
 	ListAccessReviews(ctx context.Context, req *ListAccessReviewsRequest, opts ...http.CallOption) (rsp *ListAccessReviewsResponse, err error)
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
+	ListDataFieldPolicies(ctx context.Context, req *ListDataFieldPoliciesRequest, opts ...http.CallOption) (rsp *ListDataFieldPoliciesResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
 	ListFederatedIdentityLinks(ctx context.Context, req *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (rsp *ListFederatedIdentityLinksResponse, err error)
 	ListMenus(ctx context.Context, req *ListMenusRequest, opts ...http.CallOption) (rsp *ListMenusResponse, err error)
@@ -1171,6 +1248,7 @@ type PlatformServiceHTTPClient interface {
 	UpdateUserGroupRoles(ctx context.Context, req *UpdateUserGroupRolesRequest, opts ...http.CallOption) (rsp *UpdateUserGroupRolesResponse, err error)
 	UpdateUserRoles(ctx context.Context, req *UpdateUserRolesRequest, opts ...http.CallOption) (rsp *UpdateUserRolesResponse, err error)
 	UpdateUserStatus(ctx context.Context, req *UpdateUserStatusRequest, opts ...http.CallOption) (rsp *UpdateUserStatusResponse, err error)
+	UpsertDataFieldPolicy(ctx context.Context, req *UpsertDataFieldPolicyRequest, opts ...http.CallOption) (rsp *UpsertDataFieldPolicyResponse, err error)
 	VerifyAuditIntegrity(ctx context.Context, req *VerifyAuditIntegrityRequest, opts ...http.CallOption) (rsp *VerifyAuditIntegrityResponse, err error)
 }
 
@@ -1180,6 +1258,19 @@ type PlatformServiceHTTPClientImpl struct {
 
 func NewPlatformServiceHTTPClient(client *http.Client) PlatformServiceHTTPClient {
 	return &PlatformServiceHTTPClientImpl{client}
+}
+
+func (c *PlatformServiceHTTPClientImpl) AuthorizeDataExport(ctx context.Context, in *AuthorizeDataExportRequest, opts ...http.CallOption) (*AuthorizeDataExportResponse, error) {
+	var out AuthorizeDataExportResponse
+	pattern := "/api/v1/admin/data-exports/authorize"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceAuthorizeDataExport))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *PlatformServiceHTTPClientImpl) CreateAccessReview(ctx context.Context, in *CreateAccessReviewRequest, opts ...http.CallOption) (*CreateAccessReviewResponse, error) {
@@ -1356,6 +1447,19 @@ func (c *PlatformServiceHTTPClientImpl) ListAuditLogs(ctx context.Context, in *L
 	pattern := "/api/v1/admin/audit-logs"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlatformServiceListAuditLogs))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ListDataFieldPolicies(ctx context.Context, in *ListDataFieldPoliciesRequest, opts ...http.CallOption) (*ListDataFieldPoliciesResponse, error) {
+	var out ListDataFieldPoliciesResponse
+	pattern := "/api/v1/admin/data-policies"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListDataFieldPolicies))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1735,6 +1839,19 @@ func (c *PlatformServiceHTTPClientImpl) UpdateUserStatus(ctx context.Context, in
 	opts = append(opts, http.Operation(OperationPlatformServiceUpdateUserStatus))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UpsertDataFieldPolicy(ctx context.Context, in *UpsertDataFieldPolicyRequest, opts ...http.CallOption) (*UpsertDataFieldPolicyResponse, error) {
+	var out UpsertDataFieldPolicyResponse
+	pattern := "/api/v1/admin/data-policies/{policy.field_key}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUpsertDataFieldPolicy))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
