@@ -27,9 +27,11 @@ mkdir -p "$OUT"
   -o "cyclonedx-json=$OUT/source.cdx.json"
 
 "${TOOL_RUN[@]}" github.com/zricethezav/gitleaks/v8 git . \
+  --config "$ROOT/.gitleaks.toml" \
   --no-banner --redact=100 --report-format json \
   --report-path "$OUT/gitleaks.json"
 "${TOOL_RUN[@]}" github.com/zricethezav/gitleaks/v8 dir . \
+  --config "$ROOT/.gitleaks.toml" \
   --no-banner --redact=100 --report-format json \
   --report-path "$OUT/gitleaks-worktree.json"
 
