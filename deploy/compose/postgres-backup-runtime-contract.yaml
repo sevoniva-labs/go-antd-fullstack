@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?POSTGRES_IMAGE must be an immutable digest}
+    environment:
+      POSTGRES_USER: forge
+      POSTGRES_PASSWORD: ${FORGE_POSTGRES_PASSWORD:?FORGE_POSTGRES_PASSWORD is required}
+      POSTGRES_DB: postgres
+    volumes:
+      - ${FORGE_POSTGRES_DUMP_FILE:?FORGE_POSTGRES_DUMP_FILE is required}:/tmp/forge-contract.dump:ro
+    ports:
+      - "${FORGE_POSTGRES_PORT:-15432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forge -d postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: "no"
