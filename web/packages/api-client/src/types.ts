@@ -107,7 +107,7 @@ export interface Menu {
   icon: string
   permission_key: string
   sort_order: number
-  status: string
+  status: 'ACTIVE' | 'DISABLED'
 }
 
 export type RoleDataScope = 'ORGANIZATION' | 'DEPARTMENT' | 'DEPARTMENT_TREE' | 'SELF' | 'CUSTOM'

@@ -652,6 +652,22 @@ export type ForgeV1UpdateDepartmentResponse = {
     department?: ForgeV1Department;
 };
 
+export type ForgeV1UpdateMenuRequest = {
+    menuKey?: string;
+    parentKey?: string;
+    name?: string;
+    route?: string;
+    icon?: string;
+    permissionKey?: string;
+    sortOrder?: number;
+    status?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1UpdateMenuResponse = {
+    menu?: ForgeV1Menu;
+};
+
 export type ForgeV1UpdateOrganizationRequest = {
     name?: string;
     description?: string;
@@ -1044,6 +1060,24 @@ export type PlatformServiceListMenusResponses = {
 };
 
 export type PlatformServiceListMenusResponse = PlatformServiceListMenusResponses[keyof PlatformServiceListMenusResponses];
+
+export type PlatformServiceUpdateMenuData = {
+    body: ForgeV1UpdateMenuRequest;
+    path: {
+        menuKey: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/menus/{menuKey}';
+};
+
+export type PlatformServiceUpdateMenuResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UpdateMenuResponse;
+};
+
+export type PlatformServiceUpdateMenuResponse = PlatformServiceUpdateMenuResponses[keyof PlatformServiceUpdateMenuResponses];
 
 export type PlatformServiceGetOrganizationData = {
     body?: never;

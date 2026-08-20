@@ -124,6 +124,8 @@ export const api = {
     apiFetch<SecurityPolicy>(`/admin/security-config?approval_id=${encodeURIComponent(approvalId)}`, { method: 'PUT', body: JSON.stringify(payload) }),
   users: () => apiFetch<{ items: User[] }>('/admin/users'),
   menus: () => apiFetch<{ menus?: Menu[]; items?: Menu[] }>('/admin/menus'),
+  updateMenu: (menuKey: string, payload: { parent_key: string; name: string; route: string; icon: string; permission_key: string; sort_order: number; status: 'ACTIVE' | 'DISABLED' }, approvalId: string) =>
+    apiFetch<Menu>(`/admin/menus/${encodeURIComponent(menuKey)}`, { method: 'PATCH', body: JSON.stringify({ ...payload, approval_id: approvalId }) }),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
   updateUserRoles: (userId: string, roles: string[], approvalId: string) =>
