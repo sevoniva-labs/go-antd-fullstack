@@ -1,0 +1,16 @@
+# DEVELOPMENT ONLY. Production must use an approved Redis topology with TLS,
+# ACLs, persistence, backup, monitoring and failover evidence.
+services:
+  redis:
+    image: ${REDIS_IMAGE:?set REDIS_IMAGE to an internal Harbor digest}
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in the local environment}
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
