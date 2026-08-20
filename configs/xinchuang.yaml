@@ -25,7 +25,7 @@ database:
   max_idle_conns: 10
   max_lifetime: 30m
   query_timeout: 10s
-  auto_migrate: true
+  auto_migrate: false
 cache:
   provider: redis
   mode: standalone

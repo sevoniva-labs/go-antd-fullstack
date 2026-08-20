@@ -138,19 +138,20 @@ type Search struct {
 }
 
 type Storage struct {
-	Provider      string `yaml:"provider"` // local | s3 | s3-compatible | minio | ceph-rgw | oss | cos | obs
-	LocalRoot     string `yaml:"local_root"`
-	Endpoint      string `yaml:"endpoint"`
-	Region        string `yaml:"region"`
-	Bucket        string `yaml:"bucket"`
-	AccessKey     string `yaml:"-"`
-	SecretKey     string `yaml:"-"`
-	PathStyle     bool   `yaml:"path_style"`
-	TLS           bool   `yaml:"tls"`
-	TLSCAFile     string `yaml:"tls_ca_file"`
-	TLSCertFile   string `yaml:"tls_cert_file"`
-	TLSKeyFile    string `yaml:"tls_key_file"`
-	TLSServerName string `yaml:"tls_server_name"`
+	Provider               string `yaml:"provider"` // local | s3 | s3-compatible | minio | ceph-rgw | oss | cos | obs
+	LocalRoot              string `yaml:"local_root"`
+	Endpoint               string `yaml:"endpoint"`
+	Region                 string `yaml:"region"`
+	Bucket                 string `yaml:"bucket"`
+	AccessKey              string `yaml:"-"`
+	SecretKey              string `yaml:"-"`
+	CapabilityEvidenceFile string `yaml:"capability_evidence_file"`
+	PathStyle              bool   `yaml:"path_style"`
+	TLS                    bool   `yaml:"tls"`
+	TLSCAFile              string `yaml:"tls_ca_file"`
+	TLSCertFile            string `yaml:"tls_cert_file"`
+	TLSKeyFile             string `yaml:"tls_key_file"`
+	TLSServerName          string `yaml:"tls_server_name"`
 }
 
 type Discovery struct {
@@ -255,7 +256,10 @@ func Default() Config {
 			ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
 			ShutdownTimeout: 15 * time.Second, MaxBodyBytes: 8 << 20,
 		},
-		Database: Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: true},
+		// Schema changes are a release operation, not an API/worker start-up
+		// side effect. Development profiles may explicitly enable this for a
+		// disposable local database, but the safe default must be disabled.
+		Database: Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: false},
 		Cache:    Cache{Provider: "memory", Mode: "standalone", Prefix: "forge:", TTL: 10 * time.Minute},
 		Messaging: Messaging{
 			Provider: "disabled", RocketMQBatchSize: 16,
@@ -461,6 +465,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Storage.Region, "FORGE_STORAGE_REGION")
 	overrideString(&cfg.Storage.Bucket, "FORGE_STORAGE_BUCKET")
 	overrideString(&cfg.Storage.LocalRoot, "FORGE_STORAGE_LOCAL_ROOT")
+	overrideString(&cfg.Storage.CapabilityEvidenceFile, "FORGE_STORAGE_CAPABILITY_EVIDENCE_FILE")
 	overrideBool(&cfg.Storage.PathStyle, "FORGE_STORAGE_PATH_STYLE")
 	overrideBool(&cfg.Storage.TLS, "FORGE_STORAGE_TLS")
 	overrideString(&cfg.Storage.TLSCAFile, "FORGE_STORAGE_TLS_CA_FILE")
@@ -683,6 +688,9 @@ func (c Config) Validate() error {
 	if c.Security.PasswordHistory < 0 || c.Security.PasswordHistory > 24 {
 		errs = append(errs, "security.password_history must be 0..24")
 	}
+	if isProduction(c.App.Environment) {
+		errs = append(errs, productionSecurityFloorErrors(c)...)
+	}
 	switch c.Security.CryptoProvider {
 	case "standard", "gm":
 	default:
@@ -767,10 +775,39 @@ func (c Config) Validate() error {
 	if c.Compliance.NetworkLogRetentionDays < 183 && (c.Compliance.Profile == "mlps3" || c.Compliance.Profile == "financial") {
 		errs = append(errs, "mlps3/financial profile requires network_log_retention_days >= 183")
 	}
+	if isProduction(c.App.Environment) && c.Database.AutoMigrate {
+		errs = append(errs, "database.auto_migrate must be false in production; run forge-migrate as a one-shot release job")
+	}
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, "; "))
 	}
 	return nil
+}
+
+func productionSecurityFloorErrors(c Config) []string {
+	var errs []string
+	if c.Security.PasswordMinLength < 12 {
+		errs = append(errs, "security.password_min_length must be >= 12 in production")
+	}
+	if !c.Security.PasswordUpper || !c.Security.PasswordLower || !c.Security.PasswordDigit || !c.Security.PasswordSymbol {
+		errs = append(errs, "security.password character-class requirements cannot be disabled in production")
+	}
+	if c.Security.PasswordHistory < 5 {
+		errs = append(errs, "security.password_history must be >= 5 in production")
+	}
+	if c.Security.PasswordMaxAgeDay < 1 || c.Security.PasswordMaxAgeDay > 90 {
+		errs = append(errs, "security.password_max_age_days must be between 1 and 90 in production")
+	}
+	if c.Security.LoginMaxFailures < 1 || c.Security.LoginMaxFailures > 5 {
+		errs = append(errs, "security.login_max_failures must be between 1 and 5 in production")
+	}
+	if c.Security.LoginLockDuration < 15*time.Minute {
+		errs = append(errs, "security.login_lock_duration must be >= 15m in production")
+	}
+	if c.Security.SessionTTL <= 0 || c.Security.SessionTTL > 12*time.Hour {
+		errs = append(errs, "security.session_ttl must be between 1s and 12h in production")
+	}
+	return errs
 }
 
 func validWebCSPOrigin(source string, production bool) bool {

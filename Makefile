@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -29,6 +29,20 @@ help:
 	@echo "  make release-evidence  Scan, sign, and verify an internal digest image"
 	@echo "  make disaster-check  Validate a dated disaster evidence report"
 	@echo "  make proto-check     Lint and regenerate the Buf API contracts"
+	@echo "  make storage-cos-contract  Run credential-externalized Tencent COS S3 contract"
+	@echo "  make storage-cos-advanced-contract  Run opt-in advanced S3 capability contract"
+	@echo "  make identity-compose-config  Render the local LDAP/SSO contract overlay"
+	@echo "  make identity-runtime-contract  Start and probe the local LDAP/SSO contract overlay"
+	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
+	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
+	@echo "  make rocketmq-runtime-contract  Start and probe the local RocketMQ 5 contract overlay"
+	@echo "  make otel-runtime-contract  Start and probe the local OTel Collector contract overlay"
+	@echo "  make mysql-runtime-contract  Start MySQL and run the migration/schema contract"
+	@echo "  make kafka-runtime-contract  Start Kafka and run the franz-go stream contract"
+	@echo "  make s3-local-advanced-contract  Run generic S3 advanced capability contract locally"
+	@echo "  make apisix-runtime-contract  Run APISIX route and Admin API boundary contract"
+	@echo "  make postgres-backup-restore-contract  Run local PostgreSQL backup and restore contract"
+	@echo "  make offline-build  Build a digest-locked offline source bundle"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
 
@@ -75,6 +89,7 @@ contract:
 	python3 scripts/check-error-codes.py
 	python3 scripts/check-contract-coverage.py
 	python3 scripts/check-openapi-security.py
+	python3 scripts/check-platform-completeness.py
 
 module-boundaries:
 	bash scripts/check-module-boundaries.sh
@@ -112,6 +127,45 @@ proto-breaking: proto-tools
 
 proto-check: proto-lint proto-breaking
 	bash scripts/check-generated-proto.sh
+
+storage-cos-contract:
+	bash scripts/test-cos-contract.sh
+
+storage-cos-advanced-contract:
+	bash scripts/test-cos-advanced-contract.sh
+
+identity-compose-config:
+	docker compose -f deploy/compose/identity-dev.yaml config >/dev/null
+
+identity-runtime-contract:
+	bash scripts/test-identity-contract.sh
+
+nacos-runtime-contract:
+	bash scripts/test-nacos-contract.sh
+
+redis-runtime-contract:
+	bash scripts/test-redis-contract.sh
+
+rocketmq-runtime-contract:
+	bash scripts/test-rocketmq-contract.sh
+
+otel-runtime-contract:
+	bash scripts/test-otel-contract.sh
+
+mysql-runtime-contract:
+	bash scripts/test-mysql-contract.sh
+
+kafka-runtime-contract:
+	bash scripts/test-kafka-contract.sh
+
+postgres-backup-restore-contract:
+	bash scripts/test-postgres-backup-restore-contract.sh
+
+s3-local-advanced-contract:
+	bash scripts/test-s3-local-advanced-contract.sh
+
+apisix-runtime-contract:
+	bash scripts/test-apisix-contract.sh
 
 build: web-build
 	mkdir -p bin
@@ -177,6 +231,9 @@ release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
 verify: ci-go ci-web ci-deploy security-tools supply-chain-evidence
+
+offline-build:
+	bash scripts/build-offline-package.sh
 
 offline-check: fmt contract
 	python3 -m json.tool web/apps/shell/package.json >/dev/null

@@ -1,0 +1,41 @@
+services:
+  etcd:
+    image: ${ETCD_IMAGE:?ETCD_IMAGE must be an immutable digest}
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_NAME: etcd
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd:2380
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_CLUSTER: etcd=http://etcd:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ETCD_INITIAL_CLUSTER_TOKEN: forge-apisix-contract
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/etcd/bin/etcdctl endpoint health --endpoints=http://127.0.0.1:2379 >/dev/null 2>&1"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: "no"
+
+  backend:
+    image: ${NGINX_IMAGE:?NGINX_IMAGE must be an immutable digest}
+    volumes:
+      - ${APISIX_BACKEND_CONFIG:?APISIX_BACKEND_CONFIG is required}:/etc/nginx/conf.d/default.conf:ro
+    restart: "no"
+
+  apisix:
+    image: ${APISIX_IMAGE:?APISIX_IMAGE must be an immutable digest}
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["/opt/bitnami/apisix/bin/apisix start && exec tail -f /dev/null"]
+    volumes:
+      - ${APISIX_CONFIG:?APISIX_CONFIG is required}:/opt/bitnami/apisix/conf/config.yaml:ro
+    ports:
+      - "${APISIX_CONTRACT_DATA_PORT:-19080}:9080"
+      - "${APISIX_CONTRACT_ADMIN_PORT:-19180}:9180"
+    depends_on:
+      etcd:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    restart: "no"

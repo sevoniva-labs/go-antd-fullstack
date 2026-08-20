@@ -92,7 +92,17 @@ func New(ctx context.Context, c appcfg.Storage) (Store, error) {
 		}
 		return &local{root: c.LocalRoot}, nil
 	default:
-		return newS3(ctx, c, profile, defaultCapabilityContract(profile))
+		contract := defaultCapabilityContract(profile)
+		if strings.TrimSpace(c.CapabilityEvidenceFile) != "" {
+			contract, err = LoadCapabilityContract(c.CapabilityEvidenceFile)
+			if err != nil {
+				return nil, err
+			}
+			if contract.Profile != profile {
+				return nil, fmt.Errorf("storage capability contract profile %q does not match configured profile %q", contract.Profile, profile)
+			}
+		}
+		return newS3(ctx, c, profile, contract)
 	}
 }
 
@@ -226,10 +236,19 @@ func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile, contr
 	return &s3Store{client: cli, presign: s3.NewPresignClient(cli), bucket: c.Bucket, profile: profile, contract: contract}, nil
 }
 func (s *s3Store) Put(ctx context.Context, key string, r io.Reader) error {
+	if err := validateMultipartKey(key); err != nil {
+		return err
+	}
+	if r == nil {
+		return errors.New("object body is required")
+	}
 	_, e := s.client.PutObject(ctx, &s3.PutObjectInput{Bucket: &s.bucket, Key: &key, Body: r})
 	return e
 }
 func (s *s3Store) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+	if err := validateMultipartKey(key); err != nil {
+		return nil, err
+	}
 	o, e := s.client.GetObject(ctx, &s3.GetObjectInput{Bucket: &s.bucket, Key: &key})
 	if e != nil {
 		return nil, e
@@ -237,6 +256,9 @@ func (s *s3Store) Get(ctx context.Context, key string) (io.ReadCloser, error) {
 	return o.Body, nil
 }
 func (s *s3Store) Delete(ctx context.Context, key string) error {
+	if err := validateMultipartKey(key); err != nil {
+		return err
+	}
 	_, e := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: &s.bucket, Key: &key})
 	return e
 }

@@ -1,0 +1,27 @@
+# DEVELOPMENT ONLY. Production must use an approved RocketMQ 5 topology with
+# TLS, ACL2, namespace isolation, persistence, backup, monitoring and HA.
+services:
+  rocketmq-namesrv:
+    image: ${ROCKETMQ_IMAGE:?set ROCKETMQ_IMAGE to an internal Harbor digest}
+    command: ["sh", "mqnamesrv"]
+    healthcheck:
+      test: ["CMD-SHELL", "sh mqadmin clusterList -n localhost:9876 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 36
+
+  rocketmq:
+    image: ${ROCKETMQ_IMAGE:?set ROCKETMQ_IMAGE to an internal Harbor digest}
+    command: ["sh", "mqbroker", "-n", "rocketmq-namesrv:9876", "--enable-proxy"]
+    environment:
+      NAMESRV_ADDR: rocketmq-namesrv:9876
+      JAVA_OPT_EXT: -Xms512m -Xmx512m -Xmn256m
+    depends_on:
+      rocketmq-namesrv: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "sh mqadmin clusterList -n rocketmq-namesrv:9876 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 36
+    ports:
+      - "8081:8081"

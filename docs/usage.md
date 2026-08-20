@@ -67,6 +67,8 @@ make verify
 docker compose -f deploy/compose/standard.yaml up -d
 ```
 
+`configs/minimal.yaml` 仅为本地开发保留 `database.auto_migrate: true`。所有生产 profile 均强制关闭它；生产发布必须先由同版本镜像中的 `forge-migrate` 一次性执行迁移，确认后才滚动 API/Worker。环境变量也不能在生产中重新打开该开关。
+
 完整依赖环境：
 
 ```bash

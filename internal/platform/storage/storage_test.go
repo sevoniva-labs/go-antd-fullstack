@@ -73,6 +73,33 @@ func TestStorageCapabilitiesFailClosedUntilContractEvidenceExists(t *testing.T) 
 	}
 }
 
+func TestS3StoreRejectsInvalidObjectKeysBeforeRequest(t *testing.T) {
+	store, err := New(context.Background(), config.Storage{
+		Provider: "cos",
+		Endpoint: "https://cos.example",
+		Region:   "ap-shanghai",
+		Bucket:   "documents",
+		TLS:      true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"", strings.Repeat("x", 1025)} {
+		if err := store.Put(context.Background(), key, strings.NewReader("payload")); err == nil {
+			t.Fatalf("invalid S3 put key %q was accepted", key)
+		}
+		if _, err := store.Get(context.Background(), key); err == nil {
+			t.Fatalf("invalid S3 get key %q was accepted", key)
+		}
+		if err := store.Delete(context.Background(), key); err == nil {
+			t.Fatalf("invalid S3 delete key %q was accepted", key)
+		}
+	}
+	if err := store.Put(context.Background(), "documents/report.txt", nil); err == nil {
+		t.Fatal("nil S3 object body was accepted")
+	}
+}
+
 func TestLocalStorageDoesNotClaimS3Capabilities(t *testing.T) {
 	store, err := New(context.Background(), config.Storage{Provider: "local", LocalRoot: t.TempDir()})
 	if err != nil {

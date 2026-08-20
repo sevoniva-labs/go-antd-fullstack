@@ -1,0 +1,37 @@
+# DEVELOPMENT/CONTRACT TEST ONLY.
+# Import approved images into the organization's Harbor and provide immutable
+# digests. This overlay is never a production identity topology.
+services:
+  ldap:
+    image: ${FORGE_LDAP_IMAGE:?set FORGE_LDAP_IMAGE to an internal Harbor digest}
+    environment:
+      LDAP_ROOT: dc=forge,dc=local
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: ${FORGE_LDAP_ADMIN_PASSWORD:?set FORGE_LDAP_ADMIN_PASSWORD in the local environment}
+      LDAP_USERS: forge.user
+      LDAP_PASSWORDS: ${FORGE_LDAP_USER_PASSWORD:?set FORGE_LDAP_USER_PASSWORD in the local environment}
+      LDAP_USER_OU: users
+      LDAP_GROUP: forge-users
+    ports:
+      - "1389:1389"
+      - "1636:1636"
+    volumes:
+      - forge_ldap_data:/bitnami/openldap
+
+  sso:
+    image: ${FORGE_SSO_IMAGE:?set FORGE_SSO_IMAGE to an internal Harbor digest}
+    command: ["start-dev"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${FORGE_SSO_ADMIN_PASSWORD:?set FORGE_SSO_ADMIN_PASSWORD in the local environment}
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "18080:8080"
+      - "19000:9000"
+    volumes:
+      - forge_sso_data:/opt/keycloak/data
+
+volumes:
+  forge_ldap_data:
+  forge_sso_data:

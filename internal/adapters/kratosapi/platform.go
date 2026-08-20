@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"net"
 	"sort"
@@ -722,12 +723,32 @@ func (s *PlatformService) audited(ctx context.Context, event *audit.Event, opera
 	if s.db == nil || s.audit == nil {
 		return errors.New("reliable audit is unavailable")
 	}
-	return s.db.WithinTx(ctx, func(txCtx context.Context) error {
+	err := s.db.WithinTx(ctx, func(txCtx context.Context) error {
 		if err := operation(txCtx); err != nil {
 			return err
 		}
 		return s.audit.Write(txCtx, *event)
 	})
+	if err == nil {
+		return nil
+	}
+
+	// The business transaction has already rolled back. Preserve the failure
+	// outcome in a separate audit transaction without recording raw dependency
+	// errors, which may contain credentials, SQL, or regulated data.
+	failure := *event
+	failure.Result = "FAILURE"
+	if failure.Details == nil {
+		failure.Details = make(map[string]any)
+	}
+	failure.Details["outcome"] = "business-operation-failed"
+	auditErr := s.db.WithinTx(ctx, func(auditCtx context.Context) error {
+		return s.audit.Write(auditCtx, failure)
+	})
+	if auditErr != nil {
+		return fmt.Errorf("platform operation failed: %w; failure audit failed: %v", err, auditErr)
+	}
+	return err
 }
 
 func newAuditEvent(ctx context.Context, principal domain.Principal, action, resourceType, resourceID string, details map[string]any) *audit.Event {

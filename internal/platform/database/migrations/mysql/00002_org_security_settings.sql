@@ -1,9 +1,8 @@
 -- +goose Up
-ALTER TABLE organizations
-  ADD COLUMN IF NOT EXISTS status varchar(20) NOT NULL DEFAULT 'ACTIVE',
-  ADD COLUMN IF NOT EXISTS description varchar(500) NOT NULL DEFAULT '',
-  ADD COLUMN IF NOT EXISTS max_users int NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS max_active_sessions int NOT NULL DEFAULT 0;
+ALTER TABLE organizations ADD COLUMN status varchar(20) NOT NULL DEFAULT 'ACTIVE';
+ALTER TABLE organizations ADD COLUMN description varchar(500) NOT NULL DEFAULT '';
+ALTER TABLE organizations ADD COLUMN max_users int NOT NULL DEFAULT 0;
+ALTER TABLE organizations ADD COLUMN max_active_sessions int NOT NULL DEFAULT 0;
 
 UPDATE organizations
   SET status = COALESCE(NULLIF(TRIM(status), ''), 'ACTIVE'),
@@ -25,8 +24,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
 
 -- +goose Down
 DROP TABLE IF EXISTS system_settings;
-ALTER TABLE organizations
-  DROP COLUMN IF EXISTS status,
-  DROP COLUMN IF EXISTS description,
-  DROP COLUMN IF EXISTS max_users,
-  DROP COLUMN IF EXISTS max_active_sessions;
+ALTER TABLE organizations DROP COLUMN status;
+ALTER TABLE organizations DROP COLUMN description;
+ALTER TABLE organizations DROP COLUMN max_users;
+ALTER TABLE organizations DROP COLUMN max_active_sessions;

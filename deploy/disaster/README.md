@@ -2,6 +2,8 @@
 
 The scaffold provides a machine-checkable evidence format. It does not claim that any database, message queue, S3-compatible provider, Kubernetes cluster, HSM, or site topology has passed a disaster drill.
 
+The local database backup/restore contract is intentionally narrower than this report: `make postgres-backup-restore-contract` exercises a disposable PostgreSQL dump, database recreation, restore, and row verification. Its result must not be copied into a certified disaster report.
+
 ## Required scenarios
 
 - `node_failure`

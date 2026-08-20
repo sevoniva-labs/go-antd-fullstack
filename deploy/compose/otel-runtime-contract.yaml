@@ -1,0 +1,10 @@
+services:
+  otel-collector:
+    image: ${OTEL_IMAGE:?OTEL_IMAGE must be an immutable digest}
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ${OTEL_CONTRACT_CONFIG:?OTEL_CONTRACT_CONFIG is required}:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "${OTEL_CONTRACT_HTTP_PORT:-14318}:4318"
+      - "${OTEL_CONTRACT_HEALTH_PORT:-13133}:13133"
+    restart: "no"

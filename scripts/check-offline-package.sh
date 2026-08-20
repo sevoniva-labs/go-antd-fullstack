@@ -17,10 +17,19 @@ for path in "${required[@]}"; do
   [[ -s "$path" ]] || { echo "offline prerequisite missing: $path" >&2; exit 1; }
 done
 
-if rg -n -I 'docker\.io|ghcr\.io|quay\.io|registry-1\.docker\.io' configs deploy tools package.json pnpm-lock.yaml; then
-  echo "public OCI source found in offline prerequisites" >&2
-  exit 1
-fi
+check_public_oci_sources() {
+  local root="$1"
+  local path
+  for path in configs deploy/compose deploy/helm deploy/docker tools package.json pnpm-lock.yaml; do
+    [[ -e "$root/$path" ]] || continue
+    if rg -n -I 'docker\.io|ghcr\.io|quay\.io|registry-1\.docker\.io' "$root/$path"; then
+      echo "public OCI source found in offline inputs: $root/$path" >&2
+      return 1
+    fi
+  done
+}
+
+check_public_oci_sources "$ROOT"
 
 bundle=${OFFLINE_BUNDLE_DIR:-}
 if [[ -z "$bundle" ]]; then
@@ -31,8 +40,9 @@ fi
 [[ -s "$bundle/manifest.sha256" ]] || { echo "offline bundle manifest.sha256 is required" >&2; exit 1; }
 [[ -s "$bundle/provenance.txt" ]] || { echo "offline bundle provenance.txt is required" >&2; exit 1; }
 [[ -s "$bundle/images.lock" ]] || { echo "offline bundle images.lock is required" >&2; exit 1; }
-if rg -n -I 'docker\.io|ghcr\.io|quay\.io|registry-1\.docker\.io' "$bundle"; then
-  echo "public OCI source found in offline bundle" >&2
+check_public_oci_sources "$bundle"
+if rg -n -I 'docker\.io|ghcr\.io|quay\.io|registry-1\.docker\.io' "$bundle/images.lock"; then
+  echo "public OCI source found in offline image lock" >&2
   exit 1
 fi
 if awk 'NF && $0 !~ /@sha256:[0-9a-f]{64}/ {bad=1} END {exit bad}' "$bundle/images.lock"; then

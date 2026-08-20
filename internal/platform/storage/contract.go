@@ -2,9 +2,12 @@ package storage
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/sevoniva-labs/forge/internal/platform/securefile"
 	"time"
 )
 
@@ -24,13 +27,35 @@ const (
 // CapabilityContract is evidence produced by a target-specific contract test.
 // EvidenceDigest is the SHA-256 digest of the immutable evidence artifact.
 type CapabilityContract struct {
-	Profile        ProviderProfile
-	Level          EvidenceLevel
-	Target         string
-	EvidenceRef    string
-	EvidenceDigest string
-	TestedAt       time.Time
-	Capabilities   map[Capability]CapabilityStatus
+	Profile        ProviderProfile                 `json:"profile"`
+	Level          EvidenceLevel                   `json:"level"`
+	Target         string                          `json:"target"`
+	EvidenceRef    string                          `json:"evidence_ref"`
+	EvidenceDigest string                          `json:"evidence_digest"`
+	TestedAt       time.Time                       `json:"tested_at"`
+	Capabilities   map[Capability]CapabilityStatus `json:"capabilities"`
+}
+
+// LoadCapabilityContract reads a target contract produced by an approved
+// contract suite. The file is an input to startup only; credentials never
+// belong in it. Validation is performed before the contract reaches a store.
+func LoadCapabilityContract(path string) (CapabilityContract, error) {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return CapabilityContract{}, errors.New("storage capability contract path is required")
+	}
+	raw, err := securefile.Read(path)
+	if err != nil {
+		return CapabilityContract{}, fmt.Errorf("read storage capability contract: %w", err)
+	}
+	var contract CapabilityContract
+	if err := json.Unmarshal(raw, &contract); err != nil {
+		return CapabilityContract{}, fmt.Errorf("parse storage capability contract: %w", err)
+	}
+	if err := contract.Validate(CapabilityBasicObjectIO); err != nil {
+		return CapabilityContract{}, err
+	}
+	return contract, nil
 }
 
 func (c CapabilityContract) Validate(required ...Capability) error {
