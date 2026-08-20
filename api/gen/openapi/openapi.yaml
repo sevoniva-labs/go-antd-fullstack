@@ -122,6 +122,70 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/identity-mappings:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListFederatedIdentityLinks
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListFederatedIdentityLinksResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_LinkFederatedIdentity
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.LinkFederatedIdentityRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.LinkFederatedIdentityResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/identity-mappings/{linkId}:unlink:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UnlinkFederatedIdentity
+            parameters:
+                - name: linkId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UnlinkFederatedIdentityRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UnlinkFederatedIdentityResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/organization:
         get:
             tags:
@@ -1577,6 +1641,31 @@ components:
                     type: string
                 filename:
                     type: string
+        forge.v1.FederatedIdentityLink:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                provider:
+                    type: string
+                subject:
+                    type: string
+                userId:
+                    type: string
+                loginName:
+                    type: string
+                createdBy:
+                    type: string
+                approvalId:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                lastAuthenticatedAt:
+                    type: string
+                    format: date-time
         forge.v1.GetApprovalResponse:
             type: object
             properties:
@@ -1634,6 +1723,22 @@ components:
                     type: string
                 version:
                     type: string
+        forge.v1.LinkFederatedIdentityRequest:
+            type: object
+            properties:
+                provider:
+                    type: string
+                subject:
+                    type: string
+                userId:
+                    type: string
+                approvalId:
+                    type: string
+        forge.v1.LinkFederatedIdentityResponse:
+            type: object
+            properties:
+                link:
+                    $ref: '#/components/schemas/forge.v1.FederatedIdentityLink'
         forge.v1.ListApiTokensResponse:
             type: object
             properties:
@@ -1662,6 +1767,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.Department'
+        forge.v1.ListFederatedIdentityLinksResponse:
+            type: object
+            properties:
+                links:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.FederatedIdentityLink'
         forge.v1.ListPermissionsResponse:
             type: object
             properties:
@@ -2005,6 +2117,14 @@ components:
             properties:
                 approval:
                     $ref: '#/components/schemas/forge.v1.ApprovalRequest'
+        forge.v1.UnlinkFederatedIdentityRequest:
+            type: object
+            properties:
+                linkId:
+                    type: string
+        forge.v1.UnlinkFederatedIdentityResponse:
+            type: object
+            properties: {}
         forge.v1.UnlockUserRequest:
             type: object
             properties:

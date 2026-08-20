@@ -19,40 +19,43 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PlatformService_ListUsers_FullMethodName                = "/forge.v1.PlatformService/ListUsers"
-	PlatformService_CreateUser_FullMethodName               = "/forge.v1.PlatformService/CreateUser"
-	PlatformService_ListDepartments_FullMethodName          = "/forge.v1.PlatformService/ListDepartments"
-	PlatformService_CreateDepartment_FullMethodName         = "/forge.v1.PlatformService/CreateDepartment"
-	PlatformService_UpdateDepartment_FullMethodName         = "/forge.v1.PlatformService/UpdateDepartment"
-	PlatformService_ListPositions_FullMethodName            = "/forge.v1.PlatformService/ListPositions"
-	PlatformService_CreatePosition_FullMethodName           = "/forge.v1.PlatformService/CreatePosition"
-	PlatformService_UpdatePosition_FullMethodName           = "/forge.v1.PlatformService/UpdatePosition"
-	PlatformService_ListUserGroups_FullMethodName           = "/forge.v1.PlatformService/ListUserGroups"
-	PlatformService_CreateUserGroup_FullMethodName          = "/forge.v1.PlatformService/CreateUserGroup"
-	PlatformService_UpdateUserGroup_FullMethodName          = "/forge.v1.PlatformService/UpdateUserGroup"
-	PlatformService_UpdateUserGroupMembers_FullMethodName   = "/forge.v1.PlatformService/UpdateUserGroupMembers"
-	PlatformService_UpdateUserGroupRoles_FullMethodName     = "/forge.v1.PlatformService/UpdateUserGroupRoles"
-	PlatformService_ListUserAssignments_FullMethodName      = "/forge.v1.PlatformService/ListUserAssignments"
-	PlatformService_ReplaceUserAssignments_FullMethodName   = "/forge.v1.PlatformService/ReplaceUserAssignments"
-	PlatformService_GetOrganization_FullMethodName          = "/forge.v1.PlatformService/GetOrganization"
-	PlatformService_UpdateOrganization_FullMethodName       = "/forge.v1.PlatformService/UpdateOrganization"
-	PlatformService_GetSecurityPolicy_FullMethodName        = "/forge.v1.PlatformService/GetSecurityPolicy"
-	PlatformService_UpdateSecurityPolicy_FullMethodName     = "/forge.v1.PlatformService/UpdateSecurityPolicy"
-	PlatformService_ListRoles_FullMethodName                = "/forge.v1.PlatformService/ListRoles"
-	PlatformService_ListPermissions_FullMethodName          = "/forge.v1.PlatformService/ListPermissions"
-	PlatformService_UpdateRoleDataScope_FullMethodName      = "/forge.v1.PlatformService/UpdateRoleDataScope"
-	PlatformService_UpdateRolePermissions_FullMethodName    = "/forge.v1.PlatformService/UpdateRolePermissions"
-	PlatformService_UpdateUserRoles_FullMethodName          = "/forge.v1.PlatformService/UpdateUserRoles"
-	PlatformService_UpdateUserStatus_FullMethodName         = "/forge.v1.PlatformService/UpdateUserStatus"
-	PlatformService_UnlockUser_FullMethodName               = "/forge.v1.PlatformService/UnlockUser"
-	PlatformService_ResetUserPassword_FullMethodName        = "/forge.v1.PlatformService/ResetUserPassword"
-	PlatformService_ListSessions_FullMethodName             = "/forge.v1.PlatformService/ListSessions"
-	PlatformService_RevokeSession_FullMethodName            = "/forge.v1.PlatformService/RevokeSession"
-	PlatformService_ListAuditLogs_FullMethodName            = "/forge.v1.PlatformService/ListAuditLogs"
-	PlatformService_ExportAuditLogs_FullMethodName          = "/forge.v1.PlatformService/ExportAuditLogs"
-	PlatformService_ListTemporaryRoleGrants_FullMethodName  = "/forge.v1.PlatformService/ListTemporaryRoleGrants"
-	PlatformService_CreateTemporaryRoleGrant_FullMethodName = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
-	PlatformService_RevokeTemporaryRoleGrant_FullMethodName = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
+	PlatformService_ListUsers_FullMethodName                  = "/forge.v1.PlatformService/ListUsers"
+	PlatformService_CreateUser_FullMethodName                 = "/forge.v1.PlatformService/CreateUser"
+	PlatformService_ListDepartments_FullMethodName            = "/forge.v1.PlatformService/ListDepartments"
+	PlatformService_CreateDepartment_FullMethodName           = "/forge.v1.PlatformService/CreateDepartment"
+	PlatformService_UpdateDepartment_FullMethodName           = "/forge.v1.PlatformService/UpdateDepartment"
+	PlatformService_ListPositions_FullMethodName              = "/forge.v1.PlatformService/ListPositions"
+	PlatformService_CreatePosition_FullMethodName             = "/forge.v1.PlatformService/CreatePosition"
+	PlatformService_UpdatePosition_FullMethodName             = "/forge.v1.PlatformService/UpdatePosition"
+	PlatformService_ListUserGroups_FullMethodName             = "/forge.v1.PlatformService/ListUserGroups"
+	PlatformService_CreateUserGroup_FullMethodName            = "/forge.v1.PlatformService/CreateUserGroup"
+	PlatformService_UpdateUserGroup_FullMethodName            = "/forge.v1.PlatformService/UpdateUserGroup"
+	PlatformService_UpdateUserGroupMembers_FullMethodName     = "/forge.v1.PlatformService/UpdateUserGroupMembers"
+	PlatformService_UpdateUserGroupRoles_FullMethodName       = "/forge.v1.PlatformService/UpdateUserGroupRoles"
+	PlatformService_ListUserAssignments_FullMethodName        = "/forge.v1.PlatformService/ListUserAssignments"
+	PlatformService_ReplaceUserAssignments_FullMethodName     = "/forge.v1.PlatformService/ReplaceUserAssignments"
+	PlatformService_GetOrganization_FullMethodName            = "/forge.v1.PlatformService/GetOrganization"
+	PlatformService_UpdateOrganization_FullMethodName         = "/forge.v1.PlatformService/UpdateOrganization"
+	PlatformService_GetSecurityPolicy_FullMethodName          = "/forge.v1.PlatformService/GetSecurityPolicy"
+	PlatformService_UpdateSecurityPolicy_FullMethodName       = "/forge.v1.PlatformService/UpdateSecurityPolicy"
+	PlatformService_ListRoles_FullMethodName                  = "/forge.v1.PlatformService/ListRoles"
+	PlatformService_ListPermissions_FullMethodName            = "/forge.v1.PlatformService/ListPermissions"
+	PlatformService_UpdateRoleDataScope_FullMethodName        = "/forge.v1.PlatformService/UpdateRoleDataScope"
+	PlatformService_UpdateRolePermissions_FullMethodName      = "/forge.v1.PlatformService/UpdateRolePermissions"
+	PlatformService_UpdateUserRoles_FullMethodName            = "/forge.v1.PlatformService/UpdateUserRoles"
+	PlatformService_UpdateUserStatus_FullMethodName           = "/forge.v1.PlatformService/UpdateUserStatus"
+	PlatformService_UnlockUser_FullMethodName                 = "/forge.v1.PlatformService/UnlockUser"
+	PlatformService_ResetUserPassword_FullMethodName          = "/forge.v1.PlatformService/ResetUserPassword"
+	PlatformService_ListSessions_FullMethodName               = "/forge.v1.PlatformService/ListSessions"
+	PlatformService_RevokeSession_FullMethodName              = "/forge.v1.PlatformService/RevokeSession"
+	PlatformService_ListAuditLogs_FullMethodName              = "/forge.v1.PlatformService/ListAuditLogs"
+	PlatformService_ExportAuditLogs_FullMethodName            = "/forge.v1.PlatformService/ExportAuditLogs"
+	PlatformService_ListTemporaryRoleGrants_FullMethodName    = "/forge.v1.PlatformService/ListTemporaryRoleGrants"
+	PlatformService_CreateTemporaryRoleGrant_FullMethodName   = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
+	PlatformService_RevokeTemporaryRoleGrant_FullMethodName   = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
+	PlatformService_ListFederatedIdentityLinks_FullMethodName = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
+	PlatformService_LinkFederatedIdentity_FullMethodName      = "/forge.v1.PlatformService/LinkFederatedIdentity"
+	PlatformService_UnlinkFederatedIdentity_FullMethodName    = "/forge.v1.PlatformService/UnlinkFederatedIdentity"
 )
 
 // PlatformServiceClient is the client API for PlatformService service.
@@ -93,6 +96,9 @@ type PlatformServiceClient interface {
 	ListTemporaryRoleGrants(ctx context.Context, in *ListTemporaryRoleGrantsRequest, opts ...grpc.CallOption) (*ListTemporaryRoleGrantsResponse, error)
 	CreateTemporaryRoleGrant(ctx context.Context, in *CreateTemporaryRoleGrantRequest, opts ...grpc.CallOption) (*CreateTemporaryRoleGrantResponse, error)
 	RevokeTemporaryRoleGrant(ctx context.Context, in *RevokeTemporaryRoleGrantRequest, opts ...grpc.CallOption) (*RevokeTemporaryRoleGrantResponse, error)
+	ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...grpc.CallOption) (*ListFederatedIdentityLinksResponse, error)
+	LinkFederatedIdentity(ctx context.Context, in *LinkFederatedIdentityRequest, opts ...grpc.CallOption) (*LinkFederatedIdentityResponse, error)
+	UnlinkFederatedIdentity(ctx context.Context, in *UnlinkFederatedIdentityRequest, opts ...grpc.CallOption) (*UnlinkFederatedIdentityResponse, error)
 }
 
 type platformServiceClient struct {
@@ -443,6 +449,36 @@ func (c *platformServiceClient) RevokeTemporaryRoleGrant(ctx context.Context, in
 	return out, nil
 }
 
+func (c *platformServiceClient) ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...grpc.CallOption) (*ListFederatedIdentityLinksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListFederatedIdentityLinksResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListFederatedIdentityLinks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) LinkFederatedIdentity(ctx context.Context, in *LinkFederatedIdentityRequest, opts ...grpc.CallOption) (*LinkFederatedIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LinkFederatedIdentityResponse)
+	err := c.cc.Invoke(ctx, PlatformService_LinkFederatedIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) UnlinkFederatedIdentity(ctx context.Context, in *UnlinkFederatedIdentityRequest, opts ...grpc.CallOption) (*UnlinkFederatedIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UnlinkFederatedIdentityResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UnlinkFederatedIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServiceServer is the server API for PlatformService service.
 // All implementations must embed UnimplementedPlatformServiceServer
 // for forward compatibility.
@@ -481,6 +517,9 @@ type PlatformServiceServer interface {
 	ListTemporaryRoleGrants(context.Context, *ListTemporaryRoleGrantsRequest) (*ListTemporaryRoleGrantsResponse, error)
 	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
 	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
+	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
+	LinkFederatedIdentity(context.Context, *LinkFederatedIdentityRequest) (*LinkFederatedIdentityResponse, error)
+	UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error)
 	mustEmbedUnimplementedPlatformServiceServer()
 }
 
@@ -592,6 +631,15 @@ func (UnimplementedPlatformServiceServer) CreateTemporaryRoleGrant(context.Conte
 }
 func (UnimplementedPlatformServiceServer) RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeTemporaryRoleGrant not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListFederatedIdentityLinks not implemented")
+}
+func (UnimplementedPlatformServiceServer) LinkFederatedIdentity(context.Context, *LinkFederatedIdentityRequest) (*LinkFederatedIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LinkFederatedIdentity not implemented")
+}
+func (UnimplementedPlatformServiceServer) UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnlinkFederatedIdentity not implemented")
 }
 func (UnimplementedPlatformServiceServer) mustEmbedUnimplementedPlatformServiceServer() {}
 func (UnimplementedPlatformServiceServer) testEmbeddedByValue()                         {}
@@ -1226,6 +1274,60 @@ func _PlatformService_RevokeTemporaryRoleGrant_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_ListFederatedIdentityLinks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFederatedIdentityLinksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListFederatedIdentityLinks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListFederatedIdentityLinks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListFederatedIdentityLinks(ctx, req.(*ListFederatedIdentityLinksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_LinkFederatedIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LinkFederatedIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).LinkFederatedIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_LinkFederatedIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).LinkFederatedIdentity(ctx, req.(*LinkFederatedIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_UnlinkFederatedIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnlinkFederatedIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UnlinkFederatedIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UnlinkFederatedIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UnlinkFederatedIdentity(ctx, req.(*UnlinkFederatedIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlatformService_ServiceDesc is the grpc.ServiceDesc for PlatformService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1368,6 +1470,18 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RevokeTemporaryRoleGrant",
 			Handler:    _PlatformService_RevokeTemporaryRoleGrant_Handler,
+		},
+		{
+			MethodName: "ListFederatedIdentityLinks",
+			Handler:    _PlatformService_ListFederatedIdentityLinks_Handler,
+		},
+		{
+			MethodName: "LinkFederatedIdentity",
+			Handler:    _PlatformService_LinkFederatedIdentity_Handler,
+		},
+		{
+			MethodName: "UnlinkFederatedIdentity",
+			Handler:    _PlatformService_UnlinkFederatedIdentity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -27,8 +27,10 @@ const OperationPlatformServiceCreateUserGroup = "/forge.v1.PlatformService/Creat
 const OperationPlatformServiceExportAuditLogs = "/forge.v1.PlatformService/ExportAuditLogs"
 const OperationPlatformServiceGetOrganization = "/forge.v1.PlatformService/GetOrganization"
 const OperationPlatformServiceGetSecurityPolicy = "/forge.v1.PlatformService/GetSecurityPolicy"
+const OperationPlatformServiceLinkFederatedIdentity = "/forge.v1.PlatformService/LinkFederatedIdentity"
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
+const OperationPlatformServiceListFederatedIdentityLinks = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
 const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListPermissions"
 const OperationPlatformServiceListPositions = "/forge.v1.PlatformService/ListPositions"
 const OperationPlatformServiceListRoles = "/forge.v1.PlatformService/ListRoles"
@@ -41,6 +43,7 @@ const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformServic
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
 const OperationPlatformServiceRevokeTemporaryRoleGrant = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
+const OperationPlatformServiceUnlinkFederatedIdentity = "/forge.v1.PlatformService/UnlinkFederatedIdentity"
 const OperationPlatformServiceUnlockUser = "/forge.v1.PlatformService/UnlockUser"
 const OperationPlatformServiceUpdateDepartment = "/forge.v1.PlatformService/UpdateDepartment"
 const OperationPlatformServiceUpdateOrganization = "/forge.v1.PlatformService/UpdateOrganization"
@@ -63,8 +66,10 @@ type PlatformServiceHTTPServer interface {
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
+	LinkFederatedIdentity(context.Context, *LinkFederatedIdentityRequest) (*LinkFederatedIdentityResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
+	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
 	ListPositions(context.Context, *ListPositionsRequest) (*ListPositionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
@@ -77,6 +82,7 @@ type PlatformServiceHTTPServer interface {
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
+	UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error)
 	UnlockUser(context.Context, *UnlockUserRequest) (*UnlockUserResponse, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*UpdateOrganizationResponse, error)
@@ -127,6 +133,9 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/temporary-role-grants", _PlatformService_ListTemporaryRoleGrants0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/temporary-role-grants", _PlatformService_CreateTemporaryRoleGrant0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/temporary-role-grants/{grant_id}:revoke", _PlatformService_RevokeTemporaryRoleGrant0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/identity-mappings", _PlatformService_ListFederatedIdentityLinks0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/identity-mappings", _PlatformService_LinkFederatedIdentity0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/identity-mappings/{link_id}:unlink", _PlatformService_UnlinkFederatedIdentity0_HTTP_Handler(srv))
 }
 
 func _PlatformService_ListUsers0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
@@ -880,6 +889,72 @@ func _PlatformService_RevokeTemporaryRoleGrant0_HTTP_Handler(srv PlatformService
 	}
 }
 
+func _PlatformService_ListFederatedIdentityLinks0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListFederatedIdentityLinksRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListFederatedIdentityLinks)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListFederatedIdentityLinks(ctx, req.(*ListFederatedIdentityLinksRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListFederatedIdentityLinksResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_LinkFederatedIdentity0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LinkFederatedIdentityRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceLinkFederatedIdentity)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.LinkFederatedIdentity(ctx, req.(*LinkFederatedIdentityRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LinkFederatedIdentityResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UnlinkFederatedIdentity0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UnlinkFederatedIdentityRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUnlinkFederatedIdentity)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UnlinkFederatedIdentity(ctx, req.(*UnlinkFederatedIdentityRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UnlinkFederatedIdentityResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PlatformServiceHTTPClient interface {
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
@@ -889,8 +964,10 @@ type PlatformServiceHTTPClient interface {
 	ExportAuditLogs(ctx context.Context, req *ExportAuditLogsRequest, opts ...http.CallOption) (rsp *ExportAuditLogsResponse, err error)
 	GetOrganization(ctx context.Context, req *GetOrganizationRequest, opts ...http.CallOption) (rsp *GetOrganizationResponse, err error)
 	GetSecurityPolicy(ctx context.Context, req *GetSecurityPolicyRequest, opts ...http.CallOption) (rsp *GetSecurityPolicyResponse, err error)
+	LinkFederatedIdentity(ctx context.Context, req *LinkFederatedIdentityRequest, opts ...http.CallOption) (rsp *LinkFederatedIdentityResponse, err error)
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
+	ListFederatedIdentityLinks(ctx context.Context, req *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (rsp *ListFederatedIdentityLinksResponse, err error)
 	ListPermissions(ctx context.Context, req *ListPermissionsRequest, opts ...http.CallOption) (rsp *ListPermissionsResponse, err error)
 	ListPositions(ctx context.Context, req *ListPositionsRequest, opts ...http.CallOption) (rsp *ListPositionsResponse, err error)
 	ListRoles(ctx context.Context, req *ListRolesRequest, opts ...http.CallOption) (rsp *ListRolesResponse, err error)
@@ -903,6 +980,7 @@ type PlatformServiceHTTPClient interface {
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
 	RevokeTemporaryRoleGrant(ctx context.Context, req *RevokeTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *RevokeTemporaryRoleGrantResponse, err error)
+	UnlinkFederatedIdentity(ctx context.Context, req *UnlinkFederatedIdentityRequest, opts ...http.CallOption) (rsp *UnlinkFederatedIdentityResponse, err error)
 	UnlockUser(ctx context.Context, req *UnlockUserRequest, opts ...http.CallOption) (rsp *UnlockUserResponse, err error)
 	UpdateDepartment(ctx context.Context, req *UpdateDepartmentRequest, opts ...http.CallOption) (rsp *UpdateDepartmentResponse, err error)
 	UpdateOrganization(ctx context.Context, req *UpdateOrganizationRequest, opts ...http.CallOption) (rsp *UpdateOrganizationResponse, err error)
@@ -1029,6 +1107,19 @@ func (c *PlatformServiceHTTPClientImpl) GetSecurityPolicy(ctx context.Context, i
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) LinkFederatedIdentity(ctx context.Context, in *LinkFederatedIdentityRequest, opts ...http.CallOption) (*LinkFederatedIdentityResponse, error) {
+	var out LinkFederatedIdentityResponse
+	pattern := "/api/v1/admin/identity-mappings"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceLinkFederatedIdentity))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListAuditLogs(ctx context.Context, in *ListAuditLogsRequest, opts ...http.CallOption) (*ListAuditLogsResponse, error) {
 	var out ListAuditLogsResponse
 	pattern := "/api/v1/admin/audit-logs"
@@ -1047,6 +1138,19 @@ func (c *PlatformServiceHTTPClientImpl) ListDepartments(ctx context.Context, in 
 	pattern := "/api/v1/admin/departments"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlatformServiceListDepartments))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (*ListFederatedIdentityLinksResponse, error) {
+	var out ListFederatedIdentityLinksResponse
+	pattern := "/api/v1/admin/identity-mappings"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListFederatedIdentityLinks))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1203,6 +1307,19 @@ func (c *PlatformServiceHTTPClientImpl) RevokeTemporaryRoleGrant(ctx context.Con
 	pattern := "/api/v1/admin/temporary-role-grants/{grant_id}:revoke"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceRevokeTemporaryRoleGrant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UnlinkFederatedIdentity(ctx context.Context, in *UnlinkFederatedIdentityRequest, opts ...http.CallOption) (*UnlinkFederatedIdentityResponse, error) {
+	var out UnlinkFederatedIdentityResponse
+	pattern := "/api/v1/admin/identity-mappings/{link_id}:unlink"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUnlinkFederatedIdentity))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
