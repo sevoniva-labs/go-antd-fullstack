@@ -79,3 +79,9 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - 等保测评、密评、金融监管验收或任何厂商认证。
 
 这些项目必须在目标机构的网络、硬件、数据库、中间件和安全设备上形成独立测试报告，不能由脚手架单元测试替代。
+## PostgreSQL runtime evidence (2026-08-21)
+
+- A local Linux ARM64 runtime contract used the domestic PostgreSQL image digest `docker.m.daocloud.io/library/postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685` through Lima/nerdctl.
+- `cmd/migrate` applied PostgreSQL migrations `00001` through `00022` successfully. The runtime check exposed an existing `organizations.updated_at` schema drift during bootstrap; migration `00022_organization_updated_at.sql` closes that drift for PostgreSQL and MySQL.
+- `cmd/server` then started successfully against the migrated database. `GET /api/v1/system/health` and `GET /api/v1/system/ready` both returned `status: UP`, including database, cache, messaging, search, and storage readiness checks in the minimal local profile.
+- This is local PostgreSQL runtime evidence only. It does not certify MySQL runtime behavior, distributed dependencies, Xinchuang target systems, or any regulatory compliance outcome.
