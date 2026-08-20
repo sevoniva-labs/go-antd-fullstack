@@ -6,7 +6,17 @@ set -euo pipefail
 : "${FORGE_S3_SECRET_KEY:?FORGE_S3_SECRET_KEY is required}"
 : "${FORGE_S3_BUCKET:?FORGE_S3_BUCKET is required}"
 
-profile="${FORGE_S3_PROFILE,,}"
+profile_input="${FORGE_S3_PROFILE,,}"
+case "$profile_input" in
+    generic|generic-s3|s3-compatible|s3_compatible) profile=generic-s3 ;;
+    s3|aws|aws-s3|amazon-s3) profile=aws-s3 ;;
+    minio|minio-s3) profile=minio ;;
+    ceph|ceph-rgw|radosgw) profile=ceph-rgw ;;
+    oss|aliyun-oss|alibaba-oss) profile=alibaba-oss ;;
+    cos|tencent-cos) profile=tencent-cos ;;
+    obs|huawei-obs) profile=huawei-obs ;;
+    *) echo "unsupported S3 profile: $FORGE_S3_PROFILE" >&2; exit 1 ;;
+esac
 region="${FORGE_S3_REGION:-us-east-1}"
 endpoint="${FORGE_S3_ENDPOINT:-}"
 evidence_file="${FORGE_S3_EVIDENCE_FILE:-}"
@@ -31,10 +41,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-case "$profile" in
-    generic-s3|aws-s3|minio|ceph-rgw|alibaba-oss|tencent-cos|huawei-obs) ;;
-    *) echo "unsupported S3 profile: $FORGE_S3_PROFILE" >&2; exit 1 ;;
-esac
 if [[ -n "$contract_file" && -z "$evidence_file" ]]; then
     echo "FORGE_S3_EVIDENCE_FILE is required when FORGE_S3_CONTRACT_FILE is set" >&2
     exit 1
