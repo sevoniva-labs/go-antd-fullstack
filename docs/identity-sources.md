@@ -33,6 +33,12 @@ LDAP/AD is enabled only when `FORGE_LDAP_URL` is set. Required values are `FORGE
 
 Provider credentials are environment/file-only secrets. Do not place them in YAML, Helm values, Git, approval payloads, or audit details.
 
+## Adapter slots
+
+- SAML 2.0 is an `Adapter slot`: an implementation must validate the XML signature, issuer, audience, destination, recipient, `InResponseTo`, time bounds, replay, and explicit subject mapping. Unsigned assertions and implicit group-to-role mapping are forbidden.
+- SCIM 2.0 is an `Adapter slot`: an implementation must use TLS, bounded pagination, ETag/`If-Match` concurrency control, explicit joiner/mover/leaver policy, deprovisioning audit, and fail-closed behavior for synchronization errors. This port never carries passwords or bearer credentials.
+- No SAML/SCIM vendor is `Target-tested` until its exact product, version, TLS chain, lifecycle cases, failure behavior, and audit evidence pass the provider contract suite.
+
 ## Self-hosted development contract environment
 
 The repository provides `deploy/compose/identity-dev.yaml` for local LDAP/OIDC contract testing. It runs an OpenLDAP-compatible directory and a Keycloak-compatible OIDC issuer as a development overlay; it does not change production identity architecture and it does not certify either product.
