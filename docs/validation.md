@@ -90,3 +90,9 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - `cmd/migrate` applied PostgreSQL migrations `00001` through `00022` successfully. The runtime check exposed an existing `organizations.updated_at` schema drift during bootstrap; migration `00022_organization_updated_at.sql` closes that drift for PostgreSQL and MySQL.
 - `cmd/server` then started successfully against the migrated database. `GET /api/v1/system/health` and `GET /api/v1/system/ready` both returned `status: UP`, including database, cache, messaging, search, and storage readiness checks in the minimal local profile.
 - This is local PostgreSQL runtime evidence only. It does not certify MySQL runtime behavior, distributed dependencies, Xinchuang target systems, or any regulatory compliance outcome.
+
+## Nacos runtime contract evidence (2026-08-21)
+
+- `scripts/test-nacos-contract.sh` provides a disposable Nacos 3 runtime contract using an approved immutable image digest and local-only environment secrets. It validates the console readiness endpoint, server readiness endpoint, anonymous configuration access rejection, and the Nacos Base64 authentication-token minimum length before startup.
+- 2026-08-21: the exact local Nacos image was started through Lima rootful nerdctl from the domestic mirror digest `docker.m.daocloud.io/nacos/nacos-server@sha256:a223937902d4292e49ce6bcca8c9d47d29d508075b7f7c6ba98e1a34ff9c3f3b`. The contract passed the console readiness endpoint on the compose-mapped console port, the server readiness endpoint returning `data: "ok"`, anonymous configuration access rejection, and the token length policy.
+- Run `make nacos-runtime-contract` with a rotated, temporary Base64 token that decodes to at least 32 bytes and set `FORGE_NACOS_EVIDENCE_FILE` for a non-secret JSON record. This is local development evidence only, not Nacos cluster, TLS, HA, Xinchuang, production, or regulatory certification.
