@@ -205,7 +205,8 @@ type Security struct {
 	PasswordMaxAgeDay int           `yaml:"password_max_age_days"`
 	LoginMaxFailures  int           `yaml:"login_max_failures"`
 	LoginLockDuration time.Duration `yaml:"login_lock_duration"`
-	CryptoProvider    string        `yaml:"crypto_provider"` // standard | gm
+	CryptoProvider    string        `yaml:"crypto_provider"`   // standard | gm
+	CryptoKeySource   string        `yaml:"crypto_key_source"` // software | adapter
 	CryptoKey         string        `yaml:"-"`
 	CryptoKeyVersion  string        `yaml:"crypto_key_version"`
 	AllowedOrigins    []string      `yaml:"allowed_origins"`
@@ -274,7 +275,7 @@ func Default() Config {
 			SessionTTL: 12 * time.Hour, SameSite: "lax", PasswordMinLength: 12,
 			PasswordUpper: true, PasswordLower: true, PasswordDigit: true, PasswordSymbol: true,
 			PasswordHistory: 5, PasswordMaxAgeDay: 90, LoginMaxFailures: 5, LoginLockDuration: 30 * time.Minute,
-			CryptoProvider: "standard", CryptoKeyVersion: "v1",
+			CryptoProvider: "standard", CryptoKeySource: "software", CryptoKeyVersion: "v1",
 		},
 		Observability: Observability{LogLevel: "info", LogFormat: "json", MetricsEnabled: true, MetricsPath: "/metrics"},
 		Resilience:    Resilience{DependencyTimeout: 10 * time.Second, RetryMaxAttempts: 3, RetryBaseDelay: 100 * time.Millisecond, CircuitFailureThreshold: 5, CircuitOpenDuration: 30 * time.Second, BulkheadConcurrency: 100},
@@ -513,6 +514,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideInt(&cfg.Security.LoginMaxFailures, "FORGE_LOGIN_MAX_FAILURES")
 	overrideDuration(&cfg.Security.LoginLockDuration, "FORGE_LOGIN_LOCK_DURATION")
 	overrideString(&cfg.Security.CryptoProvider, "FORGE_CRYPTO_PROVIDER")
+	overrideString(&cfg.Security.CryptoKeySource, "FORGE_CRYPTO_KEY_SOURCE")
 	overrideString(&cfg.Security.CryptoKeyVersion, "FORGE_CRYPTO_KEY_VERSION")
 	overrideBool(&cfg.Security.SecureCookies, "FORGE_SECURE_COOKIES")
 	overrideString(&cfg.Security.SameSite, "FORGE_SAME_SITE")
@@ -695,6 +697,14 @@ func (c Config) Validate() error {
 	case "standard", "gm":
 	default:
 		errs = append(errs, "security.crypto_provider must be standard|gm")
+	}
+	switch strings.ToLower(strings.TrimSpace(c.Security.CryptoKeySource)) {
+	case "software", "adapter":
+	default:
+		errs = append(errs, "security.crypto_key_source must be software|adapter")
+	}
+	if isProduction(c.App.Environment) && strings.ToLower(strings.TrimSpace(c.Security.CryptoKeySource)) != "adapter" {
+		errs = append(errs, "security.crypto_key_source=adapter is required in production")
 	}
 	if strings.EqualFold(c.Security.SameSite, "none") && !c.Security.SecureCookies {
 		errs = append(errs, "security.same_site=none requires secure_cookies=true")

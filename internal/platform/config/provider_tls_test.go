@@ -9,6 +9,7 @@ func productionConfig() Config {
 	cfg := Default()
 	cfg.App.Environment = "production"
 	cfg.Database.DSN = "postgres://user:secret@db/app?sslmode=verify-full"
+	cfg.Security.CryptoKeySource = "adapter"
 	return cfg
 }
 

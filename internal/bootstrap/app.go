@@ -45,7 +45,12 @@ import (
 	"github.com/sevoniva-labs/forge/internal/platform/storage"
 )
 
-type Options struct{ Version string }
+type CryptoProviderFactory func(context.Context, config.Security) (appcrypto.Provider, error)
+
+type Options struct {
+	Version               string
+	CryptoProviderFactory CryptoProviderFactory
+}
 
 type App struct {
 	cfg           config.Config
@@ -135,7 +140,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		_ = db.Close()
 		return nil, err
 	}
-	crypt, err := appcrypto.New(cfg.Security.CryptoProvider, cfg.Security.CryptoKey, cfg.Security.CryptoKeyVersion)
+	crypt, err := newCryptoProvider(ctx, cfg.Security, opts.CryptoProviderFactory)
 	if err != nil {
 		bus.Close()
 		_ = c.Close()
@@ -274,6 +279,27 @@ func New(ctx context.Context, opts Options) (*App, error) {
 		kratos.Server(httpServer, grpcServer), kratos.StopTimeout(cfg.Server.ShutdownTimeout),
 	)
 	return &App{cfg: cfg, log: log, runtime: runtime, db: db, cache: c, bus: bus, registry: reg, traceShutdown: traceShutdown}, nil
+}
+
+func newCryptoProvider(ctx context.Context, security config.Security, factory CryptoProviderFactory) (appcrypto.Provider, error) {
+	source := strings.ToLower(strings.TrimSpace(security.CryptoKeySource))
+	if source == "adapter" {
+		if factory == nil {
+			return nil, fmt.Errorf("crypto key source adapter requires an injected KMS/HSM/password-device provider")
+		}
+		provider, err := factory(ctx, security)
+		if err != nil {
+			return nil, fmt.Errorf("crypto adapter: %w", err)
+		}
+		if provider == nil {
+			return nil, fmt.Errorf("crypto adapter returned a nil provider")
+		}
+		return provider, nil
+	}
+	if source != "software" {
+		return nil, fmt.Errorf("unsupported crypto key source %q", security.CryptoKeySource)
+	}
+	return appcrypto.New(security.CryptoProvider, security.CryptoKey, security.CryptoKeyVersion)
 }
 
 func (a *App) Run(ctx context.Context) error {

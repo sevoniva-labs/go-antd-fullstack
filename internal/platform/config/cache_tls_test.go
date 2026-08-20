@@ -9,6 +9,7 @@ func TestValidateRequiresRedisTLSInProduction(t *testing.T) {
 	cfg := Default()
 	cfg.App.Environment = "production"
 	cfg.Database.DSN = "postgres://user:secret@db/app?sslmode=verify-full"
+	cfg.Security.CryptoKeySource = "adapter"
 	cfg.Cache.Provider = "redis"
 	cfg.Cache.Addresses = []string{"redis.internal:6379"}
 	cfg.Cache.TLS = false
