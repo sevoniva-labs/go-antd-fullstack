@@ -24,22 +24,11 @@ type Provider interface {
 }
 
 func New(name string, rawKey string, versions ...string) (Provider, error) {
-	key, err := normalizeKey(rawKey)
-	if err != nil {
-		return nil, err
-	}
 	version := "v1"
 	if len(versions) > 0 && versions[0] != "" {
 		version = versions[0]
 	}
-	switch name {
-	case "standard":
-		return &standard{key: key, version: version}, nil
-	case "gm":
-		return &gm{key: key[:16], version: version}, nil
-	default:
-		return nil, fmt.Errorf("unknown crypto provider %q", name)
-	}
+	return NewKeyring(name, map[string]string{version: rawKey}, version)
 }
 
 func normalizeKey(raw string) ([]byte, error) {

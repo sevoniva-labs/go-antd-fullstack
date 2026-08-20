@@ -29,9 +29,9 @@
 
 - Standard：SHA-256 + AES-GCM。
 - GM baseline：SM3 + SM4-GCM。
-- 应用密文携带 key version 前缀，为后续轮换/Keyring 留兼容边界；当前根模块只激活一个主密钥版本。
+- 应用密文携带 key version 前缀；keyring 支持新版本加密、旧版本解密的轮换窗口，未知版本 fail-closed。
 - 主密钥要求至少 32 字节或等价 base64；短口令不会被静默 hash 成“看似可用”的主密钥。
-- 生产金融密码方案通常还需要 SM2、证书体系、KMS/HSM/密码机、密钥生命周期和密评，扩展位见 `integrations/secrets/hsm`。
+- 生产金融密码方案通常还需要 SM2、证书体系、KMS/HSM/密码机、双人管钥、密钥生命周期和密评；KMS/HSM 仍是 `Adapter slot`，扩展位见 `integrations/secrets/hsm`。
 - `security/masking` 提供手机号、证件、银行卡、邮箱、姓名脱敏 primitive；真正脱敏策略由数据分类分级决定。
 
 ## 审计与日志

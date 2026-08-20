@@ -35,8 +35,8 @@ S3 仅把基础对象读写标记为 `Built-in`。STS、临时凭证、分片恢
 
 | Config Center | Nacos | Built-in | 启动拉取 + Watch API |
 | Service Registry | Nacos | Built-in | register/deregister/health |
-| Crypto | Standard | Built-in | SHA-256 + AES-GCM |
-| Crypto | GM | Built-in baseline | SM3 + SM4-GCM；不等同于完整密评方案 |
+| Crypto | Standard | Built-in | SHA-256 + AES-GCM + versioned keyring |
+| Crypto | GM | Built-in baseline | SM3 + SM4-GCM + versioned keyring；不等同于完整密评方案 |
 | Crypto | SM2 / HSM / KMS / 密码机 | Adapter slot | 见 `integrations/secrets/hsm` |
 | Secrets | Env / `*_FILE` | Built-in | Secret file 优先 |
 | Secrets | Vault/Cloud KMS/HSM | Adapter slot | 实现 `secrets.Provider` |
