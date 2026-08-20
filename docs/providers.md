@@ -27,13 +27,13 @@
 | Storage | MinIO | Profile | S3 protocol profile；不因产品名自动获得认证 |
 | Storage | Ceph RGW | Profile | S3 protocol profile；不因产品名自动获得认证 |
 | Storage | 阿里 OSS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
-| Storage | 腾讯 COS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
+| Storage | 腾讯 COS | Profile + foundation target-tested | `ap-shanghai` virtual-host S3 basic object I/O, SSE-S3 AES256, and version read/list have real evidence; advanced capabilities remain `Not certified` |
 | Storage | 华为 OBS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
 | Storage | WORM audit archive | Adapter slot | S3 Object Lock Compliance + Retention + Checksum + VersionId；未通过目标契约测试不可启用 |
 
 `FORGE_STORAGE_PROVIDER` 支持别名：`s3`, `s3-compatible`, `minio`, `oss`, `cos`, `ceph`, `ceph-rgw`，启动时会统一归一化为 `s3`（大小写不敏感，带下划线/短横线兼容）。
 
-S3 仅把基础对象读写标记为 `Built-in`。STS、临时凭证、分片恢复、checksum、SSE、版本控制、Object Lock、Retention、Legal Hold 和受限预签名均默认是 `unknown`，必须通过精确目标环境契约测试后才能标记 `Target-tested`；AWS S3、MinIO、Ceph RGW、阿里 OSS、腾讯 COS、华为 OBS 没有实测证据时统一是 `Not certified`。
+S3 仅把基础对象读写标记为 `Built-in`。STS、临时凭证、分片恢复、checksum、SSE-KMS、Object Lock、Retention、Legal Hold 和受限预签名均默认是 `unknown`，必须通过精确目标环境契约测试后才能标记 `Target-tested`。腾讯 COS 的基础证据通过 `make storage-cos-contract` 重放；当前只覆盖基础对象读写、SSE-S3 AES256 和版本读取/列表观察，不代表高级能力或金融合规认证。AWS S3、MinIO、Ceph RGW、阿里 OSS、华为 OBS 没有对应目标环境实测证据时统一是 `Not certified`。
 
 | Config Center | Nacos | Built-in | 启动拉取 + Watch API |
 | Service Registry | Nacos | Built-in | register/deregister/health |

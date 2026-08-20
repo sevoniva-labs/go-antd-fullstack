@@ -21,7 +21,20 @@
 store, err := storage.NewWithCapabilityContract(ctx, cfg.Storage, targetContract)
 ```
 
-当前仓库只提供协议能力边界和验证入口，AWS、MinIO、Ceph、OSS、COS、OBS 以及国产对象存储的目标版本、签名行为、STS、KMS/HSM、Object Lock 和灾备结果仍属于 `Not certified`，必须在实际交付环境留存证据后再升级标签。
+当前仓库提供协议能力边界和 COS 基础契约验证入口：`make storage-cos-contract`。腾讯 COS 的 `ap-shanghai` 目标已验证基础对象读写、SSE-S3 AES256 和版本读取/列表观察；这不覆盖分片、Checksum、STS、SSE-KMS、Object Lock、Retention、Legal Hold、灾备或任何认证结论。除明确记录的基础证据外，AWS、MinIO、Ceph、OSS、COS、OBS 以及国产对象存储的能力仍属于 `Not certified`，必须在实际交付环境留存证据后再升级标签。
+
+契约执行只从环境变量读取凭据，不把密钥写入仓库：
+
+```bash
+FORGE_COS_ACCESS_KEY='测试访问密钥' \
+FORGE_COS_SECRET_KEY='测试秘密密钥' \
+FORGE_COS_REGION='ap-shanghai' \
+FORGE_COS_BUCKET='专用测试桶' \
+FORGE_COS_EVIDENCE_FILE='artifacts/storage/tencent-cos-foundation.json' \
+make storage-cos-contract
+```
+
+测试身份必须是最小权限专用身份；探针对象使用唯一前缀并在测试结束时删除。若删除失败，脚本返回失败。生成的证据文件不得包含凭据，并应随目标版本、配置和报告一同归档。
 
 ## Upload quarantine
 

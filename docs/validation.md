@@ -16,6 +16,12 @@
 - HTTP SPA 测试覆盖随机 CSP nonce 注入、脚本严格策略、Wujie 审批策略、独立 `connect-src`/`frame-src` 和签名静态资源 URL 不重定向。
 - 配置测试覆盖生产来源必须 HTTPS、拒绝通配符/路径/用户信息/查询参数以及重复来源。
 
+### Tencent COS S3 foundation contract
+
+- 2026-08-21: 已使用腾讯 COS `ap-shanghai` 私有测试桶完成 `HeadBucket`、对象列表、SSE-S3 `AES256` 上传、对象元数据、下载内容校验、删除、版本状态读取和版本列表权限验证。
+- 仓库入口为 `make storage-cos-contract`，凭据只从环境变量读取并自动清理探针对象；可通过 `FORGE_COS_EVIDENCE_FILE` 生成不含密钥的 JSON 证据。
+- 当前证据只支持基础对象读写、SSE-S3 AES256 和版本读取/列表观察；分片、Checksum、STS、SSE-KMS、Object Lock、Retention、Legal Hold、预签名和灾备仍未验证。
+
 ### 前端
 
 - `pnpm install --frozen-lockfile`、workspace typecheck、单元测试和 Vite 8 生产构建已执行通过。
@@ -65,7 +71,7 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 ## 尚未验证，不得宣称
 
 - OTel Collector 真实进程联调：当前环境没有提供 `OTELCOL_BIN`。
-- 真实 Nacos 3、RocketMQ 5、Kafka、Redis 集群和各云厂商 S3 端点的兼容认证。
+- 真实 Nacos 3、RocketMQ 5、Kafka、Redis 集群和除腾讯 COS 基础契约外的各云厂商 S3 端点兼容认证。
 - OceanBase、达梦、人大金仓、GaussDB 等国产数据库的驱动、SQL 方言、迁移、故障切换和性能认证。
 - 国密 SSL、SM2 证书链、HSM/密码机、KMS 和密钥轮换演练。
 - 组织内 Harbor、多架构镜像、离线包、Kubernetes 集群、备份恢复和两地三中心容灾演练。
