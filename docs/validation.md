@@ -108,3 +108,9 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - `scripts/test-rocketmq-contract.sh` provides a disposable RocketMQ 5 development contract with nameserver, broker and proxy. It waits for broker readiness, creates a unique topic, waits for nameserver route visibility, and runs the same RocketMQ Go SDK path through a Linux ARM64 helper inside the broker network to produce, receive and acknowledge a message.
 - 2026-08-21: the exact domestic mirror image `docker.m.daocloud.io/apache/rocketmq@sha256:455287638deddbbcd6cf48cdf988ed4d05bbac7265acc0c399d9d8228862a7d7` passed the standalone contract. The local overlay uses plaintext gRPC and an empty namespace only for disposable development; production TLS, ACL2, namespace isolation, FIFO/delay/transaction semantics, retry/DLQ, cluster HA, persistence recovery and failover remain unverified.
 - Run `make rocketmq-runtime-contract` with temporary local access/secret values and set `FORGE_ROCKETMQ_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only, not RocketMQ production, Xinchuang, or regulatory certification.
+
+## OTel Collector runtime contract evidence (2026-08-21)
+
+- `scripts/test-otel-contract.sh` provides a disposable OTel Collector contract. It starts the Collector, probes the health extension, sends one OTLP/HTTP trace, and requires HTTP 200.
+- The exact domestic mirror image pulled for this contract is `docker.m.daocloud.io/otel/opentelemetry-collector-contrib@sha256:faf125d656fa47cea568b2f3b4494efd2525083bc75c1e96038bc23f05cd68fd`.
+- Run `make otel-runtime-contract` with `FORGE_OTEL_IMAGE` set to that exact digest and optionally set `FORGE_OTEL_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only; production TLS/mTLS, exporter persistence, trace storage, alerting, sampling policy, HA, and target-tested observability backends remain unverified.

@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-cos-contract storage-cos-advanced-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-cos-contract storage-cos-advanced-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -36,6 +36,7 @@ help:
 	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
 	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
 	@echo "  make rocketmq-runtime-contract  Start and probe the local RocketMQ 5 contract overlay"
+	@echo "  make otel-runtime-contract  Start and probe the local OTel Collector contract overlay"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
 
@@ -140,6 +141,9 @@ redis-runtime-contract:
 
 rocketmq-runtime-contract:
 	bash scripts/test-rocketmq-contract.sh
+
+otel-runtime-contract:
+	bash scripts/test-otel-contract.sh
 
 build: web-build
 	mkdir -p bin
