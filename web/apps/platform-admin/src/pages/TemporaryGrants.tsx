@@ -123,3 +123,7 @@ export function TemporaryGrantsPage() {
     />
   </AppPageContainer>
 }
+
+// Keep adjacent governance pages in one lazy-loaded entry so the Shell bundle
+// budget does not grow by one chunk for every small governance capability.
+export { EmergencyAccessPage } from './EmergencyAccess'

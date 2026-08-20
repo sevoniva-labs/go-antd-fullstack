@@ -38,7 +38,7 @@ const SessionsPage = lazy(() => import('@forge/platform-admin/sessions').then((m
 const AuditLogsPage = lazy(() => import('@forge/platform-admin/audit-logs').then((m) => ({ default: m.AuditLogsPage })))
 const ApprovalsPage = lazy(() => import('@forge/platform-admin/approvals').then((m) => ({ default: m.ApprovalsPage })))
 const TemporaryGrantsPage = lazy(() => import('@forge/platform-admin/temporary-grants').then((m) => ({ default: m.TemporaryGrantsPage })))
-const EmergencyAccessPage = lazy(() => import('@forge/platform-admin/emergency-access').then((m) => ({ default: m.EmergencyAccessPage })))
+const EmergencyAccessPage = lazy(() => import('@forge/platform-admin/temporary-grants').then((m) => ({ default: m.EmergencyAccessPage })))
 const AccessReviewsPage = lazy(() => import('@forge/platform-admin/access-reviews').then((m) => ({ default: m.AccessReviewsPage })))
 const DataGovernancePage = lazy(() => import('@forge/platform-admin/data-governance').then((m) => ({ default: m.DataGovernancePage })))
 const ConfigChangesPage = lazy(() => import('@forge/platform-admin/data-governance').then((m) => ({ default: m.ConfigChangesPage })))
