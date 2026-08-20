@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -54,6 +55,14 @@ func LoadCapabilityContract(path string) (CapabilityContract, error) {
 	}
 	if err := contract.Validate(CapabilityBasicObjectIO); err != nil {
 		return CapabilityContract{}, err
+	}
+	evidence, err := securefile.Read(contract.EvidenceRef)
+	if err != nil {
+		return CapabilityContract{}, fmt.Errorf("read storage capability evidence: %w", err)
+	}
+	digest := sha256.Sum256(evidence)
+	if !strings.EqualFold(hex.EncodeToString(digest[:]), strings.TrimSpace(contract.EvidenceDigest)) {
+		return CapabilityContract{}, errors.New("storage capability evidence digest does not match contract")
 	}
 	return contract, nil
 }

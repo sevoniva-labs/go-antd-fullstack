@@ -24,6 +24,13 @@
 - 仓库入口为 `make storage-cos-contract`，凭据只从环境变量读取并自动清理探针对象；可通过 `FORGE_COS_EVIDENCE_FILE` 生成不含密钥的 JSON 证据，并通过 `FORGE_COS_CONTRACT_FILE` 生成启动可加载的 Target-tested 合同清单。
 - 当前证据只支持基础对象读写、SSE-S3 AES256 和版本读取/列表观察；分片、Checksum、STS、SSE-KMS、Object Lock、Retention、Legal Hold、预签名和灾备仍未验证。
 
+### Provider-neutral S3 foundation contract
+
+- `make storage-s3-contract` 提供供应商无关的基础契约入口，要求显式的 `FORGE_S3_PROFILE`、最小权限凭据、桶、区域和端点，可用于 `generic-s3`、AWS S3、MinIO、Ceph RGW、阿里 OSS、腾讯 COS、华为 OBS。
+- 该入口真实验证 HeadBucket、列表、SSE-S3 + SHA-256 上传、元数据、下载内容、清理和版本能力观察，并生成不含密钥的证据；它不把基础通过扩展成 STS、SSE-KMS、Object Lock、Retention、Legal Hold 或生产认证。
+- 只有同时提供 `FORGE_S3_CONTRACT_FILE` 和成功的 `FORGE_S3_EVIDENCE_FILE`，才生成可被启动器加载的 `Target-tested` 合同。HTTP 端点仅允许通过 `FORGE_S3_ALLOW_HTTP=true` 显式用于一次性本地测试。
+- 当前切片已通过 `bash -n scripts/test-s3-contract.sh` 和 `make -n storage-s3-contract`；本轮本地 Docker daemon 未启动，因此尚无该通用入口的运行时 Target-tested 证据，不作通过声明。
+
 ### 前端
 
 - `pnpm install --frozen-lockfile`、workspace typecheck、单元测试和 Vite 8 生产构建已执行通过。

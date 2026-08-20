@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-s3-contract storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -29,6 +29,7 @@ help:
 	@echo "  make release-evidence  Scan, sign, and verify an internal digest image"
 	@echo "  make disaster-check  Validate a dated disaster evidence report"
 	@echo "  make proto-check     Lint and regenerate the Buf API contracts"
+	@echo "  make storage-s3-contract  Run the provider-neutral S3 foundation contract"
 	@echo "  make storage-cos-contract  Run credential-externalized Tencent COS S3 contract"
 	@echo "  make storage-cos-advanced-contract  Run opt-in advanced S3 capability contract"
 	@echo "  make identity-compose-config  Render the local LDAP/SSO contract overlay"
@@ -127,6 +128,9 @@ proto-breaking: proto-tools
 
 proto-check: proto-lint proto-breaking
 	bash scripts/check-generated-proto.sh
+
+storage-s3-contract:
+	bash scripts/test-s3-contract.sh
 
 storage-cos-contract:
 	bash scripts/test-cos-contract.sh

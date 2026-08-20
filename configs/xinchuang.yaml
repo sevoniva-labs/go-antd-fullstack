@@ -86,6 +86,7 @@ security:
   login_max_failures: 5
   login_lock_duration: 30m
   crypto_provider: gm
+  crypto_key_source: adapter
   crypto_key_version: v1
   allowed_origins: []
   trusted_proxies: []

@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"strings"
@@ -52,8 +54,17 @@ func TestCapabilityContractRejectsWrongProfile(t *testing.T) {
 }
 
 func TestLoadCapabilityContractValidatesTargetEvidence(t *testing.T) {
-	path := t.TempDir() + "/cos-contract.json"
+	dir := t.TempDir()
+	path := dir + "/cos-contract.json"
+	evidencePath := dir + "/cos-evidence.json"
+	evidence := []byte(`{"status":"passed","target":"test"}`)
+	if err := os.WriteFile(evidencePath, evidence, 0o600); err != nil {
+		t.Fatal(err)
+	}
 	contract := targetContract(ProviderProfileTencentCOS, CapabilityBasicObjectIO, CapabilitySSES3)
+	digest := sha256.Sum256(evidence)
+	contract.EvidenceRef = evidencePath
+	contract.EvidenceDigest = hex.EncodeToString(digest[:])
 	raw, err := json.Marshal(contract)
 	if err != nil {
 		t.Fatal(err)
@@ -67,6 +78,13 @@ func TestLoadCapabilityContractValidatesTargetEvidence(t *testing.T) {
 	}
 	if loaded.Profile != ProviderProfileTencentCOS || loaded.Level != EvidenceTargetTested {
 		t.Fatalf("loaded contract metadata = %#v", loaded)
+	}
+
+	if err := os.WriteFile(evidencePath, []byte(`{"status":"tampered"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadCapabilityContract(path); err == nil {
+		t.Fatal("tampered capability evidence was accepted")
 	}
 }
 
