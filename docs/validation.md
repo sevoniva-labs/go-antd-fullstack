@@ -114,3 +114,9 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - `scripts/test-otel-contract.sh` provides a disposable OTel Collector contract. It starts the Collector, probes the health extension, sends one OTLP/HTTP trace, and requires HTTP 200.
 - The exact domestic mirror image pulled for this contract is `docker.m.daocloud.io/otel/opentelemetry-collector-contrib@sha256:faf125d656fa47cea568b2f3b4494efd2525083bc75c1e96038bc23f05cd68fd`.
 - Run `make otel-runtime-contract` with `FORGE_OTEL_IMAGE` set to that exact digest and optionally set `FORGE_OTEL_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only; production TLS/mTLS, exporter persistence, trace storage, alerting, sampling policy, HA, and target-tested observability backends remain unverified.
+
+## MySQL runtime contract evidence (2026-08-21)
+
+- `scripts/test-mysql-contract.sh` starts a disposable MySQL instance with a domestic immutable image, waits for authenticated readiness, runs `go run ./cmd/migrate` with the MySQL provider, and checks the required `users`, `organizations`, and `audit_logs` tables plus `organizations.updated_at`.
+- 2026-08-21: the exact domestic mirror image `docker.m.daocloud.io/library/mysql@sha256:b3b90af2a6552ae30c266fdb7d5dd55f3afb72404bb78d37fe8a23eb857fd3fb` passed the standalone contract. Goose migrations `00001` through `00022` completed, and the required table/column assertions passed.
+- Run `make mysql-runtime-contract` with temporary local `FORGE_MYSQL_ROOT_PASSWORD` and `FORGE_MYSQL_PASSWORD` values and optionally set `FORGE_MYSQL_EVIDENCE_FILE`. This is local MySQL migration evidence only; MySQL HA, TLS, backup/recovery, Xinchuang database targets, and regulatory certification remain unverified.

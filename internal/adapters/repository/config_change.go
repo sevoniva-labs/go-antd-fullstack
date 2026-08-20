@@ -15,8 +15,16 @@ type ConfigChangeRepo struct{ db *database.DB }
 
 func NewConfigChangeRepo(db *database.DB) *ConfigChangeRepo { return &ConfigChangeRepo{db: db} }
 
+func (r *ConfigChangeRepo) sensitiveColumn() string {
+	if r.db.Provider == "mysql" || r.db.Provider == "oceanbase" {
+		return "`sensitive`"
+	}
+	return "sensitive"
+}
+
 func (r *ConfigChangeRepo) List(ctx context.Context, organizationID string) ([]configchange.Change, error) {
-	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,namespace,config_group,data_id,version,expected_previous_version,value_digest,value_ref,sensitive,created_by,approved_by,approval_id,state,updated_at FROM config_change_history WHERE organization_id=? ORDER BY updated_at DESC,id DESC LIMIT 200`), organizationID)
+	query := fmt.Sprintf(`SELECT id,organization_id,namespace,config_group,data_id,version,expected_previous_version,value_digest,value_ref,%s,created_by,approved_by,approval_id,state,updated_at FROM config_change_history WHERE organization_id=? ORDER BY updated_at DESC,id DESC LIMIT 200`, r.sensitiveColumn())
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(query), organizationID)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +41,8 @@ func (r *ConfigChangeRepo) List(ctx context.Context, organizationID string) ([]c
 }
 
 func (r *ConfigChangeRepo) ByID(ctx context.Context, organizationID, id string) (configchange.Change, error) {
-	return scanConfigChange(r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,organization_id,namespace,config_group,data_id,version,expected_previous_version,value_digest,value_ref,sensitive,created_by,approved_by,approval_id,state,updated_at FROM config_change_history WHERE organization_id=? AND id=?`), organizationID, id))
+	query := fmt.Sprintf(`SELECT id,organization_id,namespace,config_group,data_id,version,expected_previous_version,value_digest,value_ref,%s,created_by,approved_by,approval_id,state,updated_at FROM config_change_history WHERE organization_id=? AND id=?`, r.sensitiveColumn())
+	return scanConfigChange(r.db.QueryRowContext(ctx, r.db.Rebind(query), organizationID, id))
 }
 
 func (r *ConfigChangeRepo) Create(ctx context.Context, change configchange.Change) (configchange.Change, error) {
@@ -45,7 +54,8 @@ func (r *ConfigChangeRepo) Create(ctx context.Context, change configchange.Chang
 	if err != nil {
 		return configchange.Change{}, err
 	}
-	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO config_change_history(id,organization_id,namespace,config_group,data_id,version,expected_previous_version,value_digest,value_ref,sensitive,created_by,approved_by,approval_id,state,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`), change.ID, change.OrganizationID, change.Namespace, change.Group, change.DataID, version, previousVersion, change.ValueDigest, change.ValueRef, change.Sensitive, change.CreatedBy, nullIfEmpty(change.ApprovedBy), nullIfEmpty(change.ApprovalID), string(change.State), change.UpdatedAt)
+	query := fmt.Sprintf(`INSERT INTO config_change_history(id,organization_id,namespace,config_group,data_id,version,expected_previous_version,value_digest,value_ref,%s,created_by,approved_by,approval_id,state,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, r.sensitiveColumn())
+	_, err = r.db.ExecContext(ctx, r.db.Rebind(query), change.ID, change.OrganizationID, change.Namespace, change.Group, change.DataID, version, previousVersion, change.ValueDigest, change.ValueRef, change.Sensitive, change.CreatedBy, nullIfEmpty(change.ApprovedBy), nullIfEmpty(change.ApprovalID), string(change.State), change.UpdatedAt)
 	return change, err
 }
 

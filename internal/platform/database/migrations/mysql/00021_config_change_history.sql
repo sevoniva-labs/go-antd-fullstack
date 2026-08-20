@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS config_change_history (
     expected_previous_version bigint NOT NULL,
     value_digest char(64) NOT NULL,
     value_ref varchar(500) NOT NULL,
-    sensitive boolean NOT NULL DEFAULT false,
+    `sensitive` boolean NOT NULL DEFAULT false,
     created_by varchar(36) NOT NULL,
     approved_by varchar(36),
     approval_id varchar(36),
