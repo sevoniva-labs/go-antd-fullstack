@@ -17,6 +17,7 @@ REQUIRED_ADMIN_PAGES = {
     "AuditLogs.tsx",
     "ConfigChanges.tsx",
     "DataGovernance.tsx",
+    "EmergencyAccess.tsx",
     "Departments.tsx",
     "Menus.tsx",
     "Organization.tsx",

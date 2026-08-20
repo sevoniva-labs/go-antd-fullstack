@@ -16,6 +16,7 @@ export const queryKeys = {
   mfa: ['mfa'] as const,
   approvals: ['approvals'] as const,
   temporaryRoleGrants: ['temporary-role-grants'] as const,
+  emergencyAccess: ['emergency-access'] as const,
   accessReviews: ['access-reviews'] as const,
   dataPolicies: ['data-policies'] as const,
   dataDeletionEvidence: ['data-deletion-evidence'] as const,
