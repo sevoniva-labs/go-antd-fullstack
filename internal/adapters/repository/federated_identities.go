@@ -15,7 +15,7 @@ func (r *IdentityRepo) ListFederatedIdentityLinks(ctx context.Context, organizat
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	links := make([]identity.FederatedIdentityLink, 0)
 	for rows.Next() {
 		var link identity.FederatedIdentityLink

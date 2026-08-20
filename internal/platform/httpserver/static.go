@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -25,6 +26,12 @@ func SPA(options SPAOptions) http.Handler {
 		absoluteRoot = options.Root
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		root, rootErr := os.OpenRoot(absoluteRoot)
+		if rootErr != nil {
+			writeError(w, http.StatusInternalServerError, "WEB_STATIC_RESOURCE_UNAVAILABLE", "web static root is unavailable")
+			return
+		}
+		defer func() { _ = root.Close() }()
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method is not allowed")
 			return
@@ -40,41 +47,41 @@ func SPA(options SPAOptions) http.Handler {
 			}
 		}
 		clean := strings.TrimPrefix(filepath.Clean(filepath.FromSlash(r.URL.Path)), string(filepath.Separator))
-		target := filepath.Join(absoluteRoot, clean)
-		if !withinRoot(absoluteRoot, target) {
-			writeError(w, http.StatusNotFound, "NOT_FOUND", "resource not found")
-			return
-		}
-		index := filepath.Join(absoluteRoot, "index.html")
 		if clean == "index.html" {
-			serveSPAIndex(w, r, index, options)
+			serveSPAIndex(w, r, root, options)
 			return
 		}
 		if clean != "." && clean != "" {
-			if info, statErr := os.Stat(target); statErr == nil && !info.IsDir() {
-				file, openErr := os.Open(target)
+			if info, statErr := root.Stat(clean); statErr == nil && !info.IsDir() {
+				file, openErr := root.Open(clean)
 				if openErr != nil {
 					writeError(w, http.StatusInternalServerError, "WEB_STATIC_RESOURCE_UNAVAILABLE", "web static resource is unavailable")
 					return
 				}
-				defer file.Close()
+				defer func() { _ = file.Close() }()
 
 				setStaticCacheControl(w.Header(), clean)
-				http.ServeContent(w, r, filepath.Base(target), info.ModTime(), file)
+				http.ServeContent(w, r, filepath.Base(clean), info.ModTime(), file)
 				return
 			}
 		}
-		serveSPAIndex(w, r, index, options)
+		serveSPAIndex(w, r, root, options)
 	})
 }
 
-func serveSPAIndex(w http.ResponseWriter, r *http.Request, index string, options SPAOptions) {
-	info, err := os.Stat(index)
+func serveSPAIndex(w http.ResponseWriter, r *http.Request, root *os.Root, options SPAOptions) {
+	info, err := root.Stat("index.html")
 	if err != nil || info.IsDir() {
 		writeError(w, http.StatusNotFound, "NOT_FOUND", "resource not found")
 		return
 	}
-	content, err := os.ReadFile(index)
+	file, err := root.Open("index.html")
+	if err != nil {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "resource not found")
+		return
+	}
+	content, err := io.ReadAll(file)
+	_ = file.Close()
 	if err != nil || !bytes.Contains(content, []byte(cspNonceMarker)) {
 		writeError(w, http.StatusInternalServerError, "WEB_SECURITY_CONFIGURATION_INVALID", "web security configuration is invalid")
 		return
@@ -144,9 +151,4 @@ func setStaticCacheControl(header http.Header, cleanPath string) {
 		return
 	}
 	header.Set("Cache-Control", "public, max-age=300")
-}
-
-func withinRoot(root, target string) bool {
-	relative, err := filepath.Rel(root, target)
-	return err == nil && relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator))
 }

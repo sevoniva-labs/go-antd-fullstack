@@ -177,17 +177,6 @@ type s3Store struct {
 	profile ProviderProfile
 }
 
-func normalizeStorageProvider(value string) string {
-	profile, err := ResolveProviderProfile(value)
-	if err != nil {
-		return strings.ToLower(strings.TrimSpace(value))
-	}
-	if IsS3Profile(profile) {
-		return "s3"
-	}
-	return "local"
-}
-
 func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile) (Store, error) {
 	if c.TLS && strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.Endpoint)), "http://") {
 		return nil, errors.New("storage tls=true requires https endpoint")

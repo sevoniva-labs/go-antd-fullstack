@@ -145,7 +145,8 @@ func NewLDAPProvider(cfg LDAPConfig) (*LDAPProvider, error) {
 		return nil, ErrInvalidConfiguration
 	}
 	u, err := url.Parse(cfg.URL)
-	if err != nil || u.Host == "" || (u.Scheme != "ldaps" && !(u.Scheme == "ldap" && cfg.StartTLS) && !cfg.AllowInsecure) {
+	validLDAPEndpoint := u.Scheme == "ldaps" || (u.Scheme == "ldap" && (cfg.StartTLS || cfg.AllowInsecure))
+	if err != nil || u.Host == "" || !validLDAPEndpoint {
 		return nil, ErrInvalidConfiguration
 	}
 	if cfg.SearchTimeout <= 0 {
@@ -206,7 +207,8 @@ func (p *LDAPProvider) Authenticate(ctx context.Context, login, password string)
 
 func validateEndpoint(value string, allowHTTP bool) error {
 	u, err := url.Parse(strings.TrimSpace(value))
-	if err != nil || u.Host == "" || (u.Scheme != "https" && !(allowHTTP && u.Scheme == "http")) {
+	validHTTPSEndpoint := u.Scheme == "https" || (allowHTTP && u.Scheme == "http")
+	if err != nil || u.Host == "" || !validHTTPSEndpoint {
 		return ErrInvalidConfiguration
 	}
 	return nil

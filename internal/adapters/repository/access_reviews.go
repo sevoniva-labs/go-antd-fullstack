@@ -27,7 +27,7 @@ func (r *IdentityRepo) CreateAccessReview(ctx context.Context, review domain.Acc
 		if err != nil {
 			return err
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 		for rows.Next() {
 			var item domain.AccessReviewItem
 			if err := rows.Scan(&item.UserID, &item.LoginName, &item.RoleKey); err != nil {
@@ -65,7 +65,7 @@ func (r *IdentityRepo) ListAccessReviews(ctx context.Context, organizationID str
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	items := make([]domain.AccessReview, 0)
 	for rows.Next() {
 		var review domain.AccessReview
@@ -87,7 +87,7 @@ func (r *IdentityRepo) ListAccessReviewItems(ctx context.Context, organizationID
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	items := make([]domain.AccessReviewItem, 0)
 	for rows.Next() {
 		var item domain.AccessReviewItem

@@ -16,7 +16,7 @@ import (
 const maxPresignTTL = 15 * time.Minute
 
 type MultipartPart struct {
-	Number         int
+	Number         int32
 	ETag           string
 	ChecksumSHA256 string
 }
@@ -24,7 +24,7 @@ type MultipartPart struct {
 type MultipartStore interface {
 	Store
 	CreateMultipart(context.Context, string, string) (string, error)
-	UploadPart(context.Context, string, string, int, io.Reader, string) (MultipartPart, error)
+	UploadPart(context.Context, string, string, int32, io.Reader, string) (MultipartPart, error)
 	CompleteMultipart(context.Context, string, string, []MultipartPart) error
 	AbortMultipart(context.Context, string, string) error
 }
@@ -42,7 +42,7 @@ func validateMultipartKey(key string) error {
 	return nil
 }
 
-func validateMultipartPart(partNumber int) error {
+func validateMultipartPart(partNumber int32) error {
 	if partNumber < 1 || partNumber > 10000 {
 		return errors.New("multipart part number must be between 1 and 10000")
 	}
@@ -77,7 +77,7 @@ func (s *s3Store) CreateMultipart(ctx context.Context, key, contentType string) 
 	return *out.UploadId, nil
 }
 
-func (s *s3Store) UploadPart(ctx context.Context, key, uploadID string, partNumber int, body io.Reader, checksumSHA256 string) (MultipartPart, error) {
+func (s *s3Store) UploadPart(ctx context.Context, key, uploadID string, partNumber int32, body io.Reader, checksumSHA256 string) (MultipartPart, error) {
 	if err := validateMultipartKey(key); err != nil {
 		return MultipartPart{}, err
 	}
@@ -90,7 +90,7 @@ func (s *s3Store) UploadPart(ctx context.Context, key, uploadID string, partNumb
 	if err := RequireCapabilities(s, CapabilityMultipartRecovery); err != nil {
 		return MultipartPart{}, err
 	}
-	input := &s3.UploadPartInput{Bucket: &s.bucket, Key: &key, UploadId: &uploadID, PartNumber: aws.Int32(int32(partNumber)), Body: body}
+	input := &s3.UploadPartInput{Bucket: &s.bucket, Key: &key, UploadId: &uploadID, PartNumber: aws.Int32(partNumber), Body: body}
 	if checksumSHA256 != "" {
 		input.ChecksumSHA256 = aws.String(checksumSHA256)
 	}
@@ -121,13 +121,13 @@ func (s *s3Store) CompleteMultipart(ctx context.Context, key, uploadID string, p
 	ordered := append([]MultipartPart(nil), parts...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Number < ordered[j].Number })
 	completed := make([]types.CompletedPart, 0, len(ordered))
-	last := 0
+	var last int32
 	for _, part := range ordered {
 		if err := validateMultipartPart(part.Number); err != nil || part.Number == last || strings.TrimSpace(part.ETag) == "" {
 			return errors.New("multipart parts must have unique valid numbers and etags")
 		}
 		last = part.Number
-		item := types.CompletedPart{PartNumber: aws.Int32(int32(part.Number)), ETag: aws.String(part.ETag)}
+		item := types.CompletedPart{PartNumber: aws.Int32(part.Number), ETag: aws.String(part.ETag)}
 		if part.ChecksumSHA256 != "" {
 			item.ChecksumSHA256 = aws.String(part.ChecksumSHA256)
 		}

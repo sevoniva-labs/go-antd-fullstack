@@ -952,7 +952,7 @@ func permissionProto(permission domain.Permission) *forgev1.Permission {
 }
 
 func menuProto(menu domain.Menu) *forgev1.Menu {
-	return &forgev1.Menu{Id: menu.ID, OrganizationId: menu.OrganizationID, Key: menu.Key, ParentKey: menu.ParentKey, Name: menu.Name, Route: menu.Route, Icon: menu.Icon, PermissionKey: menu.PermissionKey, SortOrder: int32(menu.SortOrder), Status: menu.Status}
+	return &forgev1.Menu{Id: menu.ID, OrganizationId: menu.OrganizationID, Key: menu.Key, ParentKey: menu.ParentKey, Name: menu.Name, Route: menu.Route, Icon: menu.Icon, PermissionKey: menu.PermissionKey, SortOrder: int32(menu.SortOrder), Status: menu.Status} // #nosec G115 -- menus.sort_order is persisted as SQL INTEGER and bounded by the menu mutation policy.
 }
 
 func roleProto(role domain.Role) *forgev1.Role {

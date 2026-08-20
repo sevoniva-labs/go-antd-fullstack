@@ -30,7 +30,7 @@ func main() {
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	log.Printf("serving CSP test build on http://%s", address)
+	log.Printf("serving CSP test build")
 	log.Fatal(server.ListenAndServe())
 }
 
