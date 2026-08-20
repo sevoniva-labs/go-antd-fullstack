@@ -22,3 +22,9 @@ store, err := storage.NewWithCapabilityContract(ctx, cfg.Storage, targetContract
 ```
 
 当前仓库只提供协议能力边界和验证入口，AWS、MinIO、Ceph、OSS、COS、OBS 以及国产对象存储的目标版本、签名行为、STS、KMS/HSM、Object Lock 和灾备结果仍属于 `Not certified`，必须在实际交付环境留存证据后再升级标签。
+
+## Upload quarantine
+
+`QuarantineController` enforces the common regulated-upload path: server-side size and content-type checks, SHA-256 binding, quarantine storage, malware-scan evidence, atomic state transitions, governed promotion, and cleanup retry. The record store must provide an atomic compare-and-swap implementation backed by the application database; the in-memory fakes in tests are not a production store.
+
+The malware scanner and quarantine object store are adapter slots. A clean local test is not evidence that a target S3 provider, scanner, KMS/HSM, or retention policy is certified. Promotion always calls `GovernanceStore.PutGoverned`, so untested S3 capabilities still fail closed.
