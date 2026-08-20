@@ -19,8 +19,10 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationPlatformServiceApproveConfigChange = "/forge.v1.PlatformService/ApproveConfigChange"
 const OperationPlatformServiceAuthorizeDataExport = "/forge.v1.PlatformService/AuthorizeDataExport"
 const OperationPlatformServiceCreateAccessReview = "/forge.v1.PlatformService/CreateAccessReview"
+const OperationPlatformServiceCreateConfigChange = "/forge.v1.PlatformService/CreateConfigChange"
 const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
 const OperationPlatformServiceCreatePosition = "/forge.v1.PlatformService/CreatePosition"
 const OperationPlatformServiceCreateTemporaryRoleGrant = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
@@ -34,6 +36,7 @@ const OperationPlatformServiceLinkFederatedIdentity = "/forge.v1.PlatformService
 const OperationPlatformServiceListAccessReviewItems = "/forge.v1.PlatformService/ListAccessReviewItems"
 const OperationPlatformServiceListAccessReviews = "/forge.v1.PlatformService/ListAccessReviews"
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
+const OperationPlatformServiceListConfigChanges = "/forge.v1.PlatformService/ListConfigChanges"
 const OperationPlatformServiceListDataDeletionEvidence = "/forge.v1.PlatformService/ListDataDeletionEvidence"
 const OperationPlatformServiceListDataFieldPolicies = "/forge.v1.PlatformService/ListDataFieldPolicies"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
@@ -47,11 +50,14 @@ const OperationPlatformServiceListTemporaryRoleGrants = "/forge.v1.PlatformServi
 const OperationPlatformServiceListUserAssignments = "/forge.v1.PlatformService/ListUserAssignments"
 const OperationPlatformServiceListUserGroups = "/forge.v1.PlatformService/ListUserGroups"
 const OperationPlatformServiceListUsers = "/forge.v1.PlatformService/ListUsers"
+const OperationPlatformServicePublishConfigChange = "/forge.v1.PlatformService/PublishConfigChange"
 const OperationPlatformServiceRecordDataDeletionEvidence = "/forge.v1.PlatformService/RecordDataDeletionEvidence"
 const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformService/ReplaceUserAssignments"
+const OperationPlatformServiceRequestConfigRollback = "/forge.v1.PlatformService/RequestConfigRollback"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
 const OperationPlatformServiceRevokeTemporaryRoleGrant = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
+const OperationPlatformServiceRollbackConfigChange = "/forge.v1.PlatformService/RollbackConfigChange"
 const OperationPlatformServiceUnlinkFederatedIdentity = "/forge.v1.PlatformService/UnlinkFederatedIdentity"
 const OperationPlatformServiceUnlockUser = "/forge.v1.PlatformService/UnlockUser"
 const OperationPlatformServiceUpdateDepartment = "/forge.v1.PlatformService/UpdateDepartment"
@@ -70,8 +76,10 @@ const OperationPlatformServiceUpsertDataFieldPolicy = "/forge.v1.PlatformService
 const OperationPlatformServiceVerifyAuditIntegrity = "/forge.v1.PlatformService/VerifyAuditIntegrity"
 
 type PlatformServiceHTTPServer interface {
+	ApproveConfigChange(context.Context, *ApproveConfigChangeRequest) (*ApproveConfigChangeResponse, error)
 	AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error)
 	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
+	CreateConfigChange(context.Context, *CreateConfigChangeRequest) (*CreateConfigChangeResponse, error)
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
 	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
@@ -85,6 +93,7 @@ type PlatformServiceHTTPServer interface {
 	ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error)
 	ListAccessReviews(context.Context, *ListAccessReviewsRequest) (*ListAccessReviewsResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
+	ListConfigChanges(context.Context, *ListConfigChangesRequest) (*ListConfigChangesResponse, error)
 	ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error)
 	ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
@@ -98,11 +107,14 @@ type PlatformServiceHTTPServer interface {
 	ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error)
 	ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	PublishConfigChange(context.Context, *PublishConfigChangeRequest) (*PublishConfigChangeResponse, error)
 	RecordDataDeletionEvidence(context.Context, *RecordDataDeletionEvidenceRequest) (*RecordDataDeletionEvidenceResponse, error)
 	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
+	RequestConfigRollback(context.Context, *RequestConfigRollbackRequest) (*RequestConfigRollbackResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
+	RollbackConfigChange(context.Context, *RollbackConfigChangeRequest) (*RollbackConfigChangeResponse, error)
 	UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error)
 	UnlockUser(context.Context, *UnlockUserRequest) (*UnlockUserResponse, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error)
@@ -172,6 +184,12 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.POST("/api/v1/admin/access-reviews", _PlatformService_CreateAccessReview0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/access-reviews/{review_id}/items", _PlatformService_ListAccessReviewItems0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions", _PlatformService_DecideAccessReviewItem0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/config-changes", _PlatformService_ListConfigChanges0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/config-changes", _PlatformService_CreateConfigChange0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/config-changes/{change_id}/approve", _PlatformService_ApproveConfigChange0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/config-changes/{change_id}/publish", _PlatformService_PublishConfigChange0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/config-changes/{change_id}/rollback-request", _PlatformService_RequestConfigRollback0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/config-changes/{change_id}/rollback", _PlatformService_RollbackConfigChange0_HTTP_Handler(srv))
 }
 
 func _PlatformService_ListUsers0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
@@ -1249,9 +1267,152 @@ func _PlatformService_DecideAccessReviewItem0_HTTP_Handler(srv PlatformServiceHT
 	}
 }
 
+func _PlatformService_ListConfigChanges0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListConfigChangesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListConfigChanges)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListConfigChanges(ctx, req.(*ListConfigChangesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListConfigChangesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_CreateConfigChange0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateConfigChangeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceCreateConfigChange)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateConfigChange(ctx, req.(*CreateConfigChangeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateConfigChangeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ApproveConfigChange0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ApproveConfigChangeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceApproveConfigChange)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ApproveConfigChange(ctx, req.(*ApproveConfigChangeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ApproveConfigChangeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_PublishConfigChange0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PublishConfigChangeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServicePublishConfigChange)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PublishConfigChange(ctx, req.(*PublishConfigChangeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PublishConfigChangeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_RequestConfigRollback0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RequestConfigRollbackRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceRequestConfigRollback)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RequestConfigRollback(ctx, req.(*RequestConfigRollbackRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RequestConfigRollbackResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_RollbackConfigChange0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RollbackConfigChangeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceRollbackConfigChange)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RollbackConfigChange(ctx, req.(*RollbackConfigChangeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RollbackConfigChangeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PlatformServiceHTTPClient interface {
+	ApproveConfigChange(ctx context.Context, req *ApproveConfigChangeRequest, opts ...http.CallOption) (rsp *ApproveConfigChangeResponse, err error)
 	AuthorizeDataExport(ctx context.Context, req *AuthorizeDataExportRequest, opts ...http.CallOption) (rsp *AuthorizeDataExportResponse, err error)
 	CreateAccessReview(ctx context.Context, req *CreateAccessReviewRequest, opts ...http.CallOption) (rsp *CreateAccessReviewResponse, err error)
+	CreateConfigChange(ctx context.Context, req *CreateConfigChangeRequest, opts ...http.CallOption) (rsp *CreateConfigChangeResponse, err error)
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
 	CreateTemporaryRoleGrant(ctx context.Context, req *CreateTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *CreateTemporaryRoleGrantResponse, err error)
@@ -1265,6 +1426,7 @@ type PlatformServiceHTTPClient interface {
 	ListAccessReviewItems(ctx context.Context, req *ListAccessReviewItemsRequest, opts ...http.CallOption) (rsp *ListAccessReviewItemsResponse, err error)
 	ListAccessReviews(ctx context.Context, req *ListAccessReviewsRequest, opts ...http.CallOption) (rsp *ListAccessReviewsResponse, err error)
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
+	ListConfigChanges(ctx context.Context, req *ListConfigChangesRequest, opts ...http.CallOption) (rsp *ListConfigChangesResponse, err error)
 	ListDataDeletionEvidence(ctx context.Context, req *ListDataDeletionEvidenceRequest, opts ...http.CallOption) (rsp *ListDataDeletionEvidenceResponse, err error)
 	ListDataFieldPolicies(ctx context.Context, req *ListDataFieldPoliciesRequest, opts ...http.CallOption) (rsp *ListDataFieldPoliciesResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
@@ -1278,11 +1440,14 @@ type PlatformServiceHTTPClient interface {
 	ListUserAssignments(ctx context.Context, req *ListUserAssignmentsRequest, opts ...http.CallOption) (rsp *ListUserAssignmentsResponse, err error)
 	ListUserGroups(ctx context.Context, req *ListUserGroupsRequest, opts ...http.CallOption) (rsp *ListUserGroupsResponse, err error)
 	ListUsers(ctx context.Context, req *ListUsersRequest, opts ...http.CallOption) (rsp *ListUsersResponse, err error)
+	PublishConfigChange(ctx context.Context, req *PublishConfigChangeRequest, opts ...http.CallOption) (rsp *PublishConfigChangeResponse, err error)
 	RecordDataDeletionEvidence(ctx context.Context, req *RecordDataDeletionEvidenceRequest, opts ...http.CallOption) (rsp *RecordDataDeletionEvidenceResponse, err error)
 	ReplaceUserAssignments(ctx context.Context, req *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (rsp *ReplaceUserAssignmentsResponse, err error)
+	RequestConfigRollback(ctx context.Context, req *RequestConfigRollbackRequest, opts ...http.CallOption) (rsp *RequestConfigRollbackResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
 	RevokeTemporaryRoleGrant(ctx context.Context, req *RevokeTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *RevokeTemporaryRoleGrantResponse, err error)
+	RollbackConfigChange(ctx context.Context, req *RollbackConfigChangeRequest, opts ...http.CallOption) (rsp *RollbackConfigChangeResponse, err error)
 	UnlinkFederatedIdentity(ctx context.Context, req *UnlinkFederatedIdentityRequest, opts ...http.CallOption) (rsp *UnlinkFederatedIdentityResponse, err error)
 	UnlockUser(ctx context.Context, req *UnlockUserRequest, opts ...http.CallOption) (rsp *UnlockUserResponse, err error)
 	UpdateDepartment(ctx context.Context, req *UpdateDepartmentRequest, opts ...http.CallOption) (rsp *UpdateDepartmentResponse, err error)
@@ -1309,6 +1474,19 @@ func NewPlatformServiceHTTPClient(client *http.Client) PlatformServiceHTTPClient
 	return &PlatformServiceHTTPClientImpl{client}
 }
 
+func (c *PlatformServiceHTTPClientImpl) ApproveConfigChange(ctx context.Context, in *ApproveConfigChangeRequest, opts ...http.CallOption) (*ApproveConfigChangeResponse, error) {
+	var out ApproveConfigChangeResponse
+	pattern := "/api/v1/admin/config-changes/{change_id}/approve"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceApproveConfigChange))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) AuthorizeDataExport(ctx context.Context, in *AuthorizeDataExportRequest, opts ...http.CallOption) (*AuthorizeDataExportResponse, error) {
 	var out AuthorizeDataExportResponse
 	pattern := "/api/v1/admin/data-exports/authorize"
@@ -1327,6 +1505,19 @@ func (c *PlatformServiceHTTPClientImpl) CreateAccessReview(ctx context.Context, 
 	pattern := "/api/v1/admin/access-reviews"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceCreateAccessReview))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) CreateConfigChange(ctx context.Context, in *CreateConfigChangeRequest, opts ...http.CallOption) (*CreateConfigChangeResponse, error) {
+	var out CreateConfigChangeResponse
+	pattern := "/api/v1/admin/config-changes"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceCreateConfigChange))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -1504,6 +1695,19 @@ func (c *PlatformServiceHTTPClientImpl) ListAuditLogs(ctx context.Context, in *L
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) ListConfigChanges(ctx context.Context, in *ListConfigChangesRequest, opts ...http.CallOption) (*ListConfigChangesResponse, error) {
+	var out ListConfigChangesResponse
+	pattern := "/api/v1/admin/config-changes"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListConfigChanges))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListDataDeletionEvidence(ctx context.Context, in *ListDataDeletionEvidenceRequest, opts ...http.CallOption) (*ListDataDeletionEvidenceResponse, error) {
 	var out ListDataDeletionEvidenceResponse
 	pattern := "/api/v1/admin/data-retention/evidence"
@@ -1673,6 +1877,19 @@ func (c *PlatformServiceHTTPClientImpl) ListUsers(ctx context.Context, in *ListU
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) PublishConfigChange(ctx context.Context, in *PublishConfigChangeRequest, opts ...http.CallOption) (*PublishConfigChangeResponse, error) {
+	var out PublishConfigChangeResponse
+	pattern := "/api/v1/admin/config-changes/{change_id}/publish"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServicePublishConfigChange))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) RecordDataDeletionEvidence(ctx context.Context, in *RecordDataDeletionEvidenceRequest, opts ...http.CallOption) (*RecordDataDeletionEvidenceResponse, error) {
 	var out RecordDataDeletionEvidenceResponse
 	pattern := "/api/v1/admin/data-retention/evidence"
@@ -1693,6 +1910,19 @@ func (c *PlatformServiceHTTPClientImpl) ReplaceUserAssignments(ctx context.Conte
 	opts = append(opts, http.Operation(OperationPlatformServiceReplaceUserAssignments))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) RequestConfigRollback(ctx context.Context, in *RequestConfigRollbackRequest, opts ...http.CallOption) (*RequestConfigRollbackResponse, error) {
+	var out RequestConfigRollbackResponse
+	pattern := "/api/v1/admin/config-changes/{change_id}/rollback-request"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceRequestConfigRollback))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1730,6 +1960,19 @@ func (c *PlatformServiceHTTPClientImpl) RevokeTemporaryRoleGrant(ctx context.Con
 	pattern := "/api/v1/admin/temporary-role-grants/{grant_id}:revoke"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceRevokeTemporaryRoleGrant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) RollbackConfigChange(ctx context.Context, in *RollbackConfigChangeRequest, opts ...http.CallOption) (*RollbackConfigChangeResponse, error) {
+	var out RollbackConfigChangeResponse
+	pattern := "/api/v1/admin/config-changes/{change_id}/rollback"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceRollbackConfigChange))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

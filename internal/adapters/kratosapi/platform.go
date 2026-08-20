@@ -21,6 +21,7 @@ import (
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
 	appapproval "github.com/sevoniva-labs/forge/internal/app/approval"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
+	appconfigchange "github.com/sevoniva-labs/forge/internal/app/configchange"
 	appdatapolicy "github.com/sevoniva-labs/forge/internal/app/datapolicy"
 	appidentity "github.com/sevoniva-labs/forge/internal/app/identity"
 	domainapproval "github.com/sevoniva-labs/forge/internal/domain/approval"
@@ -31,15 +32,16 @@ import (
 
 type PlatformService struct {
 	forgev1.UnimplementedPlatformServiceServer
-	identity   *appidentity.Service
-	approval   *appapproval.Service
-	dataPolicy *appdatapolicy.Service
-	audit      *audit.Writer
-	db         *database.DB
+	identity     *appidentity.Service
+	approval     *appapproval.Service
+	configChange *appconfigchange.Service
+	dataPolicy   *appdatapolicy.Service
+	audit        *audit.Writer
+	db           *database.DB
 }
 
-func NewPlatformService(identity *appidentity.Service, approval *appapproval.Service, dataPolicy *appdatapolicy.Service, auditWriter *audit.Writer, db *database.DB) *PlatformService {
-	return &PlatformService{identity: identity, approval: approval, dataPolicy: dataPolicy, audit: auditWriter, db: db}
+func NewPlatformService(identity *appidentity.Service, approval *appapproval.Service, configChange *appconfigchange.Service, dataPolicy *appdatapolicy.Service, auditWriter *audit.Writer, db *database.DB) *PlatformService {
+	return &PlatformService{identity: identity, approval: approval, configChange: configChange, dataPolicy: dataPolicy, audit: auditWriter, db: db}
 }
 
 func (s *PlatformService) CreateUser(ctx context.Context, req *forgev1.CreateUserRequest) (*forgev1.CreateUserResponse, error) {

@@ -163,6 +163,154 @@ paths:
             security:
                 - SessionCookie: []
                 - BearerAuth: []
+    /api/v1/admin/config-changes:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListConfigChanges
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListConfigChangesResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreateConfigChange
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateConfigChangeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateConfigChangeResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/config-changes/{changeId}/approve:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ApproveConfigChange
+            parameters:
+                - name: changeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.ApproveConfigChangeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ApproveConfigChangeResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/config-changes/{changeId}/publish:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_PublishConfigChange
+            parameters:
+                - name: changeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.PublishConfigChangeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.PublishConfigChangeResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/config-changes/{changeId}/rollback:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_RollbackConfigChange
+            parameters:
+                - name: changeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.RollbackConfigChangeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.RollbackConfigChangeResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/config-changes/{changeId}/rollback-request:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_RequestConfigRollback
+            parameters:
+                - name: changeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.RequestConfigRollbackRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.RequestConfigRollbackResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/data-exports/authorize:
         post:
             tags:
@@ -1726,6 +1874,18 @@ components:
                 decidedAt:
                     type: string
                     format: date-time
+        forge.v1.ApproveConfigChangeRequest:
+            type: object
+            properties:
+                changeId:
+                    type: string
+                approvalId:
+                    type: string
+        forge.v1.ApproveConfigChangeResponse:
+            type: object
+            properties:
+                change:
+                    $ref: '#/components/schemas/forge.v1.ConfigChange'
         forge.v1.AuditEvent:
             type: object
             properties:
@@ -1825,6 +1985,40 @@ components:
                     $ref: '#/components/schemas/forge.v1.User'
                 csrfToken:
                     type: string
+        forge.v1.ConfigChange:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                namespace:
+                    type: string
+                group:
+                    type: string
+                dataId:
+                    type: string
+                version:
+                    type: string
+                expectedPreviousVersion:
+                    type: string
+                valueDigest:
+                    type: string
+                valueRef:
+                    type: string
+                sensitive:
+                    type: boolean
+                createdBy:
+                    type: string
+                approvedBy:
+                    type: string
+                approvalId:
+                    type: string
+                state:
+                    type: string
+                updatedAt:
+                    type: string
+                    format: date-time
         forge.v1.ConfirmMFAEnrollmentRequest:
             type: object
             properties:
@@ -1900,6 +2094,30 @@ components:
             properties:
                 approval:
                     $ref: '#/components/schemas/forge.v1.ApprovalRequest'
+        forge.v1.CreateConfigChangeRequest:
+            type: object
+            properties:
+                namespace:
+                    type: string
+                group:
+                    type: string
+                dataId:
+                    type: string
+                version:
+                    type: string
+                expectedPreviousVersion:
+                    type: string
+                valueDigest:
+                    type: string
+                valueRef:
+                    type: string
+                sensitive:
+                    type: boolean
+        forge.v1.CreateConfigChangeResponse:
+            type: object
+            properties:
+                change:
+                    $ref: '#/components/schemas/forge.v1.ConfigChange'
         forge.v1.CreateDepartmentRequest:
             type: object
             properties:
@@ -2282,6 +2500,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.AuditEvent'
+        forge.v1.ListConfigChangesResponse:
+            type: object
+            properties:
+                changes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.ConfigChange'
         forge.v1.ListDataDeletionEvidenceResponse:
             type: object
             properties:
@@ -2502,6 +2727,18 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+        forge.v1.PublishConfigChangeRequest:
+            type: object
+            properties:
+                changeId:
+                    type: string
+                approvalId:
+                    type: string
+        forge.v1.PublishConfigChangeResponse:
+            type: object
+            properties:
+                change:
+                    $ref: '#/components/schemas/forge.v1.ConfigChange'
         forge.v1.ReadinessResponse:
             type: object
             properties:
@@ -2548,6 +2785,18 @@ components:
         forge.v1.ReplaceUserAssignmentsResponse:
             type: object
             properties: {}
+        forge.v1.RequestConfigRollbackRequest:
+            type: object
+            properties:
+                changeId:
+                    type: string
+                approvalId:
+                    type: string
+        forge.v1.RequestConfigRollbackResponse:
+            type: object
+            properties:
+                change:
+                    $ref: '#/components/schemas/forge.v1.ConfigChange'
         forge.v1.ResetUserPasswordRequest:
             type: object
             properties:
@@ -2595,6 +2844,18 @@ components:
                     type: array
                     items:
                         type: string
+        forge.v1.RollbackConfigChangeRequest:
+            type: object
+            properties:
+                changeId:
+                    type: string
+                approvalId:
+                    type: string
+        forge.v1.RollbackConfigChangeResponse:
+            type: object
+            properties:
+                change:
+                    $ref: '#/components/schemas/forge.v1.ConfigChange'
         forge.v1.SecurityPolicy:
             type: object
             properties:

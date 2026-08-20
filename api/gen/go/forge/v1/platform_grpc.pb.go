@@ -68,6 +68,12 @@ const (
 	PlatformService_CreateAccessReview_FullMethodName         = "/forge.v1.PlatformService/CreateAccessReview"
 	PlatformService_ListAccessReviewItems_FullMethodName      = "/forge.v1.PlatformService/ListAccessReviewItems"
 	PlatformService_DecideAccessReviewItem_FullMethodName     = "/forge.v1.PlatformService/DecideAccessReviewItem"
+	PlatformService_ListConfigChanges_FullMethodName          = "/forge.v1.PlatformService/ListConfigChanges"
+	PlatformService_CreateConfigChange_FullMethodName         = "/forge.v1.PlatformService/CreateConfigChange"
+	PlatformService_ApproveConfigChange_FullMethodName        = "/forge.v1.PlatformService/ApproveConfigChange"
+	PlatformService_PublishConfigChange_FullMethodName        = "/forge.v1.PlatformService/PublishConfigChange"
+	PlatformService_RequestConfigRollback_FullMethodName      = "/forge.v1.PlatformService/RequestConfigRollback"
+	PlatformService_RollbackConfigChange_FullMethodName       = "/forge.v1.PlatformService/RollbackConfigChange"
 )
 
 // PlatformServiceClient is the client API for PlatformService service.
@@ -123,6 +129,12 @@ type PlatformServiceClient interface {
 	CreateAccessReview(ctx context.Context, in *CreateAccessReviewRequest, opts ...grpc.CallOption) (*CreateAccessReviewResponse, error)
 	ListAccessReviewItems(ctx context.Context, in *ListAccessReviewItemsRequest, opts ...grpc.CallOption) (*ListAccessReviewItemsResponse, error)
 	DecideAccessReviewItem(ctx context.Context, in *DecideAccessReviewItemRequest, opts ...grpc.CallOption) (*DecideAccessReviewItemResponse, error)
+	ListConfigChanges(ctx context.Context, in *ListConfigChangesRequest, opts ...grpc.CallOption) (*ListConfigChangesResponse, error)
+	CreateConfigChange(ctx context.Context, in *CreateConfigChangeRequest, opts ...grpc.CallOption) (*CreateConfigChangeResponse, error)
+	ApproveConfigChange(ctx context.Context, in *ApproveConfigChangeRequest, opts ...grpc.CallOption) (*ApproveConfigChangeResponse, error)
+	PublishConfigChange(ctx context.Context, in *PublishConfigChangeRequest, opts ...grpc.CallOption) (*PublishConfigChangeResponse, error)
+	RequestConfigRollback(ctx context.Context, in *RequestConfigRollbackRequest, opts ...grpc.CallOption) (*RequestConfigRollbackResponse, error)
+	RollbackConfigChange(ctx context.Context, in *RollbackConfigChangeRequest, opts ...grpc.CallOption) (*RollbackConfigChangeResponse, error)
 }
 
 type platformServiceClient struct {
@@ -623,6 +635,66 @@ func (c *platformServiceClient) DecideAccessReviewItem(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *platformServiceClient) ListConfigChanges(ctx context.Context, in *ListConfigChangesRequest, opts ...grpc.CallOption) (*ListConfigChangesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListConfigChangesResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListConfigChanges_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) CreateConfigChange(ctx context.Context, in *CreateConfigChangeRequest, opts ...grpc.CallOption) (*CreateConfigChangeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateConfigChangeResponse)
+	err := c.cc.Invoke(ctx, PlatformService_CreateConfigChange_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) ApproveConfigChange(ctx context.Context, in *ApproveConfigChangeRequest, opts ...grpc.CallOption) (*ApproveConfigChangeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApproveConfigChangeResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ApproveConfigChange_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) PublishConfigChange(ctx context.Context, in *PublishConfigChangeRequest, opts ...grpc.CallOption) (*PublishConfigChangeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublishConfigChangeResponse)
+	err := c.cc.Invoke(ctx, PlatformService_PublishConfigChange_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) RequestConfigRollback(ctx context.Context, in *RequestConfigRollbackRequest, opts ...grpc.CallOption) (*RequestConfigRollbackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RequestConfigRollbackResponse)
+	err := c.cc.Invoke(ctx, PlatformService_RequestConfigRollback_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) RollbackConfigChange(ctx context.Context, in *RollbackConfigChangeRequest, opts ...grpc.CallOption) (*RollbackConfigChangeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RollbackConfigChangeResponse)
+	err := c.cc.Invoke(ctx, PlatformService_RollbackConfigChange_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServiceServer is the server API for PlatformService service.
 // All implementations must embed UnimplementedPlatformServiceServer
 // for forward compatibility.
@@ -676,6 +748,12 @@ type PlatformServiceServer interface {
 	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
 	ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error)
 	DecideAccessReviewItem(context.Context, *DecideAccessReviewItemRequest) (*DecideAccessReviewItemResponse, error)
+	ListConfigChanges(context.Context, *ListConfigChangesRequest) (*ListConfigChangesResponse, error)
+	CreateConfigChange(context.Context, *CreateConfigChangeRequest) (*CreateConfigChangeResponse, error)
+	ApproveConfigChange(context.Context, *ApproveConfigChangeRequest) (*ApproveConfigChangeResponse, error)
+	PublishConfigChange(context.Context, *PublishConfigChangeRequest) (*PublishConfigChangeResponse, error)
+	RequestConfigRollback(context.Context, *RequestConfigRollbackRequest) (*RequestConfigRollbackResponse, error)
+	RollbackConfigChange(context.Context, *RollbackConfigChangeRequest) (*RollbackConfigChangeResponse, error)
 	mustEmbedUnimplementedPlatformServiceServer()
 }
 
@@ -832,6 +910,24 @@ func (UnimplementedPlatformServiceServer) ListAccessReviewItems(context.Context,
 }
 func (UnimplementedPlatformServiceServer) DecideAccessReviewItem(context.Context, *DecideAccessReviewItemRequest) (*DecideAccessReviewItemResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DecideAccessReviewItem not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListConfigChanges(context.Context, *ListConfigChangesRequest) (*ListConfigChangesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListConfigChanges not implemented")
+}
+func (UnimplementedPlatformServiceServer) CreateConfigChange(context.Context, *CreateConfigChangeRequest) (*CreateConfigChangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateConfigChange not implemented")
+}
+func (UnimplementedPlatformServiceServer) ApproveConfigChange(context.Context, *ApproveConfigChangeRequest) (*ApproveConfigChangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApproveConfigChange not implemented")
+}
+func (UnimplementedPlatformServiceServer) PublishConfigChange(context.Context, *PublishConfigChangeRequest) (*PublishConfigChangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PublishConfigChange not implemented")
+}
+func (UnimplementedPlatformServiceServer) RequestConfigRollback(context.Context, *RequestConfigRollbackRequest) (*RequestConfigRollbackResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RequestConfigRollback not implemented")
+}
+func (UnimplementedPlatformServiceServer) RollbackConfigChange(context.Context, *RollbackConfigChangeRequest) (*RollbackConfigChangeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RollbackConfigChange not implemented")
 }
 func (UnimplementedPlatformServiceServer) mustEmbedUnimplementedPlatformServiceServer() {}
 func (UnimplementedPlatformServiceServer) testEmbeddedByValue()                         {}
@@ -1736,6 +1832,114 @@ func _PlatformService_DecideAccessReviewItem_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_ListConfigChanges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListConfigChangesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListConfigChanges(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListConfigChanges_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListConfigChanges(ctx, req.(*ListConfigChangesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_CreateConfigChange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateConfigChangeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).CreateConfigChange(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_CreateConfigChange_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).CreateConfigChange(ctx, req.(*CreateConfigChangeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_ApproveConfigChange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApproveConfigChangeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ApproveConfigChange(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ApproveConfigChange_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ApproveConfigChange(ctx, req.(*ApproveConfigChangeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_PublishConfigChange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishConfigChangeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).PublishConfigChange(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_PublishConfigChange_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).PublishConfigChange(ctx, req.(*PublishConfigChangeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_RequestConfigRollback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestConfigRollbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).RequestConfigRollback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_RequestConfigRollback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).RequestConfigRollback(ctx, req.(*RequestConfigRollbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_RollbackConfigChange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RollbackConfigChangeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).RollbackConfigChange(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_RollbackConfigChange_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).RollbackConfigChange(ctx, req.(*RollbackConfigChangeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlatformService_ServiceDesc is the grpc.ServiceDesc for PlatformService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1938,6 +2142,30 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DecideAccessReviewItem",
 			Handler:    _PlatformService_DecideAccessReviewItem_Handler,
+		},
+		{
+			MethodName: "ListConfigChanges",
+			Handler:    _PlatformService_ListConfigChanges_Handler,
+		},
+		{
+			MethodName: "CreateConfigChange",
+			Handler:    _PlatformService_CreateConfigChange_Handler,
+		},
+		{
+			MethodName: "ApproveConfigChange",
+			Handler:    _PlatformService_ApproveConfigChange_Handler,
+		},
+		{
+			MethodName: "PublishConfigChange",
+			Handler:    _PlatformService_PublishConfigChange_Handler,
+		},
+		{
+			MethodName: "RequestConfigRollback",
+			Handler:    _PlatformService_RequestConfigRollback_Handler,
+		},
+		{
+			MethodName: "RollbackConfigChange",
+			Handler:    _PlatformService_RollbackConfigChange_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

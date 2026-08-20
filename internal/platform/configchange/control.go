@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 )
@@ -91,7 +92,7 @@ func Validate(change Change) error {
 			return fmt.Errorf("config %s is required", label)
 		}
 	}
-	if change.Version == 0 || change.Version <= change.ExpectedPreviousVersion {
+	if change.Version == 0 || change.Version > math.MaxInt64 || change.ExpectedPreviousVersion > math.MaxInt64 || change.Version <= change.ExpectedPreviousVersion {
 		return errors.New("config version must be greater than the expected previous version")
 	}
 	digest := strings.TrimSpace(change.ValueDigest)

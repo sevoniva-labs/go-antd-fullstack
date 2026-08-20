@@ -3204,6 +3204,770 @@ func (x *RecordDataDeletionEvidenceResponse) GetEvidence() *DataDeletionEvidence
 	return nil
 }
 
+type ListConfigChangesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListConfigChangesRequest) Reset() {
+	*x = ListConfigChangesRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListConfigChangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListConfigChangesRequest) ProtoMessage() {}
+
+func (x *ListConfigChangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListConfigChangesRequest.ProtoReflect.Descriptor instead.
+func (*ListConfigChangesRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{59}
+}
+
+type ListConfigChangesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Changes       []*ConfigChange        `protobuf:"bytes,1,rep,name=changes,proto3" json:"changes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListConfigChangesResponse) Reset() {
+	*x = ListConfigChangesResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListConfigChangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListConfigChangesResponse) ProtoMessage() {}
+
+func (x *ListConfigChangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListConfigChangesResponse.ProtoReflect.Descriptor instead.
+func (*ListConfigChangesResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *ListConfigChangesResponse) GetChanges() []*ConfigChange {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
+}
+
+type ConfigChange struct {
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	Id                      string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrganizationId          string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Namespace               string                 `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	Group                   string                 `protobuf:"bytes,4,opt,name=group,proto3" json:"group,omitempty"`
+	DataId                  string                 `protobuf:"bytes,5,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty"`
+	Version                 uint64                 `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+	ExpectedPreviousVersion uint64                 `protobuf:"varint,7,opt,name=expected_previous_version,json=expectedPreviousVersion,proto3" json:"expected_previous_version,omitempty"`
+	ValueDigest             string                 `protobuf:"bytes,8,opt,name=value_digest,json=valueDigest,proto3" json:"value_digest,omitempty"`
+	ValueRef                string                 `protobuf:"bytes,9,opt,name=value_ref,json=valueRef,proto3" json:"value_ref,omitempty"`
+	Sensitive               bool                   `protobuf:"varint,10,opt,name=sensitive,proto3" json:"sensitive,omitempty"`
+	CreatedBy               string                 `protobuf:"bytes,11,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	ApprovedBy              string                 `protobuf:"bytes,12,opt,name=approved_by,json=approvedBy,proto3" json:"approved_by,omitempty"`
+	ApprovalId              string                 `protobuf:"bytes,13,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	State                   string                 `protobuf:"bytes,14,opt,name=state,proto3" json:"state,omitempty"`
+	UpdatedAt               *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *ConfigChange) Reset() {
+	*x = ConfigChange{}
+	mi := &file_forge_v1_platform_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfigChange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfigChange) ProtoMessage() {}
+
+func (x *ConfigChange) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfigChange.ProtoReflect.Descriptor instead.
+func (*ConfigChange) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *ConfigChange) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetDataId() string {
+	if x != nil {
+		return x.DataId
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *ConfigChange) GetExpectedPreviousVersion() uint64 {
+	if x != nil {
+		return x.ExpectedPreviousVersion
+	}
+	return 0
+}
+
+func (x *ConfigChange) GetValueDigest() string {
+	if x != nil {
+		return x.ValueDigest
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetValueRef() string {
+	if x != nil {
+		return x.ValueRef
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetSensitive() bool {
+	if x != nil {
+		return x.Sensitive
+	}
+	return false
+}
+
+func (x *ConfigChange) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetApprovedBy() string {
+	if x != nil {
+		return x.ApprovedBy
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ConfigChange) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type CreateConfigChangeRequest struct {
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	Namespace               string                 `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	Group                   string                 `protobuf:"bytes,2,opt,name=group,proto3" json:"group,omitempty"`
+	DataId                  string                 `protobuf:"bytes,3,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty"`
+	Version                 uint64                 `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	ExpectedPreviousVersion uint64                 `protobuf:"varint,5,opt,name=expected_previous_version,json=expectedPreviousVersion,proto3" json:"expected_previous_version,omitempty"`
+	ValueDigest             string                 `protobuf:"bytes,6,opt,name=value_digest,json=valueDigest,proto3" json:"value_digest,omitempty"`
+	ValueRef                string                 `protobuf:"bytes,7,opt,name=value_ref,json=valueRef,proto3" json:"value_ref,omitempty"`
+	Sensitive               bool                   `protobuf:"varint,8,opt,name=sensitive,proto3" json:"sensitive,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *CreateConfigChangeRequest) Reset() {
+	*x = CreateConfigChangeRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateConfigChangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateConfigChangeRequest) ProtoMessage() {}
+
+func (x *CreateConfigChangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateConfigChangeRequest.ProtoReflect.Descriptor instead.
+func (*CreateConfigChangeRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *CreateConfigChangeRequest) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
+}
+
+func (x *CreateConfigChangeRequest) GetGroup() string {
+	if x != nil {
+		return x.Group
+	}
+	return ""
+}
+
+func (x *CreateConfigChangeRequest) GetDataId() string {
+	if x != nil {
+		return x.DataId
+	}
+	return ""
+}
+
+func (x *CreateConfigChangeRequest) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *CreateConfigChangeRequest) GetExpectedPreviousVersion() uint64 {
+	if x != nil {
+		return x.ExpectedPreviousVersion
+	}
+	return 0
+}
+
+func (x *CreateConfigChangeRequest) GetValueDigest() string {
+	if x != nil {
+		return x.ValueDigest
+	}
+	return ""
+}
+
+func (x *CreateConfigChangeRequest) GetValueRef() string {
+	if x != nil {
+		return x.ValueRef
+	}
+	return ""
+}
+
+func (x *CreateConfigChangeRequest) GetSensitive() bool {
+	if x != nil {
+		return x.Sensitive
+	}
+	return false
+}
+
+type CreateConfigChangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Change        *ConfigChange          `protobuf:"bytes,1,opt,name=change,proto3" json:"change,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateConfigChangeResponse) Reset() {
+	*x = CreateConfigChangeResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateConfigChangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateConfigChangeResponse) ProtoMessage() {}
+
+func (x *CreateConfigChangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateConfigChangeResponse.ProtoReflect.Descriptor instead.
+func (*CreateConfigChangeResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *CreateConfigChangeResponse) GetChange() *ConfigChange {
+	if x != nil {
+		return x.Change
+	}
+	return nil
+}
+
+type ApproveConfigChangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChangeId      string                 `protobuf:"bytes,1,opt,name=change_id,json=changeId,proto3" json:"change_id,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,2,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApproveConfigChangeRequest) Reset() {
+	*x = ApproveConfigChangeRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveConfigChangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveConfigChangeRequest) ProtoMessage() {}
+
+func (x *ApproveConfigChangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveConfigChangeRequest.ProtoReflect.Descriptor instead.
+func (*ApproveConfigChangeRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *ApproveConfigChangeRequest) GetChangeId() string {
+	if x != nil {
+		return x.ChangeId
+	}
+	return ""
+}
+
+func (x *ApproveConfigChangeRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+type ApproveConfigChangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Change        *ConfigChange          `protobuf:"bytes,1,opt,name=change,proto3" json:"change,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApproveConfigChangeResponse) Reset() {
+	*x = ApproveConfigChangeResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveConfigChangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveConfigChangeResponse) ProtoMessage() {}
+
+func (x *ApproveConfigChangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveConfigChangeResponse.ProtoReflect.Descriptor instead.
+func (*ApproveConfigChangeResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *ApproveConfigChangeResponse) GetChange() *ConfigChange {
+	if x != nil {
+		return x.Change
+	}
+	return nil
+}
+
+type PublishConfigChangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChangeId      string                 `protobuf:"bytes,1,opt,name=change_id,json=changeId,proto3" json:"change_id,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,2,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishConfigChangeRequest) Reset() {
+	*x = PublishConfigChangeRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishConfigChangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishConfigChangeRequest) ProtoMessage() {}
+
+func (x *PublishConfigChangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishConfigChangeRequest.ProtoReflect.Descriptor instead.
+func (*PublishConfigChangeRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *PublishConfigChangeRequest) GetChangeId() string {
+	if x != nil {
+		return x.ChangeId
+	}
+	return ""
+}
+
+func (x *PublishConfigChangeRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+type PublishConfigChangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Change        *ConfigChange          `protobuf:"bytes,1,opt,name=change,proto3" json:"change,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishConfigChangeResponse) Reset() {
+	*x = PublishConfigChangeResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishConfigChangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishConfigChangeResponse) ProtoMessage() {}
+
+func (x *PublishConfigChangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishConfigChangeResponse.ProtoReflect.Descriptor instead.
+func (*PublishConfigChangeResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *PublishConfigChangeResponse) GetChange() *ConfigChange {
+	if x != nil {
+		return x.Change
+	}
+	return nil
+}
+
+type RequestConfigRollbackRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChangeId      string                 `protobuf:"bytes,1,opt,name=change_id,json=changeId,proto3" json:"change_id,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,2,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestConfigRollbackRequest) Reset() {
+	*x = RequestConfigRollbackRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestConfigRollbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestConfigRollbackRequest) ProtoMessage() {}
+
+func (x *RequestConfigRollbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestConfigRollbackRequest.ProtoReflect.Descriptor instead.
+func (*RequestConfigRollbackRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{68}
+}
+
+func (x *RequestConfigRollbackRequest) GetChangeId() string {
+	if x != nil {
+		return x.ChangeId
+	}
+	return ""
+}
+
+func (x *RequestConfigRollbackRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+type RequestConfigRollbackResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Change        *ConfigChange          `protobuf:"bytes,1,opt,name=change,proto3" json:"change,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestConfigRollbackResponse) Reset() {
+	*x = RequestConfigRollbackResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[69]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestConfigRollbackResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestConfigRollbackResponse) ProtoMessage() {}
+
+func (x *RequestConfigRollbackResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[69]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestConfigRollbackResponse.ProtoReflect.Descriptor instead.
+func (*RequestConfigRollbackResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{69}
+}
+
+func (x *RequestConfigRollbackResponse) GetChange() *ConfigChange {
+	if x != nil {
+		return x.Change
+	}
+	return nil
+}
+
+type RollbackConfigChangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChangeId      string                 `protobuf:"bytes,1,opt,name=change_id,json=changeId,proto3" json:"change_id,omitempty"`
+	ApprovalId    string                 `protobuf:"bytes,2,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RollbackConfigChangeRequest) Reset() {
+	*x = RollbackConfigChangeRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RollbackConfigChangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RollbackConfigChangeRequest) ProtoMessage() {}
+
+func (x *RollbackConfigChangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RollbackConfigChangeRequest.ProtoReflect.Descriptor instead.
+func (*RollbackConfigChangeRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *RollbackConfigChangeRequest) GetChangeId() string {
+	if x != nil {
+		return x.ChangeId
+	}
+	return ""
+}
+
+func (x *RollbackConfigChangeRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+type RollbackConfigChangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Change        *ConfigChange          `protobuf:"bytes,1,opt,name=change,proto3" json:"change,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RollbackConfigChangeResponse) Reset() {
+	*x = RollbackConfigChangeResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RollbackConfigChangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RollbackConfigChangeResponse) ProtoMessage() {}
+
+func (x *RollbackConfigChangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RollbackConfigChangeResponse.ProtoReflect.Descriptor instead.
+func (*RollbackConfigChangeResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *RollbackConfigChangeResponse) GetChange() *ConfigChange {
+	if x != nil {
+		return x.Change
+	}
+	return nil
+}
+
 type UpdateRolePermissionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoleKey       string                 `protobuf:"bytes,1,opt,name=role_key,json=roleKey,proto3" json:"role_key,omitempty"`
@@ -3215,7 +3979,7 @@ type UpdateRolePermissionsRequest struct {
 
 func (x *UpdateRolePermissionsRequest) Reset() {
 	*x = UpdateRolePermissionsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[59]
+	mi := &file_forge_v1_platform_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3227,7 +3991,7 @@ func (x *UpdateRolePermissionsRequest) String() string {
 func (*UpdateRolePermissionsRequest) ProtoMessage() {}
 
 func (x *UpdateRolePermissionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[59]
+	mi := &file_forge_v1_platform_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3240,7 +4004,7 @@ func (x *UpdateRolePermissionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRolePermissionsRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRolePermissionsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{59}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *UpdateRolePermissionsRequest) GetRoleKey() string {
@@ -3273,7 +4037,7 @@ type UpdateRolePermissionsResponse struct {
 
 func (x *UpdateRolePermissionsResponse) Reset() {
 	*x = UpdateRolePermissionsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[60]
+	mi := &file_forge_v1_platform_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3285,7 +4049,7 @@ func (x *UpdateRolePermissionsResponse) String() string {
 func (*UpdateRolePermissionsResponse) ProtoMessage() {}
 
 func (x *UpdateRolePermissionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[60]
+	mi := &file_forge_v1_platform_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3298,7 +4062,7 @@ func (x *UpdateRolePermissionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRolePermissionsResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRolePermissionsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{60}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *UpdateRolePermissionsResponse) GetRole() *Role {
@@ -3320,7 +4084,7 @@ type UpdateRoleDataScopeRequest struct {
 
 func (x *UpdateRoleDataScopeRequest) Reset() {
 	*x = UpdateRoleDataScopeRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[61]
+	mi := &file_forge_v1_platform_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3332,7 +4096,7 @@ func (x *UpdateRoleDataScopeRequest) String() string {
 func (*UpdateRoleDataScopeRequest) ProtoMessage() {}
 
 func (x *UpdateRoleDataScopeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[61]
+	mi := &file_forge_v1_platform_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3345,7 +4109,7 @@ func (x *UpdateRoleDataScopeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleDataScopeRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRoleDataScopeRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{61}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *UpdateRoleDataScopeRequest) GetRoleKey() string {
@@ -3385,7 +4149,7 @@ type UpdateRoleDataScopeResponse struct {
 
 func (x *UpdateRoleDataScopeResponse) Reset() {
 	*x = UpdateRoleDataScopeResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[62]
+	mi := &file_forge_v1_platform_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3397,7 +4161,7 @@ func (x *UpdateRoleDataScopeResponse) String() string {
 func (*UpdateRoleDataScopeResponse) ProtoMessage() {}
 
 func (x *UpdateRoleDataScopeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[62]
+	mi := &file_forge_v1_platform_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3410,7 +4174,7 @@ func (x *UpdateRoleDataScopeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoleDataScopeResponse.ProtoReflect.Descriptor instead.
 func (*UpdateRoleDataScopeResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{62}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *UpdateRoleDataScopeResponse) GetRole() *Role {
@@ -3431,7 +4195,7 @@ type UpdateUserRolesRequest struct {
 
 func (x *UpdateUserRolesRequest) Reset() {
 	*x = UpdateUserRolesRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[63]
+	mi := &file_forge_v1_platform_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3443,7 +4207,7 @@ func (x *UpdateUserRolesRequest) String() string {
 func (*UpdateUserRolesRequest) ProtoMessage() {}
 
 func (x *UpdateUserRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[63]
+	mi := &file_forge_v1_platform_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3456,7 +4220,7 @@ func (x *UpdateUserRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRolesRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserRolesRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{63}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *UpdateUserRolesRequest) GetUserId() string {
@@ -3489,7 +4253,7 @@ type UpdateUserRolesResponse struct {
 
 func (x *UpdateUserRolesResponse) Reset() {
 	*x = UpdateUserRolesResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[64]
+	mi := &file_forge_v1_platform_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3501,7 +4265,7 @@ func (x *UpdateUserRolesResponse) String() string {
 func (*UpdateUserRolesResponse) ProtoMessage() {}
 
 func (x *UpdateUserRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[64]
+	mi := &file_forge_v1_platform_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3514,7 +4278,7 @@ func (x *UpdateUserRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRolesResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserRolesResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{64}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *UpdateUserRolesResponse) GetUser() *User {
@@ -3534,7 +4298,7 @@ type UpdateUserStatusRequest struct {
 
 func (x *UpdateUserStatusRequest) Reset() {
 	*x = UpdateUserStatusRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[65]
+	mi := &file_forge_v1_platform_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3546,7 +4310,7 @@ func (x *UpdateUserStatusRequest) String() string {
 func (*UpdateUserStatusRequest) ProtoMessage() {}
 
 func (x *UpdateUserStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[65]
+	mi := &file_forge_v1_platform_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3559,7 +4323,7 @@ func (x *UpdateUserStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserStatusRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{65}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *UpdateUserStatusRequest) GetUserId() string {
@@ -3585,7 +4349,7 @@ type UpdateUserStatusResponse struct {
 
 func (x *UpdateUserStatusResponse) Reset() {
 	*x = UpdateUserStatusResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[66]
+	mi := &file_forge_v1_platform_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3597,7 +4361,7 @@ func (x *UpdateUserStatusResponse) String() string {
 func (*UpdateUserStatusResponse) ProtoMessage() {}
 
 func (x *UpdateUserStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[66]
+	mi := &file_forge_v1_platform_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3610,7 +4374,7 @@ func (x *UpdateUserStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserStatusResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{66}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{79}
 }
 
 func (x *UpdateUserStatusResponse) GetUser() *User {
@@ -3629,7 +4393,7 @@ type UnlockUserRequest struct {
 
 func (x *UnlockUserRequest) Reset() {
 	*x = UnlockUserRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[67]
+	mi := &file_forge_v1_platform_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3641,7 +4405,7 @@ func (x *UnlockUserRequest) String() string {
 func (*UnlockUserRequest) ProtoMessage() {}
 
 func (x *UnlockUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[67]
+	mi := &file_forge_v1_platform_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3654,7 +4418,7 @@ func (x *UnlockUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnlockUserRequest.ProtoReflect.Descriptor instead.
 func (*UnlockUserRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{67}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *UnlockUserRequest) GetUserId() string {
@@ -3673,7 +4437,7 @@ type UnlockUserResponse struct {
 
 func (x *UnlockUserResponse) Reset() {
 	*x = UnlockUserResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[68]
+	mi := &file_forge_v1_platform_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3685,7 +4449,7 @@ func (x *UnlockUserResponse) String() string {
 func (*UnlockUserResponse) ProtoMessage() {}
 
 func (x *UnlockUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[68]
+	mi := &file_forge_v1_platform_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3698,7 +4462,7 @@ func (x *UnlockUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnlockUserResponse.ProtoReflect.Descriptor instead.
 func (*UnlockUserResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{68}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *UnlockUserResponse) GetUser() *User {
@@ -3719,7 +4483,7 @@ type ResetUserPasswordRequest struct {
 
 func (x *ResetUserPasswordRequest) Reset() {
 	*x = ResetUserPasswordRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[69]
+	mi := &file_forge_v1_platform_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3731,7 +4495,7 @@ func (x *ResetUserPasswordRequest) String() string {
 func (*ResetUserPasswordRequest) ProtoMessage() {}
 
 func (x *ResetUserPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[69]
+	mi := &file_forge_v1_platform_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3744,7 +4508,7 @@ func (x *ResetUserPasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetUserPasswordRequest.ProtoReflect.Descriptor instead.
 func (*ResetUserPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{69}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *ResetUserPasswordRequest) GetUserId() string {
@@ -3776,7 +4540,7 @@ type ResetUserPasswordResponse struct {
 
 func (x *ResetUserPasswordResponse) Reset() {
 	*x = ResetUserPasswordResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[70]
+	mi := &file_forge_v1_platform_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3788,7 +4552,7 @@ func (x *ResetUserPasswordResponse) String() string {
 func (*ResetUserPasswordResponse) ProtoMessage() {}
 
 func (x *ResetUserPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[70]
+	mi := &file_forge_v1_platform_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3801,7 +4565,7 @@ func (x *ResetUserPasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetUserPasswordResponse.ProtoReflect.Descriptor instead.
 func (*ResetUserPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{70}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{83}
 }
 
 type ListSessionsRequest struct {
@@ -3813,7 +4577,7 @@ type ListSessionsRequest struct {
 
 func (x *ListSessionsRequest) Reset() {
 	*x = ListSessionsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[71]
+	mi := &file_forge_v1_platform_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3825,7 +4589,7 @@ func (x *ListSessionsRequest) String() string {
 func (*ListSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[71]
+	mi := &file_forge_v1_platform_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3838,7 +4602,7 @@ func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{71}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *ListSessionsRequest) GetLimit() int32 {
@@ -3857,7 +4621,7 @@ type ListSessionsResponse struct {
 
 func (x *ListSessionsResponse) Reset() {
 	*x = ListSessionsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[72]
+	mi := &file_forge_v1_platform_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3869,7 +4633,7 @@ func (x *ListSessionsResponse) String() string {
 func (*ListSessionsResponse) ProtoMessage() {}
 
 func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[72]
+	mi := &file_forge_v1_platform_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3882,7 +4646,7 @@ func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{72}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *ListSessionsResponse) GetSessions() []*Session {
@@ -3901,7 +4665,7 @@ type RevokeSessionRequest struct {
 
 func (x *RevokeSessionRequest) Reset() {
 	*x = RevokeSessionRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[73]
+	mi := &file_forge_v1_platform_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3913,7 +4677,7 @@ func (x *RevokeSessionRequest) String() string {
 func (*RevokeSessionRequest) ProtoMessage() {}
 
 func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[73]
+	mi := &file_forge_v1_platform_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3926,7 +4690,7 @@ func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeSessionRequest.ProtoReflect.Descriptor instead.
 func (*RevokeSessionRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{73}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *RevokeSessionRequest) GetSessionId() string {
@@ -3944,7 +4708,7 @@ type RevokeSessionResponse struct {
 
 func (x *RevokeSessionResponse) Reset() {
 	*x = RevokeSessionResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[74]
+	mi := &file_forge_v1_platform_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3956,7 +4720,7 @@ func (x *RevokeSessionResponse) String() string {
 func (*RevokeSessionResponse) ProtoMessage() {}
 
 func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[74]
+	mi := &file_forge_v1_platform_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3969,7 +4733,7 @@ func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeSessionResponse.ProtoReflect.Descriptor instead.
 func (*RevokeSessionResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{74}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{87}
 }
 
 type ListAuditLogsRequest struct {
@@ -3981,7 +4745,7 @@ type ListAuditLogsRequest struct {
 
 func (x *ListAuditLogsRequest) Reset() {
 	*x = ListAuditLogsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[75]
+	mi := &file_forge_v1_platform_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3993,7 +4757,7 @@ func (x *ListAuditLogsRequest) String() string {
 func (*ListAuditLogsRequest) ProtoMessage() {}
 
 func (x *ListAuditLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[75]
+	mi := &file_forge_v1_platform_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4006,7 +4770,7 @@ func (x *ListAuditLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditLogsRequest.ProtoReflect.Descriptor instead.
 func (*ListAuditLogsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{75}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *ListAuditLogsRequest) GetLimit() int32 {
@@ -4025,7 +4789,7 @@ type ListAuditLogsResponse struct {
 
 func (x *ListAuditLogsResponse) Reset() {
 	*x = ListAuditLogsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[76]
+	mi := &file_forge_v1_platform_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4037,7 +4801,7 @@ func (x *ListAuditLogsResponse) String() string {
 func (*ListAuditLogsResponse) ProtoMessage() {}
 
 func (x *ListAuditLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[76]
+	mi := &file_forge_v1_platform_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4050,7 +4814,7 @@ func (x *ListAuditLogsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditLogsResponse.ProtoReflect.Descriptor instead.
 func (*ListAuditLogsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{76}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *ListAuditLogsResponse) GetEvents() []*AuditEvent {
@@ -4068,7 +4832,7 @@ type VerifyAuditIntegrityRequest struct {
 
 func (x *VerifyAuditIntegrityRequest) Reset() {
 	*x = VerifyAuditIntegrityRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[77]
+	mi := &file_forge_v1_platform_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4080,7 +4844,7 @@ func (x *VerifyAuditIntegrityRequest) String() string {
 func (*VerifyAuditIntegrityRequest) ProtoMessage() {}
 
 func (x *VerifyAuditIntegrityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[77]
+	mi := &file_forge_v1_platform_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4093,7 +4857,7 @@ func (x *VerifyAuditIntegrityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyAuditIntegrityRequest.ProtoReflect.Descriptor instead.
 func (*VerifyAuditIntegrityRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{77}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{90}
 }
 
 type VerifyAuditIntegrityResponse struct {
@@ -4105,7 +4869,7 @@ type VerifyAuditIntegrityResponse struct {
 
 func (x *VerifyAuditIntegrityResponse) Reset() {
 	*x = VerifyAuditIntegrityResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[78]
+	mi := &file_forge_v1_platform_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4117,7 +4881,7 @@ func (x *VerifyAuditIntegrityResponse) String() string {
 func (*VerifyAuditIntegrityResponse) ProtoMessage() {}
 
 func (x *VerifyAuditIntegrityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[78]
+	mi := &file_forge_v1_platform_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4130,7 +4894,7 @@ func (x *VerifyAuditIntegrityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyAuditIntegrityResponse.ProtoReflect.Descriptor instead.
 func (*VerifyAuditIntegrityResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{78}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *VerifyAuditIntegrityResponse) GetVerified() bool {
@@ -4151,7 +4915,7 @@ type ExportAuditLogsRequest struct {
 
 func (x *ExportAuditLogsRequest) Reset() {
 	*x = ExportAuditLogsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[79]
+	mi := &file_forge_v1_platform_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4163,7 +4927,7 @@ func (x *ExportAuditLogsRequest) String() string {
 func (*ExportAuditLogsRequest) ProtoMessage() {}
 
 func (x *ExportAuditLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[79]
+	mi := &file_forge_v1_platform_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4176,7 +4940,7 @@ func (x *ExportAuditLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportAuditLogsRequest.ProtoReflect.Descriptor instead.
 func (*ExportAuditLogsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{79}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *ExportAuditLogsRequest) GetFormat() string {
@@ -4211,7 +4975,7 @@ type ExportAuditLogsResponse struct {
 
 func (x *ExportAuditLogsResponse) Reset() {
 	*x = ExportAuditLogsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[80]
+	mi := &file_forge_v1_platform_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4223,7 +4987,7 @@ func (x *ExportAuditLogsResponse) String() string {
 func (*ExportAuditLogsResponse) ProtoMessage() {}
 
 func (x *ExportAuditLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[80]
+	mi := &file_forge_v1_platform_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4236,7 +5000,7 @@ func (x *ExportAuditLogsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportAuditLogsResponse.ProtoReflect.Descriptor instead.
 func (*ExportAuditLogsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{80}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *ExportAuditLogsResponse) GetContent() []byte {
@@ -4282,7 +5046,7 @@ type TemporaryRoleGrant struct {
 
 func (x *TemporaryRoleGrant) Reset() {
 	*x = TemporaryRoleGrant{}
-	mi := &file_forge_v1_platform_proto_msgTypes[81]
+	mi := &file_forge_v1_platform_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4294,7 +5058,7 @@ func (x *TemporaryRoleGrant) String() string {
 func (*TemporaryRoleGrant) ProtoMessage() {}
 
 func (x *TemporaryRoleGrant) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[81]
+	mi := &file_forge_v1_platform_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4307,7 +5071,7 @@ func (x *TemporaryRoleGrant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TemporaryRoleGrant.ProtoReflect.Descriptor instead.
 func (*TemporaryRoleGrant) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{81}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *TemporaryRoleGrant) GetId() string {
@@ -4416,7 +5180,7 @@ type ListTemporaryRoleGrantsRequest struct {
 
 func (x *ListTemporaryRoleGrantsRequest) Reset() {
 	*x = ListTemporaryRoleGrantsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[82]
+	mi := &file_forge_v1_platform_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4428,7 +5192,7 @@ func (x *ListTemporaryRoleGrantsRequest) String() string {
 func (*ListTemporaryRoleGrantsRequest) ProtoMessage() {}
 
 func (x *ListTemporaryRoleGrantsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[82]
+	mi := &file_forge_v1_platform_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4441,7 +5205,7 @@ func (x *ListTemporaryRoleGrantsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTemporaryRoleGrantsRequest.ProtoReflect.Descriptor instead.
 func (*ListTemporaryRoleGrantsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{82}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{95}
 }
 
 type ListTemporaryRoleGrantsResponse struct {
@@ -4453,7 +5217,7 @@ type ListTemporaryRoleGrantsResponse struct {
 
 func (x *ListTemporaryRoleGrantsResponse) Reset() {
 	*x = ListTemporaryRoleGrantsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[83]
+	mi := &file_forge_v1_platform_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4465,7 +5229,7 @@ func (x *ListTemporaryRoleGrantsResponse) String() string {
 func (*ListTemporaryRoleGrantsResponse) ProtoMessage() {}
 
 func (x *ListTemporaryRoleGrantsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[83]
+	mi := &file_forge_v1_platform_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4478,7 +5242,7 @@ func (x *ListTemporaryRoleGrantsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTemporaryRoleGrantsResponse.ProtoReflect.Descriptor instead.
 func (*ListTemporaryRoleGrantsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{83}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *ListTemporaryRoleGrantsResponse) GetGrants() []*TemporaryRoleGrant {
@@ -4502,7 +5266,7 @@ type CreateTemporaryRoleGrantRequest struct {
 
 func (x *CreateTemporaryRoleGrantRequest) Reset() {
 	*x = CreateTemporaryRoleGrantRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[84]
+	mi := &file_forge_v1_platform_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4514,7 +5278,7 @@ func (x *CreateTemporaryRoleGrantRequest) String() string {
 func (*CreateTemporaryRoleGrantRequest) ProtoMessage() {}
 
 func (x *CreateTemporaryRoleGrantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[84]
+	mi := &file_forge_v1_platform_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4527,7 +5291,7 @@ func (x *CreateTemporaryRoleGrantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTemporaryRoleGrantRequest.ProtoReflect.Descriptor instead.
 func (*CreateTemporaryRoleGrantRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{84}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *CreateTemporaryRoleGrantRequest) GetUserId() string {
@@ -4581,7 +5345,7 @@ type CreateTemporaryRoleGrantResponse struct {
 
 func (x *CreateTemporaryRoleGrantResponse) Reset() {
 	*x = CreateTemporaryRoleGrantResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[85]
+	mi := &file_forge_v1_platform_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4593,7 +5357,7 @@ func (x *CreateTemporaryRoleGrantResponse) String() string {
 func (*CreateTemporaryRoleGrantResponse) ProtoMessage() {}
 
 func (x *CreateTemporaryRoleGrantResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[85]
+	mi := &file_forge_v1_platform_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4606,7 +5370,7 @@ func (x *CreateTemporaryRoleGrantResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTemporaryRoleGrantResponse.ProtoReflect.Descriptor instead.
 func (*CreateTemporaryRoleGrantResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{85}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{98}
 }
 
 func (x *CreateTemporaryRoleGrantResponse) GetGrant() *TemporaryRoleGrant {
@@ -4626,7 +5390,7 @@ type RevokeTemporaryRoleGrantRequest struct {
 
 func (x *RevokeTemporaryRoleGrantRequest) Reset() {
 	*x = RevokeTemporaryRoleGrantRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[86]
+	mi := &file_forge_v1_platform_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4638,7 +5402,7 @@ func (x *RevokeTemporaryRoleGrantRequest) String() string {
 func (*RevokeTemporaryRoleGrantRequest) ProtoMessage() {}
 
 func (x *RevokeTemporaryRoleGrantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[86]
+	mi := &file_forge_v1_platform_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4651,7 +5415,7 @@ func (x *RevokeTemporaryRoleGrantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeTemporaryRoleGrantRequest.ProtoReflect.Descriptor instead.
 func (*RevokeTemporaryRoleGrantRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{86}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{99}
 }
 
 func (x *RevokeTemporaryRoleGrantRequest) GetGrantId() string {
@@ -4676,7 +5440,7 @@ type RevokeTemporaryRoleGrantResponse struct {
 
 func (x *RevokeTemporaryRoleGrantResponse) Reset() {
 	*x = RevokeTemporaryRoleGrantResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[87]
+	mi := &file_forge_v1_platform_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4688,7 +5452,7 @@ func (x *RevokeTemporaryRoleGrantResponse) String() string {
 func (*RevokeTemporaryRoleGrantResponse) ProtoMessage() {}
 
 func (x *RevokeTemporaryRoleGrantResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[87]
+	mi := &file_forge_v1_platform_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4701,7 +5465,7 @@ func (x *RevokeTemporaryRoleGrantResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeTemporaryRoleGrantResponse.ProtoReflect.Descriptor instead.
 func (*RevokeTemporaryRoleGrantResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{87}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{100}
 }
 
 type FederatedIdentityLink struct {
@@ -4722,7 +5486,7 @@ type FederatedIdentityLink struct {
 
 func (x *FederatedIdentityLink) Reset() {
 	*x = FederatedIdentityLink{}
-	mi := &file_forge_v1_platform_proto_msgTypes[88]
+	mi := &file_forge_v1_platform_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4734,7 +5498,7 @@ func (x *FederatedIdentityLink) String() string {
 func (*FederatedIdentityLink) ProtoMessage() {}
 
 func (x *FederatedIdentityLink) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[88]
+	mi := &file_forge_v1_platform_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4747,7 +5511,7 @@ func (x *FederatedIdentityLink) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FederatedIdentityLink.ProtoReflect.Descriptor instead.
 func (*FederatedIdentityLink) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{88}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{101}
 }
 
 func (x *FederatedIdentityLink) GetId() string {
@@ -4828,7 +5592,7 @@ type ListFederatedIdentityLinksRequest struct {
 
 func (x *ListFederatedIdentityLinksRequest) Reset() {
 	*x = ListFederatedIdentityLinksRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[89]
+	mi := &file_forge_v1_platform_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4840,7 +5604,7 @@ func (x *ListFederatedIdentityLinksRequest) String() string {
 func (*ListFederatedIdentityLinksRequest) ProtoMessage() {}
 
 func (x *ListFederatedIdentityLinksRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[89]
+	mi := &file_forge_v1_platform_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4853,7 +5617,7 @@ func (x *ListFederatedIdentityLinksRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ListFederatedIdentityLinksRequest.ProtoReflect.Descriptor instead.
 func (*ListFederatedIdentityLinksRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{89}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{102}
 }
 
 type ListFederatedIdentityLinksResponse struct {
@@ -4865,7 +5629,7 @@ type ListFederatedIdentityLinksResponse struct {
 
 func (x *ListFederatedIdentityLinksResponse) Reset() {
 	*x = ListFederatedIdentityLinksResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[90]
+	mi := &file_forge_v1_platform_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4877,7 +5641,7 @@ func (x *ListFederatedIdentityLinksResponse) String() string {
 func (*ListFederatedIdentityLinksResponse) ProtoMessage() {}
 
 func (x *ListFederatedIdentityLinksResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[90]
+	mi := &file_forge_v1_platform_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4890,7 +5654,7 @@ func (x *ListFederatedIdentityLinksResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ListFederatedIdentityLinksResponse.ProtoReflect.Descriptor instead.
 func (*ListFederatedIdentityLinksResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{90}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{103}
 }
 
 func (x *ListFederatedIdentityLinksResponse) GetLinks() []*FederatedIdentityLink {
@@ -4912,7 +5676,7 @@ type LinkFederatedIdentityRequest struct {
 
 func (x *LinkFederatedIdentityRequest) Reset() {
 	*x = LinkFederatedIdentityRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[91]
+	mi := &file_forge_v1_platform_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4924,7 +5688,7 @@ func (x *LinkFederatedIdentityRequest) String() string {
 func (*LinkFederatedIdentityRequest) ProtoMessage() {}
 
 func (x *LinkFederatedIdentityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[91]
+	mi := &file_forge_v1_platform_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4937,7 +5701,7 @@ func (x *LinkFederatedIdentityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LinkFederatedIdentityRequest.ProtoReflect.Descriptor instead.
 func (*LinkFederatedIdentityRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{91}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *LinkFederatedIdentityRequest) GetProvider() string {
@@ -4977,7 +5741,7 @@ type LinkFederatedIdentityResponse struct {
 
 func (x *LinkFederatedIdentityResponse) Reset() {
 	*x = LinkFederatedIdentityResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[92]
+	mi := &file_forge_v1_platform_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4989,7 +5753,7 @@ func (x *LinkFederatedIdentityResponse) String() string {
 func (*LinkFederatedIdentityResponse) ProtoMessage() {}
 
 func (x *LinkFederatedIdentityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[92]
+	mi := &file_forge_v1_platform_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5002,7 +5766,7 @@ func (x *LinkFederatedIdentityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LinkFederatedIdentityResponse.ProtoReflect.Descriptor instead.
 func (*LinkFederatedIdentityResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{92}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *LinkFederatedIdentityResponse) GetLink() *FederatedIdentityLink {
@@ -5021,7 +5785,7 @@ type UnlinkFederatedIdentityRequest struct {
 
 func (x *UnlinkFederatedIdentityRequest) Reset() {
 	*x = UnlinkFederatedIdentityRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[93]
+	mi := &file_forge_v1_platform_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5033,7 +5797,7 @@ func (x *UnlinkFederatedIdentityRequest) String() string {
 func (*UnlinkFederatedIdentityRequest) ProtoMessage() {}
 
 func (x *UnlinkFederatedIdentityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[93]
+	mi := &file_forge_v1_platform_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5046,7 +5810,7 @@ func (x *UnlinkFederatedIdentityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnlinkFederatedIdentityRequest.ProtoReflect.Descriptor instead.
 func (*UnlinkFederatedIdentityRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{93}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *UnlinkFederatedIdentityRequest) GetLinkId() string {
@@ -5064,7 +5828,7 @@ type UnlinkFederatedIdentityResponse struct {
 
 func (x *UnlinkFederatedIdentityResponse) Reset() {
 	*x = UnlinkFederatedIdentityResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[94]
+	mi := &file_forge_v1_platform_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5076,7 +5840,7 @@ func (x *UnlinkFederatedIdentityResponse) String() string {
 func (*UnlinkFederatedIdentityResponse) ProtoMessage() {}
 
 func (x *UnlinkFederatedIdentityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[94]
+	mi := &file_forge_v1_platform_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5089,7 +5853,7 @@ func (x *UnlinkFederatedIdentityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnlinkFederatedIdentityResponse.ProtoReflect.Descriptor instead.
 func (*UnlinkFederatedIdentityResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{94}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{107}
 }
 
 type AccessReview struct {
@@ -5109,7 +5873,7 @@ type AccessReview struct {
 
 func (x *AccessReview) Reset() {
 	*x = AccessReview{}
-	mi := &file_forge_v1_platform_proto_msgTypes[95]
+	mi := &file_forge_v1_platform_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5121,7 +5885,7 @@ func (x *AccessReview) String() string {
 func (*AccessReview) ProtoMessage() {}
 
 func (x *AccessReview) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[95]
+	mi := &file_forge_v1_platform_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5134,7 +5898,7 @@ func (x *AccessReview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccessReview.ProtoReflect.Descriptor instead.
 func (*AccessReview) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{95}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{108}
 }
 
 func (x *AccessReview) GetId() string {
@@ -5219,7 +5983,7 @@ type AccessReviewItem struct {
 
 func (x *AccessReviewItem) Reset() {
 	*x = AccessReviewItem{}
-	mi := &file_forge_v1_platform_proto_msgTypes[96]
+	mi := &file_forge_v1_platform_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5231,7 +5995,7 @@ func (x *AccessReviewItem) String() string {
 func (*AccessReviewItem) ProtoMessage() {}
 
 func (x *AccessReviewItem) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[96]
+	mi := &file_forge_v1_platform_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5244,7 +6008,7 @@ func (x *AccessReviewItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccessReviewItem.ProtoReflect.Descriptor instead.
 func (*AccessReviewItem) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{96}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{109}
 }
 
 func (x *AccessReviewItem) GetId() string {
@@ -5332,7 +6096,7 @@ type ListAccessReviewsRequest struct {
 
 func (x *ListAccessReviewsRequest) Reset() {
 	*x = ListAccessReviewsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[97]
+	mi := &file_forge_v1_platform_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5344,7 +6108,7 @@ func (x *ListAccessReviewsRequest) String() string {
 func (*ListAccessReviewsRequest) ProtoMessage() {}
 
 func (x *ListAccessReviewsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[97]
+	mi := &file_forge_v1_platform_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5357,7 +6121,7 @@ func (x *ListAccessReviewsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAccessReviewsRequest.ProtoReflect.Descriptor instead.
 func (*ListAccessReviewsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{97}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{110}
 }
 
 type ListAccessReviewsResponse struct {
@@ -5369,7 +6133,7 @@ type ListAccessReviewsResponse struct {
 
 func (x *ListAccessReviewsResponse) Reset() {
 	*x = ListAccessReviewsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[98]
+	mi := &file_forge_v1_platform_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5381,7 +6145,7 @@ func (x *ListAccessReviewsResponse) String() string {
 func (*ListAccessReviewsResponse) ProtoMessage() {}
 
 func (x *ListAccessReviewsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[98]
+	mi := &file_forge_v1_platform_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5394,7 +6158,7 @@ func (x *ListAccessReviewsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAccessReviewsResponse.ProtoReflect.Descriptor instead.
 func (*ListAccessReviewsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{98}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{111}
 }
 
 func (x *ListAccessReviewsResponse) GetReviews() []*AccessReview {
@@ -5414,7 +6178,7 @@ type CreateAccessReviewRequest struct {
 
 func (x *CreateAccessReviewRequest) Reset() {
 	*x = CreateAccessReviewRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[99]
+	mi := &file_forge_v1_platform_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5426,7 +6190,7 @@ func (x *CreateAccessReviewRequest) String() string {
 func (*CreateAccessReviewRequest) ProtoMessage() {}
 
 func (x *CreateAccessReviewRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[99]
+	mi := &file_forge_v1_platform_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5439,7 +6203,7 @@ func (x *CreateAccessReviewRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAccessReviewRequest.ProtoReflect.Descriptor instead.
 func (*CreateAccessReviewRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{99}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{112}
 }
 
 func (x *CreateAccessReviewRequest) GetReviewerId() string {
@@ -5465,7 +6229,7 @@ type CreateAccessReviewResponse struct {
 
 func (x *CreateAccessReviewResponse) Reset() {
 	*x = CreateAccessReviewResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[100]
+	mi := &file_forge_v1_platform_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5477,7 +6241,7 @@ func (x *CreateAccessReviewResponse) String() string {
 func (*CreateAccessReviewResponse) ProtoMessage() {}
 
 func (x *CreateAccessReviewResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[100]
+	mi := &file_forge_v1_platform_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5490,7 +6254,7 @@ func (x *CreateAccessReviewResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAccessReviewResponse.ProtoReflect.Descriptor instead.
 func (*CreateAccessReviewResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{100}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{113}
 }
 
 func (x *CreateAccessReviewResponse) GetReview() *AccessReview {
@@ -5509,7 +6273,7 @@ type ListAccessReviewItemsRequest struct {
 
 func (x *ListAccessReviewItemsRequest) Reset() {
 	*x = ListAccessReviewItemsRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[101]
+	mi := &file_forge_v1_platform_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5521,7 +6285,7 @@ func (x *ListAccessReviewItemsRequest) String() string {
 func (*ListAccessReviewItemsRequest) ProtoMessage() {}
 
 func (x *ListAccessReviewItemsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[101]
+	mi := &file_forge_v1_platform_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5534,7 +6298,7 @@ func (x *ListAccessReviewItemsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAccessReviewItemsRequest.ProtoReflect.Descriptor instead.
 func (*ListAccessReviewItemsRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{101}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{114}
 }
 
 func (x *ListAccessReviewItemsRequest) GetReviewId() string {
@@ -5553,7 +6317,7 @@ type ListAccessReviewItemsResponse struct {
 
 func (x *ListAccessReviewItemsResponse) Reset() {
 	*x = ListAccessReviewItemsResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[102]
+	mi := &file_forge_v1_platform_proto_msgTypes[115]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5565,7 +6329,7 @@ func (x *ListAccessReviewItemsResponse) String() string {
 func (*ListAccessReviewItemsResponse) ProtoMessage() {}
 
 func (x *ListAccessReviewItemsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[102]
+	mi := &file_forge_v1_platform_proto_msgTypes[115]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5578,7 +6342,7 @@ func (x *ListAccessReviewItemsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAccessReviewItemsResponse.ProtoReflect.Descriptor instead.
 func (*ListAccessReviewItemsResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{102}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{115}
 }
 
 func (x *ListAccessReviewItemsResponse) GetItems() []*AccessReviewItem {
@@ -5600,7 +6364,7 @@ type DecideAccessReviewItemRequest struct {
 
 func (x *DecideAccessReviewItemRequest) Reset() {
 	*x = DecideAccessReviewItemRequest{}
-	mi := &file_forge_v1_platform_proto_msgTypes[103]
+	mi := &file_forge_v1_platform_proto_msgTypes[116]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5612,7 +6376,7 @@ func (x *DecideAccessReviewItemRequest) String() string {
 func (*DecideAccessReviewItemRequest) ProtoMessage() {}
 
 func (x *DecideAccessReviewItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[103]
+	mi := &file_forge_v1_platform_proto_msgTypes[116]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5625,7 +6389,7 @@ func (x *DecideAccessReviewItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideAccessReviewItemRequest.ProtoReflect.Descriptor instead.
 func (*DecideAccessReviewItemRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{103}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{116}
 }
 
 func (x *DecideAccessReviewItemRequest) GetReviewId() string {
@@ -5664,7 +6428,7 @@ type DecideAccessReviewItemResponse struct {
 
 func (x *DecideAccessReviewItemResponse) Reset() {
 	*x = DecideAccessReviewItemResponse{}
-	mi := &file_forge_v1_platform_proto_msgTypes[104]
+	mi := &file_forge_v1_platform_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5676,7 +6440,7 @@ func (x *DecideAccessReviewItemResponse) String() string {
 func (*DecideAccessReviewItemResponse) ProtoMessage() {}
 
 func (x *DecideAccessReviewItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_platform_proto_msgTypes[104]
+	mi := &file_forge_v1_platform_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5689,7 +6453,7 @@ func (x *DecideAccessReviewItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideAccessReviewItemResponse.ProtoReflect.Descriptor instead.
 func (*DecideAccessReviewItemResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_platform_proto_rawDescGZIP(), []int{104}
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{117}
 }
 
 var File_forge_v1_platform_proto protoreflect.FileDescriptor
@@ -5922,7 +6686,66 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\vapproval_id\x18\a \x01(\tR\n" +
 	"approvalId\"`\n" +
 	"\"RecordDataDeletionEvidenceResponse\x12:\n" +
-	"\bevidence\x18\x01 \x01(\v2\x1e.forge.v1.DataDeletionEvidenceR\bevidence\"|\n" +
+	"\bevidence\x18\x01 \x01(\v2\x1e.forge.v1.DataDeletionEvidenceR\bevidence\"\x1a\n" +
+	"\x18ListConfigChangesRequest\"M\n" +
+	"\x19ListConfigChangesResponse\x120\n" +
+	"\achanges\x18\x01 \x03(\v2\x16.forge.v1.ConfigChangeR\achanges\"\xfa\x03\n" +
+	"\fConfigChange\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x1c\n" +
+	"\tnamespace\x18\x03 \x01(\tR\tnamespace\x12\x14\n" +
+	"\x05group\x18\x04 \x01(\tR\x05group\x12\x17\n" +
+	"\adata_id\x18\x05 \x01(\tR\x06dataId\x12\x18\n" +
+	"\aversion\x18\x06 \x01(\x04R\aversion\x12:\n" +
+	"\x19expected_previous_version\x18\a \x01(\x04R\x17expectedPreviousVersion\x12!\n" +
+	"\fvalue_digest\x18\b \x01(\tR\vvalueDigest\x12\x1b\n" +
+	"\tvalue_ref\x18\t \x01(\tR\bvalueRef\x12\x1c\n" +
+	"\tsensitive\x18\n" +
+	" \x01(\bR\tsensitive\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\v \x01(\tR\tcreatedBy\x12\x1f\n" +
+	"\vapproved_by\x18\f \x01(\tR\n" +
+	"approvedBy\x12\x1f\n" +
+	"\vapproval_id\x18\r \x01(\tR\n" +
+	"approvalId\x12\x14\n" +
+	"\x05state\x18\x0e \x01(\tR\x05state\x129\n" +
+	"\n" +
+	"updated_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9c\x02\n" +
+	"\x19CreateConfigChangeRequest\x12\x1c\n" +
+	"\tnamespace\x18\x01 \x01(\tR\tnamespace\x12\x14\n" +
+	"\x05group\x18\x02 \x01(\tR\x05group\x12\x17\n" +
+	"\adata_id\x18\x03 \x01(\tR\x06dataId\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\x04R\aversion\x12:\n" +
+	"\x19expected_previous_version\x18\x05 \x01(\x04R\x17expectedPreviousVersion\x12!\n" +
+	"\fvalue_digest\x18\x06 \x01(\tR\vvalueDigest\x12\x1b\n" +
+	"\tvalue_ref\x18\a \x01(\tR\bvalueRef\x12\x1c\n" +
+	"\tsensitive\x18\b \x01(\bR\tsensitive\"L\n" +
+	"\x1aCreateConfigChangeResponse\x12.\n" +
+	"\x06change\x18\x01 \x01(\v2\x16.forge.v1.ConfigChangeR\x06change\"Z\n" +
+	"\x1aApproveConfigChangeRequest\x12\x1b\n" +
+	"\tchange_id\x18\x01 \x01(\tR\bchangeId\x12\x1f\n" +
+	"\vapproval_id\x18\x02 \x01(\tR\n" +
+	"approvalId\"M\n" +
+	"\x1bApproveConfigChangeResponse\x12.\n" +
+	"\x06change\x18\x01 \x01(\v2\x16.forge.v1.ConfigChangeR\x06change\"Z\n" +
+	"\x1aPublishConfigChangeRequest\x12\x1b\n" +
+	"\tchange_id\x18\x01 \x01(\tR\bchangeId\x12\x1f\n" +
+	"\vapproval_id\x18\x02 \x01(\tR\n" +
+	"approvalId\"M\n" +
+	"\x1bPublishConfigChangeResponse\x12.\n" +
+	"\x06change\x18\x01 \x01(\v2\x16.forge.v1.ConfigChangeR\x06change\"\\\n" +
+	"\x1cRequestConfigRollbackRequest\x12\x1b\n" +
+	"\tchange_id\x18\x01 \x01(\tR\bchangeId\x12\x1f\n" +
+	"\vapproval_id\x18\x02 \x01(\tR\n" +
+	"approvalId\"O\n" +
+	"\x1dRequestConfigRollbackResponse\x12.\n" +
+	"\x06change\x18\x01 \x01(\v2\x16.forge.v1.ConfigChangeR\x06change\"[\n" +
+	"\x1bRollbackConfigChangeRequest\x12\x1b\n" +
+	"\tchange_id\x18\x01 \x01(\tR\bchangeId\x12\x1f\n" +
+	"\vapproval_id\x18\x02 \x01(\tR\n" +
+	"approvalId\"N\n" +
+	"\x1cRollbackConfigChangeResponse\x12.\n" +
+	"\x06change\x18\x01 \x01(\v2\x16.forge.v1.ConfigChangeR\x06change\"|\n" +
 	"\x1cUpdateRolePermissionsRequest\x12\x19\n" +
 	"\brole_key\x18\x01 \x01(\tR\aroleKey\x12 \n" +
 	"\vpermissions\x18\x02 \x03(\tR\vpermissions\x12\x1f\n" +
@@ -6104,7 +6927,7 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1a\n" +
 	"\bdecision\x18\x03 \x01(\tR\bdecision\x12\x16\n" +
 	"\x06reason\x18\x04 \x01(\tR\x06reason\" \n" +
-	"\x1eDecideAccessReviewItemResponse2\xbaI\n" +
+	"\x1eDecideAccessReviewItemResponse2\xacS\n" +
 	"\x0fPlatformService\x12\x8b\x01\n" +
 	"\tListUsers\x12\x1a.forge.v1.ListUsersRequest\x1a\x1b.forge.v1.ListUsersResponse\"E\xbaG'Z\x13\n" +
 	"\x11\n" +
@@ -6456,7 +7279,53 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\tCsrfToken\x12\x00Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02G:\x01*\"B/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisionsB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02G:\x01*\"B/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions\x12\xac\x01\n" +
+	"\x11ListConfigChanges\x12\".forge.v1.ListConfigChangesRequest\x1a#.forge.v1.ListConfigChangesResponse\"N\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/admin/config-changes\x12\xc1\x01\n" +
+	"\x12CreateConfigChange\x12#.forge.v1.CreateConfigChangeRequest\x1a$.forge.v1.CreateConfigChangeResponse\"`\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/api/v1/admin/config-changes\x12\xd8\x01\n" +
+	"\x13ApproveConfigChange\x12$.forge.v1.ApproveConfigChangeRequest\x1a%.forge.v1.ApproveConfigChangeResponse\"t\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/admin/config-changes/{change_id}/approve\x12\xd8\x01\n" +
+	"\x13PublishConfigChange\x12$.forge.v1.PublishConfigChangeRequest\x1a%.forge.v1.PublishConfigChangeResponse\"t\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/admin/config-changes/{change_id}/publish\x12\xe7\x01\n" +
+	"\x15RequestConfigRollback\x12&.forge.v1.RequestConfigRollbackRequest\x1a'.forge.v1.RequestConfigRollbackResponse\"}\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02>:\x01*\"9/api/v1/admin/config-changes/{change_id}/rollback-request\x12\xdc\x01\n" +
+	"\x14RollbackConfigChange\x12%.forge.v1.RollbackConfigChangeRequest\x1a&.forge.v1.RollbackConfigChangeResponse\"u\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x026:\x01*\"1/api/v1/admin/config-changes/{change_id}/rollbackB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
 
 var (
 	file_forge_v1_platform_proto_rawDescOnce sync.Once
@@ -6470,7 +7339,7 @@ func file_forge_v1_platform_proto_rawDescGZIP() []byte {
 	return file_forge_v1_platform_proto_rawDescData
 }
 
-var file_forge_v1_platform_proto_msgTypes = make([]protoimpl.MessageInfo, 105)
+var file_forge_v1_platform_proto_msgTypes = make([]protoimpl.MessageInfo, 118)
 var file_forge_v1_platform_proto_goTypes = []any{
 	(*ListUsersRequest)(nil),                   // 0: forge.v1.ListUsersRequest
 	(*ListUsersResponse)(nil),                  // 1: forge.v1.ListUsersResponse
@@ -6531,229 +7400,261 @@ var file_forge_v1_platform_proto_goTypes = []any{
 	(*DataDeletionEvidence)(nil),               // 56: forge.v1.DataDeletionEvidence
 	(*RecordDataDeletionEvidenceRequest)(nil),  // 57: forge.v1.RecordDataDeletionEvidenceRequest
 	(*RecordDataDeletionEvidenceResponse)(nil), // 58: forge.v1.RecordDataDeletionEvidenceResponse
-	(*UpdateRolePermissionsRequest)(nil),       // 59: forge.v1.UpdateRolePermissionsRequest
-	(*UpdateRolePermissionsResponse)(nil),      // 60: forge.v1.UpdateRolePermissionsResponse
-	(*UpdateRoleDataScopeRequest)(nil),         // 61: forge.v1.UpdateRoleDataScopeRequest
-	(*UpdateRoleDataScopeResponse)(nil),        // 62: forge.v1.UpdateRoleDataScopeResponse
-	(*UpdateUserRolesRequest)(nil),             // 63: forge.v1.UpdateUserRolesRequest
-	(*UpdateUserRolesResponse)(nil),            // 64: forge.v1.UpdateUserRolesResponse
-	(*UpdateUserStatusRequest)(nil),            // 65: forge.v1.UpdateUserStatusRequest
-	(*UpdateUserStatusResponse)(nil),           // 66: forge.v1.UpdateUserStatusResponse
-	(*UnlockUserRequest)(nil),                  // 67: forge.v1.UnlockUserRequest
-	(*UnlockUserResponse)(nil),                 // 68: forge.v1.UnlockUserResponse
-	(*ResetUserPasswordRequest)(nil),           // 69: forge.v1.ResetUserPasswordRequest
-	(*ResetUserPasswordResponse)(nil),          // 70: forge.v1.ResetUserPasswordResponse
-	(*ListSessionsRequest)(nil),                // 71: forge.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),               // 72: forge.v1.ListSessionsResponse
-	(*RevokeSessionRequest)(nil),               // 73: forge.v1.RevokeSessionRequest
-	(*RevokeSessionResponse)(nil),              // 74: forge.v1.RevokeSessionResponse
-	(*ListAuditLogsRequest)(nil),               // 75: forge.v1.ListAuditLogsRequest
-	(*ListAuditLogsResponse)(nil),              // 76: forge.v1.ListAuditLogsResponse
-	(*VerifyAuditIntegrityRequest)(nil),        // 77: forge.v1.VerifyAuditIntegrityRequest
-	(*VerifyAuditIntegrityResponse)(nil),       // 78: forge.v1.VerifyAuditIntegrityResponse
-	(*ExportAuditLogsRequest)(nil),             // 79: forge.v1.ExportAuditLogsRequest
-	(*ExportAuditLogsResponse)(nil),            // 80: forge.v1.ExportAuditLogsResponse
-	(*TemporaryRoleGrant)(nil),                 // 81: forge.v1.TemporaryRoleGrant
-	(*ListTemporaryRoleGrantsRequest)(nil),     // 82: forge.v1.ListTemporaryRoleGrantsRequest
-	(*ListTemporaryRoleGrantsResponse)(nil),    // 83: forge.v1.ListTemporaryRoleGrantsResponse
-	(*CreateTemporaryRoleGrantRequest)(nil),    // 84: forge.v1.CreateTemporaryRoleGrantRequest
-	(*CreateTemporaryRoleGrantResponse)(nil),   // 85: forge.v1.CreateTemporaryRoleGrantResponse
-	(*RevokeTemporaryRoleGrantRequest)(nil),    // 86: forge.v1.RevokeTemporaryRoleGrantRequest
-	(*RevokeTemporaryRoleGrantResponse)(nil),   // 87: forge.v1.RevokeTemporaryRoleGrantResponse
-	(*FederatedIdentityLink)(nil),              // 88: forge.v1.FederatedIdentityLink
-	(*ListFederatedIdentityLinksRequest)(nil),  // 89: forge.v1.ListFederatedIdentityLinksRequest
-	(*ListFederatedIdentityLinksResponse)(nil), // 90: forge.v1.ListFederatedIdentityLinksResponse
-	(*LinkFederatedIdentityRequest)(nil),       // 91: forge.v1.LinkFederatedIdentityRequest
-	(*LinkFederatedIdentityResponse)(nil),      // 92: forge.v1.LinkFederatedIdentityResponse
-	(*UnlinkFederatedIdentityRequest)(nil),     // 93: forge.v1.UnlinkFederatedIdentityRequest
-	(*UnlinkFederatedIdentityResponse)(nil),    // 94: forge.v1.UnlinkFederatedIdentityResponse
-	(*AccessReview)(nil),                       // 95: forge.v1.AccessReview
-	(*AccessReviewItem)(nil),                   // 96: forge.v1.AccessReviewItem
-	(*ListAccessReviewsRequest)(nil),           // 97: forge.v1.ListAccessReviewsRequest
-	(*ListAccessReviewsResponse)(nil),          // 98: forge.v1.ListAccessReviewsResponse
-	(*CreateAccessReviewRequest)(nil),          // 99: forge.v1.CreateAccessReviewRequest
-	(*CreateAccessReviewResponse)(nil),         // 100: forge.v1.CreateAccessReviewResponse
-	(*ListAccessReviewItemsRequest)(nil),       // 101: forge.v1.ListAccessReviewItemsRequest
-	(*ListAccessReviewItemsResponse)(nil),      // 102: forge.v1.ListAccessReviewItemsResponse
-	(*DecideAccessReviewItemRequest)(nil),      // 103: forge.v1.DecideAccessReviewItemRequest
-	(*DecideAccessReviewItemResponse)(nil),     // 104: forge.v1.DecideAccessReviewItemResponse
-	(*User)(nil),                               // 105: forge.v1.User
-	(*Department)(nil),                         // 106: forge.v1.Department
-	(*Position)(nil),                           // 107: forge.v1.Position
-	(*UserGroup)(nil),                          // 108: forge.v1.UserGroup
-	(*UserAssignment)(nil),                     // 109: forge.v1.UserAssignment
-	(*Organization)(nil),                       // 110: forge.v1.Organization
-	(*SecurityPolicy)(nil),                     // 111: forge.v1.SecurityPolicy
-	(*Role)(nil),                               // 112: forge.v1.Role
-	(*Permission)(nil),                         // 113: forge.v1.Permission
-	(*timestamppb.Timestamp)(nil),              // 114: google.protobuf.Timestamp
-	(*Session)(nil),                            // 115: forge.v1.Session
-	(*AuditEvent)(nil),                         // 116: forge.v1.AuditEvent
+	(*ListConfigChangesRequest)(nil),           // 59: forge.v1.ListConfigChangesRequest
+	(*ListConfigChangesResponse)(nil),          // 60: forge.v1.ListConfigChangesResponse
+	(*ConfigChange)(nil),                       // 61: forge.v1.ConfigChange
+	(*CreateConfigChangeRequest)(nil),          // 62: forge.v1.CreateConfigChangeRequest
+	(*CreateConfigChangeResponse)(nil),         // 63: forge.v1.CreateConfigChangeResponse
+	(*ApproveConfigChangeRequest)(nil),         // 64: forge.v1.ApproveConfigChangeRequest
+	(*ApproveConfigChangeResponse)(nil),        // 65: forge.v1.ApproveConfigChangeResponse
+	(*PublishConfigChangeRequest)(nil),         // 66: forge.v1.PublishConfigChangeRequest
+	(*PublishConfigChangeResponse)(nil),        // 67: forge.v1.PublishConfigChangeResponse
+	(*RequestConfigRollbackRequest)(nil),       // 68: forge.v1.RequestConfigRollbackRequest
+	(*RequestConfigRollbackResponse)(nil),      // 69: forge.v1.RequestConfigRollbackResponse
+	(*RollbackConfigChangeRequest)(nil),        // 70: forge.v1.RollbackConfigChangeRequest
+	(*RollbackConfigChangeResponse)(nil),       // 71: forge.v1.RollbackConfigChangeResponse
+	(*UpdateRolePermissionsRequest)(nil),       // 72: forge.v1.UpdateRolePermissionsRequest
+	(*UpdateRolePermissionsResponse)(nil),      // 73: forge.v1.UpdateRolePermissionsResponse
+	(*UpdateRoleDataScopeRequest)(nil),         // 74: forge.v1.UpdateRoleDataScopeRequest
+	(*UpdateRoleDataScopeResponse)(nil),        // 75: forge.v1.UpdateRoleDataScopeResponse
+	(*UpdateUserRolesRequest)(nil),             // 76: forge.v1.UpdateUserRolesRequest
+	(*UpdateUserRolesResponse)(nil),            // 77: forge.v1.UpdateUserRolesResponse
+	(*UpdateUserStatusRequest)(nil),            // 78: forge.v1.UpdateUserStatusRequest
+	(*UpdateUserStatusResponse)(nil),           // 79: forge.v1.UpdateUserStatusResponse
+	(*UnlockUserRequest)(nil),                  // 80: forge.v1.UnlockUserRequest
+	(*UnlockUserResponse)(nil),                 // 81: forge.v1.UnlockUserResponse
+	(*ResetUserPasswordRequest)(nil),           // 82: forge.v1.ResetUserPasswordRequest
+	(*ResetUserPasswordResponse)(nil),          // 83: forge.v1.ResetUserPasswordResponse
+	(*ListSessionsRequest)(nil),                // 84: forge.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),               // 85: forge.v1.ListSessionsResponse
+	(*RevokeSessionRequest)(nil),               // 86: forge.v1.RevokeSessionRequest
+	(*RevokeSessionResponse)(nil),              // 87: forge.v1.RevokeSessionResponse
+	(*ListAuditLogsRequest)(nil),               // 88: forge.v1.ListAuditLogsRequest
+	(*ListAuditLogsResponse)(nil),              // 89: forge.v1.ListAuditLogsResponse
+	(*VerifyAuditIntegrityRequest)(nil),        // 90: forge.v1.VerifyAuditIntegrityRequest
+	(*VerifyAuditIntegrityResponse)(nil),       // 91: forge.v1.VerifyAuditIntegrityResponse
+	(*ExportAuditLogsRequest)(nil),             // 92: forge.v1.ExportAuditLogsRequest
+	(*ExportAuditLogsResponse)(nil),            // 93: forge.v1.ExportAuditLogsResponse
+	(*TemporaryRoleGrant)(nil),                 // 94: forge.v1.TemporaryRoleGrant
+	(*ListTemporaryRoleGrantsRequest)(nil),     // 95: forge.v1.ListTemporaryRoleGrantsRequest
+	(*ListTemporaryRoleGrantsResponse)(nil),    // 96: forge.v1.ListTemporaryRoleGrantsResponse
+	(*CreateTemporaryRoleGrantRequest)(nil),    // 97: forge.v1.CreateTemporaryRoleGrantRequest
+	(*CreateTemporaryRoleGrantResponse)(nil),   // 98: forge.v1.CreateTemporaryRoleGrantResponse
+	(*RevokeTemporaryRoleGrantRequest)(nil),    // 99: forge.v1.RevokeTemporaryRoleGrantRequest
+	(*RevokeTemporaryRoleGrantResponse)(nil),   // 100: forge.v1.RevokeTemporaryRoleGrantResponse
+	(*FederatedIdentityLink)(nil),              // 101: forge.v1.FederatedIdentityLink
+	(*ListFederatedIdentityLinksRequest)(nil),  // 102: forge.v1.ListFederatedIdentityLinksRequest
+	(*ListFederatedIdentityLinksResponse)(nil), // 103: forge.v1.ListFederatedIdentityLinksResponse
+	(*LinkFederatedIdentityRequest)(nil),       // 104: forge.v1.LinkFederatedIdentityRequest
+	(*LinkFederatedIdentityResponse)(nil),      // 105: forge.v1.LinkFederatedIdentityResponse
+	(*UnlinkFederatedIdentityRequest)(nil),     // 106: forge.v1.UnlinkFederatedIdentityRequest
+	(*UnlinkFederatedIdentityResponse)(nil),    // 107: forge.v1.UnlinkFederatedIdentityResponse
+	(*AccessReview)(nil),                       // 108: forge.v1.AccessReview
+	(*AccessReviewItem)(nil),                   // 109: forge.v1.AccessReviewItem
+	(*ListAccessReviewsRequest)(nil),           // 110: forge.v1.ListAccessReviewsRequest
+	(*ListAccessReviewsResponse)(nil),          // 111: forge.v1.ListAccessReviewsResponse
+	(*CreateAccessReviewRequest)(nil),          // 112: forge.v1.CreateAccessReviewRequest
+	(*CreateAccessReviewResponse)(nil),         // 113: forge.v1.CreateAccessReviewResponse
+	(*ListAccessReviewItemsRequest)(nil),       // 114: forge.v1.ListAccessReviewItemsRequest
+	(*ListAccessReviewItemsResponse)(nil),      // 115: forge.v1.ListAccessReviewItemsResponse
+	(*DecideAccessReviewItemRequest)(nil),      // 116: forge.v1.DecideAccessReviewItemRequest
+	(*DecideAccessReviewItemResponse)(nil),     // 117: forge.v1.DecideAccessReviewItemResponse
+	(*User)(nil),                               // 118: forge.v1.User
+	(*Department)(nil),                         // 119: forge.v1.Department
+	(*Position)(nil),                           // 120: forge.v1.Position
+	(*UserGroup)(nil),                          // 121: forge.v1.UserGroup
+	(*UserAssignment)(nil),                     // 122: forge.v1.UserAssignment
+	(*Organization)(nil),                       // 123: forge.v1.Organization
+	(*SecurityPolicy)(nil),                     // 124: forge.v1.SecurityPolicy
+	(*Role)(nil),                               // 125: forge.v1.Role
+	(*Permission)(nil),                         // 126: forge.v1.Permission
+	(*timestamppb.Timestamp)(nil),              // 127: google.protobuf.Timestamp
+	(*Session)(nil),                            // 128: forge.v1.Session
+	(*AuditEvent)(nil),                         // 129: forge.v1.AuditEvent
 }
 var file_forge_v1_platform_proto_depIdxs = []int32{
-	105, // 0: forge.v1.ListUsersResponse.users:type_name -> forge.v1.User
-	105, // 1: forge.v1.CreateUserResponse.user:type_name -> forge.v1.User
-	106, // 2: forge.v1.ListDepartmentsResponse.departments:type_name -> forge.v1.Department
-	106, // 3: forge.v1.CreateDepartmentResponse.department:type_name -> forge.v1.Department
-	106, // 4: forge.v1.UpdateDepartmentResponse.department:type_name -> forge.v1.Department
-	107, // 5: forge.v1.ListPositionsResponse.positions:type_name -> forge.v1.Position
-	107, // 6: forge.v1.CreatePositionResponse.position:type_name -> forge.v1.Position
-	107, // 7: forge.v1.UpdatePositionResponse.position:type_name -> forge.v1.Position
-	108, // 8: forge.v1.ListUserGroupsResponse.user_groups:type_name -> forge.v1.UserGroup
-	108, // 9: forge.v1.CreateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
-	108, // 10: forge.v1.UpdateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
-	109, // 11: forge.v1.ListUserAssignmentsResponse.assignments:type_name -> forge.v1.UserAssignment
-	109, // 12: forge.v1.ReplaceUserAssignmentsRequest.assignments:type_name -> forge.v1.UserAssignment
-	110, // 13: forge.v1.GetOrganizationResponse.organization:type_name -> forge.v1.Organization
-	110, // 14: forge.v1.UpdateOrganizationResponse.organization:type_name -> forge.v1.Organization
-	111, // 15: forge.v1.GetSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
-	111, // 16: forge.v1.UpdateSecurityPolicyRequest.policy:type_name -> forge.v1.SecurityPolicy
-	111, // 17: forge.v1.UpdateSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
-	112, // 18: forge.v1.ListRolesResponse.roles:type_name -> forge.v1.Role
-	113, // 19: forge.v1.ListPermissionsResponse.permissions:type_name -> forge.v1.Permission
+	118, // 0: forge.v1.ListUsersResponse.users:type_name -> forge.v1.User
+	118, // 1: forge.v1.CreateUserResponse.user:type_name -> forge.v1.User
+	119, // 2: forge.v1.ListDepartmentsResponse.departments:type_name -> forge.v1.Department
+	119, // 3: forge.v1.CreateDepartmentResponse.department:type_name -> forge.v1.Department
+	119, // 4: forge.v1.UpdateDepartmentResponse.department:type_name -> forge.v1.Department
+	120, // 5: forge.v1.ListPositionsResponse.positions:type_name -> forge.v1.Position
+	120, // 6: forge.v1.CreatePositionResponse.position:type_name -> forge.v1.Position
+	120, // 7: forge.v1.UpdatePositionResponse.position:type_name -> forge.v1.Position
+	121, // 8: forge.v1.ListUserGroupsResponse.user_groups:type_name -> forge.v1.UserGroup
+	121, // 9: forge.v1.CreateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
+	121, // 10: forge.v1.UpdateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
+	122, // 11: forge.v1.ListUserAssignmentsResponse.assignments:type_name -> forge.v1.UserAssignment
+	122, // 12: forge.v1.ReplaceUserAssignmentsRequest.assignments:type_name -> forge.v1.UserAssignment
+	123, // 13: forge.v1.GetOrganizationResponse.organization:type_name -> forge.v1.Organization
+	123, // 14: forge.v1.UpdateOrganizationResponse.organization:type_name -> forge.v1.Organization
+	124, // 15: forge.v1.GetSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
+	124, // 16: forge.v1.UpdateSecurityPolicyRequest.policy:type_name -> forge.v1.SecurityPolicy
+	124, // 17: forge.v1.UpdateSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
+	125, // 18: forge.v1.ListRolesResponse.roles:type_name -> forge.v1.Role
+	126, // 19: forge.v1.ListPermissionsResponse.permissions:type_name -> forge.v1.Permission
 	44,  // 20: forge.v1.ListMenusResponse.menus:type_name -> forge.v1.Menu
 	44,  // 21: forge.v1.UpdateMenuResponse.menu:type_name -> forge.v1.Menu
 	49,  // 22: forge.v1.ListDataFieldPoliciesResponse.policies:type_name -> forge.v1.DataFieldPolicy
-	114, // 23: forge.v1.DataFieldPolicy.created_at:type_name -> google.protobuf.Timestamp
-	114, // 24: forge.v1.DataFieldPolicy.updated_at:type_name -> google.protobuf.Timestamp
+	127, // 23: forge.v1.DataFieldPolicy.created_at:type_name -> google.protobuf.Timestamp
+	127, // 24: forge.v1.DataFieldPolicy.updated_at:type_name -> google.protobuf.Timestamp
 	49,  // 25: forge.v1.UpsertDataFieldPolicyRequest.policy:type_name -> forge.v1.DataFieldPolicy
 	49,  // 26: forge.v1.UpsertDataFieldPolicyResponse.policy:type_name -> forge.v1.DataFieldPolicy
 	56,  // 27: forge.v1.ListDataDeletionEvidenceResponse.evidence:type_name -> forge.v1.DataDeletionEvidence
-	114, // 28: forge.v1.DataDeletionEvidence.deleted_at:type_name -> google.protobuf.Timestamp
-	114, // 29: forge.v1.DataDeletionEvidence.created_at:type_name -> google.protobuf.Timestamp
-	114, // 30: forge.v1.RecordDataDeletionEvidenceRequest.deleted_at:type_name -> google.protobuf.Timestamp
+	127, // 28: forge.v1.DataDeletionEvidence.deleted_at:type_name -> google.protobuf.Timestamp
+	127, // 29: forge.v1.DataDeletionEvidence.created_at:type_name -> google.protobuf.Timestamp
+	127, // 30: forge.v1.RecordDataDeletionEvidenceRequest.deleted_at:type_name -> google.protobuf.Timestamp
 	56,  // 31: forge.v1.RecordDataDeletionEvidenceResponse.evidence:type_name -> forge.v1.DataDeletionEvidence
-	112, // 32: forge.v1.UpdateRolePermissionsResponse.role:type_name -> forge.v1.Role
-	112, // 33: forge.v1.UpdateRoleDataScopeResponse.role:type_name -> forge.v1.Role
-	105, // 34: forge.v1.UpdateUserRolesResponse.user:type_name -> forge.v1.User
-	105, // 35: forge.v1.UpdateUserStatusResponse.user:type_name -> forge.v1.User
-	105, // 36: forge.v1.UnlockUserResponse.user:type_name -> forge.v1.User
-	115, // 37: forge.v1.ListSessionsResponse.sessions:type_name -> forge.v1.Session
-	116, // 38: forge.v1.ListAuditLogsResponse.events:type_name -> forge.v1.AuditEvent
-	114, // 39: forge.v1.TemporaryRoleGrant.valid_from:type_name -> google.protobuf.Timestamp
-	114, // 40: forge.v1.TemporaryRoleGrant.valid_until:type_name -> google.protobuf.Timestamp
-	114, // 41: forge.v1.TemporaryRoleGrant.revoked_at:type_name -> google.protobuf.Timestamp
-	114, // 42: forge.v1.TemporaryRoleGrant.created_at:type_name -> google.protobuf.Timestamp
-	81,  // 43: forge.v1.ListTemporaryRoleGrantsResponse.grants:type_name -> forge.v1.TemporaryRoleGrant
-	114, // 44: forge.v1.CreateTemporaryRoleGrantRequest.valid_from:type_name -> google.protobuf.Timestamp
-	114, // 45: forge.v1.CreateTemporaryRoleGrantRequest.valid_until:type_name -> google.protobuf.Timestamp
-	81,  // 46: forge.v1.CreateTemporaryRoleGrantResponse.grant:type_name -> forge.v1.TemporaryRoleGrant
-	114, // 47: forge.v1.FederatedIdentityLink.created_at:type_name -> google.protobuf.Timestamp
-	114, // 48: forge.v1.FederatedIdentityLink.last_authenticated_at:type_name -> google.protobuf.Timestamp
-	88,  // 49: forge.v1.ListFederatedIdentityLinksResponse.links:type_name -> forge.v1.FederatedIdentityLink
-	88,  // 50: forge.v1.LinkFederatedIdentityResponse.link:type_name -> forge.v1.FederatedIdentityLink
-	114, // 51: forge.v1.AccessReview.due_at:type_name -> google.protobuf.Timestamp
-	114, // 52: forge.v1.AccessReview.created_at:type_name -> google.protobuf.Timestamp
-	114, // 53: forge.v1.AccessReview.completed_at:type_name -> google.protobuf.Timestamp
-	114, // 54: forge.v1.AccessReviewItem.decided_at:type_name -> google.protobuf.Timestamp
-	114, // 55: forge.v1.AccessReviewItem.created_at:type_name -> google.protobuf.Timestamp
-	95,  // 56: forge.v1.ListAccessReviewsResponse.reviews:type_name -> forge.v1.AccessReview
-	114, // 57: forge.v1.CreateAccessReviewRequest.due_at:type_name -> google.protobuf.Timestamp
-	95,  // 58: forge.v1.CreateAccessReviewResponse.review:type_name -> forge.v1.AccessReview
-	96,  // 59: forge.v1.ListAccessReviewItemsResponse.items:type_name -> forge.v1.AccessReviewItem
-	0,   // 60: forge.v1.PlatformService.ListUsers:input_type -> forge.v1.ListUsersRequest
-	2,   // 61: forge.v1.PlatformService.CreateUser:input_type -> forge.v1.CreateUserRequest
-	4,   // 62: forge.v1.PlatformService.ListDepartments:input_type -> forge.v1.ListDepartmentsRequest
-	6,   // 63: forge.v1.PlatformService.CreateDepartment:input_type -> forge.v1.CreateDepartmentRequest
-	8,   // 64: forge.v1.PlatformService.UpdateDepartment:input_type -> forge.v1.UpdateDepartmentRequest
-	10,  // 65: forge.v1.PlatformService.ListPositions:input_type -> forge.v1.ListPositionsRequest
-	12,  // 66: forge.v1.PlatformService.CreatePosition:input_type -> forge.v1.CreatePositionRequest
-	14,  // 67: forge.v1.PlatformService.UpdatePosition:input_type -> forge.v1.UpdatePositionRequest
-	16,  // 68: forge.v1.PlatformService.ListUserGroups:input_type -> forge.v1.ListUserGroupsRequest
-	18,  // 69: forge.v1.PlatformService.CreateUserGroup:input_type -> forge.v1.CreateUserGroupRequest
-	20,  // 70: forge.v1.PlatformService.UpdateUserGroup:input_type -> forge.v1.UpdateUserGroupRequest
-	22,  // 71: forge.v1.PlatformService.UpdateUserGroupMembers:input_type -> forge.v1.UpdateUserGroupMembersRequest
-	24,  // 72: forge.v1.PlatformService.UpdateUserGroupRoles:input_type -> forge.v1.UpdateUserGroupRolesRequest
-	26,  // 73: forge.v1.PlatformService.ListUserAssignments:input_type -> forge.v1.ListUserAssignmentsRequest
-	28,  // 74: forge.v1.PlatformService.ReplaceUserAssignments:input_type -> forge.v1.ReplaceUserAssignmentsRequest
-	30,  // 75: forge.v1.PlatformService.GetOrganization:input_type -> forge.v1.GetOrganizationRequest
-	32,  // 76: forge.v1.PlatformService.UpdateOrganization:input_type -> forge.v1.UpdateOrganizationRequest
-	34,  // 77: forge.v1.PlatformService.GetSecurityPolicy:input_type -> forge.v1.GetSecurityPolicyRequest
-	36,  // 78: forge.v1.PlatformService.UpdateSecurityPolicy:input_type -> forge.v1.UpdateSecurityPolicyRequest
-	38,  // 79: forge.v1.PlatformService.ListRoles:input_type -> forge.v1.ListRolesRequest
-	40,  // 80: forge.v1.PlatformService.ListPermissions:input_type -> forge.v1.ListPermissionsRequest
-	42,  // 81: forge.v1.PlatformService.ListMenus:input_type -> forge.v1.ListMenusRequest
-	45,  // 82: forge.v1.PlatformService.UpdateMenu:input_type -> forge.v1.UpdateMenuRequest
-	47,  // 83: forge.v1.PlatformService.ListDataFieldPolicies:input_type -> forge.v1.ListDataFieldPoliciesRequest
-	50,  // 84: forge.v1.PlatformService.UpsertDataFieldPolicy:input_type -> forge.v1.UpsertDataFieldPolicyRequest
-	52,  // 85: forge.v1.PlatformService.AuthorizeDataExport:input_type -> forge.v1.AuthorizeDataExportRequest
-	54,  // 86: forge.v1.PlatformService.ListDataDeletionEvidence:input_type -> forge.v1.ListDataDeletionEvidenceRequest
-	57,  // 87: forge.v1.PlatformService.RecordDataDeletionEvidence:input_type -> forge.v1.RecordDataDeletionEvidenceRequest
-	61,  // 88: forge.v1.PlatformService.UpdateRoleDataScope:input_type -> forge.v1.UpdateRoleDataScopeRequest
-	59,  // 89: forge.v1.PlatformService.UpdateRolePermissions:input_type -> forge.v1.UpdateRolePermissionsRequest
-	63,  // 90: forge.v1.PlatformService.UpdateUserRoles:input_type -> forge.v1.UpdateUserRolesRequest
-	65,  // 91: forge.v1.PlatformService.UpdateUserStatus:input_type -> forge.v1.UpdateUserStatusRequest
-	67,  // 92: forge.v1.PlatformService.UnlockUser:input_type -> forge.v1.UnlockUserRequest
-	69,  // 93: forge.v1.PlatformService.ResetUserPassword:input_type -> forge.v1.ResetUserPasswordRequest
-	71,  // 94: forge.v1.PlatformService.ListSessions:input_type -> forge.v1.ListSessionsRequest
-	73,  // 95: forge.v1.PlatformService.RevokeSession:input_type -> forge.v1.RevokeSessionRequest
-	75,  // 96: forge.v1.PlatformService.ListAuditLogs:input_type -> forge.v1.ListAuditLogsRequest
-	77,  // 97: forge.v1.PlatformService.VerifyAuditIntegrity:input_type -> forge.v1.VerifyAuditIntegrityRequest
-	79,  // 98: forge.v1.PlatformService.ExportAuditLogs:input_type -> forge.v1.ExportAuditLogsRequest
-	82,  // 99: forge.v1.PlatformService.ListTemporaryRoleGrants:input_type -> forge.v1.ListTemporaryRoleGrantsRequest
-	84,  // 100: forge.v1.PlatformService.CreateTemporaryRoleGrant:input_type -> forge.v1.CreateTemporaryRoleGrantRequest
-	86,  // 101: forge.v1.PlatformService.RevokeTemporaryRoleGrant:input_type -> forge.v1.RevokeTemporaryRoleGrantRequest
-	89,  // 102: forge.v1.PlatformService.ListFederatedIdentityLinks:input_type -> forge.v1.ListFederatedIdentityLinksRequest
-	91,  // 103: forge.v1.PlatformService.LinkFederatedIdentity:input_type -> forge.v1.LinkFederatedIdentityRequest
-	93,  // 104: forge.v1.PlatformService.UnlinkFederatedIdentity:input_type -> forge.v1.UnlinkFederatedIdentityRequest
-	97,  // 105: forge.v1.PlatformService.ListAccessReviews:input_type -> forge.v1.ListAccessReviewsRequest
-	99,  // 106: forge.v1.PlatformService.CreateAccessReview:input_type -> forge.v1.CreateAccessReviewRequest
-	101, // 107: forge.v1.PlatformService.ListAccessReviewItems:input_type -> forge.v1.ListAccessReviewItemsRequest
-	103, // 108: forge.v1.PlatformService.DecideAccessReviewItem:input_type -> forge.v1.DecideAccessReviewItemRequest
-	1,   // 109: forge.v1.PlatformService.ListUsers:output_type -> forge.v1.ListUsersResponse
-	3,   // 110: forge.v1.PlatformService.CreateUser:output_type -> forge.v1.CreateUserResponse
-	5,   // 111: forge.v1.PlatformService.ListDepartments:output_type -> forge.v1.ListDepartmentsResponse
-	7,   // 112: forge.v1.PlatformService.CreateDepartment:output_type -> forge.v1.CreateDepartmentResponse
-	9,   // 113: forge.v1.PlatformService.UpdateDepartment:output_type -> forge.v1.UpdateDepartmentResponse
-	11,  // 114: forge.v1.PlatformService.ListPositions:output_type -> forge.v1.ListPositionsResponse
-	13,  // 115: forge.v1.PlatformService.CreatePosition:output_type -> forge.v1.CreatePositionResponse
-	15,  // 116: forge.v1.PlatformService.UpdatePosition:output_type -> forge.v1.UpdatePositionResponse
-	17,  // 117: forge.v1.PlatformService.ListUserGroups:output_type -> forge.v1.ListUserGroupsResponse
-	19,  // 118: forge.v1.PlatformService.CreateUserGroup:output_type -> forge.v1.CreateUserGroupResponse
-	21,  // 119: forge.v1.PlatformService.UpdateUserGroup:output_type -> forge.v1.UpdateUserGroupResponse
-	23,  // 120: forge.v1.PlatformService.UpdateUserGroupMembers:output_type -> forge.v1.UpdateUserGroupMembersResponse
-	25,  // 121: forge.v1.PlatformService.UpdateUserGroupRoles:output_type -> forge.v1.UpdateUserGroupRolesResponse
-	27,  // 122: forge.v1.PlatformService.ListUserAssignments:output_type -> forge.v1.ListUserAssignmentsResponse
-	29,  // 123: forge.v1.PlatformService.ReplaceUserAssignments:output_type -> forge.v1.ReplaceUserAssignmentsResponse
-	31,  // 124: forge.v1.PlatformService.GetOrganization:output_type -> forge.v1.GetOrganizationResponse
-	33,  // 125: forge.v1.PlatformService.UpdateOrganization:output_type -> forge.v1.UpdateOrganizationResponse
-	35,  // 126: forge.v1.PlatformService.GetSecurityPolicy:output_type -> forge.v1.GetSecurityPolicyResponse
-	37,  // 127: forge.v1.PlatformService.UpdateSecurityPolicy:output_type -> forge.v1.UpdateSecurityPolicyResponse
-	39,  // 128: forge.v1.PlatformService.ListRoles:output_type -> forge.v1.ListRolesResponse
-	41,  // 129: forge.v1.PlatformService.ListPermissions:output_type -> forge.v1.ListPermissionsResponse
-	43,  // 130: forge.v1.PlatformService.ListMenus:output_type -> forge.v1.ListMenusResponse
-	46,  // 131: forge.v1.PlatformService.UpdateMenu:output_type -> forge.v1.UpdateMenuResponse
-	48,  // 132: forge.v1.PlatformService.ListDataFieldPolicies:output_type -> forge.v1.ListDataFieldPoliciesResponse
-	51,  // 133: forge.v1.PlatformService.UpsertDataFieldPolicy:output_type -> forge.v1.UpsertDataFieldPolicyResponse
-	53,  // 134: forge.v1.PlatformService.AuthorizeDataExport:output_type -> forge.v1.AuthorizeDataExportResponse
-	55,  // 135: forge.v1.PlatformService.ListDataDeletionEvidence:output_type -> forge.v1.ListDataDeletionEvidenceResponse
-	58,  // 136: forge.v1.PlatformService.RecordDataDeletionEvidence:output_type -> forge.v1.RecordDataDeletionEvidenceResponse
-	62,  // 137: forge.v1.PlatformService.UpdateRoleDataScope:output_type -> forge.v1.UpdateRoleDataScopeResponse
-	60,  // 138: forge.v1.PlatformService.UpdateRolePermissions:output_type -> forge.v1.UpdateRolePermissionsResponse
-	64,  // 139: forge.v1.PlatformService.UpdateUserRoles:output_type -> forge.v1.UpdateUserRolesResponse
-	66,  // 140: forge.v1.PlatformService.UpdateUserStatus:output_type -> forge.v1.UpdateUserStatusResponse
-	68,  // 141: forge.v1.PlatformService.UnlockUser:output_type -> forge.v1.UnlockUserResponse
-	70,  // 142: forge.v1.PlatformService.ResetUserPassword:output_type -> forge.v1.ResetUserPasswordResponse
-	72,  // 143: forge.v1.PlatformService.ListSessions:output_type -> forge.v1.ListSessionsResponse
-	74,  // 144: forge.v1.PlatformService.RevokeSession:output_type -> forge.v1.RevokeSessionResponse
-	76,  // 145: forge.v1.PlatformService.ListAuditLogs:output_type -> forge.v1.ListAuditLogsResponse
-	78,  // 146: forge.v1.PlatformService.VerifyAuditIntegrity:output_type -> forge.v1.VerifyAuditIntegrityResponse
-	80,  // 147: forge.v1.PlatformService.ExportAuditLogs:output_type -> forge.v1.ExportAuditLogsResponse
-	83,  // 148: forge.v1.PlatformService.ListTemporaryRoleGrants:output_type -> forge.v1.ListTemporaryRoleGrantsResponse
-	85,  // 149: forge.v1.PlatformService.CreateTemporaryRoleGrant:output_type -> forge.v1.CreateTemporaryRoleGrantResponse
-	87,  // 150: forge.v1.PlatformService.RevokeTemporaryRoleGrant:output_type -> forge.v1.RevokeTemporaryRoleGrantResponse
-	90,  // 151: forge.v1.PlatformService.ListFederatedIdentityLinks:output_type -> forge.v1.ListFederatedIdentityLinksResponse
-	92,  // 152: forge.v1.PlatformService.LinkFederatedIdentity:output_type -> forge.v1.LinkFederatedIdentityResponse
-	94,  // 153: forge.v1.PlatformService.UnlinkFederatedIdentity:output_type -> forge.v1.UnlinkFederatedIdentityResponse
-	98,  // 154: forge.v1.PlatformService.ListAccessReviews:output_type -> forge.v1.ListAccessReviewsResponse
-	100, // 155: forge.v1.PlatformService.CreateAccessReview:output_type -> forge.v1.CreateAccessReviewResponse
-	102, // 156: forge.v1.PlatformService.ListAccessReviewItems:output_type -> forge.v1.ListAccessReviewItemsResponse
-	104, // 157: forge.v1.PlatformService.DecideAccessReviewItem:output_type -> forge.v1.DecideAccessReviewItemResponse
-	109, // [109:158] is the sub-list for method output_type
-	60,  // [60:109] is the sub-list for method input_type
-	60,  // [60:60] is the sub-list for extension type_name
-	60,  // [60:60] is the sub-list for extension extendee
-	0,   // [0:60] is the sub-list for field type_name
+	61,  // 32: forge.v1.ListConfigChangesResponse.changes:type_name -> forge.v1.ConfigChange
+	127, // 33: forge.v1.ConfigChange.updated_at:type_name -> google.protobuf.Timestamp
+	61,  // 34: forge.v1.CreateConfigChangeResponse.change:type_name -> forge.v1.ConfigChange
+	61,  // 35: forge.v1.ApproveConfigChangeResponse.change:type_name -> forge.v1.ConfigChange
+	61,  // 36: forge.v1.PublishConfigChangeResponse.change:type_name -> forge.v1.ConfigChange
+	61,  // 37: forge.v1.RequestConfigRollbackResponse.change:type_name -> forge.v1.ConfigChange
+	61,  // 38: forge.v1.RollbackConfigChangeResponse.change:type_name -> forge.v1.ConfigChange
+	125, // 39: forge.v1.UpdateRolePermissionsResponse.role:type_name -> forge.v1.Role
+	125, // 40: forge.v1.UpdateRoleDataScopeResponse.role:type_name -> forge.v1.Role
+	118, // 41: forge.v1.UpdateUserRolesResponse.user:type_name -> forge.v1.User
+	118, // 42: forge.v1.UpdateUserStatusResponse.user:type_name -> forge.v1.User
+	118, // 43: forge.v1.UnlockUserResponse.user:type_name -> forge.v1.User
+	128, // 44: forge.v1.ListSessionsResponse.sessions:type_name -> forge.v1.Session
+	129, // 45: forge.v1.ListAuditLogsResponse.events:type_name -> forge.v1.AuditEvent
+	127, // 46: forge.v1.TemporaryRoleGrant.valid_from:type_name -> google.protobuf.Timestamp
+	127, // 47: forge.v1.TemporaryRoleGrant.valid_until:type_name -> google.protobuf.Timestamp
+	127, // 48: forge.v1.TemporaryRoleGrant.revoked_at:type_name -> google.protobuf.Timestamp
+	127, // 49: forge.v1.TemporaryRoleGrant.created_at:type_name -> google.protobuf.Timestamp
+	94,  // 50: forge.v1.ListTemporaryRoleGrantsResponse.grants:type_name -> forge.v1.TemporaryRoleGrant
+	127, // 51: forge.v1.CreateTemporaryRoleGrantRequest.valid_from:type_name -> google.protobuf.Timestamp
+	127, // 52: forge.v1.CreateTemporaryRoleGrantRequest.valid_until:type_name -> google.protobuf.Timestamp
+	94,  // 53: forge.v1.CreateTemporaryRoleGrantResponse.grant:type_name -> forge.v1.TemporaryRoleGrant
+	127, // 54: forge.v1.FederatedIdentityLink.created_at:type_name -> google.protobuf.Timestamp
+	127, // 55: forge.v1.FederatedIdentityLink.last_authenticated_at:type_name -> google.protobuf.Timestamp
+	101, // 56: forge.v1.ListFederatedIdentityLinksResponse.links:type_name -> forge.v1.FederatedIdentityLink
+	101, // 57: forge.v1.LinkFederatedIdentityResponse.link:type_name -> forge.v1.FederatedIdentityLink
+	127, // 58: forge.v1.AccessReview.due_at:type_name -> google.protobuf.Timestamp
+	127, // 59: forge.v1.AccessReview.created_at:type_name -> google.protobuf.Timestamp
+	127, // 60: forge.v1.AccessReview.completed_at:type_name -> google.protobuf.Timestamp
+	127, // 61: forge.v1.AccessReviewItem.decided_at:type_name -> google.protobuf.Timestamp
+	127, // 62: forge.v1.AccessReviewItem.created_at:type_name -> google.protobuf.Timestamp
+	108, // 63: forge.v1.ListAccessReviewsResponse.reviews:type_name -> forge.v1.AccessReview
+	127, // 64: forge.v1.CreateAccessReviewRequest.due_at:type_name -> google.protobuf.Timestamp
+	108, // 65: forge.v1.CreateAccessReviewResponse.review:type_name -> forge.v1.AccessReview
+	109, // 66: forge.v1.ListAccessReviewItemsResponse.items:type_name -> forge.v1.AccessReviewItem
+	0,   // 67: forge.v1.PlatformService.ListUsers:input_type -> forge.v1.ListUsersRequest
+	2,   // 68: forge.v1.PlatformService.CreateUser:input_type -> forge.v1.CreateUserRequest
+	4,   // 69: forge.v1.PlatformService.ListDepartments:input_type -> forge.v1.ListDepartmentsRequest
+	6,   // 70: forge.v1.PlatformService.CreateDepartment:input_type -> forge.v1.CreateDepartmentRequest
+	8,   // 71: forge.v1.PlatformService.UpdateDepartment:input_type -> forge.v1.UpdateDepartmentRequest
+	10,  // 72: forge.v1.PlatformService.ListPositions:input_type -> forge.v1.ListPositionsRequest
+	12,  // 73: forge.v1.PlatformService.CreatePosition:input_type -> forge.v1.CreatePositionRequest
+	14,  // 74: forge.v1.PlatformService.UpdatePosition:input_type -> forge.v1.UpdatePositionRequest
+	16,  // 75: forge.v1.PlatformService.ListUserGroups:input_type -> forge.v1.ListUserGroupsRequest
+	18,  // 76: forge.v1.PlatformService.CreateUserGroup:input_type -> forge.v1.CreateUserGroupRequest
+	20,  // 77: forge.v1.PlatformService.UpdateUserGroup:input_type -> forge.v1.UpdateUserGroupRequest
+	22,  // 78: forge.v1.PlatformService.UpdateUserGroupMembers:input_type -> forge.v1.UpdateUserGroupMembersRequest
+	24,  // 79: forge.v1.PlatformService.UpdateUserGroupRoles:input_type -> forge.v1.UpdateUserGroupRolesRequest
+	26,  // 80: forge.v1.PlatformService.ListUserAssignments:input_type -> forge.v1.ListUserAssignmentsRequest
+	28,  // 81: forge.v1.PlatformService.ReplaceUserAssignments:input_type -> forge.v1.ReplaceUserAssignmentsRequest
+	30,  // 82: forge.v1.PlatformService.GetOrganization:input_type -> forge.v1.GetOrganizationRequest
+	32,  // 83: forge.v1.PlatformService.UpdateOrganization:input_type -> forge.v1.UpdateOrganizationRequest
+	34,  // 84: forge.v1.PlatformService.GetSecurityPolicy:input_type -> forge.v1.GetSecurityPolicyRequest
+	36,  // 85: forge.v1.PlatformService.UpdateSecurityPolicy:input_type -> forge.v1.UpdateSecurityPolicyRequest
+	38,  // 86: forge.v1.PlatformService.ListRoles:input_type -> forge.v1.ListRolesRequest
+	40,  // 87: forge.v1.PlatformService.ListPermissions:input_type -> forge.v1.ListPermissionsRequest
+	42,  // 88: forge.v1.PlatformService.ListMenus:input_type -> forge.v1.ListMenusRequest
+	45,  // 89: forge.v1.PlatformService.UpdateMenu:input_type -> forge.v1.UpdateMenuRequest
+	47,  // 90: forge.v1.PlatformService.ListDataFieldPolicies:input_type -> forge.v1.ListDataFieldPoliciesRequest
+	50,  // 91: forge.v1.PlatformService.UpsertDataFieldPolicy:input_type -> forge.v1.UpsertDataFieldPolicyRequest
+	52,  // 92: forge.v1.PlatformService.AuthorizeDataExport:input_type -> forge.v1.AuthorizeDataExportRequest
+	54,  // 93: forge.v1.PlatformService.ListDataDeletionEvidence:input_type -> forge.v1.ListDataDeletionEvidenceRequest
+	57,  // 94: forge.v1.PlatformService.RecordDataDeletionEvidence:input_type -> forge.v1.RecordDataDeletionEvidenceRequest
+	74,  // 95: forge.v1.PlatformService.UpdateRoleDataScope:input_type -> forge.v1.UpdateRoleDataScopeRequest
+	72,  // 96: forge.v1.PlatformService.UpdateRolePermissions:input_type -> forge.v1.UpdateRolePermissionsRequest
+	76,  // 97: forge.v1.PlatformService.UpdateUserRoles:input_type -> forge.v1.UpdateUserRolesRequest
+	78,  // 98: forge.v1.PlatformService.UpdateUserStatus:input_type -> forge.v1.UpdateUserStatusRequest
+	80,  // 99: forge.v1.PlatformService.UnlockUser:input_type -> forge.v1.UnlockUserRequest
+	82,  // 100: forge.v1.PlatformService.ResetUserPassword:input_type -> forge.v1.ResetUserPasswordRequest
+	84,  // 101: forge.v1.PlatformService.ListSessions:input_type -> forge.v1.ListSessionsRequest
+	86,  // 102: forge.v1.PlatformService.RevokeSession:input_type -> forge.v1.RevokeSessionRequest
+	88,  // 103: forge.v1.PlatformService.ListAuditLogs:input_type -> forge.v1.ListAuditLogsRequest
+	90,  // 104: forge.v1.PlatformService.VerifyAuditIntegrity:input_type -> forge.v1.VerifyAuditIntegrityRequest
+	92,  // 105: forge.v1.PlatformService.ExportAuditLogs:input_type -> forge.v1.ExportAuditLogsRequest
+	95,  // 106: forge.v1.PlatformService.ListTemporaryRoleGrants:input_type -> forge.v1.ListTemporaryRoleGrantsRequest
+	97,  // 107: forge.v1.PlatformService.CreateTemporaryRoleGrant:input_type -> forge.v1.CreateTemporaryRoleGrantRequest
+	99,  // 108: forge.v1.PlatformService.RevokeTemporaryRoleGrant:input_type -> forge.v1.RevokeTemporaryRoleGrantRequest
+	102, // 109: forge.v1.PlatformService.ListFederatedIdentityLinks:input_type -> forge.v1.ListFederatedIdentityLinksRequest
+	104, // 110: forge.v1.PlatformService.LinkFederatedIdentity:input_type -> forge.v1.LinkFederatedIdentityRequest
+	106, // 111: forge.v1.PlatformService.UnlinkFederatedIdentity:input_type -> forge.v1.UnlinkFederatedIdentityRequest
+	110, // 112: forge.v1.PlatformService.ListAccessReviews:input_type -> forge.v1.ListAccessReviewsRequest
+	112, // 113: forge.v1.PlatformService.CreateAccessReview:input_type -> forge.v1.CreateAccessReviewRequest
+	114, // 114: forge.v1.PlatformService.ListAccessReviewItems:input_type -> forge.v1.ListAccessReviewItemsRequest
+	116, // 115: forge.v1.PlatformService.DecideAccessReviewItem:input_type -> forge.v1.DecideAccessReviewItemRequest
+	59,  // 116: forge.v1.PlatformService.ListConfigChanges:input_type -> forge.v1.ListConfigChangesRequest
+	62,  // 117: forge.v1.PlatformService.CreateConfigChange:input_type -> forge.v1.CreateConfigChangeRequest
+	64,  // 118: forge.v1.PlatformService.ApproveConfigChange:input_type -> forge.v1.ApproveConfigChangeRequest
+	66,  // 119: forge.v1.PlatformService.PublishConfigChange:input_type -> forge.v1.PublishConfigChangeRequest
+	68,  // 120: forge.v1.PlatformService.RequestConfigRollback:input_type -> forge.v1.RequestConfigRollbackRequest
+	70,  // 121: forge.v1.PlatformService.RollbackConfigChange:input_type -> forge.v1.RollbackConfigChangeRequest
+	1,   // 122: forge.v1.PlatformService.ListUsers:output_type -> forge.v1.ListUsersResponse
+	3,   // 123: forge.v1.PlatformService.CreateUser:output_type -> forge.v1.CreateUserResponse
+	5,   // 124: forge.v1.PlatformService.ListDepartments:output_type -> forge.v1.ListDepartmentsResponse
+	7,   // 125: forge.v1.PlatformService.CreateDepartment:output_type -> forge.v1.CreateDepartmentResponse
+	9,   // 126: forge.v1.PlatformService.UpdateDepartment:output_type -> forge.v1.UpdateDepartmentResponse
+	11,  // 127: forge.v1.PlatformService.ListPositions:output_type -> forge.v1.ListPositionsResponse
+	13,  // 128: forge.v1.PlatformService.CreatePosition:output_type -> forge.v1.CreatePositionResponse
+	15,  // 129: forge.v1.PlatformService.UpdatePosition:output_type -> forge.v1.UpdatePositionResponse
+	17,  // 130: forge.v1.PlatformService.ListUserGroups:output_type -> forge.v1.ListUserGroupsResponse
+	19,  // 131: forge.v1.PlatformService.CreateUserGroup:output_type -> forge.v1.CreateUserGroupResponse
+	21,  // 132: forge.v1.PlatformService.UpdateUserGroup:output_type -> forge.v1.UpdateUserGroupResponse
+	23,  // 133: forge.v1.PlatformService.UpdateUserGroupMembers:output_type -> forge.v1.UpdateUserGroupMembersResponse
+	25,  // 134: forge.v1.PlatformService.UpdateUserGroupRoles:output_type -> forge.v1.UpdateUserGroupRolesResponse
+	27,  // 135: forge.v1.PlatformService.ListUserAssignments:output_type -> forge.v1.ListUserAssignmentsResponse
+	29,  // 136: forge.v1.PlatformService.ReplaceUserAssignments:output_type -> forge.v1.ReplaceUserAssignmentsResponse
+	31,  // 137: forge.v1.PlatformService.GetOrganization:output_type -> forge.v1.GetOrganizationResponse
+	33,  // 138: forge.v1.PlatformService.UpdateOrganization:output_type -> forge.v1.UpdateOrganizationResponse
+	35,  // 139: forge.v1.PlatformService.GetSecurityPolicy:output_type -> forge.v1.GetSecurityPolicyResponse
+	37,  // 140: forge.v1.PlatformService.UpdateSecurityPolicy:output_type -> forge.v1.UpdateSecurityPolicyResponse
+	39,  // 141: forge.v1.PlatformService.ListRoles:output_type -> forge.v1.ListRolesResponse
+	41,  // 142: forge.v1.PlatformService.ListPermissions:output_type -> forge.v1.ListPermissionsResponse
+	43,  // 143: forge.v1.PlatformService.ListMenus:output_type -> forge.v1.ListMenusResponse
+	46,  // 144: forge.v1.PlatformService.UpdateMenu:output_type -> forge.v1.UpdateMenuResponse
+	48,  // 145: forge.v1.PlatformService.ListDataFieldPolicies:output_type -> forge.v1.ListDataFieldPoliciesResponse
+	51,  // 146: forge.v1.PlatformService.UpsertDataFieldPolicy:output_type -> forge.v1.UpsertDataFieldPolicyResponse
+	53,  // 147: forge.v1.PlatformService.AuthorizeDataExport:output_type -> forge.v1.AuthorizeDataExportResponse
+	55,  // 148: forge.v1.PlatformService.ListDataDeletionEvidence:output_type -> forge.v1.ListDataDeletionEvidenceResponse
+	58,  // 149: forge.v1.PlatformService.RecordDataDeletionEvidence:output_type -> forge.v1.RecordDataDeletionEvidenceResponse
+	75,  // 150: forge.v1.PlatformService.UpdateRoleDataScope:output_type -> forge.v1.UpdateRoleDataScopeResponse
+	73,  // 151: forge.v1.PlatformService.UpdateRolePermissions:output_type -> forge.v1.UpdateRolePermissionsResponse
+	77,  // 152: forge.v1.PlatformService.UpdateUserRoles:output_type -> forge.v1.UpdateUserRolesResponse
+	79,  // 153: forge.v1.PlatformService.UpdateUserStatus:output_type -> forge.v1.UpdateUserStatusResponse
+	81,  // 154: forge.v1.PlatformService.UnlockUser:output_type -> forge.v1.UnlockUserResponse
+	83,  // 155: forge.v1.PlatformService.ResetUserPassword:output_type -> forge.v1.ResetUserPasswordResponse
+	85,  // 156: forge.v1.PlatformService.ListSessions:output_type -> forge.v1.ListSessionsResponse
+	87,  // 157: forge.v1.PlatformService.RevokeSession:output_type -> forge.v1.RevokeSessionResponse
+	89,  // 158: forge.v1.PlatformService.ListAuditLogs:output_type -> forge.v1.ListAuditLogsResponse
+	91,  // 159: forge.v1.PlatformService.VerifyAuditIntegrity:output_type -> forge.v1.VerifyAuditIntegrityResponse
+	93,  // 160: forge.v1.PlatformService.ExportAuditLogs:output_type -> forge.v1.ExportAuditLogsResponse
+	96,  // 161: forge.v1.PlatformService.ListTemporaryRoleGrants:output_type -> forge.v1.ListTemporaryRoleGrantsResponse
+	98,  // 162: forge.v1.PlatformService.CreateTemporaryRoleGrant:output_type -> forge.v1.CreateTemporaryRoleGrantResponse
+	100, // 163: forge.v1.PlatformService.RevokeTemporaryRoleGrant:output_type -> forge.v1.RevokeTemporaryRoleGrantResponse
+	103, // 164: forge.v1.PlatformService.ListFederatedIdentityLinks:output_type -> forge.v1.ListFederatedIdentityLinksResponse
+	105, // 165: forge.v1.PlatformService.LinkFederatedIdentity:output_type -> forge.v1.LinkFederatedIdentityResponse
+	107, // 166: forge.v1.PlatformService.UnlinkFederatedIdentity:output_type -> forge.v1.UnlinkFederatedIdentityResponse
+	111, // 167: forge.v1.PlatformService.ListAccessReviews:output_type -> forge.v1.ListAccessReviewsResponse
+	113, // 168: forge.v1.PlatformService.CreateAccessReview:output_type -> forge.v1.CreateAccessReviewResponse
+	115, // 169: forge.v1.PlatformService.ListAccessReviewItems:output_type -> forge.v1.ListAccessReviewItemsResponse
+	117, // 170: forge.v1.PlatformService.DecideAccessReviewItem:output_type -> forge.v1.DecideAccessReviewItemResponse
+	60,  // 171: forge.v1.PlatformService.ListConfigChanges:output_type -> forge.v1.ListConfigChangesResponse
+	63,  // 172: forge.v1.PlatformService.CreateConfigChange:output_type -> forge.v1.CreateConfigChangeResponse
+	65,  // 173: forge.v1.PlatformService.ApproveConfigChange:output_type -> forge.v1.ApproveConfigChangeResponse
+	67,  // 174: forge.v1.PlatformService.PublishConfigChange:output_type -> forge.v1.PublishConfigChangeResponse
+	69,  // 175: forge.v1.PlatformService.RequestConfigRollback:output_type -> forge.v1.RequestConfigRollbackResponse
+	71,  // 176: forge.v1.PlatformService.RollbackConfigChange:output_type -> forge.v1.RollbackConfigChangeResponse
+	122, // [122:177] is the sub-list for method output_type
+	67,  // [67:122] is the sub-list for method input_type
+	67,  // [67:67] is the sub-list for extension type_name
+	67,  // [67:67] is the sub-list for extension extendee
+	0,   // [0:67] is the sub-list for field type_name
 }
 
 func init() { file_forge_v1_platform_proto_init() }
@@ -6768,7 +7669,7 @@ func file_forge_v1_platform_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_forge_v1_platform_proto_rawDesc), len(file_forge_v1_platform_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   105,
+			NumMessages:   118,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

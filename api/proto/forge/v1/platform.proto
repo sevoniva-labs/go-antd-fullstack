@@ -885,6 +885,30 @@ service PlatformService {
     option (google.api.http) = {post: "/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions" body: "*"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
   }
+  rpc ListConfigChanges(ListConfigChangesRequest) returns (ListConfigChangesResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/config-changes"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc CreateConfigChange(CreateConfigChangeRequest) returns (CreateConfigChangeResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/config-changes" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc ApproveConfigChange(ApproveConfigChangeRequest) returns (ApproveConfigChangeResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/config-changes/{change_id}/approve" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc PublishConfigChange(PublishConfigChangeRequest) returns (PublishConfigChangeResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/config-changes/{change_id}/publish" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc RequestConfigRollback(RequestConfigRollbackRequest) returns (RequestConfigRollbackResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/config-changes/{change_id}/rollback-request" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc RollbackConfigChange(RollbackConfigChangeRequest) returns (RollbackConfigChangeResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/config-changes/{change_id}/rollback" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
 }
 
 message ListUsersRequest {
@@ -1143,6 +1167,45 @@ message RecordDataDeletionEvidenceRequest {
 message RecordDataDeletionEvidenceResponse {
   DataDeletionEvidence evidence = 1;
 }
+
+message ListConfigChangesRequest {}
+message ListConfigChangesResponse { repeated ConfigChange changes = 1; }
+message ConfigChange {
+  string id = 1;
+  string organization_id = 2;
+  string namespace = 3;
+  string group = 4;
+  string data_id = 5;
+  uint64 version = 6;
+  uint64 expected_previous_version = 7;
+  string value_digest = 8;
+  string value_ref = 9;
+  bool sensitive = 10;
+  string created_by = 11;
+  string approved_by = 12;
+  string approval_id = 13;
+  string state = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+message CreateConfigChangeRequest {
+  string namespace = 1;
+  string group = 2;
+  string data_id = 3;
+  uint64 version = 4;
+  uint64 expected_previous_version = 5;
+  string value_digest = 6;
+  string value_ref = 7;
+  bool sensitive = 8;
+}
+message CreateConfigChangeResponse { ConfigChange change = 1; }
+message ApproveConfigChangeRequest { string change_id = 1; string approval_id = 2; }
+message ApproveConfigChangeResponse { ConfigChange change = 1; }
+message PublishConfigChangeRequest { string change_id = 1; string approval_id = 2; }
+message PublishConfigChangeResponse { ConfigChange change = 1; }
+message RequestConfigRollbackRequest { string change_id = 1; string approval_id = 2; }
+message RequestConfigRollbackResponse { ConfigChange change = 1; }
+message RollbackConfigChangeRequest { string change_id = 1; string approval_id = 2; }
+message RollbackConfigChangeResponse { ConfigChange change = 1; }
 
 message UpdateRolePermissionsRequest {
   string role_key = 1;
