@@ -10,6 +10,7 @@ TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
 .PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-s3-contract storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract mysql-backup-restore-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check offline-check-certified disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: crypto-evidence-check crypto-evidence-check-certified
 
 help:
 	@echo "Sevoniva Forge"
@@ -238,7 +239,7 @@ supply-chain-evidence: ci-policy
 release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
-verify: offline-check disaster-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
+verify: offline-check disaster-check crypto-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-build:
 	bash scripts/build-offline-package.sh
@@ -260,6 +261,15 @@ disaster-check-certified:
 	@test -n "$(DR_EVIDENCE_FILE)" || (echo "DR_EVIDENCE_FILE is required" >&2; exit 1)
 	@test -n "$(DR_EVIDENCE_ROOT)" || (echo "DR_EVIDENCE_ROOT is required" >&2; exit 1)
 	python3 scripts/check-disaster-evidence.py --file "$(DR_EVIDENCE_FILE)" --evidence-root "$(DR_EVIDENCE_ROOT)" --require-certified
+
+crypto-evidence-check:
+	python3 scripts/check-crypto-evidence_test.py
+	python3 scripts/check-crypto-evidence.py
+
+crypto-evidence-check-certified:
+	@test -n "$(FORGE_CRYPTO_EVIDENCE_FILE)" || (echo "FORGE_CRYPTO_EVIDENCE_FILE is required" >&2; exit 1)
+	@test -n "$(FORGE_CRYPTO_EVIDENCE_ROOT)" || (echo "FORGE_CRYPTO_EVIDENCE_ROOT is required" >&2; exit 1)
+	python3 scripts/check-crypto-evidence.py --file "$(FORGE_CRYPTO_EVIDENCE_FILE)" --evidence-root "$(FORGE_CRYPTO_EVIDENCE_ROOT)" --require-target-tested
 
 docker-build:
 	@for value in "$$FORGE_NODE_IMAGE" "$$FORGE_GO_IMAGE" "$$FORGE_RUNTIME_IMAGE"; do \

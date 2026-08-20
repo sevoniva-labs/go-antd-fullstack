@@ -1,0 +1,24 @@
+{
+  "kind": "forge-crypto-device-evidence",
+  "level": "Not certified",
+  "target": {
+    "product": "replace-with-approved-hsm-kms-or-password-device",
+    "version": "replace-with-version",
+    "firmware": "replace-with-firmware",
+    "architecture": "replace-with-cpu",
+    "os": "replace-with-os-and-kernel",
+    "runtime": "replace-with-runtime",
+    "tested_at": "replace-with-rfc3339"
+  },
+  "provider": "adapter-slot",
+  "key_source": "adapter",
+  "algorithms": ["replace-with-approved-algorithms"],
+  "controls": {
+    "key_rotation": "not_tested",
+    "backup_restore": "not_tested",
+    "dual_control": "not_tested",
+    "audit": "not_tested",
+    "tls": "not_tested"
+  },
+  "evidence_refs": []
+}
