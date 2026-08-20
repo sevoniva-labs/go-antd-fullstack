@@ -143,6 +143,21 @@ type Permission struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Menu struct {
+	ID             string    `json:"id"`
+	OrganizationID string    `json:"organization_id"`
+	Key            string    `json:"menu_key"`
+	ParentKey      string    `json:"parent_key"`
+	Name           string    `json:"name"`
+	Route          string    `json:"route"`
+	Icon           string    `json:"icon"`
+	PermissionKey  string    `json:"permission_key"`
+	SortOrder      int       `json:"sort_order"`
+	Status         string    `json:"status"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type Role struct {
 	ID          string       `json:"id"`
 	Key         string       `json:"role_key"`

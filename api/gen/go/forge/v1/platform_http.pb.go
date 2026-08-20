@@ -35,6 +35,7 @@ const OperationPlatformServiceListAccessReviews = "/forge.v1.PlatformService/Lis
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
 const OperationPlatformServiceListFederatedIdentityLinks = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
+const OperationPlatformServiceListMenus = "/forge.v1.PlatformService/ListMenus"
 const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListPermissions"
 const OperationPlatformServiceListPositions = "/forge.v1.PlatformService/ListPositions"
 const OperationPlatformServiceListRoles = "/forge.v1.PlatformService/ListRoles"
@@ -79,6 +80,7 @@ type PlatformServiceHTTPServer interface {
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
+	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
 	ListPositions(context.Context, *ListPositionsRequest) (*ListPositionsResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
@@ -130,6 +132,7 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.PUT("/api/v1/admin/security-config", _PlatformService_UpdateSecurityPolicy0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/roles", _PlatformService_ListRoles0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/permissions", _PlatformService_ListPermissions0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/menus", _PlatformService_ListMenus0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/data-scope", _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/permissions", _PlatformService_UpdateRolePermissions0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/users/{user_id}/roles", _PlatformService_UpdateUserRoles0_HTTP_Handler(srv))
@@ -605,6 +608,25 @@ func _PlatformService_ListPermissions0_HTTP_Handler(srv PlatformServiceHTTPServe
 			return err
 		}
 		reply := out.(*ListPermissionsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ListMenus0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListMenusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListMenus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListMenus(ctx, req.(*ListMenusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListMenusResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1094,6 +1116,7 @@ type PlatformServiceHTTPClient interface {
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
 	ListFederatedIdentityLinks(ctx context.Context, req *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (rsp *ListFederatedIdentityLinksResponse, err error)
+	ListMenus(ctx context.Context, req *ListMenusRequest, opts ...http.CallOption) (rsp *ListMenusResponse, err error)
 	ListPermissions(ctx context.Context, req *ListPermissionsRequest, opts ...http.CallOption) (rsp *ListPermissionsResponse, err error)
 	ListPositions(ctx context.Context, req *ListPositionsRequest, opts ...http.CallOption) (rsp *ListPositionsResponse, err error)
 	ListRoles(ctx context.Context, req *ListRolesRequest, opts ...http.CallOption) (rsp *ListRolesResponse, err error)
@@ -1330,6 +1353,19 @@ func (c *PlatformServiceHTTPClientImpl) ListFederatedIdentityLinks(ctx context.C
 	pattern := "/api/v1/admin/identity-mappings"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlatformServiceListFederatedIdentityLinks))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ListMenus(ctx context.Context, in *ListMenusRequest, opts ...http.CallOption) (*ListMenusResponse, error) {
+	var out ListMenusResponse
+	pattern := "/api/v1/admin/menus"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListMenus))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -622,6 +622,22 @@ func (s *PlatformService) ListPermissions(ctx context.Context, _ *forgev1.ListPe
 	return reply, nil
 }
 
+func (s *PlatformService) ListMenus(ctx context.Context, _ *forgev1.ListMenusRequest) (*forgev1.ListMenusResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	menus, err := s.identity.ListMenus(ctx, principal)
+	if err != nil {
+		return nil, internalError(err)
+	}
+	reply := &forgev1.ListMenusResponse{Menus: make([]*forgev1.Menu, 0, len(menus))}
+	for _, menu := range menus {
+		reply.Menus = append(reply.Menus, menuProto(menu))
+	}
+	return reply, nil
+}
+
 func (s *PlatformService) ListSessions(ctx context.Context, _ *forgev1.ListSessionsRequest) (*forgev1.ListSessionsResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -898,6 +914,10 @@ func securityPolicyProto(policy domain.SecurityPolicy) *forgev1.SecurityPolicy {
 
 func permissionProto(permission domain.Permission) *forgev1.Permission {
 	return &forgev1.Permission{Key: permission.Key, Name: permission.Name}
+}
+
+func menuProto(menu domain.Menu) *forgev1.Menu {
+	return &forgev1.Menu{Id: menu.ID, OrganizationId: menu.OrganizationID, Key: menu.Key, ParentKey: menu.ParentKey, Name: menu.Name, Route: menu.Route, Icon: menu.Icon, PermissionKey: menu.PermissionKey, SortOrder: int32(menu.SortOrder), Status: menu.Status}
 }
 
 func roleProto(role domain.Role) *forgev1.Role {

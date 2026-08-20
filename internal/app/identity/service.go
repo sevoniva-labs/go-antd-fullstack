@@ -110,6 +110,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.department.read", "查看部门"}, {"system.department.manage", "管理部门"},
 	{"system.position.read", "查看岗位"}, {"system.position.manage", "管理岗位"},
 	{"system.user_group.read", "查看用户组"}, {"system.user_group.manage", "管理用户组"},
+	{"system.menu.read", "查看平台菜单"},
 	{"system.identity_mapping.read", "查看外部身份绑定"}, {"system.identity_mapping.manage", "管理外部身份绑定"},
 	{"system.access_review.read", "查看访问复核"}, {"system.access_review.manage", "管理访问复核"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
@@ -151,7 +152,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.identity_mapping.read", "system.identity_mapping.manage", "system.access_review.read", "system.access_review.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.menu.read", "system.identity_mapping.read", "system.identity_mapping.manage", "system.access_review.read", "system.access_review.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
@@ -171,6 +172,11 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	}
 	if err = s.repo.GrantPermissionToRole(ctx, orgID, "auditor", "approval.request.read"); err != nil {
 		return err
+	}
+	for _, menu := range builtinMenus(orgID) {
+		if err = s.repo.EnsureMenu(ctx, menu); err != nil {
+			return err
+		}
 	}
 	if admin == "" {
 		return s.finalizeBootstrapDefaults(ctx, orgID)
@@ -1616,6 +1622,34 @@ func (s *Service) UpdateRoleDataScope(ctx context.Context, actor domain.Principa
 
 func (s *Service) ListPermissions(ctx context.Context) ([]domain.Permission, error) {
 	return s.repo.ListPermissions(ctx)
+}
+
+func (s *Service) ListMenus(ctx context.Context, principal domain.Principal) ([]domain.Menu, error) {
+	menus, err := s.repo.ListMenus(ctx, principal.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	if principal.HasRole("system_admin") {
+		return menus, nil
+	}
+	filtered := make([]domain.Menu, 0, len(menus))
+	for _, menu := range menus {
+		if menu.PermissionKey == "" || principal.HasPermission(menu.PermissionKey) {
+			filtered = append(filtered, menu)
+		}
+	}
+	return filtered, nil
+}
+
+func builtinMenus(orgID string) []domain.Menu {
+	now := time.Now().UTC()
+	return []domain.Menu{
+		{OrganizationID: orgID, Key: "dashboard", Name: "工作台", Route: "/dashboard", Icon: "DashboardOutlined", SortOrder: 10, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform", Name: "平台管理", Route: "/group/platform", Icon: "SettingOutlined", PermissionKey: "system.menu.read", SortOrder: 20, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.users", ParentKey: "platform", Name: "用户管理", Route: "/admin/users", Icon: "UserOutlined", PermissionKey: "system.user.read", SortOrder: 21, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.roles", ParentKey: "platform", Name: "角色权限", Route: "/admin/roles", Icon: "SafetyOutlined", PermissionKey: "system.role.read", SortOrder: 22, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "platform.audit", ParentKey: "platform", Name: "审计日志", Route: "/admin/audit", Icon: "FileSearchOutlined", PermissionKey: "system.audit.read", SortOrder: 23, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+	}
 }
 
 func (s *Service) UpdateRolePermissions(ctx context.Context, actor domain.Principal, orgID, roleKey string, permissionKeys []string) error {

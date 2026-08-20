@@ -83,6 +83,9 @@ export type ForgeV1AuditEvent = {
     result?: string;
     clientIp?: string;
     detailsJson?: string;
+    sequenceNo?: string;
+    prevHash?: string;
+    eventHash?: string;
 };
 
 export type ForgeV1BeginMfaEnrollmentRequest = {
@@ -94,6 +97,10 @@ export type ForgeV1BeginMfaEnrollmentResponse = {
     provisioningUri?: string;
 };
 
+export type ForgeV1BeginOidcLoginResponse = {
+    redirectUrl?: string;
+};
+
 export type ForgeV1ChangePasswordRequest = {
     currentPassword?: string;
     newPassword?: string;
@@ -101,6 +108,17 @@ export type ForgeV1ChangePasswordRequest = {
 
 export type ForgeV1ChangePasswordResponse = {
     [key: string]: unknown;
+};
+
+export type ForgeV1CompleteOidcLoginRequest = {
+    provider?: string;
+    code?: string;
+    state?: string;
+};
+
+export type ForgeV1CompleteOidcLoginResponse = {
+    user?: ForgeV1User;
+    csrfToken?: string;
 };
 
 export type ForgeV1ConfirmMfaEnrollmentRequest = {
@@ -365,6 +383,10 @@ export type ForgeV1ListFederatedIdentityLinksResponse = {
     links?: Array<ForgeV1FederatedIdentityLink>;
 };
 
+export type ForgeV1ListMenusResponse = {
+    menus?: Array<ForgeV1Menu>;
+};
+
 export type ForgeV1ListPermissionsResponse = {
     permissions?: Array<ForgeV1Permission>;
 };
@@ -397,6 +419,18 @@ export type ForgeV1ListUsersResponse = {
     users?: Array<ForgeV1User>;
 };
 
+export type ForgeV1LoginLdapRequest = {
+    provider?: string;
+    organization?: string;
+    loginName?: string;
+    password?: string;
+};
+
+export type ForgeV1LoginLdapResponse = {
+    user?: ForgeV1User;
+    csrfToken?: string;
+};
+
 export type ForgeV1LoginRequest = {
     organization?: string;
     loginName?: string;
@@ -416,6 +450,19 @@ export type ForgeV1LogoutRequest = {
 
 export type ForgeV1LogoutResponse = {
     [key: string]: unknown;
+};
+
+export type ForgeV1Menu = {
+    id?: string;
+    organizationId?: string;
+    key?: string;
+    parentKey?: string;
+    name?: string;
+    route?: string;
+    icon?: string;
+    permissionKey?: string;
+    sortOrder?: number;
+    status?: string;
 };
 
 export type ForgeV1Organization = {
@@ -746,6 +793,10 @@ export type ForgeV1UserGroup = {
     updatedAt?: string;
 };
 
+export type ForgeV1VerifyAuditIntegrityResponse = {
+    verified?: boolean;
+};
+
 export type ForgeV1WithdrawApprovalRequest = {
     approvalId?: string;
     comment?: string;
@@ -862,6 +913,22 @@ export type PlatformServiceExportAuditLogsResponses = {
 
 export type PlatformServiceExportAuditLogsResponse = PlatformServiceExportAuditLogsResponses[keyof PlatformServiceExportAuditLogsResponses];
 
+export type PlatformServiceVerifyAuditIntegrityData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/audit-logs/integrity';
+};
+
+export type PlatformServiceVerifyAuditIntegrityResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1VerifyAuditIntegrityResponse;
+};
+
+export type PlatformServiceVerifyAuditIntegrityResponse = PlatformServiceVerifyAuditIntegrityResponses[keyof PlatformServiceVerifyAuditIntegrityResponses];
+
 export type PlatformServiceListDepartmentsData = {
     body?: never;
     path?: never;
@@ -961,6 +1028,22 @@ export type PlatformServiceUnlinkFederatedIdentityResponses = {
 };
 
 export type PlatformServiceUnlinkFederatedIdentityResponse = PlatformServiceUnlinkFederatedIdentityResponses[keyof PlatformServiceUnlinkFederatedIdentityResponses];
+
+export type PlatformServiceListMenusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/menus';
+};
+
+export type PlatformServiceListMenusResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListMenusResponse;
+};
+
+export type PlatformServiceListMenusResponse = PlatformServiceListMenusResponses[keyof PlatformServiceListMenusResponses];
 
 export type PlatformServiceGetOrganizationData = {
     body?: never;
@@ -1613,6 +1696,62 @@ export type ApprovalServiceWithdrawApprovalResponses = {
 };
 
 export type ApprovalServiceWithdrawApprovalResponse = ApprovalServiceWithdrawApprovalResponses[keyof ApprovalServiceWithdrawApprovalResponses];
+
+export type IdentityServiceLoginLdapData = {
+    body: ForgeV1LoginLdapRequest;
+    path: {
+        provider: string;
+    };
+    query?: never;
+    url: '/api/v1/auth/federated/ldap/{provider}';
+};
+
+export type IdentityServiceLoginLdapResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1LoginLdapResponse;
+};
+
+export type IdentityServiceLoginLdapResponse = IdentityServiceLoginLdapResponses[keyof IdentityServiceLoginLdapResponses];
+
+export type IdentityServiceBeginOidcLoginData = {
+    body?: never;
+    path: {
+        provider: string;
+    };
+    query?: {
+        organization?: string;
+    };
+    url: '/api/v1/auth/federated/oidc/{provider}/begin';
+};
+
+export type IdentityServiceBeginOidcLoginResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1BeginOidcLoginResponse;
+};
+
+export type IdentityServiceBeginOidcLoginResponse = IdentityServiceBeginOidcLoginResponses[keyof IdentityServiceBeginOidcLoginResponses];
+
+export type IdentityServiceCompleteOidcLoginData = {
+    body: ForgeV1CompleteOidcLoginRequest;
+    path: {
+        provider: string;
+    };
+    query?: never;
+    url: '/api/v1/auth/federated/oidc/{provider}/callback';
+};
+
+export type IdentityServiceCompleteOidcLoginResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CompleteOidcLoginResponse;
+};
+
+export type IdentityServiceCompleteOidcLoginResponse = IdentityServiceCompleteOidcLoginResponses[keyof IdentityServiceCompleteOidcLoginResponses];
 
 export type IdentityServiceLoginData = {
     body: ForgeV1LoginRequest;

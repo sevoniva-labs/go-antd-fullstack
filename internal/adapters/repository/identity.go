@@ -1093,6 +1093,43 @@ func (r *IdentityRepo) ListPermissions(ctx context.Context) ([]identity.Permissi
 	return out, rows.Err()
 }
 
+func (r *IdentityRepo) EnsureMenu(ctx context.Context, menu identity.Menu) error {
+	var id string
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM menus WHERE organization_id=? AND menu_key=?`), menu.OrganizationID, menu.Key).Scan(&id)
+	if err == nil {
+		return nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO menus(id,organization_id,menu_key,parent_key,name,route,icon,permission_key,sort_order,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`), uuid.NewString(), menu.OrganizationID, menu.Key, menu.ParentKey, menu.Name, menu.Route, menu.Icon, menu.PermissionKey, menu.SortOrder, menu.Status, menu.CreatedAt, menu.UpdatedAt)
+	if err == nil {
+		return nil
+	}
+	var existing string
+	if readErr := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM menus WHERE organization_id=? AND menu_key=?`), menu.OrganizationID, menu.Key).Scan(&existing); readErr == nil {
+		return nil
+	}
+	return err
+}
+
+func (r *IdentityRepo) ListMenus(ctx context.Context, orgID string) ([]identity.Menu, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,menu_key,parent_key,name,route,icon,permission_key,sort_order,status,created_at,updated_at FROM menus WHERE organization_id=? AND status='ACTIVE' ORDER BY sort_order,menu_key`), orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	menus := make([]identity.Menu, 0)
+	for rows.Next() {
+		var menu identity.Menu
+		if err := rows.Scan(&menu.ID, &menu.OrganizationID, &menu.Key, &menu.ParentKey, &menu.Name, &menu.Route, &menu.Icon, &menu.PermissionKey, &menu.SortOrder, &menu.Status, &menu.CreatedAt, &menu.UpdatedAt); err != nil {
+			return nil, err
+		}
+		menus = append(menus, menu)
+	}
+	return menus, rows.Err()
+}
+
 func (r *IdentityRepo) PermissionsForRole(ctx context.Context, roleID string) ([]identity.Permission, error) {
 	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT p.id,p.permission_key,p.name,p.created_at
 		FROM permissions p

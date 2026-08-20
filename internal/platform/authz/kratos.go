@@ -74,6 +74,7 @@ func PlatformRules() map[string][]string {
 		forgev1.OperationPlatformServiceUpdateSecurityPolicy:       {"system.security.manage"},
 		forgev1.OperationPlatformServiceListRoles:                  {"system.role.read"},
 		forgev1.OperationPlatformServiceListPermissions:            {"system.role.read"},
+		forgev1.OperationPlatformServiceListMenus:                  {"system.menu.read"},
 		forgev1.OperationPlatformServiceUpdateRolePermissions:      {"system.role.manage"},
 		forgev1.OperationPlatformServiceUpdateRoleDataScope:        {"system.role.manage"},
 		forgev1.OperationPlatformServiceUpdateUserRoles:            {"system.user.role.manage"},

@@ -291,6 +291,21 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/menus:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListMenus
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListMenusResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
     /api/v1/admin/organization:
         get:
             tags:
@@ -2068,6 +2083,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.FederatedIdentityLink'
+        forge.v1.ListMenusResponse:
+            type: object
+            properties:
+                menus:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.Menu'
         forge.v1.ListPermissionsResponse:
             type: object
             properties:
@@ -2168,6 +2190,30 @@ components:
         forge.v1.LogoutResponse:
             type: object
             properties: {}
+        forge.v1.Menu:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                key:
+                    type: string
+                parentKey:
+                    type: string
+                name:
+                    type: string
+                route:
+                    type: string
+                icon:
+                    type: string
+                permissionKey:
+                    type: string
+                sortOrder:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
         forge.v1.Organization:
             type: object
             properties:
