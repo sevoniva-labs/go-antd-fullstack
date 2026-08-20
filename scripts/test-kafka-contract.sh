@@ -10,7 +10,8 @@ EVIDENCE_FILE="${FORGE_KAFKA_EVIDENCE_FILE:-}"
 PROJECT="${FORGE_KAFKA_COMPOSE_PROJECT:-forge-kafka-contract}"
 TOPIC="forge-contract-$(date +%s)-$$"
 GROUP="forge-contract-group-$(date +%s)-$$"
-SOURCE_FILE="$(mktemp "$ROOT/kafka-contract-source.XXXXXX").go"
+SOURCE_BASE="$(mktemp "$ROOT/kafka-contract-source.XXXXXX")"
+SOURCE_FILE="${SOURCE_BASE}.go"
 BINARY_FILE="$(mktemp "$ROOT/kafka-contract-binary.XXXXXX")"
 
 if [[ ! "$KAFKA_IMAGE" =~ ^[^[:space:]]+@sha256:[0-9a-f]{64}$ ]]; then
@@ -26,9 +27,11 @@ compose() {
 
 cleanup() {
   compose -f "$COMPOSE_FILE" down -v --remove-orphans >/dev/null 2>&1 || true
-  rm -f "$SOURCE_FILE" "$BINARY_FILE"
+  rm -f "$SOURCE_BASE" "$SOURCE_FILE" "$BINARY_FILE"
 }
 trap cleanup EXIT
+
+mv "$SOURCE_BASE" "$SOURCE_FILE"
 
 cat >"$SOURCE_FILE" <<EOF
 package main
