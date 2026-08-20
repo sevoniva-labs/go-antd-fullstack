@@ -126,3 +126,9 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - `scripts/test-kafka-contract.sh` starts the development KRaft overlay, creates a unique topic, compiles the repository's `franz-go` streaming path for the runtime architecture, and produces/consumes one record inside the broker network.
 - The exact domestic mirror image pulled for this contract is `docker.m.daocloud.io/apache/kafka@sha256:3f7b939115cd4872e9cee9369d80bd69712fde55f9902f46d793f64848dedc75`.
 - Run `make kafka-runtime-contract` with `FORGE_KAFKA_IMAGE` set to that exact digest and optionally set `FORGE_KAFKA_EVIDENCE_FILE`. This proves only the standalone development Streaming provider path; production TLS/SASL, ACLs, multi-broker HA, rack/failure behavior, retention, replay, throughput, and Xinchuang target compatibility remain unverified. Kafka remains separate from RocketMQ business messaging.
+
+## Local generic S3 advanced contract evidence (2026-08-21)
+
+- `scripts/test-s3-local-advanced-contract.sh` starts a disposable domestic MinIO S3-compatible endpoint, creates a versioned Object Lock bucket, and delegates to `scripts/test-cos-advanced-contract.sh` with generic S3 endpoint settings. It exercises checksum, multipart abort/recovery, constrained presign, versioning, and approved legal-hold mutation where the endpoint supports them.
+- The exact domestic mirror image used for the local capability contract is `docker.m.daocloud.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e`.
+- Run `make s3-local-advanced-contract` with temporary local `FORGE_S3_LOCAL_ACCESS_KEY` and `FORGE_S3_LOCAL_SECRET_KEY` values and optionally set `FORGE_S3_LOCAL_EVIDENCE_FILE`. This is generic S3-compatible capability evidence only; it does not certify Tencent COS, another vendor's KMS/STS/Object Lock semantics, production retention policy, or regulatory compliance.

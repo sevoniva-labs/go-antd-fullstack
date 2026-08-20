@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-cos-contract storage-cos-advanced-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract kafka-runtime-contract offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract kafka-runtime-contract offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -39,6 +39,7 @@ help:
 	@echo "  make otel-runtime-contract  Start and probe the local OTel Collector contract overlay"
 	@echo "  make mysql-runtime-contract  Start MySQL and run the migration/schema contract"
 	@echo "  make kafka-runtime-contract  Start Kafka and run the franz-go stream contract"
+	@echo "  make s3-local-advanced-contract  Run generic S3 advanced capability contract locally"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
 
@@ -152,6 +153,9 @@ mysql-runtime-contract:
 
 kafka-runtime-contract:
 	bash scripts/test-kafka-contract.sh
+
+s3-local-advanced-contract:
+	bash scripts/test-s3-local-advanced-contract.sh
 
 build: web-build
 	mkdir -p bin

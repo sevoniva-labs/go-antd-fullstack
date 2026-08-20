@@ -14,6 +14,13 @@ command -v openssl >/dev/null 2>&1 || { echo "openssl is required" >&2; exit 1; 
 : "${FORGE_COS_REGION:?set FORGE_COS_REGION explicitly}"
 : "${FORGE_COS_ENDPOINT:?set FORGE_COS_ENDPOINT explicitly}"
 
+# The contract-facing FORGE_COS_* names are the source-of-truth inputs. Map
+# them to the AWS CLI names unless a caller deliberately supplied temporary
+# AWS credentials (for example, an STS session) for this invocation.
+export AWS_EC2_METADATA_DISABLED=true
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-$FORGE_COS_ACCESS_KEY}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-$FORGE_COS_SECRET_KEY}"
+
 REQUIRE_ADVANCED=${FORGE_COS_REQUIRE_ADVANCED:-false}
 ALLOW_MUTATING=${FORGE_COS_ALLOW_MUTATING_ADVANCED:-false}
 PREFIX=${FORGE_COS_PREFIX:-forge-advanced-$(date -u +%Y%m%dT%H%M%SZ)-$$}
