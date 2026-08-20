@@ -49,6 +49,7 @@ const (
 	PlatformService_ListSessions_FullMethodName               = "/forge.v1.PlatformService/ListSessions"
 	PlatformService_RevokeSession_FullMethodName              = "/forge.v1.PlatformService/RevokeSession"
 	PlatformService_ListAuditLogs_FullMethodName              = "/forge.v1.PlatformService/ListAuditLogs"
+	PlatformService_VerifyAuditIntegrity_FullMethodName       = "/forge.v1.PlatformService/VerifyAuditIntegrity"
 	PlatformService_ExportAuditLogs_FullMethodName            = "/forge.v1.PlatformService/ExportAuditLogs"
 	PlatformService_ListTemporaryRoleGrants_FullMethodName    = "/forge.v1.PlatformService/ListTemporaryRoleGrants"
 	PlatformService_CreateTemporaryRoleGrant_FullMethodName   = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
@@ -96,6 +97,7 @@ type PlatformServiceClient interface {
 	ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error)
 	RevokeSession(ctx context.Context, in *RevokeSessionRequest, opts ...grpc.CallOption) (*RevokeSessionResponse, error)
 	ListAuditLogs(ctx context.Context, in *ListAuditLogsRequest, opts ...grpc.CallOption) (*ListAuditLogsResponse, error)
+	VerifyAuditIntegrity(ctx context.Context, in *VerifyAuditIntegrityRequest, opts ...grpc.CallOption) (*VerifyAuditIntegrityResponse, error)
 	ExportAuditLogs(ctx context.Context, in *ExportAuditLogsRequest, opts ...grpc.CallOption) (*ExportAuditLogsResponse, error)
 	ListTemporaryRoleGrants(ctx context.Context, in *ListTemporaryRoleGrantsRequest, opts ...grpc.CallOption) (*ListTemporaryRoleGrantsResponse, error)
 	CreateTemporaryRoleGrant(ctx context.Context, in *CreateTemporaryRoleGrantRequest, opts ...grpc.CallOption) (*CreateTemporaryRoleGrantResponse, error)
@@ -417,6 +419,16 @@ func (c *platformServiceClient) ListAuditLogs(ctx context.Context, in *ListAudit
 	return out, nil
 }
 
+func (c *platformServiceClient) VerifyAuditIntegrity(ctx context.Context, in *VerifyAuditIntegrityRequest, opts ...grpc.CallOption) (*VerifyAuditIntegrityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifyAuditIntegrityResponse)
+	err := c.cc.Invoke(ctx, PlatformService_VerifyAuditIntegrity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformServiceClient) ExportAuditLogs(ctx context.Context, in *ExportAuditLogsRequest, opts ...grpc.CallOption) (*ExportAuditLogsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExportAuditLogsResponse)
@@ -561,6 +573,7 @@ type PlatformServiceServer interface {
 	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
+	VerifyAuditIntegrity(context.Context, *VerifyAuditIntegrityRequest) (*VerifyAuditIntegrityResponse, error)
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
 	ListTemporaryRoleGrants(context.Context, *ListTemporaryRoleGrantsRequest) (*ListTemporaryRoleGrantsResponse, error)
 	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
@@ -671,6 +684,9 @@ func (UnimplementedPlatformServiceServer) RevokeSession(context.Context, *Revoke
 }
 func (UnimplementedPlatformServiceServer) ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListAuditLogs not implemented")
+}
+func (UnimplementedPlatformServiceServer) VerifyAuditIntegrity(context.Context, *VerifyAuditIntegrityRequest) (*VerifyAuditIntegrityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method VerifyAuditIntegrity not implemented")
 }
 func (UnimplementedPlatformServiceServer) ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExportAuditLogs not implemented")
@@ -1266,6 +1282,24 @@ func _PlatformService_ListAuditLogs_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_VerifyAuditIntegrity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyAuditIntegrityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).VerifyAuditIntegrity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_VerifyAuditIntegrity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).VerifyAuditIntegrity(ctx, req.(*VerifyAuditIntegrityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlatformService_ExportAuditLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExportAuditLogsRequest)
 	if err := dec(in); err != nil {
@@ -1590,6 +1624,10 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAuditLogs",
 			Handler:    _PlatformService_ListAuditLogs_Handler,
+		},
+		{
+			MethodName: "VerifyAuditIntegrity",
+			Handler:    _PlatformService_VerifyAuditIntegrity_Handler,
 		},
 		{
 			MethodName: "ExportAuditLogs",

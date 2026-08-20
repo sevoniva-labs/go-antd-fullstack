@@ -158,4 +158,7 @@ message AuditEvent {
   string result = 10;
   string client_ip = 11;
   string details_json = 12;
+  int64 sequence_no = 13;
+  string prev_hash = 14;
+  string event_hash = 15;
 }

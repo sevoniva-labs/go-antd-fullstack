@@ -148,6 +148,21 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/audit-logs/integrity:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_VerifyAuditIntegrity
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.VerifyAuditIntegrityResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
     /api/v1/admin/departments:
         get:
             tags:
@@ -1595,6 +1610,12 @@ components:
                     type: string
                 detailsJson:
                     type: string
+                sequenceNo:
+                    type: string
+                prevHash:
+                    type: string
+                eventHash:
+                    type: string
         forge.v1.BeginMFAEnrollmentRequest:
             type: object
             properties:
@@ -2683,6 +2704,11 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+        forge.v1.VerifyAuditIntegrityResponse:
+            type: object
+            properties:
+                verified:
+                    type: boolean
         forge.v1.WithdrawApprovalRequest:
             type: object
             properties:

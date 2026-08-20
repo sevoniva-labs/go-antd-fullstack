@@ -84,6 +84,7 @@ func PlatformRules() map[string][]string {
 		forgev1.OperationPlatformServiceRevokeSession:              {"system.session.revoke"},
 		forgev1.OperationPlatformServiceListAuditLogs:              {"system.audit.read"},
 		forgev1.OperationPlatformServiceExportAuditLogs:            {"system.audit.export"},
+		forgev1.OperationPlatformServiceVerifyAuditIntegrity:       {"system.audit.verify"},
 		forgev1.OperationPlatformServiceListTemporaryRoleGrants:    {"system.temporary_grant.read"},
 		forgev1.OperationPlatformServiceCreateTemporaryRoleGrant:   {"system.temporary_grant.manage"},
 		forgev1.OperationPlatformServiceRevokeTemporaryRoleGrant:   {"system.temporary_grant.manage"},

@@ -694,6 +694,10 @@ service PlatformService {
       ]
     };
   }
+  rpc VerifyAuditIntegrity(VerifyAuditIntegrityRequest) returns (VerifyAuditIntegrityResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/audit-logs/integrity"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
   rpc ExportAuditLogs(ExportAuditLogsRequest) returns (ExportAuditLogsResponse) {
     option (google.api.http) = {get: "/api/v1/admin/audit-logs/export"};
     option (openapi.v3.operation) = {
@@ -987,6 +991,8 @@ message ListAuditLogsRequest {
 message ListAuditLogsResponse {
   repeated AuditEvent events = 1;
 }
+message VerifyAuditIntegrityRequest {}
+message VerifyAuditIntegrityResponse { bool verified = 1; }
 
 message ExportAuditLogsRequest {
   string format = 1;

@@ -60,6 +60,7 @@ const OperationPlatformServiceUpdateUserGroupMembers = "/forge.v1.PlatformServic
 const OperationPlatformServiceUpdateUserGroupRoles = "/forge.v1.PlatformService/UpdateUserGroupRoles"
 const OperationPlatformServiceUpdateUserRoles = "/forge.v1.PlatformService/UpdateUserRoles"
 const OperationPlatformServiceUpdateUserStatus = "/forge.v1.PlatformService/UpdateUserStatus"
+const OperationPlatformServiceVerifyAuditIntegrity = "/forge.v1.PlatformService/VerifyAuditIntegrity"
 
 type PlatformServiceHTTPServer interface {
 	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
@@ -103,6 +104,7 @@ type PlatformServiceHTTPServer interface {
 	UpdateUserGroupRoles(context.Context, *UpdateUserGroupRolesRequest) (*UpdateUserGroupRolesResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
 	UpdateUserStatus(context.Context, *UpdateUserStatusRequest) (*UpdateUserStatusResponse, error)
+	VerifyAuditIntegrity(context.Context, *VerifyAuditIntegrityRequest) (*VerifyAuditIntegrityResponse, error)
 }
 
 func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPServer) {
@@ -137,6 +139,7 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/sessions", _PlatformService_ListSessions0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/admin/sessions/{session_id}", _PlatformService_RevokeSession0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/audit-logs", _PlatformService_ListAuditLogs0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/audit-logs/integrity", _PlatformService_VerifyAuditIntegrity0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/audit-logs/export", _PlatformService_ExportAuditLogs0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/temporary-role-grants", _PlatformService_ListTemporaryRoleGrants0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/temporary-role-grants", _PlatformService_CreateTemporaryRoleGrant0_HTTP_Handler(srv))
@@ -816,6 +819,25 @@ func _PlatformService_ListAuditLogs0_HTTP_Handler(srv PlatformServiceHTTPServer)
 	}
 }
 
+func _PlatformService_VerifyAuditIntegrity0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in VerifyAuditIntegrityRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceVerifyAuditIntegrity)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.VerifyAuditIntegrity(ctx, req.(*VerifyAuditIntegrityRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*VerifyAuditIntegrityResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _PlatformService_ExportAuditLogs0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ExportAuditLogsRequest
@@ -1097,6 +1119,7 @@ type PlatformServiceHTTPClient interface {
 	UpdateUserGroupRoles(ctx context.Context, req *UpdateUserGroupRolesRequest, opts ...http.CallOption) (rsp *UpdateUserGroupRolesResponse, err error)
 	UpdateUserRoles(ctx context.Context, req *UpdateUserRolesRequest, opts ...http.CallOption) (rsp *UpdateUserRolesResponse, err error)
 	UpdateUserStatus(ctx context.Context, req *UpdateUserStatusRequest, opts ...http.CallOption) (rsp *UpdateUserStatusResponse, err error)
+	VerifyAuditIntegrity(ctx context.Context, req *VerifyAuditIntegrityRequest, opts ...http.CallOption) (rsp *VerifyAuditIntegrityResponse, err error)
 }
 
 type PlatformServiceHTTPClientImpl struct {
@@ -1634,6 +1657,19 @@ func (c *PlatformServiceHTTPClientImpl) UpdateUserStatus(ctx context.Context, in
 	opts = append(opts, http.Operation(OperationPlatformServiceUpdateUserStatus))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) VerifyAuditIntegrity(ctx context.Context, in *VerifyAuditIntegrityRequest, opts ...http.CallOption) (*VerifyAuditIntegrityResponse, error) {
+	var out VerifyAuditIntegrityResponse
+	pattern := "/api/v1/admin/audit-logs/integrity"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceVerifyAuditIntegrity))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

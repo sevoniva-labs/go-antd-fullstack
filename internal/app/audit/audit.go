@@ -35,6 +35,8 @@ type Event struct {
 
 type Writer struct{ db *database.DB }
 
+var ErrIntegrityViolation = errors.New("audit integrity violation")
+
 func NewWriter(db *database.DB) *Writer { return &Writer{db: db} }
 
 func (w *Writer) Write(ctx context.Context, e Event) error {
@@ -133,12 +135,12 @@ func (w *Writer) VerifyIntegrity(ctx context.Context, orgID string) error {
 			return err
 		}
 		if !sequence.Valid || !eventHash.Valid {
-			return errors.New("legacy audit event has no integrity proof")
+			return fmt.Errorf("%w: legacy audit event has no integrity proof", ErrIntegrityViolation)
 		}
 		e.OrganizationID, e.ActorID = organizationID.String, actorID.String
 		e.SequenceNo, e.PrevHash, e.EventHash = sequence.Int64, previousHash.String, eventHash.String
 		if e.SequenceNo != expectedSequence || e.PrevHash != previous || e.EventHash != auditEventHash(e, raw) {
-			return fmt.Errorf("audit integrity violation at sequence %d", e.SequenceNo)
+			return fmt.Errorf("%w at sequence %d", ErrIntegrityViolation, e.SequenceNo)
 		}
 		previous = e.EventHash
 		expectedSequence++

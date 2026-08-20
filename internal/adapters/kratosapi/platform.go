@@ -754,6 +754,8 @@ func serviceError(err error) error {
 		return kratoserrors.Conflict("APPROVAL_NOT_EXECUTABLE", "approval is not executable")
 	case errors.Is(err, domainapproval.ErrMakerChecker), errors.Is(err, appapproval.ErrAccessDenied):
 		return kratoserrors.Forbidden("APPROVAL_ACCESS_DENIED", "approval execution is not permitted")
+	case errors.Is(err, audit.ErrIntegrityViolation):
+		return kratoserrors.Conflict("AUDIT_INTEGRITY_FAILED", "audit log integrity verification failed")
 	case errors.Is(err, appidentity.ErrInvalidCredentials):
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 	case errors.Is(err, appidentity.ErrInvalidMFA):
@@ -920,6 +922,6 @@ func auditEventProto(event audit.Event) *forgev1.AuditEvent {
 		Id: event.ID, OccurredAt: timestamp(event.OccurredAt), RequestId: event.RequestID,
 		OrganizationId: event.OrganizationID, ActorId: event.ActorID, ActorName: event.ActorName,
 		Action: event.Action, ResourceType: event.ResourceType, ResourceId: event.ResourceID,
-		Result: event.Result, ClientIp: event.ClientIP, DetailsJson: string(details),
+		Result: event.Result, ClientIp: event.ClientIP, DetailsJson: string(details), SequenceNo: event.SequenceNo, PrevHash: event.PrevHash, EventHash: event.EventHash,
 	}
 }

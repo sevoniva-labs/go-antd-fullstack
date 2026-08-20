@@ -1292,6 +1292,9 @@ type AuditEvent struct {
 	Result         string                 `protobuf:"bytes,10,opt,name=result,proto3" json:"result,omitempty"`
 	ClientIp       string                 `protobuf:"bytes,11,opt,name=client_ip,json=clientIp,proto3" json:"client_ip,omitempty"`
 	DetailsJson    string                 `protobuf:"bytes,12,opt,name=details_json,json=detailsJson,proto3" json:"details_json,omitempty"`
+	SequenceNo     int64                  `protobuf:"varint,13,opt,name=sequence_no,json=sequenceNo,proto3" json:"sequence_no,omitempty"`
+	PrevHash       string                 `protobuf:"bytes,14,opt,name=prev_hash,json=prevHash,proto3" json:"prev_hash,omitempty"`
+	EventHash      string                 `protobuf:"bytes,15,opt,name=event_hash,json=eventHash,proto3" json:"event_hash,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1406,6 +1409,27 @@ func (x *AuditEvent) GetClientIp() string {
 func (x *AuditEvent) GetDetailsJson() string {
 	if x != nil {
 		return x.DetailsJson
+	}
+	return ""
+}
+
+func (x *AuditEvent) GetSequenceNo() int64 {
+	if x != nil {
+		return x.SequenceNo
+	}
+	return 0
+}
+
+func (x *AuditEvent) GetPrevHash() string {
+	if x != nil {
+		return x.PrevHash
+	}
+	return ""
+}
+
+func (x *AuditEvent) GetEventHash() string {
+	if x != nil {
+		return x.EventHash
 	}
 	return ""
 }
@@ -1562,7 +1586,7 @@ const file_forge_v1_common_proto_rawDesc = "" +
 	"expires_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12<\n" +
 	"\flast_used_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"lastUsedAt\x12\x16\n" +
-	"\x06prefix\x18\a \x01(\tR\x06prefix\"\x91\x03\n" +
+	"\x06prefix\x18\a \x01(\tR\x06prefix\"\xee\x03\n" +
 	"\n" +
 	"AuditEvent\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12;\n" +
@@ -1581,7 +1605,12 @@ const file_forge_v1_common_proto_rawDesc = "" +
 	"\x06result\x18\n" +
 	" \x01(\tR\x06result\x12\x1b\n" +
 	"\tclient_ip\x18\v \x01(\tR\bclientIp\x12!\n" +
-	"\fdetails_json\x18\f \x01(\tR\vdetailsJsonB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
+	"\fdetails_json\x18\f \x01(\tR\vdetailsJson\x12\x1f\n" +
+	"\vsequence_no\x18\r \x01(\x03R\n" +
+	"sequenceNo\x12\x1b\n" +
+	"\tprev_hash\x18\x0e \x01(\tR\bprevHash\x12\x1d\n" +
+	"\n" +
+	"event_hash\x18\x0f \x01(\tR\teventHashB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
 
 var (
 	file_forge_v1_common_proto_rawDescOnce sync.Once
