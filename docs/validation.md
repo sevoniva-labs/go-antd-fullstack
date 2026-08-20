@@ -110,7 +110,7 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 ## Redis runtime contract evidence (2026-08-21)
 
 - `scripts/test-redis-contract.sh` provides a disposable Redis runtime contract using an approved immutable image digest and a local-only password. It validates authenticated `PING`, rejection of unauthenticated `PING`, authenticated `SET`/`GET`, and a positive key TTL.
-- 2026-08-21: the exact local Redis image `docker.m.daocloud.io/library/redis@sha256:fbdbaea47b9ae4ecc2082ecdb4e1cea81e32176ffb1dcf643d422ad07427e5d9` was pulled from the domestic mirror and the standalone runtime contract passed with a temporary local password. Sentinel, Cluster, TLS, ACL rotation, persistence recovery, and production failover remain unverified until their target evidence is executed.
+- 2026-08-21: the exact local Redis image `docker.m.daocloud.io/library/redis@sha256:fbdbaea47b9ae4ecc2082ecdb4e1cea81e32176ffb1dcf643d422ad07427e5d9` was pulled from the domestic mirror and the standalone runtime contract passed with a temporary local password, including appendonly configuration and value recovery across a container restart. Sentinel, Cluster, TLS, ACL rotation, and production failover remain unverified until their target evidence is executed.
 - Run `make redis-runtime-contract` with a temporary local password and set `FORGE_REDIS_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only, not Redis topology, production, Xinchuang, or regulatory certification.
 
 ## RocketMQ runtime contract evidence (2026-08-21)

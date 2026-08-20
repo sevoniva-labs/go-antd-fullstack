@@ -65,7 +65,7 @@ if ! unauthenticated_ping_rejected; then
 fi
 
 key="forge:contract:${PROJECT}"
-if ! redis_exec "REDISCLI_AUTH=\"\$REDIS_PASSWORD\" redis-cli --raw set '$key' 'contract-value' EX 30" 2>/dev/null | rg -q '^OK$'; then
+if ! redis_exec "REDISCLI_AUTH=\"\$REDIS_PASSWORD\" redis-cli --raw set '$key' 'contract-value' EX 120" 2>/dev/null | rg -q '^OK$'; then
   printf 'Redis contract failed: authenticated write failed\n' >&2
   exit 1
 fi
@@ -79,6 +79,35 @@ fi
 ttl=$(redis_exec "REDISCLI_AUTH=\"\$REDIS_PASSWORD\" redis-cli --raw ttl '$key'" 2>/dev/null)
 if ! [[ "$ttl" =~ ^[0-9]+$ ]] || (( ttl <= 0 )); then
   printf 'Redis contract failed: key TTL was not positive\n' >&2
+  exit 1
+fi
+
+appendonly=$(redis_exec 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --raw config get appendonly' 2>/dev/null)
+if [[ "$appendonly" != *$'appendonly\nyes'* ]]; then
+  printf 'Redis contract failed: appendonly was not enabled\n' >&2
+  exit 1
+fi
+
+if ! compose restart redis >/dev/null 2>&1; then
+  printf 'Redis contract failed: restart did not complete\n' >&2
+  exit 1
+fi
+ready=false
+for _ in $(seq 1 90); do
+  if authenticated_ping; then
+    ready=true
+    break
+  fi
+  sleep 1
+done
+if [[ "$ready" != true ]]; then
+  printf 'Redis contract failed: authenticated ping did not recover after restart\n' >&2
+  exit 1
+fi
+
+recovered_value=$(redis_exec "REDISCLI_AUTH=\"\$REDIS_PASSWORD\" redis-cli --raw get '$key'" 2>/dev/null)
+if [[ "$recovered_value" != "contract-value" ]]; then
+  printf 'Redis contract failed: AOF value did not survive restart\n' >&2
   exit 1
 fi
 
@@ -103,6 +132,8 @@ payload = {
         "unauthenticated-ping-rejected",
         "authenticated-set-get",
         "positive-ttl",
+        "appendonly-enabled",
+        "aof-persistence-recovery",
     ],
 }
 pathlib.Path(path).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
