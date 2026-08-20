@@ -138,7 +138,7 @@ type Search struct {
 }
 
 type Storage struct {
-	Provider      string `yaml:"provider"` // local | s3 | s3-compatible/minio/oss/cos/ceph
+	Provider      string `yaml:"provider"` // local | s3 | s3-compatible | minio | ceph-rgw | oss | cos | obs
 	LocalRoot     string `yaml:"local_root"`
 	Endpoint      string `yaml:"endpoint"`
 	Region        string `yaml:"region"`

@@ -26,6 +26,10 @@ type Store interface {
 	Provider() string
 }
 
+type ProfileReporter interface {
+	Profile() ProviderProfile
+}
+
 type Capability string
 
 const (
@@ -77,16 +81,18 @@ func RequireCapabilities(store Store, required ...Capability) error {
 }
 
 func New(ctx context.Context, c appcfg.Storage) (Store, error) {
-	switch normalizeStorageProvider(c.Provider) {
-	case "local", "":
+	profile, err := ResolveProviderProfile(c.Provider)
+	if err != nil {
+		return nil, err
+	}
+	switch profile {
+	case ProviderProfileLocal:
 		if err := os.MkdirAll(c.LocalRoot, 0o750); err != nil {
 			return nil, err
 		}
 		return &local{root: c.LocalRoot}, nil
-	case "s3":
-		return newS3(ctx, c)
 	default:
-		return nil, errors.New("unsupported storage provider")
+		return newS3(ctx, c, profile)
 	}
 }
 
@@ -156,6 +162,7 @@ func (l *local) Delete(_ context.Context, key string) error {
 }
 func (l *local) Ping(context.Context) error { return nil }
 func (l *local) Provider() string           { return "local" }
+func (l *local) Profile() ProviderProfile   { return ProviderProfileLocal }
 func (l *local) Capabilities() map[Capability]CapabilityStatus {
 	return map[Capability]CapabilityStatus{
 		CapabilityBasicObjectIO:     {State: CapabilitySupported, Evidence: "local filesystem contract"},
@@ -164,24 +171,23 @@ func (l *local) Capabilities() map[Capability]CapabilityStatus {
 }
 
 type s3Store struct {
-	client *s3.Client
-	bucket string
+	client  *s3.Client
+	bucket  string
+	profile ProviderProfile
 }
 
 func normalizeStorageProvider(value string) string {
-	p := strings.ToLower(strings.TrimSpace(value))
-	if p == "" {
-		return "local"
+	profile, err := ResolveProviderProfile(value)
+	if err != nil {
+		return strings.ToLower(strings.TrimSpace(value))
 	}
-	switch p {
-	case "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
+	if IsS3Profile(profile) {
 		return "s3"
-	default:
-		return p
 	}
+	return "local"
 }
 
-func newS3(ctx context.Context, c appcfg.Storage) (Store, error) {
+func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile) (Store, error) {
 	if c.TLS && strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.Endpoint)), "http://") {
 		return nil, errors.New("storage tls=true requires https endpoint")
 	}
@@ -210,7 +216,7 @@ func newS3(ctx context.Context, c appcfg.Storage) (Store, error) {
 			o.BaseEndpoint = aws.String(c.Endpoint)
 		}
 	})
-	return &s3Store{client: cli, bucket: c.Bucket}, nil
+	return &s3Store{client: cli, bucket: c.Bucket, profile: profile}, nil
 }
 func (s *s3Store) Put(ctx context.Context, key string, r io.Reader) error {
 	_, e := s.client.PutObject(ctx, &s3.PutObjectInput{Bucket: &s.bucket, Key: &key, Body: r})
@@ -234,7 +240,8 @@ func (s *s3Store) Ping(ctx context.Context) error {
 	}
 	return nil
 }
-func (s *s3Store) Provider() string { return "s3" }
+func (s *s3Store) Provider() string         { return "s3" }
+func (s *s3Store) Profile() ProviderProfile { return s.profile }
 func (s *s3Store) Capabilities() map[Capability]CapabilityStatus {
 	return map[Capability]CapabilityStatus{
 		CapabilityBasicObjectIO:       {State: CapabilitySupported, Evidence: "S3 API PutObject/GetObject/DeleteObject/HeadBucket"},

@@ -81,3 +81,38 @@ func TestLocalStorageDoesNotClaimS3Capabilities(t *testing.T) {
 		t.Fatal("local provider claimed object lock")
 	}
 }
+
+func TestResolveProviderProfileKeepsVendorEvidenceBoundary(t *testing.T) {
+	tests := map[string]ProviderProfile{
+		"s3":            ProviderProfileAWSS3,
+		"minio":         ProviderProfileMinIO,
+		"ceph-rgw":      ProviderProfileCephRGW,
+		"oss":           ProviderProfileAlibabaOSS,
+		"cos":           ProviderProfileTencentCOS,
+		"obs":           ProviderProfileHuaweiOBS,
+		"s3-compatible": ProviderProfileGenericS3,
+	}
+	for input, want := range tests {
+		got, err := ResolveProviderProfile(input)
+		if err != nil || got != want {
+			t.Fatalf("ResolveProviderProfile(%q) = %q, %v; want %q", input, got, err, want)
+		}
+	}
+	if _, err := ResolveProviderProfile("unknown-object-store"); err == nil {
+		t.Fatal("unknown provider profile was accepted")
+	}
+}
+
+func TestS3StoreReportsExplicitProfile(t *testing.T) {
+	store, err := New(context.Background(), config.Storage{Provider: "cos", Endpoint: "https://cos.example", Region: "ap-shanghai", Bucket: "documents", TLS: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	reporter, ok := store.(ProfileReporter)
+	if !ok {
+		t.Fatal("storage store does not report a provider profile")
+	}
+	if reporter.Profile() != ProviderProfileTencentCOS {
+		t.Fatalf("storage profile = %v, want %q", reporter.Profile(), ProviderProfileTencentCOS)
+	}
+}

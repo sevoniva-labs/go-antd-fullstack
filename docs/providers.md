@@ -21,7 +21,13 @@
 | Search | Elasticsearch | Built-in | REST adapter |
 | Search | OpenSearch | Built-in | REST-compatible adapter，目标版本仍需兼容测试 |
 | Storage | Local | Built-in | 单实例/开发 |
-| Storage | S3-compatible | Built-in | AWS S3 SDK；兼容 MinIO、S3 兼容对象存储协议（COS/OSS/R2/Ceph/CloudStack 等）按实际版本验证 |
+| Storage | AWS S3 | Profile | AWS SDK for Go v2 S3 adapter；目标区域和版本必须通过契约测试 |
+| Storage | Generic S3 | Profile | 标准 S3 endpoint/path-style adapter；能力按目标环境协商 |
+| Storage | MinIO | Profile | S3 protocol profile；不因产品名自动获得认证 |
+| Storage | Ceph RGW | Profile | S3 protocol profile；不因产品名自动获得认证 |
+| Storage | 阿里 OSS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
+| Storage | 腾讯 COS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
+| Storage | 华为 OBS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
 
 `FORGE_STORAGE_PROVIDER` 支持别名：`s3`, `s3-compatible`, `minio`, `oss`, `cos`, `ceph`, `ceph-rgw`，启动时会统一归一化为 `s3`（大小写不敏感，带下划线/短横线兼容）。
 
