@@ -120,3 +120,9 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - `scripts/test-mysql-contract.sh` starts a disposable MySQL instance with a domestic immutable image, waits for authenticated readiness, runs `go run ./cmd/migrate` with the MySQL provider, and checks the required `users`, `organizations`, and `audit_logs` tables plus `organizations.updated_at`.
 - 2026-08-21: the exact domestic mirror image `docker.m.daocloud.io/library/mysql@sha256:b3b90af2a6552ae30c266fdb7d5dd55f3afb72404bb78d37fe8a23eb857fd3fb` passed the standalone contract. Goose migrations `00001` through `00022` completed, and the required table/column assertions passed.
 - Run `make mysql-runtime-contract` with temporary local `FORGE_MYSQL_ROOT_PASSWORD` and `FORGE_MYSQL_PASSWORD` values and optionally set `FORGE_MYSQL_EVIDENCE_FILE`. This is local MySQL migration evidence only; MySQL HA, TLS, backup/recovery, Xinchuang database targets, and regulatory certification remain unverified.
+
+## Kafka streaming runtime contract evidence (2026-08-21)
+
+- `scripts/test-kafka-contract.sh` starts the development KRaft overlay, creates a unique topic, compiles the repository's `franz-go` streaming path for the runtime architecture, and produces/consumes one record inside the broker network.
+- The exact domestic mirror image pulled for this contract is `docker.m.daocloud.io/apache/kafka@sha256:3f7b939115cd4872e9cee9369d80bd69712fde55f9902f46d793f64848dedc75`.
+- Run `make kafka-runtime-contract` with `FORGE_KAFKA_IMAGE` set to that exact digest and optionally set `FORGE_KAFKA_EVIDENCE_FILE`. This proves only the standalone development Streaming provider path; production TLS/SASL, ACLs, multi-broker HA, rack/failure behavior, retention, replay, throughput, and Xinchuang target compatibility remain unverified. Kafka remains separate from RocketMQ business messaging.
