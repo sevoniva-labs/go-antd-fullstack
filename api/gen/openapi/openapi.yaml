@@ -306,6 +306,34 @@ paths:
             security:
                 - SessionCookie: []
                 - BearerAuth: []
+    /api/v1/admin/menus/{menuKey}:
+        patch:
+            tags:
+                - PlatformService
+            operationId: PlatformService_UpdateMenu
+            parameters:
+                - name: menuKey
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.UpdateMenuRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.UpdateMenuResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/organization:
         get:
             tags:
@@ -2511,6 +2539,33 @@ components:
             properties:
                 department:
                     $ref: '#/components/schemas/forge.v1.Department'
+        forge.v1.UpdateMenuRequest:
+            type: object
+            properties:
+                menuKey:
+                    type: string
+                parentKey:
+                    type: string
+                name:
+                    type: string
+                route:
+                    type: string
+                icon:
+                    type: string
+                permissionKey:
+                    type: string
+                sortOrder:
+                    type: integer
+                    format: int32
+                status:
+                    type: string
+                approvalId:
+                    type: string
+        forge.v1.UpdateMenuResponse:
+            type: object
+            properties:
+                menu:
+                    $ref: '#/components/schemas/forge.v1.Menu'
         forge.v1.UpdateOrganizationRequest:
             type: object
             properties:

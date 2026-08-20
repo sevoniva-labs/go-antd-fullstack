@@ -1130,6 +1130,23 @@ func (r *IdentityRepo) ListMenus(ctx context.Context, orgID string) ([]identity.
 	return menus, rows.Err()
 }
 
+func (r *IdentityRepo) UpdateMenu(ctx context.Context, orgID string, menu identity.Menu) (identity.Menu, error) {
+	var current identity.Menu
+	err := r.db.QueryRowContext(ctx, r.db.Rebind(`SELECT id,created_at FROM menus WHERE organization_id=? AND menu_key=?`), orgID, menu.Key).Scan(&current.ID, &current.CreatedAt)
+	if err != nil {
+		return identity.Menu{}, err
+	}
+	menu.ID = current.ID
+	menu.OrganizationID = orgID
+	menu.CreatedAt = current.CreatedAt
+	menu.UpdatedAt = time.Now().UTC()
+	_, err = r.db.ExecContext(ctx, r.db.Rebind(`UPDATE menus SET parent_key=?,name=?,route=?,icon=?,permission_key=?,sort_order=?,status=?,updated_at=? WHERE organization_id=? AND menu_key=?`), menu.ParentKey, menu.Name, menu.Route, menu.Icon, menu.PermissionKey, menu.SortOrder, menu.Status, menu.UpdatedAt, orgID, menu.Key)
+	if err != nil {
+		return identity.Menu{}, err
+	}
+	return menu, nil
+}
+
 func (r *IdentityRepo) PermissionsForRole(ctx context.Context, roleID string) ([]identity.Permission, error) {
 	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT p.id,p.permission_key,p.name,p.created_at
 		FROM permissions p

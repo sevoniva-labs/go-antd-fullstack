@@ -638,6 +638,41 @@ func (s *PlatformService) ListMenus(ctx context.Context, _ *forgev1.ListMenusReq
 	return reply, nil
 }
 
+func (s *PlatformService) UpdateMenu(ctx context.Context, req *forgev1.UpdateMenuRequest) (*forgev1.UpdateMenuResponse, error) {
+	principal, err := requiredPrincipal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	payload, err := json.Marshal(map[string]any{
+		"menu_key": req.GetMenuKey(), "parent_key": req.GetParentKey(), "name": req.GetName(), "route": req.GetRoute(),
+		"icon": req.GetIcon(), "permission_key": req.GetPermissionKey(), "sort_order": req.GetSortOrder(), "status": req.GetStatus(),
+	})
+	if err != nil {
+		return nil, internalError(err)
+	}
+	var updated domain.Menu
+	event := newAuditEvent(ctx, principal, "menu.update", "menu", req.GetMenuKey(), map[string]any{"approval_id": req.GetApprovalId()})
+	err = s.audited(ctx, event, func(txCtx context.Context) error {
+		if s.approval == nil {
+			return appapproval.ErrApprovalRequired
+		}
+		if executionErr := s.approval.AuthorizeExecution(txCtx, principal, req.GetApprovalId(), appapproval.ExecutionInput{
+			RequestType: "MENU_CHANGE", Action: "menu.update", Resource: "menu", ResourceID: req.GetMenuKey(), PayloadJSON: string(payload),
+		}); executionErr != nil {
+			return executionErr
+		}
+		var updateErr error
+		updated, updateErr = s.identity.UpdateMenu(txCtx, principal, principal.OrganizationID, req.GetMenuKey(), domain.Menu{
+			ParentKey: req.GetParentKey(), Name: req.GetName(), Route: req.GetRoute(), Icon: req.GetIcon(), PermissionKey: req.GetPermissionKey(), SortOrder: int(req.GetSortOrder()), Status: req.GetStatus(),
+		})
+		return updateErr
+	})
+	if err != nil {
+		return nil, serviceError(err)
+	}
+	return &forgev1.UpdateMenuResponse{Menu: menuProto(updated)}, nil
+}
+
 func (s *PlatformService) ListSessions(ctx context.Context, _ *forgev1.ListSessionsRequest) (*forgev1.ListSessionsResponse, error) {
 	principal, err := requiredPrincipal(ctx)
 	if err != nil {
@@ -784,7 +819,7 @@ func serviceError(err error) error {
 		errors.Is(err, appidentity.ErrPasswordPolicy), errors.Is(err, appidentity.ErrPasswordReused),
 		errors.Is(err, appidentity.ErrInvalidSecurityPolicy), errors.Is(err, appidentity.ErrInvalidDepartment),
 		errors.Is(err, appidentity.ErrInvalidPosition), errors.Is(err, appidentity.ErrInvalidUserGroup),
-		errors.Is(err, appidentity.ErrInvalidUserAssignment), errors.Is(err, appidentity.ErrInvalidDataScope):
+		errors.Is(err, appidentity.ErrInvalidUserAssignment), errors.Is(err, appidentity.ErrInvalidDataScope), errors.Is(err, appidentity.ErrInvalidMenu):
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	case errors.Is(err, appidentity.ErrInvalidFederatedIdentity):
 		return kratoserrors.BadRequest("INVALID_FEDERATED_IDENTITY", "external identity mapping violates policy")

@@ -51,6 +51,7 @@ const OperationPlatformServiceRevokeTemporaryRoleGrant = "/forge.v1.PlatformServ
 const OperationPlatformServiceUnlinkFederatedIdentity = "/forge.v1.PlatformService/UnlinkFederatedIdentity"
 const OperationPlatformServiceUnlockUser = "/forge.v1.PlatformService/UnlockUser"
 const OperationPlatformServiceUpdateDepartment = "/forge.v1.PlatformService/UpdateDepartment"
+const OperationPlatformServiceUpdateMenu = "/forge.v1.PlatformService/UpdateMenu"
 const OperationPlatformServiceUpdateOrganization = "/forge.v1.PlatformService/UpdateOrganization"
 const OperationPlatformServiceUpdatePosition = "/forge.v1.PlatformService/UpdatePosition"
 const OperationPlatformServiceUpdateRoleDataScope = "/forge.v1.PlatformService/UpdateRoleDataScope"
@@ -96,6 +97,7 @@ type PlatformServiceHTTPServer interface {
 	UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error)
 	UnlockUser(context.Context, *UnlockUserRequest) (*UnlockUserResponse, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error)
+	UpdateMenu(context.Context, *UpdateMenuRequest) (*UpdateMenuResponse, error)
 	UpdateOrganization(context.Context, *UpdateOrganizationRequest) (*UpdateOrganizationResponse, error)
 	UpdatePosition(context.Context, *UpdatePositionRequest) (*UpdatePositionResponse, error)
 	UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error)
@@ -133,6 +135,7 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/roles", _PlatformService_ListRoles0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/permissions", _PlatformService_ListPermissions0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/menus", _PlatformService_ListMenus0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/admin/menus/{menu_key}", _PlatformService_UpdateMenu0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/data-scope", _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/permissions", _PlatformService_UpdateRolePermissions0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/users/{user_id}/roles", _PlatformService_UpdateUserRoles0_HTTP_Handler(srv))
@@ -627,6 +630,31 @@ func _PlatformService_ListMenus0_HTTP_Handler(srv PlatformServiceHTTPServer) fun
 			return err
 		}
 		reply := out.(*ListMenusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_UpdateMenu0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateMenuRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceUpdateMenu)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateMenu(ctx, req.(*UpdateMenuRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateMenuResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1132,6 +1160,7 @@ type PlatformServiceHTTPClient interface {
 	UnlinkFederatedIdentity(ctx context.Context, req *UnlinkFederatedIdentityRequest, opts ...http.CallOption) (rsp *UnlinkFederatedIdentityResponse, err error)
 	UnlockUser(ctx context.Context, req *UnlockUserRequest, opts ...http.CallOption) (rsp *UnlockUserResponse, err error)
 	UpdateDepartment(ctx context.Context, req *UpdateDepartmentRequest, opts ...http.CallOption) (rsp *UpdateDepartmentResponse, err error)
+	UpdateMenu(ctx context.Context, req *UpdateMenuRequest, opts ...http.CallOption) (rsp *UpdateMenuResponse, err error)
 	UpdateOrganization(ctx context.Context, req *UpdateOrganizationRequest, opts ...http.CallOption) (rsp *UpdateOrganizationResponse, err error)
 	UpdatePosition(ctx context.Context, req *UpdatePositionRequest, opts ...http.CallOption) (rsp *UpdatePositionResponse, err error)
 	UpdateRoleDataScope(ctx context.Context, req *UpdateRoleDataScopeRequest, opts ...http.CallOption) (rsp *UpdateRoleDataScopeResponse, err error)
@@ -1561,6 +1590,19 @@ func (c *PlatformServiceHTTPClientImpl) UpdateDepartment(ctx context.Context, in
 	pattern := "/api/v1/admin/departments/{department_id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceUpdateDepartment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...http.CallOption) (*UpdateMenuResponse, error) {
+	var out UpdateMenuResponse
+	pattern := "/api/v1/admin/menus/{menu_key}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceUpdateMenu))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
 	if err != nil {

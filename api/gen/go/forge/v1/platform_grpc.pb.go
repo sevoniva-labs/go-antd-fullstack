@@ -41,6 +41,7 @@ const (
 	PlatformService_ListRoles_FullMethodName                  = "/forge.v1.PlatformService/ListRoles"
 	PlatformService_ListPermissions_FullMethodName            = "/forge.v1.PlatformService/ListPermissions"
 	PlatformService_ListMenus_FullMethodName                  = "/forge.v1.PlatformService/ListMenus"
+	PlatformService_UpdateMenu_FullMethodName                 = "/forge.v1.PlatformService/UpdateMenu"
 	PlatformService_UpdateRoleDataScope_FullMethodName        = "/forge.v1.PlatformService/UpdateRoleDataScope"
 	PlatformService_UpdateRolePermissions_FullMethodName      = "/forge.v1.PlatformService/UpdateRolePermissions"
 	PlatformService_UpdateUserRoles_FullMethodName            = "/forge.v1.PlatformService/UpdateUserRoles"
@@ -90,6 +91,7 @@ type PlatformServiceClient interface {
 	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
 	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
 	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
+	UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*UpdateMenuResponse, error)
 	UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(ctx context.Context, in *UpdateUserRolesRequest, opts ...grpc.CallOption) (*UpdateUserRolesResponse, error)
@@ -341,6 +343,16 @@ func (c *platformServiceClient) ListMenus(ctx context.Context, in *ListMenusRequ
 	return out, nil
 }
 
+func (c *platformServiceClient) UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*UpdateMenuResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateMenuResponse)
+	err := c.cc.Invoke(ctx, PlatformService_UpdateMenu_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformServiceClient) UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateRoleDataScopeResponse)
@@ -577,6 +589,7 @@ type PlatformServiceServer interface {
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
+	UpdateMenu(context.Context, *UpdateMenuRequest) (*UpdateMenuResponse, error)
 	UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
@@ -673,6 +686,9 @@ func (UnimplementedPlatformServiceServer) ListPermissions(context.Context, *List
 }
 func (UnimplementedPlatformServiceServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListMenus not implemented")
+}
+func (UnimplementedPlatformServiceServer) UpdateMenu(context.Context, *UpdateMenuRequest) (*UpdateMenuResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMenu not implemented")
 }
 func (UnimplementedPlatformServiceServer) UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateRoleDataScope not implemented")
@@ -1154,6 +1170,24 @@ func _PlatformService_ListMenus_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_UpdateMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).UpdateMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_UpdateMenu_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).UpdateMenu(ctx, req.(*UpdateMenuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlatformService_UpdateRoleDataScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRoleDataScopeRequest)
 	if err := dec(in); err != nil {
@@ -1626,6 +1660,10 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMenus",
 			Handler:    _PlatformService_ListMenus_Handler,
+		},
+		{
+			MethodName: "UpdateMenu",
+			Handler:    _PlatformService_UpdateMenu_Handler,
 		},
 		{
 			MethodName: "UpdateRoleDataScope",

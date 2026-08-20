@@ -35,6 +35,7 @@ var ErrInvalidDepartment = errors.New("invalid department")
 var ErrInvalidPosition = errors.New("invalid position")
 var ErrInvalidUserGroup = errors.New("invalid user group")
 var ErrInvalidUserAssignment = errors.New("invalid user assignment")
+var ErrInvalidMenu = errors.New("invalid menu")
 var ErrInvalidDataScope = errors.New("invalid data scope")
 var ErrMFARequired = errors.New("multi-factor authentication required")
 var ErrInvalidMFA = errors.New("invalid multi-factor authentication code")
@@ -110,7 +111,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.department.read", "查看部门"}, {"system.department.manage", "管理部门"},
 	{"system.position.read", "查看岗位"}, {"system.position.manage", "管理岗位"},
 	{"system.user_group.read", "查看用户组"}, {"system.user_group.manage", "管理用户组"},
-	{"system.menu.read", "查看平台菜单"},
+	{"system.menu.read", "查看平台菜单"}, {"system.menu.manage", "管理平台菜单"},
 	{"system.identity_mapping.read", "查看外部身份绑定"}, {"system.identity_mapping.manage", "管理外部身份绑定"},
 	{"system.access_review.read", "查看访问复核"}, {"system.access_review.manage", "管理访问复核"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
@@ -152,7 +153,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.menu.read", "system.identity_mapping.read", "system.identity_mapping.manage", "system.access_review.read", "system.access_review.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.menu.read", "system.menu.manage", "system.identity_mapping.read", "system.identity_mapping.manage", "system.access_review.read", "system.access_review.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
@@ -1639,6 +1640,25 @@ func (s *Service) ListMenus(ctx context.Context, principal domain.Principal) ([]
 		}
 	}
 	return filtered, nil
+}
+
+func (s *Service) UpdateMenu(ctx context.Context, actor domain.Principal, orgID, menuKey string, req domain.Menu) (domain.Menu, error) {
+	if err := authorizeGrantActor(actor, orgID); err != nil {
+		return domain.Menu{}, err
+	}
+	menuKey = strings.TrimSpace(menuKey)
+	req.ParentKey = strings.TrimSpace(req.ParentKey)
+	req.Name = strings.TrimSpace(req.Name)
+	req.Route = strings.TrimSpace(req.Route)
+	req.Icon = strings.TrimSpace(req.Icon)
+	req.PermissionKey = strings.TrimSpace(req.PermissionKey)
+	req.Status = strings.ToUpper(strings.TrimSpace(req.Status))
+	if menuKey == "" || len(menuKey) > 160 || len(req.ParentKey) > 160 || len(req.Name) == 0 || len(req.Name) > 200 || len(req.Route) > 300 || len(req.Icon) > 100 || len(req.PermissionKey) > 160 || req.SortOrder < 0 || (req.Status != "ACTIVE" && req.Status != "DISABLED") || req.ParentKey == menuKey {
+		return domain.Menu{}, ErrInvalidMenu
+	}
+	req.Key = menuKey
+	req.OrganizationID = orgID
+	return s.repo.UpdateMenu(ctx, orgID, req)
 }
 
 func builtinMenus(orgID string) []domain.Menu {

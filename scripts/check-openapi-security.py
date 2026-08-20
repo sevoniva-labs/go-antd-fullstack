@@ -51,6 +51,7 @@ CSRF_REQUIRED = {
     ("post", "/api/v1/admin/identity-mappings/{link_id}:unlink"),
     ("post", "/api/v1/admin/access-reviews"),
     ("post", "/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions"),
+    ("patch", "/api/v1/admin/menus/{menu_key}"),
     ("post", "/api/v1/approvals"),
     ("post", "/api/v1/approvals/{approval_id}/decisions"),
     ("post", "/api/v1/approvals/{approval_id}/transfer"),
