@@ -22,6 +22,7 @@ import type {
   User,
   DataFieldPolicy,
   DataDeletionEvidence,
+  ConfigChange,
 } from './types'
 
 export const api = {
@@ -134,6 +135,13 @@ export const api = {
   dataDeletionEvidence: () => apiFetch<{ evidence?: DataDeletionEvidence[]; items?: DataDeletionEvidence[] }>('/admin/data-retention/evidence'),
   recordDataDeletionEvidence: (payload: { resource_type: string; resource_digest: string; field_keys: string[]; reason: string; records_deleted: number; deleted_at: string }, approvalId: string) =>
     apiFetch<DataDeletionEvidence>('/admin/data-retention/evidence', { method: 'POST', body: JSON.stringify({ ...payload, approval_id: approvalId }) }),
+  configChanges: () => apiFetch<{ changes?: ConfigChange[]; items?: ConfigChange[] }>('/admin/config-changes'),
+  createConfigChange: (payload: { namespace: string; group: string; data_id: string; version: number; expected_previous_version: number; value_digest: string; value_ref: string; sensitive: boolean }) =>
+    apiFetch<ConfigChange>('/admin/config-changes', { method: 'POST', body: JSON.stringify(payload) }),
+  approveConfigChange: (id: string, approvalId: string) => apiFetch<ConfigChange>(`/admin/config-changes/${encodeURIComponent(id)}/approve`, { method: 'POST', body: JSON.stringify({ approval_id: approvalId }) }),
+  publishConfigChange: (id: string, approvalId: string) => apiFetch<ConfigChange>(`/admin/config-changes/${encodeURIComponent(id)}/publish`, { method: 'POST', body: JSON.stringify({ approval_id: approvalId }) }),
+  requestConfigRollback: (id: string, approvalId: string) => apiFetch<ConfigChange>(`/admin/config-changes/${encodeURIComponent(id)}/rollback-request`, { method: 'POST', body: JSON.stringify({ approval_id: approvalId }) }),
+  rollbackConfigChange: (id: string, approvalId: string) => apiFetch<ConfigChange>(`/admin/config-changes/${encodeURIComponent(id)}/rollback`, { method: 'POST', body: JSON.stringify({ approval_id: approvalId }) }),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
   updateUserRoles: (userId: string, roles: string[], approvalId: string) =>

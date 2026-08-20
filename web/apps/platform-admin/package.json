@@ -21,7 +21,8 @@
     "./system-status": "./src/pages/SystemStatus.tsx",
     "./users": "./src/pages/Users.tsx",
     "./user-groups": "./src/pages/UserGroups.tsx",
-    "./data-governance": "./src/pages/DataGovernance.tsx"
+    "./data-governance": "./src/pages/DataGovernance.tsx",
+    "./config-changes": "./src/pages/ConfigChanges.tsx"
   },
   "scripts": {
     "build": "vite build",

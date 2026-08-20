@@ -140,6 +140,24 @@ export interface DataDeletionEvidence {
   created_at: string
 }
 
+export interface ConfigChange {
+  id: string
+  organization_id: string
+  namespace: string
+  group: string
+  data_id: string
+  version: number
+  expected_previous_version: number
+  value_digest: string
+  value_ref: string
+  sensitive: boolean
+  created_by: string
+  approved_by?: string
+  approval_id?: string
+  state: string
+  updated_at: string
+}
+
 export type RoleDataScope = 'ORGANIZATION' | 'DEPARTMENT' | 'DEPARTMENT_TREE' | 'SELF' | 'CUSTOM'
 
 export interface Role {

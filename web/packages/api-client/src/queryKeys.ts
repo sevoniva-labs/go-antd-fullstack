@@ -19,6 +19,7 @@ export const queryKeys = {
   accessReviews: ['access-reviews'] as const,
   dataPolicies: ['data-policies'] as const,
   dataDeletionEvidence: ['data-deletion-evidence'] as const,
+  configChanges: ['config-changes'] as const,
   systemInfo: ['system-info'] as const,
   readiness: ['readiness'] as const,
 }

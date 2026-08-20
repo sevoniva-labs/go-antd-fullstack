@@ -1686,6 +1686,7 @@ func builtinMenus(orgID string) []domain.Menu {
 		{OrganizationID: orgID, Key: "governance.temporary-grants", ParentKey: "governance", Name: "临时授权", Route: "/governance/temporary-grants", Icon: "SafetyCertificateOutlined", PermissionKey: "system.temporary_grant.read", SortOrder: 42, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		{OrganizationID: orgID, Key: "governance.access-reviews", ParentKey: "governance", Name: "访问复核", Route: "/governance/access-reviews", Icon: "SafetyCertificateOutlined", PermissionKey: "system.access_review.read", SortOrder: 43, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		{OrganizationID: orgID, Key: "governance.data-governance", ParentKey: "governance", Name: "数据治理", Route: "/admin/data-governance", Icon: "DatabaseOutlined", PermissionKey: "system.data_policy.read", SortOrder: 44, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
+		{OrganizationID: orgID, Key: "governance.config-changes", ParentKey: "governance", Name: "配置变更", Route: "/admin/config-changes", Icon: "SafetyCertificateOutlined", PermissionKey: "system.config.read", SortOrder: 45, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		{OrganizationID: orgID, Key: "operations", Name: "运维中心", Route: "/group/operations", Icon: "SettingOutlined", SortOrder: 50, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 		{OrganizationID: orgID, Key: "operations.status", ParentKey: "operations", Name: "系统状态", Route: "/ops/system", Icon: "SettingOutlined", SortOrder: 51, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now},
 	}

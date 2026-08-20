@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { ApprovalServiceCreateApprovalData, ApprovalServiceCreateApprovalResponses, ApprovalServiceDecideApprovalData, ApprovalServiceDecideApprovalResponses, ApprovalServiceGetApprovalData, ApprovalServiceGetApprovalResponses, ApprovalServiceListApprovalsData, ApprovalServiceListApprovalsResponses, ApprovalServiceTransferApprovalData, ApprovalServiceTransferApprovalResponses, ApprovalServiceWithdrawApprovalData, ApprovalServiceWithdrawApprovalResponses, IdentityServiceBeginMfaEnrollmentData, IdentityServiceBeginMfaEnrollmentResponses, IdentityServiceBeginOidcLoginData, IdentityServiceBeginOidcLoginResponses, IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCompleteOidcLoginData, IdentityServiceCompleteOidcLoginResponses, IdentityServiceConfirmMfaEnrollmentData, IdentityServiceConfirmMfaEnrollmentResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceDisableMfaData, IdentityServiceDisableMfaResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceGetMfaStatusData, IdentityServiceGetMfaStatusResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginLdapData, IdentityServiceLoginLdapResponses, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, IdentityServiceStepUpAuthenticationData, IdentityServiceStepUpAuthenticationResponses, PlatformServiceAuthorizeDataExportData, PlatformServiceAuthorizeDataExportResponses, PlatformServiceCreateAccessReviewData, PlatformServiceCreateAccessReviewResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateTemporaryRoleGrantData, PlatformServiceCreateTemporaryRoleGrantResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceDecideAccessReviewItemData, PlatformServiceDecideAccessReviewItemResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceLinkFederatedIdentityData, PlatformServiceLinkFederatedIdentityResponses, PlatformServiceListAccessReviewItemsData, PlatformServiceListAccessReviewItemsResponses, PlatformServiceListAccessReviewsData, PlatformServiceListAccessReviewsResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListDataDeletionEvidenceData, PlatformServiceListDataDeletionEvidenceResponses, PlatformServiceListDataFieldPoliciesData, PlatformServiceListDataFieldPoliciesResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListFederatedIdentityLinksData, PlatformServiceListFederatedIdentityLinksResponses, PlatformServiceListMenusData, PlatformServiceListMenusResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListTemporaryRoleGrantsData, PlatformServiceListTemporaryRoleGrantsResponses, PlatformServiceListUserAssignmentsData, PlatformServiceListUserAssignmentsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServiceRecordDataDeletionEvidenceData, PlatformServiceRecordDataDeletionEvidenceResponses, PlatformServiceReplaceUserAssignmentsData, PlatformServiceReplaceUserAssignmentsResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceRevokeTemporaryRoleGrantData, PlatformServiceRevokeTemporaryRoleGrantResponses, PlatformServiceUnlinkFederatedIdentityData, PlatformServiceUnlinkFederatedIdentityResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateMenuData, PlatformServiceUpdateMenuResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRoleDataScopeData, PlatformServiceUpdateRoleDataScopeResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, PlatformServiceUpsertDataFieldPolicyData, PlatformServiceUpsertDataFieldPolicyResponses, PlatformServiceVerifyAuditIntegrityData, PlatformServiceVerifyAuditIntegrityResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
+import type { ApprovalServiceCreateApprovalData, ApprovalServiceCreateApprovalResponses, ApprovalServiceDecideApprovalData, ApprovalServiceDecideApprovalResponses, ApprovalServiceGetApprovalData, ApprovalServiceGetApprovalResponses, ApprovalServiceListApprovalsData, ApprovalServiceListApprovalsResponses, ApprovalServiceTransferApprovalData, ApprovalServiceTransferApprovalResponses, ApprovalServiceWithdrawApprovalData, ApprovalServiceWithdrawApprovalResponses, IdentityServiceBeginMfaEnrollmentData, IdentityServiceBeginMfaEnrollmentResponses, IdentityServiceBeginOidcLoginData, IdentityServiceBeginOidcLoginResponses, IdentityServiceChangePasswordData, IdentityServiceChangePasswordResponses, IdentityServiceCompleteOidcLoginData, IdentityServiceCompleteOidcLoginResponses, IdentityServiceConfirmMfaEnrollmentData, IdentityServiceConfirmMfaEnrollmentResponses, IdentityServiceCreateApiTokenData, IdentityServiceCreateApiTokenResponses, IdentityServiceDisableMfaData, IdentityServiceDisableMfaResponses, IdentityServiceGetCurrentUserData, IdentityServiceGetCurrentUserResponses, IdentityServiceGetMfaStatusData, IdentityServiceGetMfaStatusResponses, IdentityServiceListApiTokensData, IdentityServiceListApiTokensResponses, IdentityServiceLoginData, IdentityServiceLoginLdapData, IdentityServiceLoginLdapResponses, IdentityServiceLoginResponses, IdentityServiceLogoutData, IdentityServiceLogoutResponses, IdentityServiceRevokeApiTokenData, IdentityServiceRevokeApiTokenResponses, IdentityServiceStepUpAuthenticationData, IdentityServiceStepUpAuthenticationResponses, PlatformServiceApproveConfigChangeData, PlatformServiceApproveConfigChangeResponses, PlatformServiceAuthorizeDataExportData, PlatformServiceAuthorizeDataExportResponses, PlatformServiceCreateAccessReviewData, PlatformServiceCreateAccessReviewResponses, PlatformServiceCreateConfigChangeData, PlatformServiceCreateConfigChangeResponses, PlatformServiceCreateDepartmentData, PlatformServiceCreateDepartmentResponses, PlatformServiceCreatePositionData, PlatformServiceCreatePositionResponses, PlatformServiceCreateTemporaryRoleGrantData, PlatformServiceCreateTemporaryRoleGrantResponses, PlatformServiceCreateUserData, PlatformServiceCreateUserGroupData, PlatformServiceCreateUserGroupResponses, PlatformServiceCreateUserResponses, PlatformServiceDecideAccessReviewItemData, PlatformServiceDecideAccessReviewItemResponses, PlatformServiceExportAuditLogsData, PlatformServiceExportAuditLogsResponses, PlatformServiceGetOrganizationData, PlatformServiceGetOrganizationResponses, PlatformServiceGetSecurityPolicyData, PlatformServiceGetSecurityPolicyResponses, PlatformServiceLinkFederatedIdentityData, PlatformServiceLinkFederatedIdentityResponses, PlatformServiceListAccessReviewItemsData, PlatformServiceListAccessReviewItemsResponses, PlatformServiceListAccessReviewsData, PlatformServiceListAccessReviewsResponses, PlatformServiceListAuditLogsData, PlatformServiceListAuditLogsResponses, PlatformServiceListConfigChangesData, PlatformServiceListConfigChangesResponses, PlatformServiceListDataDeletionEvidenceData, PlatformServiceListDataDeletionEvidenceResponses, PlatformServiceListDataFieldPoliciesData, PlatformServiceListDataFieldPoliciesResponses, PlatformServiceListDepartmentsData, PlatformServiceListDepartmentsResponses, PlatformServiceListFederatedIdentityLinksData, PlatformServiceListFederatedIdentityLinksResponses, PlatformServiceListMenusData, PlatformServiceListMenusResponses, PlatformServiceListPermissionsData, PlatformServiceListPermissionsResponses, PlatformServiceListPositionsData, PlatformServiceListPositionsResponses, PlatformServiceListRolesData, PlatformServiceListRolesResponses, PlatformServiceListSessionsData, PlatformServiceListSessionsResponses, PlatformServiceListTemporaryRoleGrantsData, PlatformServiceListTemporaryRoleGrantsResponses, PlatformServiceListUserAssignmentsData, PlatformServiceListUserAssignmentsResponses, PlatformServiceListUserGroupsData, PlatformServiceListUserGroupsResponses, PlatformServiceListUsersData, PlatformServiceListUsersResponses, PlatformServicePublishConfigChangeData, PlatformServicePublishConfigChangeResponses, PlatformServiceRecordDataDeletionEvidenceData, PlatformServiceRecordDataDeletionEvidenceResponses, PlatformServiceReplaceUserAssignmentsData, PlatformServiceReplaceUserAssignmentsResponses, PlatformServiceRequestConfigRollbackData, PlatformServiceRequestConfigRollbackResponses, PlatformServiceResetUserPasswordData, PlatformServiceResetUserPasswordResponses, PlatformServiceRevokeSessionData, PlatformServiceRevokeSessionResponses, PlatformServiceRevokeTemporaryRoleGrantData, PlatformServiceRevokeTemporaryRoleGrantResponses, PlatformServiceRollbackConfigChangeData, PlatformServiceRollbackConfigChangeResponses, PlatformServiceUnlinkFederatedIdentityData, PlatformServiceUnlinkFederatedIdentityResponses, PlatformServiceUnlockUserData, PlatformServiceUnlockUserResponses, PlatformServiceUpdateDepartmentData, PlatformServiceUpdateDepartmentResponses, PlatformServiceUpdateMenuData, PlatformServiceUpdateMenuResponses, PlatformServiceUpdateOrganizationData, PlatformServiceUpdateOrganizationResponses, PlatformServiceUpdatePositionData, PlatformServiceUpdatePositionResponses, PlatformServiceUpdateRoleDataScopeData, PlatformServiceUpdateRoleDataScopeResponses, PlatformServiceUpdateRolePermissionsData, PlatformServiceUpdateRolePermissionsResponses, PlatformServiceUpdateSecurityPolicyData, PlatformServiceUpdateSecurityPolicyResponses, PlatformServiceUpdateUserGroupData, PlatformServiceUpdateUserGroupMembersData, PlatformServiceUpdateUserGroupMembersResponses, PlatformServiceUpdateUserGroupResponses, PlatformServiceUpdateUserGroupRolesData, PlatformServiceUpdateUserGroupRolesResponses, PlatformServiceUpdateUserRolesData, PlatformServiceUpdateUserRolesResponses, PlatformServiceUpdateUserStatusData, PlatformServiceUpdateUserStatusResponses, PlatformServiceUpsertDataFieldPolicyData, PlatformServiceUpsertDataFieldPolicyResponses, PlatformServiceVerifyAuditIntegrityData, PlatformServiceVerifyAuditIntegrityResponses, ReferenceSettlementServiceGetSettlementData, ReferenceSettlementServiceGetSettlementResponses, SystemServiceGetSystemInfoData, SystemServiceGetSystemInfoResponses, SystemServiceHealthData, SystemServiceHealthResponses, SystemServiceReadinessData, SystemServiceReadinessResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -106,6 +106,106 @@ export const platformServiceVerifyAuditIntegrity = <ThrowOnError extends boolean
         }, { scheme: 'bearer', type: 'http' }],
     url: '/api/v1/admin/audit-logs/integrity',
     ...options
+});
+
+export const platformServiceListConfigChanges = <ThrowOnError extends boolean = false>(options?: Options<PlatformServiceListConfigChangesData, ThrowOnError>): RequestResult<PlatformServiceListConfigChangesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PlatformServiceListConfigChangesResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/admin/config-changes',
+    ...options
+});
+
+export const platformServiceCreateConfigChange = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceCreateConfigChangeData, ThrowOnError>): RequestResult<PlatformServiceCreateConfigChangeResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServiceCreateConfigChangeResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/config-changes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceApproveConfigChange = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceApproveConfigChangeData, ThrowOnError>): RequestResult<PlatformServiceApproveConfigChangeResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServiceApproveConfigChangeResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/config-changes/{changeId}/approve',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServicePublishConfigChange = <ThrowOnError extends boolean = false>(options: Options<PlatformServicePublishConfigChangeData, ThrowOnError>): RequestResult<PlatformServicePublishConfigChangeResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServicePublishConfigChangeResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/config-changes/{changeId}/publish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceRollbackConfigChange = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceRollbackConfigChangeData, ThrowOnError>): RequestResult<PlatformServiceRollbackConfigChangeResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServiceRollbackConfigChangeResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/config-changes/{changeId}/rollback',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const platformServiceRequestConfigRollback = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceRequestConfigRollbackData, ThrowOnError>): RequestResult<PlatformServiceRequestConfigRollbackResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServiceRequestConfigRollbackResponses, unknown, ThrowOnError>({
+    security: [
+        {
+            in: 'cookie',
+            name: 'forge_session',
+            type: 'apiKey'
+        },
+        { name: 'X-CSRF-Token', type: 'apiKey' },
+        { scheme: 'bearer', type: 'http' }
+    ],
+    url: '/api/v1/admin/config-changes/{changeId}/rollback-request',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 export const platformServiceAuthorizeDataExport = <ThrowOnError extends boolean = false>(options: Options<PlatformServiceAuthorizeDataExportData, ThrowOnError>): RequestResult<PlatformServiceAuthorizeDataExportResponses, unknown, ThrowOnError> => (options.client ?? client).post<PlatformServiceAuthorizeDataExportResponses, unknown, ThrowOnError>({

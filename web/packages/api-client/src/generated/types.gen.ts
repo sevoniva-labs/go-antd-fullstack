@@ -70,6 +70,15 @@ export type ForgeV1ApprovalTask = {
     decidedAt?: string;
 };
 
+export type ForgeV1ApproveConfigChangeRequest = {
+    changeId?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1ApproveConfigChangeResponse = {
+    change?: ForgeV1ConfigChange;
+};
+
 export type ForgeV1AuditEvent = {
     id?: string;
     occurredAt?: string;
@@ -134,6 +143,24 @@ export type ForgeV1CompleteOidcLoginResponse = {
     csrfToken?: string;
 };
 
+export type ForgeV1ConfigChange = {
+    id?: string;
+    organizationId?: string;
+    namespace?: string;
+    group?: string;
+    dataId?: string;
+    version?: string;
+    expectedPreviousVersion?: string;
+    valueDigest?: string;
+    valueRef?: string;
+    sensitive?: boolean;
+    createdBy?: string;
+    approvedBy?: string;
+    approvalId?: string;
+    state?: string;
+    updatedAt?: string;
+};
+
 export type ForgeV1ConfirmMfaEnrollmentRequest = {
     code?: string;
 };
@@ -177,6 +204,21 @@ export type ForgeV1CreateApprovalRequest = {
 
 export type ForgeV1CreateApprovalResponse = {
     approval?: ForgeV1ApprovalRequest;
+};
+
+export type ForgeV1CreateConfigChangeRequest = {
+    namespace?: string;
+    group?: string;
+    dataId?: string;
+    version?: string;
+    expectedPreviousVersion?: string;
+    valueDigest?: string;
+    valueRef?: string;
+    sensitive?: boolean;
+};
+
+export type ForgeV1CreateConfigChangeResponse = {
+    change?: ForgeV1ConfigChange;
 };
 
 export type ForgeV1CreateDepartmentRequest = {
@@ -418,6 +460,10 @@ export type ForgeV1ListAuditLogsResponse = {
     events?: Array<ForgeV1AuditEvent>;
 };
 
+export type ForgeV1ListConfigChangesResponse = {
+    changes?: Array<ForgeV1ConfigChange>;
+};
+
 export type ForgeV1ListDataDeletionEvidenceResponse = {
     evidence?: Array<ForgeV1DataDeletionEvidence>;
 };
@@ -549,6 +595,15 @@ export type ForgeV1Position = {
     updatedAt?: string;
 };
 
+export type ForgeV1PublishConfigChangeRequest = {
+    changeId?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1PublishConfigChangeResponse = {
+    change?: ForgeV1ConfigChange;
+};
+
 export type ForgeV1ReadinessResponse = {
     status?: string;
     dependencies?: Array<ForgeV1DependencyStatus>;
@@ -575,6 +630,15 @@ export type ForgeV1ReplaceUserAssignmentsRequest = {
 
 export type ForgeV1ReplaceUserAssignmentsResponse = {
     [key: string]: unknown;
+};
+
+export type ForgeV1RequestConfigRollbackRequest = {
+    changeId?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1RequestConfigRollbackResponse = {
+    change?: ForgeV1ConfigChange;
 };
 
 export type ForgeV1ResetUserPasswordRequest = {
@@ -611,6 +675,15 @@ export type ForgeV1Role = {
     dataScope?: string;
     permissions?: Array<string>;
     dataScopeDepartmentIds?: Array<string>;
+};
+
+export type ForgeV1RollbackConfigChangeRequest = {
+    changeId?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1RollbackConfigChangeResponse = {
+    change?: ForgeV1ConfigChange;
 };
 
 export type ForgeV1SecurityPolicy = {
@@ -1018,6 +1091,110 @@ export type PlatformServiceVerifyAuditIntegrityResponses = {
 };
 
 export type PlatformServiceVerifyAuditIntegrityResponse = PlatformServiceVerifyAuditIntegrityResponses[keyof PlatformServiceVerifyAuditIntegrityResponses];
+
+export type PlatformServiceListConfigChangesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/config-changes';
+};
+
+export type PlatformServiceListConfigChangesResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListConfigChangesResponse;
+};
+
+export type PlatformServiceListConfigChangesResponse = PlatformServiceListConfigChangesResponses[keyof PlatformServiceListConfigChangesResponses];
+
+export type PlatformServiceCreateConfigChangeData = {
+    body: ForgeV1CreateConfigChangeRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/config-changes';
+};
+
+export type PlatformServiceCreateConfigChangeResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateConfigChangeResponse;
+};
+
+export type PlatformServiceCreateConfigChangeResponse = PlatformServiceCreateConfigChangeResponses[keyof PlatformServiceCreateConfigChangeResponses];
+
+export type PlatformServiceApproveConfigChangeData = {
+    body: ForgeV1ApproveConfigChangeRequest;
+    path: {
+        changeId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/config-changes/{changeId}/approve';
+};
+
+export type PlatformServiceApproveConfigChangeResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ApproveConfigChangeResponse;
+};
+
+export type PlatformServiceApproveConfigChangeResponse = PlatformServiceApproveConfigChangeResponses[keyof PlatformServiceApproveConfigChangeResponses];
+
+export type PlatformServicePublishConfigChangeData = {
+    body: ForgeV1PublishConfigChangeRequest;
+    path: {
+        changeId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/config-changes/{changeId}/publish';
+};
+
+export type PlatformServicePublishConfigChangeResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1PublishConfigChangeResponse;
+};
+
+export type PlatformServicePublishConfigChangeResponse = PlatformServicePublishConfigChangeResponses[keyof PlatformServicePublishConfigChangeResponses];
+
+export type PlatformServiceRollbackConfigChangeData = {
+    body: ForgeV1RollbackConfigChangeRequest;
+    path: {
+        changeId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/config-changes/{changeId}/rollback';
+};
+
+export type PlatformServiceRollbackConfigChangeResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1RollbackConfigChangeResponse;
+};
+
+export type PlatformServiceRollbackConfigChangeResponse = PlatformServiceRollbackConfigChangeResponses[keyof PlatformServiceRollbackConfigChangeResponses];
+
+export type PlatformServiceRequestConfigRollbackData = {
+    body: ForgeV1RequestConfigRollbackRequest;
+    path: {
+        changeId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/config-changes/{changeId}/rollback-request';
+};
+
+export type PlatformServiceRequestConfigRollbackResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1RequestConfigRollbackResponse;
+};
+
+export type PlatformServiceRequestConfigRollbackResponse = PlatformServiceRequestConfigRollbackResponses[keyof PlatformServiceRequestConfigRollbackResponses];
 
 export type PlatformServiceAuthorizeDataExportData = {
     body: ForgeV1AuthorizeDataExportRequest;

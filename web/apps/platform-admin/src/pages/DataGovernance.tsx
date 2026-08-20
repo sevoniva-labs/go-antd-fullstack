@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons'
 import { ModalForm, ProFormDigit, ProFormSelect, ProFormText, ProFormTextArea } from '@ant-design/pro-components'
 import type { ProColumns } from '@ant-design/pro-components'
-import { Alert, App, Button, Card, Space, Tag, Typography } from 'antd'
+import { Alert, App, Button, Card, Tag, Typography } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, queryKeys, type DataDeletionEvidence, type DataFieldPolicy } from '@forge/api-client'
 import { can, useMe } from '@forge/auth-sdk'
@@ -62,3 +62,5 @@ export function DataGovernancePage() {
     </ModalForm> : null}><AppProTable<DataDeletionEvidence> rowKey="id" columns={evidenceColumns} dataSource={evidence.data?.evidence ?? evidence.data?.items ?? []} loading={evidence.isLoading} search={false} options={false} /></Card>
   </AppPageContainer>
 }
+
+export { ConfigChangesPage } from './ConfigChanges'
