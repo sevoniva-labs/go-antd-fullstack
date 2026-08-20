@@ -20,7 +20,8 @@
     "./sessions": "./src/pages/Sessions.tsx",
     "./system-status": "./src/pages/SystemStatus.tsx",
     "./users": "./src/pages/Users.tsx",
-    "./user-groups": "./src/pages/UserGroups.tsx"
+    "./user-groups": "./src/pages/UserGroups.tsx",
+    "./data-governance": "./src/pages/DataGovernance.tsx"
   },
   "scripts": {
     "build": "vite build",

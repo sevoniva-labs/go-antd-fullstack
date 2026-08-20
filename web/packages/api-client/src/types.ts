@@ -110,6 +110,36 @@ export interface Menu {
   status: 'ACTIVE' | 'DISABLED'
 }
 
+export interface DataFieldPolicy {
+  id: string
+  organization_id: string
+  field_key: string
+  classification: string
+  owner: string
+  purpose: string
+  residency: string
+  retention_days: number
+  tags: string[]
+  mask_strategy: string
+  export_approval: boolean
+  watermark: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface DataDeletionEvidence {
+  id: string
+  organization_id: string
+  resource_type: string
+  resource_digest: string
+  field_keys: string[]
+  reason: string
+  records_deleted: number
+  deleted_at: string
+  evidence_hash: string
+  created_at: string
+}
+
 export type RoleDataScope = 'ORGANIZATION' | 'DEPARTMENT' | 'DEPARTMENT_TREE' | 'SELF' | 'CUSTOM'
 
 export interface Role {

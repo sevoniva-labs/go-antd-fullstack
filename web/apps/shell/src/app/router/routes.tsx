@@ -39,6 +39,7 @@ const AuditLogsPage = lazy(() => import('@forge/platform-admin/audit-logs').then
 const ApprovalsPage = lazy(() => import('@forge/platform-admin/approvals').then((m) => ({ default: m.ApprovalsPage })))
 const TemporaryGrantsPage = lazy(() => import('@forge/platform-admin/temporary-grants').then((m) => ({ default: m.TemporaryGrantsPage })))
 const AccessReviewsPage = lazy(() => import('@forge/platform-admin/access-reviews').then((m) => ({ default: m.AccessReviewsPage })))
+const DataGovernancePage = lazy(() => import('@forge/platform-admin/data-governance').then((m) => ({ default: m.DataGovernancePage })))
 const SecurityPage = lazy(() => import('@forge/platform-admin/security').then((m) => ({ default: m.SecurityPage })))
 const SystemStatusPage = lazy(() => import('@forge/platform-admin/system-status').then((m) => ({ default: m.SystemStatusPage })))
 const AccountSecurityPage = lazy(() => import('../../pages/AccountSecurity').then((m) => ({ default: m.AccountSecurityPage })))
@@ -71,6 +72,7 @@ const platformAdminComponents: Record<PlatformAdminModuleKey, LazyExoticComponen
   approvals: ApprovalsPage,
   'temporary-grants': TemporaryGrantsPage,
   'access-reviews': AccessReviewsPage,
+  'data-governance': DataGovernancePage,
   'system-status': SystemStatusPage,
 }
 
@@ -89,6 +91,7 @@ const platformAdminIcons: Record<PlatformAdminModuleKey, ReactNode> = {
   approvals: <CheckSquareOutlined />,
   'temporary-grants': <SafetyCertificateOutlined />,
   'access-reviews': <SafetyCertificateOutlined />,
+  'data-governance': <SafetyCertificateOutlined />,
   'system-status': <SettingOutlined />,
 }
 

@@ -20,6 +20,8 @@ import type {
   AccessReviewItem,
   Menu,
   User,
+  DataFieldPolicy,
+  DataDeletionEvidence,
 } from './types'
 
 export const api = {
@@ -126,6 +128,12 @@ export const api = {
   menus: () => apiFetch<{ menus?: Menu[]; items?: Menu[] }>('/admin/menus'),
   updateMenu: (menuKey: string, payload: { parent_key: string; name: string; route: string; icon: string; permission_key: string; sort_order: number; status: 'ACTIVE' | 'DISABLED' }, approvalId: string) =>
     apiFetch<Menu>(`/admin/menus/${encodeURIComponent(menuKey)}`, { method: 'PATCH', body: JSON.stringify({ ...payload, approval_id: approvalId }) }),
+  dataPolicies: () => apiFetch<{ policies?: DataFieldPolicy[]; items?: DataFieldPolicy[] }>('/admin/data-policies'),
+  upsertDataPolicy: (payload: Omit<DataFieldPolicy, 'id' | 'organization_id' | 'created_at' | 'updated_at'>, approvalId: string) =>
+    apiFetch<DataFieldPolicy>(`/admin/data-policies/${encodeURIComponent(payload.field_key)}`, { method: 'PUT', body: JSON.stringify({ policy: payload, approval_id: approvalId }) }),
+  dataDeletionEvidence: () => apiFetch<{ evidence?: DataDeletionEvidence[]; items?: DataDeletionEvidence[] }>('/admin/data-retention/evidence'),
+  recordDataDeletionEvidence: (payload: { resource_type: string; resource_digest: string; field_keys: string[]; reason: string; records_deleted: number; deleted_at: string }, approvalId: string) =>
+    apiFetch<DataDeletionEvidence>('/admin/data-retention/evidence', { method: 'POST', body: JSON.stringify({ ...payload, approval_id: approvalId }) }),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
   updateUserRoles: (userId: string, roles: string[], approvalId: string) =>

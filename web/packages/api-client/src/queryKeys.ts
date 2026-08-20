@@ -17,6 +17,8 @@ export const queryKeys = {
   approvals: ['approvals'] as const,
   temporaryRoleGrants: ['temporary-role-grants'] as const,
   accessReviews: ['access-reviews'] as const,
+  dataPolicies: ['data-policies'] as const,
+  dataDeletionEvidence: ['data-deletion-evidence'] as const,
   systemInfo: ['system-info'] as const,
   readiness: ['readiness'] as const,
 }

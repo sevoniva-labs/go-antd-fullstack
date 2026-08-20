@@ -14,6 +14,7 @@ export type PlatformAdminModuleKey =
   | 'approvals'
   | 'temporary-grants'
   | 'access-reviews'
+  | 'data-governance'
 
 export interface PlatformAdminModule {
   key: PlatformAdminModuleKey
@@ -38,5 +39,6 @@ export const platformAdminModules: readonly PlatformAdminModule[] = [
   { key: 'approvals', path: '/governance/approvals', name: '审批中心', group: '治理中心', permission: 'approval.request.read' },
   { key: 'temporary-grants', path: '/governance/temporary-grants', name: '临时授权', group: '治理中心', permission: 'system.temporary_grant.read' },
   { key: 'access-reviews', path: '/governance/access-reviews', name: '访问复核', group: '治理中心', permission: 'system.access_review.read' },
+  { key: 'data-governance', path: '/admin/data-governance', name: '数据治理', group: '治理中心', permission: 'system.data_policy.read' },
   { key: 'system-status', path: '/ops/system', name: '系统状态', group: '运维中心' },
 ]
