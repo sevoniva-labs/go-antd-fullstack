@@ -58,3 +58,26 @@ func TestLocalStoreRoundTripUsesPrivateFileMode(t *testing.T) {
 		t.Fatalf("file mode = %o, want 600", info.Mode().Perm())
 	}
 }
+
+func TestStorageCapabilitiesFailClosedUntilContractEvidenceExists(t *testing.T) {
+	store, err := New(context.Background(), config.Storage{Provider: "s3", Endpoint: "https://s3.example", Region: "cn-beijing", Bucket: "documents", TLS: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := RequireCapabilities(store, CapabilityBasicObjectIO); err != nil {
+		t.Fatalf("basic S3 capability rejected: %v", err)
+	}
+	if err := RequireCapabilities(store, CapabilityObjectLock); err == nil {
+		t.Fatal("unverified object lock capability was accepted")
+	}
+}
+
+func TestLocalStorageDoesNotClaimS3Capabilities(t *testing.T) {
+	store, err := New(context.Background(), config.Storage{Provider: "local", LocalRoot: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := RequireCapabilities(store, CapabilityObjectLock); err == nil {
+		t.Fatal("local provider claimed object lock")
+	}
+}

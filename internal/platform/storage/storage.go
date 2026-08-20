@@ -26,6 +26,56 @@ type Store interface {
 	Provider() string
 }
 
+type Capability string
+
+const (
+	CapabilityBasicObjectIO       Capability = "basic_object_io"
+	CapabilityMultipartRecovery   Capability = "multipart_recovery"
+	CapabilityChecksum            Capability = "checksum"
+	CapabilitySSES3               Capability = "sse_s3"
+	CapabilitySSEKMS              Capability = "sse_kms"
+	CapabilityVersioning          Capability = "versioning"
+	CapabilityObjectLock          Capability = "object_lock"
+	CapabilityRetention           Capability = "retention"
+	CapabilityLegalHold           Capability = "legal_hold"
+	CapabilityConstrainedPresign  Capability = "constrained_presign"
+	CapabilityTemporaryCredential Capability = "temporary_credentials"
+)
+
+type CapabilityState string
+
+const (
+	CapabilitySupported   CapabilityState = "supported"
+	CapabilityUnsupported CapabilityState = "unsupported"
+	CapabilityUnknown     CapabilityState = "unknown"
+)
+
+type CapabilityStatus struct {
+	State    CapabilityState
+	Evidence string
+}
+
+type CapabilityReporter interface {
+	Capabilities() map[Capability]CapabilityStatus
+}
+
+// RequireCapabilities fails closed. A provider must be contract-tested before
+// an operation can rely on an advanced S3 feature.
+func RequireCapabilities(store Store, required ...Capability) error {
+	reporter, ok := store.(CapabilityReporter)
+	if !ok {
+		return errors.New("storage provider does not report capabilities")
+	}
+	capabilities := reporter.Capabilities()
+	for _, capability := range required {
+		status, present := capabilities[capability]
+		if !present || status.State != CapabilitySupported {
+			return fmt.Errorf("storage capability %q is not verified", capability)
+		}
+	}
+	return nil
+}
+
 func New(ctx context.Context, c appcfg.Storage) (Store, error) {
 	switch normalizeStorageProvider(c.Provider) {
 	case "local", "":
@@ -106,6 +156,12 @@ func (l *local) Delete(_ context.Context, key string) error {
 }
 func (l *local) Ping(context.Context) error { return nil }
 func (l *local) Provider() string           { return "local" }
+func (l *local) Capabilities() map[Capability]CapabilityStatus {
+	return map[Capability]CapabilityStatus{
+		CapabilityBasicObjectIO:     {State: CapabilitySupported, Evidence: "local filesystem contract"},
+		CapabilityMultipartRecovery: {State: CapabilityUnsupported, Evidence: "local provider has no multipart protocol"},
+	}
+}
 
 type s3Store struct {
 	client *s3.Client
@@ -179,3 +235,18 @@ func (s *s3Store) Ping(ctx context.Context) error {
 	return nil
 }
 func (s *s3Store) Provider() string { return "s3" }
+func (s *s3Store) Capabilities() map[Capability]CapabilityStatus {
+	return map[Capability]CapabilityStatus{
+		CapabilityBasicObjectIO:       {State: CapabilitySupported, Evidence: "S3 API PutObject/GetObject/DeleteObject/HeadBucket"},
+		CapabilityMultipartRecovery:   {State: CapabilityUnknown, Evidence: "target contract test required"},
+		CapabilityChecksum:            {State: CapabilityUnknown, Evidence: "target contract test required"},
+		CapabilitySSES3:               {State: CapabilityUnknown, Evidence: "target contract test required"},
+		CapabilitySSEKMS:              {State: CapabilityUnknown, Evidence: "target KMS contract test required"},
+		CapabilityVersioning:          {State: CapabilityUnknown, Evidence: "target contract test required"},
+		CapabilityObjectLock:          {State: CapabilityUnknown, Evidence: "target object-lock contract test required"},
+		CapabilityRetention:           {State: CapabilityUnknown, Evidence: "target retention contract test required"},
+		CapabilityLegalHold:           {State: CapabilityUnknown, Evidence: "target legal-hold contract test required"},
+		CapabilityConstrainedPresign:  {State: CapabilityUnknown, Evidence: "target presign contract test required"},
+		CapabilityTemporaryCredential: {State: CapabilityUnknown, Evidence: "target STS contract test required"},
+	}
+}
