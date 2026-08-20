@@ -1,5 +1,7 @@
 # Velora 后端采用 Forge 脚手架实施方案
 
+> 已被 [velora-backend-rapid-replacement-plan.md](velora-backend-rapid-replacement-plan.md) 取代。由于 Velora 当前代码和数据量较少，采用整体替换后端基座，不再按本文执行渐进迁移。
+
 ## 1. 结论
 
 `go-antd-fullstack` 可以作为 Velora 新后端基座，且比继续扩展现有 Gin/GORM 后端更适合生产级、金融级建设。它已具备 Kratos v2、Proto/Buf/OpenAPI、`database/sql` + Goose、RBAC/数据范围、审批、可靠审计、OIDC 身份源、通用 S3、国密软件基线、独立迁移命令、供应链和部署门禁。
