@@ -18,6 +18,7 @@ import type {
   TemporaryRoleGrant,
   AccessReview,
   AccessReviewItem,
+  Menu,
   User,
 } from './types'
 
@@ -122,6 +123,7 @@ export const api = {
   updateSecurityConfig: (payload: SecurityPolicy, approvalId: string) =>
     apiFetch<SecurityPolicy>(`/admin/security-config?approval_id=${encodeURIComponent(approvalId)}`, { method: 'PUT', body: JSON.stringify(payload) }),
   users: () => apiFetch<{ items: User[] }>('/admin/users'),
+  menus: () => apiFetch<{ menus?: Menu[]; items?: Menu[] }>('/admin/menus'),
   createUser: (payload: { login_name: string; display_name: string; password: string; roles: string[] }) =>
     apiFetch<User>('/admin/users', { method: 'POST', body: JSON.stringify(payload) }),
   updateUserRoles: (userId: string, roles: string[], approvalId: string) =>

@@ -97,6 +97,19 @@ export interface Permission {
 	action: string
 }
 
+export interface Menu {
+  id: string
+  organization_id: string
+  key: string
+  parent_key: string
+  name: string
+  route: string
+  icon: string
+  permission_key: string
+  sort_order: number
+  status: string
+}
+
 export type RoleDataScope = 'ORGANIZATION' | 'DEPARTMENT' | 'DEPARTMENT_TREE' | 'SELF' | 'CUSTOM'
 
 export interface Role {

@@ -4,6 +4,7 @@ export const queryKeys = {
   userAssignments: (userId: string) => ['users', userId, 'assignments'] as const,
   roles: ['roles'] as const,
   permissions: ['permissions'] as const,
+  menus: ['menus'] as const,
   organization: ['organization'] as const,
   departments: ['departments'] as const,
   positions: ['positions'] as const,

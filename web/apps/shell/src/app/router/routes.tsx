@@ -8,6 +8,7 @@ import {
   KeyOutlined,
   IdcardOutlined,
   LockOutlined,
+  MenuOutlined,
   PartitionOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
@@ -28,6 +29,7 @@ const DashboardPage = lazy(() => import('../../pages/Dashboard').then((m) => ({ 
 const UsersPage = lazy(() => import('@forge/platform-admin/users').then((m) => ({ default: m.UsersPage })))
 const RolesPage = lazy(() => import('@forge/platform-admin/roles').then((m) => ({ default: m.RolesPage })))
 const PermissionsPage = lazy(() => import('@forge/platform-admin/permissions').then((m) => ({ default: m.PermissionsPage })))
+const MenusPage = lazy(() => import('@forge/platform-admin/menus').then((m) => ({ default: m.MenusPage })))
 const OrganizationPage = lazy(() => import('@forge/platform-admin/organization').then((m) => ({ default: m.OrganizationPage })))
 const DepartmentsPage = lazy(() => import('@forge/platform-admin/departments').then((m) => ({ default: m.DepartmentsPage })))
 const PositionsPage = lazy(() => import('@forge/platform-admin/positions').then((m) => ({ default: m.PositionsPage })))
@@ -58,6 +60,7 @@ const platformAdminComponents: Record<PlatformAdminModuleKey, LazyExoticComponen
   users: UsersPage,
   roles: RolesPage,
   permissions: PermissionsPage,
+  menus: MenusPage,
   organization: OrganizationPage,
   departments: DepartmentsPage,
   positions: PositionsPage,
@@ -75,6 +78,7 @@ const platformAdminIcons: Record<PlatformAdminModuleKey, ReactNode> = {
   users: <TeamOutlined />,
   roles: <UserSwitchOutlined />,
   permissions: <FileProtectOutlined />,
+  menus: <MenuOutlined />,
   organization: <ApartmentOutlined />,
   departments: <PartitionOutlined />,
   positions: <IdcardOutlined />,

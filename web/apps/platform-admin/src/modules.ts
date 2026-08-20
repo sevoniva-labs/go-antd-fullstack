@@ -2,6 +2,7 @@ export type PlatformAdminModuleKey =
   | 'users'
   | 'roles'
   | 'permissions'
+  | 'menus'
   | 'organization'
   | 'departments'
   | 'positions'
@@ -26,6 +27,7 @@ export const platformAdminModules: readonly PlatformAdminModule[] = [
   { key: 'users', path: '/admin/users', name: '用户管理', group: '系统管理', permission: 'system.user.read' },
   { key: 'roles', path: '/admin/roles', name: '角色管理', group: '系统管理', permission: 'system.role.read' },
   { key: 'permissions', path: '/admin/permissions', name: '权限清单', group: '系统管理', permission: 'system.role.read' },
+  { key: 'menus', path: '/admin/menus', name: '菜单目录', group: '系统管理', permission: 'system.menu.read' },
   { key: 'organization', path: '/admin/organization', name: '组织信息', group: '系统管理', permission: 'system.organization.read' },
   { key: 'departments', path: '/admin/departments', name: '部门管理', group: '系统管理', permission: 'system.department.read' },
   { key: 'positions', path: '/admin/positions', name: '岗位管理', group: '系统管理', permission: 'system.position.read' },
