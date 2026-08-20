@@ -92,7 +92,17 @@ func New(ctx context.Context, c appcfg.Storage) (Store, error) {
 		}
 		return &local{root: c.LocalRoot}, nil
 	default:
-		return newS3(ctx, c, profile, defaultCapabilityContract(profile))
+		contract := defaultCapabilityContract(profile)
+		if strings.TrimSpace(c.CapabilityEvidenceFile) != "" {
+			contract, err = LoadCapabilityContract(c.CapabilityEvidenceFile)
+			if err != nil {
+				return nil, err
+			}
+			if contract.Profile != profile {
+				return nil, fmt.Errorf("storage capability contract profile %q does not match configured profile %q", contract.Profile, profile)
+			}
+		}
+		return newS3(ctx, c, profile, contract)
 	}
 }
 

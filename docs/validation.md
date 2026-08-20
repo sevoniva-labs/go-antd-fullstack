@@ -19,7 +19,7 @@
 ### Tencent COS S3 foundation contract
 
 - 2026-08-21: 已使用腾讯 COS `ap-shanghai` 私有测试桶完成 `HeadBucket`、对象列表、SSE-S3 `AES256` 上传、对象元数据、下载内容校验、删除、版本状态读取和版本列表权限验证。
-- 仓库入口为 `make storage-cos-contract`，凭据只从环境变量读取并自动清理探针对象；可通过 `FORGE_COS_EVIDENCE_FILE` 生成不含密钥的 JSON 证据。
+- 仓库入口为 `make storage-cos-contract`，凭据只从环境变量读取并自动清理探针对象；可通过 `FORGE_COS_EVIDENCE_FILE` 生成不含密钥的 JSON 证据，并通过 `FORGE_COS_CONTRACT_FILE` 生成启动可加载的 Target-tested 合同清单。
 - 当前证据只支持基础对象读写、SSE-S3 AES256 和版本读取/列表观察；分片、Checksum、STS、SSE-KMS、Object Lock、Retention、Legal Hold、预签名和灾备仍未验证。
 
 ### 前端

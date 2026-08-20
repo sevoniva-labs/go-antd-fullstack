@@ -31,10 +31,13 @@ FORGE_COS_SECRET_KEY='测试秘密密钥' \
 FORGE_COS_REGION='ap-shanghai' \
 FORGE_COS_BUCKET='专用测试桶' \
 FORGE_COS_EVIDENCE_FILE='artifacts/storage/tencent-cos-foundation.json' \
+FORGE_COS_CONTRACT_FILE='artifacts/storage/tencent-cos-foundation.contract.json' \
 make storage-cos-contract
 ```
 
 测试身份必须是最小权限专用身份；探针对象使用唯一前缀并在测试结束时删除。若删除失败，脚本返回失败。生成的证据文件不得包含凭据，并应随目标版本、配置和报告一同归档。
+
+通过测试后，可将生成的 `.contract.json` 配置到 `storage.capability_evidence_file` 或 `FORGE_STORAGE_CAPABILITY_EVIDENCE_FILE`。启动时会重新校验目标 profile、证据摘要、测试时间和 `Target-tested` 状态；原始证据文件被替换或摘要不一致时，启动失败关闭。
 
 ## Upload quarantine
 

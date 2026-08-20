@@ -138,19 +138,20 @@ type Search struct {
 }
 
 type Storage struct {
-	Provider      string `yaml:"provider"` // local | s3 | s3-compatible | minio | ceph-rgw | oss | cos | obs
-	LocalRoot     string `yaml:"local_root"`
-	Endpoint      string `yaml:"endpoint"`
-	Region        string `yaml:"region"`
-	Bucket        string `yaml:"bucket"`
-	AccessKey     string `yaml:"-"`
-	SecretKey     string `yaml:"-"`
-	PathStyle     bool   `yaml:"path_style"`
-	TLS           bool   `yaml:"tls"`
-	TLSCAFile     string `yaml:"tls_ca_file"`
-	TLSCertFile   string `yaml:"tls_cert_file"`
-	TLSKeyFile    string `yaml:"tls_key_file"`
-	TLSServerName string `yaml:"tls_server_name"`
+	Provider               string `yaml:"provider"` // local | s3 | s3-compatible | minio | ceph-rgw | oss | cos | obs
+	LocalRoot              string `yaml:"local_root"`
+	Endpoint               string `yaml:"endpoint"`
+	Region                 string `yaml:"region"`
+	Bucket                 string `yaml:"bucket"`
+	AccessKey              string `yaml:"-"`
+	SecretKey              string `yaml:"-"`
+	CapabilityEvidenceFile string `yaml:"capability_evidence_file"`
+	PathStyle              bool   `yaml:"path_style"`
+	TLS                    bool   `yaml:"tls"`
+	TLSCAFile              string `yaml:"tls_ca_file"`
+	TLSCertFile            string `yaml:"tls_cert_file"`
+	TLSKeyFile             string `yaml:"tls_key_file"`
+	TLSServerName          string `yaml:"tls_server_name"`
 }
 
 type Discovery struct {
@@ -464,6 +465,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideString(&cfg.Storage.Region, "FORGE_STORAGE_REGION")
 	overrideString(&cfg.Storage.Bucket, "FORGE_STORAGE_BUCKET")
 	overrideString(&cfg.Storage.LocalRoot, "FORGE_STORAGE_LOCAL_ROOT")
+	overrideString(&cfg.Storage.CapabilityEvidenceFile, "FORGE_STORAGE_CAPABILITY_EVIDENCE_FILE")
 	overrideBool(&cfg.Storage.PathStyle, "FORGE_STORAGE_PATH_STYLE")
 	overrideBool(&cfg.Storage.TLS, "FORGE_STORAGE_TLS")
 	overrideString(&cfg.Storage.TLSCAFile, "FORGE_STORAGE_TLS_CA_FILE")

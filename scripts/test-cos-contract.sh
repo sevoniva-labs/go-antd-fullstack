@@ -8,6 +8,7 @@ set -euo pipefail
 region="${FORGE_COS_REGION:-ap-shanghai}"
 endpoint="${FORGE_COS_ENDPOINT:-https://cos.${region}.myqcloud.com}"
 evidence_file="${FORGE_COS_EVIDENCE_FILE:-}"
+contract_file="${FORGE_COS_CONTRACT_FILE:-}"
 tested_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 probe_key="_forge-contract/$(date -u +%Y%m%dT%H%M%SZ)-$$/probe.txt"
 work_dir="$(mktemp -d)"
@@ -27,6 +28,10 @@ trap cleanup EXIT
 
 if ! command -v aws >/dev/null 2>&1; then
     echo "aws CLI is required" >&2
+    exit 1
+fi
+if [[ -n "$contract_file" && -z "$evidence_file" ]]; then
+    echo "FORGE_COS_EVIDENCE_FILE is required when FORGE_COS_CONTRACT_FILE is set" >&2
     exit 1
 fi
 
@@ -172,6 +177,30 @@ PY
         digest="$(shasum -a 256 "$evidence_file" | awk '{print $1}')"
     fi
     printf 'evidence_file=%s\nevidence_sha256=%s\n' "$evidence_file" "$digest"
+
+    if [[ -n "$contract_file" && "$result" == "passed" ]]; then
+        mkdir -p "$(dirname "$contract_file")"
+        python3 - "$contract_file" "$tested_at" "$FORGE_COS_BUCKET" "$evidence_file" "$digest" <<'PY'
+import json
+import pathlib
+import sys
+
+output, tested_at, bucket, evidence_ref, evidence_digest = sys.argv[1:]
+pathlib.Path(output).write_text(json.dumps({
+    "profile": "tencent-cos",
+    "level": "Target-tested",
+    "target": f"tencent-cos/ap-shanghai/{bucket}",
+    "evidence_ref": evidence_ref,
+    "evidence_digest": evidence_digest,
+    "tested_at": tested_at,
+    "capabilities": {
+        "basic_object_io": {"state": "supported", "evidence": evidence_ref},
+        "sse_s3": {"state": "supported", "evidence": evidence_ref},
+    },
+}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+        printf 'contract_file=%s\n' "$contract_file"
+    fi
 fi
 
 printf 'provider=tencent-cos region=%s bucket=%s result=%s\n' "$region" "$FORGE_COS_BUCKET" "$result"
