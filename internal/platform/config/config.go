@@ -688,6 +688,9 @@ func (c Config) Validate() error {
 	if c.Security.PasswordHistory < 0 || c.Security.PasswordHistory > 24 {
 		errs = append(errs, "security.password_history must be 0..24")
 	}
+	if isProduction(c.App.Environment) {
+		errs = append(errs, productionSecurityFloorErrors(c)...)
+	}
 	switch c.Security.CryptoProvider {
 	case "standard", "gm":
 	default:
@@ -779,6 +782,32 @@ func (c Config) Validate() error {
 		return errors.New(strings.Join(errs, "; "))
 	}
 	return nil
+}
+
+func productionSecurityFloorErrors(c Config) []string {
+	var errs []string
+	if c.Security.PasswordMinLength < 12 {
+		errs = append(errs, "security.password_min_length must be >= 12 in production")
+	}
+	if !c.Security.PasswordUpper || !c.Security.PasswordLower || !c.Security.PasswordDigit || !c.Security.PasswordSymbol {
+		errs = append(errs, "security.password character-class requirements cannot be disabled in production")
+	}
+	if c.Security.PasswordHistory < 5 {
+		errs = append(errs, "security.password_history must be >= 5 in production")
+	}
+	if c.Security.PasswordMaxAgeDay < 1 || c.Security.PasswordMaxAgeDay > 90 {
+		errs = append(errs, "security.password_max_age_days must be between 1 and 90 in production")
+	}
+	if c.Security.LoginMaxFailures < 1 || c.Security.LoginMaxFailures > 5 {
+		errs = append(errs, "security.login_max_failures must be between 1 and 5 in production")
+	}
+	if c.Security.LoginLockDuration < 15*time.Minute {
+		errs = append(errs, "security.login_lock_duration must be >= 15m in production")
+	}
+	if c.Security.SessionTTL <= 0 || c.Security.SessionTTL > 12*time.Hour {
+		errs = append(errs, "security.session_ttl must be between 1s and 12h in production")
+	}
+	return errs
 }
 
 func validWebCSPOrigin(source string, production bool) bool {
