@@ -7,6 +7,7 @@
 ### Latest complete gate
 
 - 2026-08-20: `make verify` passed on the scaffold branch, including Go contract/module/race checks, frontend generated API/lint/typecheck/test/build/budget checks, APISIX and Helm policy checks, Gosec, govulncheck, Staticcheck, golangci-lint, SBOM, Gitleaks history/worktree scans, and license evidence generation.
+- 2026-08-21: after isolating generated-code checks and confining capability-evidence reads with `os.Root`, `make verify` passed again; Gosec reported 0 issues, govulncheck reported no code-reachable vulnerabilities, and staticcheck/golangci-lint both reported 0 issues.
 - The complete gate does not certify a target vendor, hardware, operating system, HSM/KMS, cluster, air-gapped bundle, or disaster-recovery topology; those require the target evidence workflows below.
 
 ### Go 与安全边界
@@ -27,7 +28,7 @@
 - `pnpm install --frozen-lockfile`、workspace typecheck、单元测试和 Vite 8 生产构建已执行通过。
 - 构建预算检查已执行通过，覆盖初始/全量 JS raw 与 gzip、chunk 数、最大 chunk、CSS、source map 和 hash 文件名。
 - 生产 Wujie 构建审批门禁已执行通过；未审批路径按预期拒绝。
-- 使用调用方显式指定的本机 Chrome 执行 7 条 Playwright 生产构建 E2E，结果为 `7 passed`。
+- 首次执行 `make ci-web-e2e` 因本机没有 Playwright 缓存的 Chromium，在浏览器启动前失败；随后使用调用方显式指定的本机 Chrome 执行同一套 7 条生产构建 E2E，结果为 `7 passed`。这证明测试通过，不证明 Playwright 浏览器制品可从海外源下载。
 - 浏览器场景覆盖普通 SPA、Wujie + Host SDK、独立域 iframe、缺权拦截、双版本不可用故障关闭、签名清单回滚和默认脚本严格 CSP。
 
 ### 部署模板
