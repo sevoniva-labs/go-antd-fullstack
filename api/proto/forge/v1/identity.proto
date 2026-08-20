@@ -16,6 +16,15 @@ service IdentityService {
       body: "*"
     };
   }
+  rpc BeginOIDCLogin(BeginOIDCLoginRequest) returns (BeginOIDCLoginResponse) {
+    option (google.api.http) = {get: "/api/v1/auth/federated/oidc/{provider}/begin"};
+  }
+  rpc CompleteOIDCLogin(CompleteOIDCLoginRequest) returns (CompleteOIDCLoginResponse) {
+    option (google.api.http) = {post: "/api/v1/auth/federated/oidc/{provider}/callback" body: "*"};
+  }
+  rpc LoginLDAP(LoginLDAPRequest) returns (LoginLDAPResponse) {
+    option (google.api.http) = {post: "/api/v1/auth/federated/ldap/{provider}" body: "*"};
+  }
   rpc Logout(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/logout"
@@ -260,6 +269,33 @@ message LoginRequest {
 }
 
 message LoginResponse {
+  User user = 1;
+  string csrf_token = 2;
+}
+
+message BeginOIDCLoginRequest {
+  string provider = 1;
+  string organization = 2;
+}
+message BeginOIDCLoginResponse {
+  string redirect_url = 1;
+}
+message CompleteOIDCLoginRequest {
+  string provider = 1;
+  string code = 2;
+  string state = 3;
+}
+message CompleteOIDCLoginResponse {
+  User user = 1;
+  string csrf_token = 2;
+}
+message LoginLDAPRequest {
+  string provider = 1;
+  string organization = 2;
+  string login_name = 3;
+  string password = 4;
+}
+message LoginLDAPResponse {
   User user = 1;
   string csrf_token = 2;
 }

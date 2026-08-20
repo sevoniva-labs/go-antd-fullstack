@@ -185,7 +185,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 	publicOperation := func(_ context.Context, operation string) bool {
 		switch operation {
-		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin:
+		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin, forgev1.OperationIdentityServiceBeginOidcLogin, forgev1.OperationIdentityServiceCompleteOidcLogin, forgev1.OperationIdentityServiceLoginLdap:
 			return false
 		default:
 			return true

@@ -1120,6 +1120,76 @@ paths:
             security:
                 - SessionCookie: []
                   CsrfToken: []
+    /api/v1/auth/federated/ldap/{provider}:
+        post:
+            tags:
+                - IdentityService
+            operationId: IdentityService_LoginLDAP
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.LoginLDAPRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.LoginLDAPResponse'
+    /api/v1/auth/federated/oidc/{provider}/begin:
+        get:
+            tags:
+                - IdentityService
+            operationId: IdentityService_BeginOIDCLogin
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: organization
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.BeginOIDCLoginResponse'
+    /api/v1/auth/federated/oidc/{provider}/callback:
+        post:
+            tags:
+                - IdentityService
+            operationId: IdentityService_CompleteOIDCLogin
+            parameters:
+                - name: provider
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CompleteOIDCLoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CompleteOIDCLoginResponse'
     /api/v1/auth/login:
         post:
             tags:
@@ -1537,6 +1607,11 @@ components:
                     type: string
                 provisioningUri:
                     type: string
+        forge.v1.BeginOIDCLoginResponse:
+            type: object
+            properties:
+                redirectUrl:
+                    type: string
         forge.v1.ChangePasswordRequest:
             type: object
             properties:
@@ -1547,6 +1622,22 @@ components:
         forge.v1.ChangePasswordResponse:
             type: object
             properties: {}
+        forge.v1.CompleteOIDCLoginRequest:
+            type: object
+            properties:
+                provider:
+                    type: string
+                code:
+                    type: string
+                state:
+                    type: string
+        forge.v1.CompleteOIDCLoginResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/forge.v1.User'
+                csrfToken:
+                    type: string
         forge.v1.ConfirmMFAEnrollmentRequest:
             type: object
             properties:
@@ -2012,6 +2103,24 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.LoginLDAPRequest:
+            type: object
+            properties:
+                provider:
+                    type: string
+                organization:
+                    type: string
+                loginName:
+                    type: string
+                password:
+                    type: string
+        forge.v1.LoginLDAPResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/forge.v1.User'
+                csrfToken:
+                    type: string
         forge.v1.LoginRequest:
             type: object
             properties:

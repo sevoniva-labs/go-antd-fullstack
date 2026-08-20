@@ -20,6 +20,9 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	IdentityService_Login_FullMethodName                = "/forge.v1.IdentityService/Login"
+	IdentityService_BeginOIDCLogin_FullMethodName       = "/forge.v1.IdentityService/BeginOIDCLogin"
+	IdentityService_CompleteOIDCLogin_FullMethodName    = "/forge.v1.IdentityService/CompleteOIDCLogin"
+	IdentityService_LoginLDAP_FullMethodName            = "/forge.v1.IdentityService/LoginLDAP"
 	IdentityService_Logout_FullMethodName               = "/forge.v1.IdentityService/Logout"
 	IdentityService_ChangePassword_FullMethodName       = "/forge.v1.IdentityService/ChangePassword"
 	IdentityService_StepUpAuthentication_FullMethodName = "/forge.v1.IdentityService/StepUpAuthentication"
@@ -38,6 +41,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IdentityServiceClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	BeginOIDCLogin(ctx context.Context, in *BeginOIDCLoginRequest, opts ...grpc.CallOption) (*BeginOIDCLoginResponse, error)
+	CompleteOIDCLogin(ctx context.Context, in *CompleteOIDCLoginRequest, opts ...grpc.CallOption) (*CompleteOIDCLoginResponse, error)
+	LoginLDAP(ctx context.Context, in *LoginLDAPRequest, opts ...grpc.CallOption) (*LoginLDAPResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 	StepUpAuthentication(ctx context.Context, in *StepUpAuthenticationRequest, opts ...grpc.CallOption) (*StepUpAuthenticationResponse, error)
@@ -63,6 +69,36 @@ func (c *identityServiceClient) Login(ctx context.Context, in *LoginRequest, opt
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, IdentityService_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) BeginOIDCLogin(ctx context.Context, in *BeginOIDCLoginRequest, opts ...grpc.CallOption) (*BeginOIDCLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BeginOIDCLoginResponse)
+	err := c.cc.Invoke(ctx, IdentityService_BeginOIDCLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) CompleteOIDCLogin(ctx context.Context, in *CompleteOIDCLoginRequest, opts ...grpc.CallOption) (*CompleteOIDCLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CompleteOIDCLoginResponse)
+	err := c.cc.Invoke(ctx, IdentityService_CompleteOIDCLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) LoginLDAP(ctx context.Context, in *LoginLDAPRequest, opts ...grpc.CallOption) (*LoginLDAPResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginLDAPResponse)
+	err := c.cc.Invoke(ctx, IdentityService_LoginLDAP_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +220,9 @@ func (c *identityServiceClient) RevokeApiToken(ctx context.Context, in *RevokeAp
 // for forward compatibility.
 type IdentityServiceServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	BeginOIDCLogin(context.Context, *BeginOIDCLoginRequest) (*BeginOIDCLoginResponse, error)
+	CompleteOIDCLogin(context.Context, *CompleteOIDCLoginRequest) (*CompleteOIDCLoginResponse, error)
+	LoginLDAP(context.Context, *LoginLDAPRequest) (*LoginLDAPResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	StepUpAuthentication(context.Context, *StepUpAuthenticationRequest) (*StepUpAuthenticationResponse, error)
@@ -207,6 +246,15 @@ type UnimplementedIdentityServiceServer struct{}
 
 func (UnimplementedIdentityServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedIdentityServiceServer) BeginOIDCLogin(context.Context, *BeginOIDCLoginRequest) (*BeginOIDCLoginResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BeginOIDCLogin not implemented")
+}
+func (UnimplementedIdentityServiceServer) CompleteOIDCLogin(context.Context, *CompleteOIDCLoginRequest) (*CompleteOIDCLoginResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CompleteOIDCLogin not implemented")
+}
+func (UnimplementedIdentityServiceServer) LoginLDAP(context.Context, *LoginLDAPRequest) (*LoginLDAPResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LoginLDAP not implemented")
 }
 func (UnimplementedIdentityServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
@@ -276,6 +324,60 @@ func _IdentityService_Login_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IdentityServiceServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_BeginOIDCLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BeginOIDCLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).BeginOIDCLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_BeginOIDCLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).BeginOIDCLogin(ctx, req.(*BeginOIDCLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_CompleteOIDCLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteOIDCLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).CompleteOIDCLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_CompleteOIDCLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).CompleteOIDCLogin(ctx, req.(*CompleteOIDCLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_LoginLDAP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginLDAPRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).LoginLDAP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_LoginLDAP_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).LoginLDAP(ctx, req.(*LoginLDAPRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -488,6 +590,18 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _IdentityService_Login_Handler,
+		},
+		{
+			MethodName: "BeginOIDCLogin",
+			Handler:    _IdentityService_BeginOIDCLogin_Handler,
+		},
+		{
+			MethodName: "CompleteOIDCLogin",
+			Handler:    _IdentityService_CompleteOIDCLogin_Handler,
+		},
+		{
+			MethodName: "LoginLDAP",
+			Handler:    _IdentityService_LoginLDAP_Handler,
 		},
 		{
 			MethodName: "Logout",

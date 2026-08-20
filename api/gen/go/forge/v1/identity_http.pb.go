@@ -20,7 +20,9 @@ var _ = binding.EncodeURL
 const _ = http.SupportPackageIsVersion1
 
 const OperationIdentityServiceBeginMFAEnrollment = "/forge.v1.IdentityService/BeginMFAEnrollment"
+const OperationIdentityServiceBeginOIDCLogin = "/forge.v1.IdentityService/BeginOIDCLogin"
 const OperationIdentityServiceChangePassword = "/forge.v1.IdentityService/ChangePassword"
+const OperationIdentityServiceCompleteOIDCLogin = "/forge.v1.IdentityService/CompleteOIDCLogin"
 const OperationIdentityServiceConfirmMFAEnrollment = "/forge.v1.IdentityService/ConfirmMFAEnrollment"
 const OperationIdentityServiceCreateApiToken = "/forge.v1.IdentityService/CreateApiToken"
 const OperationIdentityServiceDisableMFA = "/forge.v1.IdentityService/DisableMFA"
@@ -28,13 +30,16 @@ const OperationIdentityServiceGetCurrentUser = "/forge.v1.IdentityService/GetCur
 const OperationIdentityServiceGetMFAStatus = "/forge.v1.IdentityService/GetMFAStatus"
 const OperationIdentityServiceListApiTokens = "/forge.v1.IdentityService/ListApiTokens"
 const OperationIdentityServiceLogin = "/forge.v1.IdentityService/Login"
+const OperationIdentityServiceLoginLDAP = "/forge.v1.IdentityService/LoginLDAP"
 const OperationIdentityServiceLogout = "/forge.v1.IdentityService/Logout"
 const OperationIdentityServiceRevokeApiToken = "/forge.v1.IdentityService/RevokeApiToken"
 const OperationIdentityServiceStepUpAuthentication = "/forge.v1.IdentityService/StepUpAuthentication"
 
 type IdentityServiceHTTPServer interface {
 	BeginMFAEnrollment(context.Context, *BeginMFAEnrollmentRequest) (*BeginMFAEnrollmentResponse, error)
+	BeginOIDCLogin(context.Context, *BeginOIDCLoginRequest) (*BeginOIDCLoginResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
+	CompleteOIDCLogin(context.Context, *CompleteOIDCLoginRequest) (*CompleteOIDCLoginResponse, error)
 	ConfirmMFAEnrollment(context.Context, *ConfirmMFAEnrollmentRequest) (*ConfirmMFAEnrollmentResponse, error)
 	CreateApiToken(context.Context, *CreateApiTokenRequest) (*CreateApiTokenResponse, error)
 	DisableMFA(context.Context, *DisableMFARequest) (*DisableMFAResponse, error)
@@ -42,6 +47,7 @@ type IdentityServiceHTTPServer interface {
 	GetMFAStatus(context.Context, *GetMFAStatusRequest) (*GetMFAStatusResponse, error)
 	ListApiTokens(context.Context, *ListApiTokensRequest) (*ListApiTokensResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	LoginLDAP(context.Context, *LoginLDAPRequest) (*LoginLDAPResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	RevokeApiToken(context.Context, *RevokeApiTokenRequest) (*RevokeApiTokenResponse, error)
 	StepUpAuthentication(context.Context, *StepUpAuthenticationRequest) (*StepUpAuthenticationResponse, error)
@@ -50,6 +56,9 @@ type IdentityServiceHTTPServer interface {
 func RegisterIdentityServiceHTTPServer(s *http.Server, srv IdentityServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/v1/auth/login", _IdentityService_Login0_HTTP_Handler(srv))
+	r.GET("/api/v1/auth/federated/oidc/{provider}/begin", _IdentityService_BeginOIDCLogin0_HTTP_Handler(srv))
+	r.POST("/api/v1/auth/federated/oidc/{provider}/callback", _IdentityService_CompleteOIDCLogin0_HTTP_Handler(srv))
+	r.POST("/api/v1/auth/federated/ldap/{provider}", _IdentityService_LoginLDAP0_HTTP_Handler(srv))
 	r.POST("/api/v1/auth/logout", _IdentityService_Logout0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/auth/password", _IdentityService_ChangePassword0_HTTP_Handler(srv))
 	r.POST("/api/v1/auth/step-up", _IdentityService_StepUpAuthentication0_HTTP_Handler(srv))
@@ -81,6 +90,78 @@ func _IdentityService_Login0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ct
 			return err
 		}
 		reply := out.(*LoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_BeginOIDCLogin0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in BeginOIDCLoginRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceBeginOIDCLogin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.BeginOIDCLogin(ctx, req.(*BeginOIDCLoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*BeginOIDCLoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_CompleteOIDCLogin0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CompleteOIDCLoginRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceCompleteOIDCLogin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CompleteOIDCLogin(ctx, req.(*CompleteOIDCLoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CompleteOIDCLoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _IdentityService_LoginLDAP0_HTTP_Handler(srv IdentityServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LoginLDAPRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationIdentityServiceLoginLDAP)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.LoginLDAP(ctx, req.(*LoginLDAPRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginLDAPResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -320,7 +401,9 @@ func _IdentityService_RevokeApiToken0_HTTP_Handler(srv IdentityServiceHTTPServer
 
 type IdentityServiceHTTPClient interface {
 	BeginMFAEnrollment(ctx context.Context, req *BeginMFAEnrollmentRequest, opts ...http.CallOption) (rsp *BeginMFAEnrollmentResponse, err error)
+	BeginOIDCLogin(ctx context.Context, req *BeginOIDCLoginRequest, opts ...http.CallOption) (rsp *BeginOIDCLoginResponse, err error)
 	ChangePassword(ctx context.Context, req *ChangePasswordRequest, opts ...http.CallOption) (rsp *ChangePasswordResponse, err error)
+	CompleteOIDCLogin(ctx context.Context, req *CompleteOIDCLoginRequest, opts ...http.CallOption) (rsp *CompleteOIDCLoginResponse, err error)
 	ConfirmMFAEnrollment(ctx context.Context, req *ConfirmMFAEnrollmentRequest, opts ...http.CallOption) (rsp *ConfirmMFAEnrollmentResponse, err error)
 	CreateApiToken(ctx context.Context, req *CreateApiTokenRequest, opts ...http.CallOption) (rsp *CreateApiTokenResponse, err error)
 	DisableMFA(ctx context.Context, req *DisableMFARequest, opts ...http.CallOption) (rsp *DisableMFAResponse, err error)
@@ -328,6 +411,7 @@ type IdentityServiceHTTPClient interface {
 	GetMFAStatus(ctx context.Context, req *GetMFAStatusRequest, opts ...http.CallOption) (rsp *GetMFAStatusResponse, err error)
 	ListApiTokens(ctx context.Context, req *ListApiTokensRequest, opts ...http.CallOption) (rsp *ListApiTokensResponse, err error)
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
+	LoginLDAP(ctx context.Context, req *LoginLDAPRequest, opts ...http.CallOption) (rsp *LoginLDAPResponse, err error)
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutResponse, err error)
 	RevokeApiToken(ctx context.Context, req *RevokeApiTokenRequest, opts ...http.CallOption) (rsp *RevokeApiTokenResponse, err error)
 	StepUpAuthentication(ctx context.Context, req *StepUpAuthenticationRequest, opts ...http.CallOption) (rsp *StepUpAuthenticationResponse, err error)
@@ -354,6 +438,19 @@ func (c *IdentityServiceHTTPClientImpl) BeginMFAEnrollment(ctx context.Context, 
 	return &out, nil
 }
 
+func (c *IdentityServiceHTTPClientImpl) BeginOIDCLogin(ctx context.Context, in *BeginOIDCLoginRequest, opts ...http.CallOption) (*BeginOIDCLoginResponse, error) {
+	var out BeginOIDCLoginResponse
+	pattern := "/api/v1/auth/federated/oidc/{provider}/begin"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationIdentityServiceBeginOIDCLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *IdentityServiceHTTPClientImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...http.CallOption) (*ChangePasswordResponse, error) {
 	var out ChangePasswordResponse
 	pattern := "/api/v1/auth/password"
@@ -361,6 +458,19 @@ func (c *IdentityServiceHTTPClientImpl) ChangePassword(ctx context.Context, in *
 	opts = append(opts, http.Operation(OperationIdentityServiceChangePassword))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *IdentityServiceHTTPClientImpl) CompleteOIDCLogin(ctx context.Context, in *CompleteOIDCLoginRequest, opts ...http.CallOption) (*CompleteOIDCLoginResponse, error) {
+	var out CompleteOIDCLoginResponse
+	pattern := "/api/v1/auth/federated/oidc/{provider}/callback"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationIdentityServiceCompleteOIDCLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -450,6 +560,19 @@ func (c *IdentityServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequ
 	pattern := "/api/v1/auth/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationIdentityServiceLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *IdentityServiceHTTPClientImpl) LoginLDAP(ctx context.Context, in *LoginLDAPRequest, opts ...http.CallOption) (*LoginLDAPResponse, error) {
+	var out LoginLDAPResponse
+	pattern := "/api/v1/auth/federated/ldap/{provider}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationIdentityServiceLoginLDAP))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

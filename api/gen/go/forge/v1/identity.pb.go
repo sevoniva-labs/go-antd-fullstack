@@ -152,6 +152,334 @@ func (x *LoginResponse) GetCsrfToken() string {
 	return ""
 }
 
+type BeginOIDCLoginRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	Organization  string                 `protobuf:"bytes,2,opt,name=organization,proto3" json:"organization,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BeginOIDCLoginRequest) Reset() {
+	*x = BeginOIDCLoginRequest{}
+	mi := &file_forge_v1_identity_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BeginOIDCLoginRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BeginOIDCLoginRequest) ProtoMessage() {}
+
+func (x *BeginOIDCLoginRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_identity_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BeginOIDCLoginRequest.ProtoReflect.Descriptor instead.
+func (*BeginOIDCLoginRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *BeginOIDCLoginRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *BeginOIDCLoginRequest) GetOrganization() string {
+	if x != nil {
+		return x.Organization
+	}
+	return ""
+}
+
+type BeginOIDCLoginResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RedirectUrl   string                 `protobuf:"bytes,1,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BeginOIDCLoginResponse) Reset() {
+	*x = BeginOIDCLoginResponse{}
+	mi := &file_forge_v1_identity_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BeginOIDCLoginResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BeginOIDCLoginResponse) ProtoMessage() {}
+
+func (x *BeginOIDCLoginResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_identity_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BeginOIDCLoginResponse.ProtoReflect.Descriptor instead.
+func (*BeginOIDCLoginResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *BeginOIDCLoginResponse) GetRedirectUrl() string {
+	if x != nil {
+		return x.RedirectUrl
+	}
+	return ""
+}
+
+type CompleteOIDCLoginRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteOIDCLoginRequest) Reset() {
+	*x = CompleteOIDCLoginRequest{}
+	mi := &file_forge_v1_identity_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteOIDCLoginRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteOIDCLoginRequest) ProtoMessage() {}
+
+func (x *CompleteOIDCLoginRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_identity_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteOIDCLoginRequest.ProtoReflect.Descriptor instead.
+func (*CompleteOIDCLoginRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CompleteOIDCLoginRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *CompleteOIDCLoginRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *CompleteOIDCLoginRequest) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+type CompleteOIDCLoginResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	CsrfToken     string                 `protobuf:"bytes,2,opt,name=csrf_token,json=csrfToken,proto3" json:"csrf_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteOIDCLoginResponse) Reset() {
+	*x = CompleteOIDCLoginResponse{}
+	mi := &file_forge_v1_identity_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteOIDCLoginResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteOIDCLoginResponse) ProtoMessage() {}
+
+func (x *CompleteOIDCLoginResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_identity_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteOIDCLoginResponse.ProtoReflect.Descriptor instead.
+func (*CompleteOIDCLoginResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CompleteOIDCLoginResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *CompleteOIDCLoginResponse) GetCsrfToken() string {
+	if x != nil {
+		return x.CsrfToken
+	}
+	return ""
+}
+
+type LoginLDAPRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	Organization  string                 `protobuf:"bytes,2,opt,name=organization,proto3" json:"organization,omitempty"`
+	LoginName     string                 `protobuf:"bytes,3,opt,name=login_name,json=loginName,proto3" json:"login_name,omitempty"`
+	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginLDAPRequest) Reset() {
+	*x = LoginLDAPRequest{}
+	mi := &file_forge_v1_identity_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginLDAPRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginLDAPRequest) ProtoMessage() {}
+
+func (x *LoginLDAPRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_identity_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginLDAPRequest.ProtoReflect.Descriptor instead.
+func (*LoginLDAPRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *LoginLDAPRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *LoginLDAPRequest) GetOrganization() string {
+	if x != nil {
+		return x.Organization
+	}
+	return ""
+}
+
+func (x *LoginLDAPRequest) GetLoginName() string {
+	if x != nil {
+		return x.LoginName
+	}
+	return ""
+}
+
+func (x *LoginLDAPRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+type LoginLDAPResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	CsrfToken     string                 `protobuf:"bytes,2,opt,name=csrf_token,json=csrfToken,proto3" json:"csrf_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginLDAPResponse) Reset() {
+	*x = LoginLDAPResponse{}
+	mi := &file_forge_v1_identity_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginLDAPResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginLDAPResponse) ProtoMessage() {}
+
+func (x *LoginLDAPResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_identity_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginLDAPResponse.ProtoReflect.Descriptor instead.
+func (*LoginLDAPResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *LoginLDAPResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *LoginLDAPResponse) GetCsrfToken() string {
+	if x != nil {
+		return x.CsrfToken
+	}
+	return ""
+}
+
 type LogoutRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -160,7 +488,7 @@ type LogoutRequest struct {
 
 func (x *LogoutRequest) Reset() {
 	*x = LogoutRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[2]
+	mi := &file_forge_v1_identity_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -172,7 +500,7 @@ func (x *LogoutRequest) String() string {
 func (*LogoutRequest) ProtoMessage() {}
 
 func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[2]
+	mi := &file_forge_v1_identity_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -185,7 +513,7 @@ func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
 func (*LogoutRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{2}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{8}
 }
 
 type LogoutResponse struct {
@@ -196,7 +524,7 @@ type LogoutResponse struct {
 
 func (x *LogoutResponse) Reset() {
 	*x = LogoutResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[3]
+	mi := &file_forge_v1_identity_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -208,7 +536,7 @@ func (x *LogoutResponse) String() string {
 func (*LogoutResponse) ProtoMessage() {}
 
 func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[3]
+	mi := &file_forge_v1_identity_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -221,7 +549,7 @@ func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
 func (*LogoutResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{3}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{9}
 }
 
 type ChangePasswordRequest struct {
@@ -234,7 +562,7 @@ type ChangePasswordRequest struct {
 
 func (x *ChangePasswordRequest) Reset() {
 	*x = ChangePasswordRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[4]
+	mi := &file_forge_v1_identity_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -246,7 +574,7 @@ func (x *ChangePasswordRequest) String() string {
 func (*ChangePasswordRequest) ProtoMessage() {}
 
 func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[4]
+	mi := &file_forge_v1_identity_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -259,7 +587,7 @@ func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangePasswordRequest.ProtoReflect.Descriptor instead.
 func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{4}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ChangePasswordRequest) GetCurrentPassword() string {
@@ -284,7 +612,7 @@ type ChangePasswordResponse struct {
 
 func (x *ChangePasswordResponse) Reset() {
 	*x = ChangePasswordResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[5]
+	mi := &file_forge_v1_identity_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -296,7 +624,7 @@ func (x *ChangePasswordResponse) String() string {
 func (*ChangePasswordResponse) ProtoMessage() {}
 
 func (x *ChangePasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[5]
+	mi := &file_forge_v1_identity_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -309,7 +637,7 @@ func (x *ChangePasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangePasswordResponse.ProtoReflect.Descriptor instead.
 func (*ChangePasswordResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{5}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{11}
 }
 
 type StepUpAuthenticationRequest struct {
@@ -323,7 +651,7 @@ type StepUpAuthenticationRequest struct {
 
 func (x *StepUpAuthenticationRequest) Reset() {
 	*x = StepUpAuthenticationRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[6]
+	mi := &file_forge_v1_identity_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -335,7 +663,7 @@ func (x *StepUpAuthenticationRequest) String() string {
 func (*StepUpAuthenticationRequest) ProtoMessage() {}
 
 func (x *StepUpAuthenticationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[6]
+	mi := &file_forge_v1_identity_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -348,7 +676,7 @@ func (x *StepUpAuthenticationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StepUpAuthenticationRequest.ProtoReflect.Descriptor instead.
 func (*StepUpAuthenticationRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{6}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *StepUpAuthenticationRequest) GetCurrentPassword() string {
@@ -381,7 +709,7 @@ type StepUpAuthenticationResponse struct {
 
 func (x *StepUpAuthenticationResponse) Reset() {
 	*x = StepUpAuthenticationResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[7]
+	mi := &file_forge_v1_identity_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -393,7 +721,7 @@ func (x *StepUpAuthenticationResponse) String() string {
 func (*StepUpAuthenticationResponse) ProtoMessage() {}
 
 func (x *StepUpAuthenticationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[7]
+	mi := &file_forge_v1_identity_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -406,7 +734,7 @@ func (x *StepUpAuthenticationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StepUpAuthenticationResponse.ProtoReflect.Descriptor instead.
 func (*StepUpAuthenticationResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{7}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *StepUpAuthenticationResponse) GetVerifiedAt() *timestamppb.Timestamp {
@@ -424,7 +752,7 @@ type GetCurrentUserRequest struct {
 
 func (x *GetCurrentUserRequest) Reset() {
 	*x = GetCurrentUserRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[8]
+	mi := &file_forge_v1_identity_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -436,7 +764,7 @@ func (x *GetCurrentUserRequest) String() string {
 func (*GetCurrentUserRequest) ProtoMessage() {}
 
 func (x *GetCurrentUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[8]
+	mi := &file_forge_v1_identity_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -449,7 +777,7 @@ func (x *GetCurrentUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrentUserRequest.ProtoReflect.Descriptor instead.
 func (*GetCurrentUserRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{8}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{14}
 }
 
 type GetCurrentUserResponse struct {
@@ -461,7 +789,7 @@ type GetCurrentUserResponse struct {
 
 func (x *GetCurrentUserResponse) Reset() {
 	*x = GetCurrentUserResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[9]
+	mi := &file_forge_v1_identity_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -473,7 +801,7 @@ func (x *GetCurrentUserResponse) String() string {
 func (*GetCurrentUserResponse) ProtoMessage() {}
 
 func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[9]
+	mi := &file_forge_v1_identity_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -486,7 +814,7 @@ func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrentUserResponse.ProtoReflect.Descriptor instead.
 func (*GetCurrentUserResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{9}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetCurrentUserResponse) GetUser() *User {
@@ -504,7 +832,7 @@ type GetMFAStatusRequest struct {
 
 func (x *GetMFAStatusRequest) Reset() {
 	*x = GetMFAStatusRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[10]
+	mi := &file_forge_v1_identity_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -516,7 +844,7 @@ func (x *GetMFAStatusRequest) String() string {
 func (*GetMFAStatusRequest) ProtoMessage() {}
 
 func (x *GetMFAStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[10]
+	mi := &file_forge_v1_identity_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -529,7 +857,7 @@ func (x *GetMFAStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMFAStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetMFAStatusRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{10}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{16}
 }
 
 type GetMFAStatusResponse struct {
@@ -541,7 +869,7 @@ type GetMFAStatusResponse struct {
 
 func (x *GetMFAStatusResponse) Reset() {
 	*x = GetMFAStatusResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[11]
+	mi := &file_forge_v1_identity_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -553,7 +881,7 @@ func (x *GetMFAStatusResponse) String() string {
 func (*GetMFAStatusResponse) ProtoMessage() {}
 
 func (x *GetMFAStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[11]
+	mi := &file_forge_v1_identity_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -566,7 +894,7 @@ func (x *GetMFAStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMFAStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetMFAStatusResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{11}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetMFAStatusResponse) GetEnabled() bool {
@@ -585,7 +913,7 @@ type BeginMFAEnrollmentRequest struct {
 
 func (x *BeginMFAEnrollmentRequest) Reset() {
 	*x = BeginMFAEnrollmentRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[12]
+	mi := &file_forge_v1_identity_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -597,7 +925,7 @@ func (x *BeginMFAEnrollmentRequest) String() string {
 func (*BeginMFAEnrollmentRequest) ProtoMessage() {}
 
 func (x *BeginMFAEnrollmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[12]
+	mi := &file_forge_v1_identity_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -610,7 +938,7 @@ func (x *BeginMFAEnrollmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BeginMFAEnrollmentRequest.ProtoReflect.Descriptor instead.
 func (*BeginMFAEnrollmentRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{12}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *BeginMFAEnrollmentRequest) GetCurrentPassword() string {
@@ -630,7 +958,7 @@ type BeginMFAEnrollmentResponse struct {
 
 func (x *BeginMFAEnrollmentResponse) Reset() {
 	*x = BeginMFAEnrollmentResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[13]
+	mi := &file_forge_v1_identity_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -642,7 +970,7 @@ func (x *BeginMFAEnrollmentResponse) String() string {
 func (*BeginMFAEnrollmentResponse) ProtoMessage() {}
 
 func (x *BeginMFAEnrollmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[13]
+	mi := &file_forge_v1_identity_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -655,7 +983,7 @@ func (x *BeginMFAEnrollmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BeginMFAEnrollmentResponse.ProtoReflect.Descriptor instead.
 func (*BeginMFAEnrollmentResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{13}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *BeginMFAEnrollmentResponse) GetSecret() string {
@@ -681,7 +1009,7 @@ type ConfirmMFAEnrollmentRequest struct {
 
 func (x *ConfirmMFAEnrollmentRequest) Reset() {
 	*x = ConfirmMFAEnrollmentRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[14]
+	mi := &file_forge_v1_identity_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -693,7 +1021,7 @@ func (x *ConfirmMFAEnrollmentRequest) String() string {
 func (*ConfirmMFAEnrollmentRequest) ProtoMessage() {}
 
 func (x *ConfirmMFAEnrollmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[14]
+	mi := &file_forge_v1_identity_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -706,7 +1034,7 @@ func (x *ConfirmMFAEnrollmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmMFAEnrollmentRequest.ProtoReflect.Descriptor instead.
 func (*ConfirmMFAEnrollmentRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{14}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ConfirmMFAEnrollmentRequest) GetCode() string {
@@ -725,7 +1053,7 @@ type ConfirmMFAEnrollmentResponse struct {
 
 func (x *ConfirmMFAEnrollmentResponse) Reset() {
 	*x = ConfirmMFAEnrollmentResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[15]
+	mi := &file_forge_v1_identity_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -737,7 +1065,7 @@ func (x *ConfirmMFAEnrollmentResponse) String() string {
 func (*ConfirmMFAEnrollmentResponse) ProtoMessage() {}
 
 func (x *ConfirmMFAEnrollmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[15]
+	mi := &file_forge_v1_identity_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -750,7 +1078,7 @@ func (x *ConfirmMFAEnrollmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmMFAEnrollmentResponse.ProtoReflect.Descriptor instead.
 func (*ConfirmMFAEnrollmentResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{15}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ConfirmMFAEnrollmentResponse) GetRecoveryCodes() []string {
@@ -771,7 +1099,7 @@ type DisableMFARequest struct {
 
 func (x *DisableMFARequest) Reset() {
 	*x = DisableMFARequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[16]
+	mi := &file_forge_v1_identity_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -783,7 +1111,7 @@ func (x *DisableMFARequest) String() string {
 func (*DisableMFARequest) ProtoMessage() {}
 
 func (x *DisableMFARequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[16]
+	mi := &file_forge_v1_identity_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -796,7 +1124,7 @@ func (x *DisableMFARequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DisableMFARequest.ProtoReflect.Descriptor instead.
 func (*DisableMFARequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{16}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *DisableMFARequest) GetCurrentPassword() string {
@@ -828,7 +1156,7 @@ type DisableMFAResponse struct {
 
 func (x *DisableMFAResponse) Reset() {
 	*x = DisableMFAResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[17]
+	mi := &file_forge_v1_identity_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -840,7 +1168,7 @@ func (x *DisableMFAResponse) String() string {
 func (*DisableMFAResponse) ProtoMessage() {}
 
 func (x *DisableMFAResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[17]
+	mi := &file_forge_v1_identity_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -853,7 +1181,7 @@ func (x *DisableMFAResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DisableMFAResponse.ProtoReflect.Descriptor instead.
 func (*DisableMFAResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{17}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{23}
 }
 
 type ListApiTokensRequest struct {
@@ -864,7 +1192,7 @@ type ListApiTokensRequest struct {
 
 func (x *ListApiTokensRequest) Reset() {
 	*x = ListApiTokensRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[18]
+	mi := &file_forge_v1_identity_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -876,7 +1204,7 @@ func (x *ListApiTokensRequest) String() string {
 func (*ListApiTokensRequest) ProtoMessage() {}
 
 func (x *ListApiTokensRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[18]
+	mi := &file_forge_v1_identity_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -889,7 +1217,7 @@ func (x *ListApiTokensRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListApiTokensRequest.ProtoReflect.Descriptor instead.
 func (*ListApiTokensRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{18}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{24}
 }
 
 type ListApiTokensResponse struct {
@@ -901,7 +1229,7 @@ type ListApiTokensResponse struct {
 
 func (x *ListApiTokensResponse) Reset() {
 	*x = ListApiTokensResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[19]
+	mi := &file_forge_v1_identity_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -913,7 +1241,7 @@ func (x *ListApiTokensResponse) String() string {
 func (*ListApiTokensResponse) ProtoMessage() {}
 
 func (x *ListApiTokensResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[19]
+	mi := &file_forge_v1_identity_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -926,7 +1254,7 @@ func (x *ListApiTokensResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListApiTokensResponse.ProtoReflect.Descriptor instead.
 func (*ListApiTokensResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{19}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListApiTokensResponse) GetTokens() []*ApiToken {
@@ -947,7 +1275,7 @@ type CreateApiTokenRequest struct {
 
 func (x *CreateApiTokenRequest) Reset() {
 	*x = CreateApiTokenRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[20]
+	mi := &file_forge_v1_identity_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -959,7 +1287,7 @@ func (x *CreateApiTokenRequest) String() string {
 func (*CreateApiTokenRequest) ProtoMessage() {}
 
 func (x *CreateApiTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[20]
+	mi := &file_forge_v1_identity_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -972,7 +1300,7 @@ func (x *CreateApiTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateApiTokenRequest.ProtoReflect.Descriptor instead.
 func (*CreateApiTokenRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{20}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CreateApiTokenRequest) GetName() string {
@@ -1006,7 +1334,7 @@ type CreateApiTokenResponse struct {
 
 func (x *CreateApiTokenResponse) Reset() {
 	*x = CreateApiTokenResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[21]
+	mi := &file_forge_v1_identity_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1018,7 +1346,7 @@ func (x *CreateApiTokenResponse) String() string {
 func (*CreateApiTokenResponse) ProtoMessage() {}
 
 func (x *CreateApiTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[21]
+	mi := &file_forge_v1_identity_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1031,7 +1359,7 @@ func (x *CreateApiTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateApiTokenResponse.ProtoReflect.Descriptor instead.
 func (*CreateApiTokenResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{21}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *CreateApiTokenResponse) GetToken() *ApiToken {
@@ -1057,7 +1385,7 @@ type RevokeApiTokenRequest struct {
 
 func (x *RevokeApiTokenRequest) Reset() {
 	*x = RevokeApiTokenRequest{}
-	mi := &file_forge_v1_identity_proto_msgTypes[22]
+	mi := &file_forge_v1_identity_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1069,7 +1397,7 @@ func (x *RevokeApiTokenRequest) String() string {
 func (*RevokeApiTokenRequest) ProtoMessage() {}
 
 func (x *RevokeApiTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[22]
+	mi := &file_forge_v1_identity_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1082,7 +1410,7 @@ func (x *RevokeApiTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeApiTokenRequest.ProtoReflect.Descriptor instead.
 func (*RevokeApiTokenRequest) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{22}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RevokeApiTokenRequest) GetTokenId() string {
@@ -1100,7 +1428,7 @@ type RevokeApiTokenResponse struct {
 
 func (x *RevokeApiTokenResponse) Reset() {
 	*x = RevokeApiTokenResponse{}
-	mi := &file_forge_v1_identity_proto_msgTypes[23]
+	mi := &file_forge_v1_identity_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1112,7 +1440,7 @@ func (x *RevokeApiTokenResponse) String() string {
 func (*RevokeApiTokenResponse) ProtoMessage() {}
 
 func (x *RevokeApiTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_forge_v1_identity_proto_msgTypes[23]
+	mi := &file_forge_v1_identity_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1125,7 +1453,7 @@ func (x *RevokeApiTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeApiTokenResponse.ProtoReflect.Descriptor instead.
 func (*RevokeApiTokenResponse) Descriptor() ([]byte, []int) {
-	return file_forge_v1_identity_proto_rawDescGZIP(), []int{23}
+	return file_forge_v1_identity_proto_rawDescGZIP(), []int{29}
 }
 
 var File_forge_v1_identity_proto protoreflect.FileDescriptor
@@ -1141,6 +1469,29 @@ const file_forge_v1_identity_proto_rawDesc = "" +
 	"\bmfa_code\x18\x04 \x01(\tR\amfaCode\x12#\n" +
 	"\rrecovery_code\x18\x05 \x01(\tR\frecoveryCode\"R\n" +
 	"\rLoginResponse\x12\"\n" +
+	"\x04user\x18\x01 \x01(\v2\x0e.forge.v1.UserR\x04user\x12\x1d\n" +
+	"\n" +
+	"csrf_token\x18\x02 \x01(\tR\tcsrfToken\"W\n" +
+	"\x15BeginOIDCLoginRequest\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\"\n" +
+	"\forganization\x18\x02 \x01(\tR\forganization\";\n" +
+	"\x16BeginOIDCLoginResponse\x12!\n" +
+	"\fredirect_url\x18\x01 \x01(\tR\vredirectUrl\"`\n" +
+	"\x18CompleteOIDCLoginRequest\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\"^\n" +
+	"\x19CompleteOIDCLoginResponse\x12\"\n" +
+	"\x04user\x18\x01 \x01(\v2\x0e.forge.v1.UserR\x04user\x12\x1d\n" +
+	"\n" +
+	"csrf_token\x18\x02 \x01(\tR\tcsrfToken\"\x8d\x01\n" +
+	"\x10LoginLDAPRequest\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\"\n" +
+	"\forganization\x18\x02 \x01(\tR\forganization\x12\x1d\n" +
+	"\n" +
+	"login_name\x18\x03 \x01(\tR\tloginName\x12\x1a\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword\"V\n" +
+	"\x11LoginLDAPResponse\x12\"\n" +
 	"\x04user\x18\x01 \x01(\v2\x0e.forge.v1.UserR\x04user\x12\x1d\n" +
 	"\n" +
 	"csrf_token\x18\x02 \x01(\tR\tcsrfToken\"\x0f\n" +
@@ -1189,9 +1540,12 @@ const file_forge_v1_identity_proto_rawDesc = "" +
 	"\x06secret\x18\x02 \x01(\tR\x06secret\"2\n" +
 	"\x15RevokeApiTokenRequest\x12\x19\n" +
 	"\btoken_id\x18\x01 \x01(\tR\atokenId\"\x18\n" +
-	"\x16RevokeApiTokenResponse2\xa0\x0e\n" +
+	"\x16RevokeApiTokenResponse2\xc0\x11\n" +
 	"\x0fIdentityService\x12W\n" +
-	"\x05Login\x12\x16.forge.v1.LoginRequest\x1a\x17.forge.v1.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12\x82\x01\n" +
+	"\x05Login\x12\x16.forge.v1.LoginRequest\x1a\x17.forge.v1.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12\x89\x01\n" +
+	"\x0eBeginOIDCLogin\x12\x1f.forge.v1.BeginOIDCLoginRequest\x1a .forge.v1.BeginOIDCLoginResponse\"4\x82\xd3\xe4\x93\x02.\x12,/api/v1/auth/federated/oidc/{provider}/begin\x12\x98\x01\n" +
+	"\x11CompleteOIDCLogin\x12\".forge.v1.CompleteOIDCLoginRequest\x1a#.forge.v1.CompleteOIDCLoginResponse\":\x82\xd3\xe4\x93\x024:\x01*\"//api/v1/auth/federated/oidc/{provider}/callback\x12w\n" +
+	"\tLoginLDAP\x12\x1a.forge.v1.LoginLDAPRequest\x1a\x1b.forge.v1.LoginLDAPResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/auth/federated/ldap/{provider}\x12\x82\x01\n" +
 	"\x06Logout\x12\x17.forge.v1.LogoutRequest\x1a\x18.forge.v1.LogoutResponse\"E\xbaG$Z\"\n" +
 	"\x11\n" +
 	"\rSessionCookie\x12\x00\n" +
@@ -1259,71 +1613,85 @@ func file_forge_v1_identity_proto_rawDescGZIP() []byte {
 	return file_forge_v1_identity_proto_rawDescData
 }
 
-var file_forge_v1_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_forge_v1_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_forge_v1_identity_proto_goTypes = []any{
 	(*LoginRequest)(nil),                 // 0: forge.v1.LoginRequest
 	(*LoginResponse)(nil),                // 1: forge.v1.LoginResponse
-	(*LogoutRequest)(nil),                // 2: forge.v1.LogoutRequest
-	(*LogoutResponse)(nil),               // 3: forge.v1.LogoutResponse
-	(*ChangePasswordRequest)(nil),        // 4: forge.v1.ChangePasswordRequest
-	(*ChangePasswordResponse)(nil),       // 5: forge.v1.ChangePasswordResponse
-	(*StepUpAuthenticationRequest)(nil),  // 6: forge.v1.StepUpAuthenticationRequest
-	(*StepUpAuthenticationResponse)(nil), // 7: forge.v1.StepUpAuthenticationResponse
-	(*GetCurrentUserRequest)(nil),        // 8: forge.v1.GetCurrentUserRequest
-	(*GetCurrentUserResponse)(nil),       // 9: forge.v1.GetCurrentUserResponse
-	(*GetMFAStatusRequest)(nil),          // 10: forge.v1.GetMFAStatusRequest
-	(*GetMFAStatusResponse)(nil),         // 11: forge.v1.GetMFAStatusResponse
-	(*BeginMFAEnrollmentRequest)(nil),    // 12: forge.v1.BeginMFAEnrollmentRequest
-	(*BeginMFAEnrollmentResponse)(nil),   // 13: forge.v1.BeginMFAEnrollmentResponse
-	(*ConfirmMFAEnrollmentRequest)(nil),  // 14: forge.v1.ConfirmMFAEnrollmentRequest
-	(*ConfirmMFAEnrollmentResponse)(nil), // 15: forge.v1.ConfirmMFAEnrollmentResponse
-	(*DisableMFARequest)(nil),            // 16: forge.v1.DisableMFARequest
-	(*DisableMFAResponse)(nil),           // 17: forge.v1.DisableMFAResponse
-	(*ListApiTokensRequest)(nil),         // 18: forge.v1.ListApiTokensRequest
-	(*ListApiTokensResponse)(nil),        // 19: forge.v1.ListApiTokensResponse
-	(*CreateApiTokenRequest)(nil),        // 20: forge.v1.CreateApiTokenRequest
-	(*CreateApiTokenResponse)(nil),       // 21: forge.v1.CreateApiTokenResponse
-	(*RevokeApiTokenRequest)(nil),        // 22: forge.v1.RevokeApiTokenRequest
-	(*RevokeApiTokenResponse)(nil),       // 23: forge.v1.RevokeApiTokenResponse
-	(*User)(nil),                         // 24: forge.v1.User
-	(*timestamppb.Timestamp)(nil),        // 25: google.protobuf.Timestamp
-	(*ApiToken)(nil),                     // 26: forge.v1.ApiToken
+	(*BeginOIDCLoginRequest)(nil),        // 2: forge.v1.BeginOIDCLoginRequest
+	(*BeginOIDCLoginResponse)(nil),       // 3: forge.v1.BeginOIDCLoginResponse
+	(*CompleteOIDCLoginRequest)(nil),     // 4: forge.v1.CompleteOIDCLoginRequest
+	(*CompleteOIDCLoginResponse)(nil),    // 5: forge.v1.CompleteOIDCLoginResponse
+	(*LoginLDAPRequest)(nil),             // 6: forge.v1.LoginLDAPRequest
+	(*LoginLDAPResponse)(nil),            // 7: forge.v1.LoginLDAPResponse
+	(*LogoutRequest)(nil),                // 8: forge.v1.LogoutRequest
+	(*LogoutResponse)(nil),               // 9: forge.v1.LogoutResponse
+	(*ChangePasswordRequest)(nil),        // 10: forge.v1.ChangePasswordRequest
+	(*ChangePasswordResponse)(nil),       // 11: forge.v1.ChangePasswordResponse
+	(*StepUpAuthenticationRequest)(nil),  // 12: forge.v1.StepUpAuthenticationRequest
+	(*StepUpAuthenticationResponse)(nil), // 13: forge.v1.StepUpAuthenticationResponse
+	(*GetCurrentUserRequest)(nil),        // 14: forge.v1.GetCurrentUserRequest
+	(*GetCurrentUserResponse)(nil),       // 15: forge.v1.GetCurrentUserResponse
+	(*GetMFAStatusRequest)(nil),          // 16: forge.v1.GetMFAStatusRequest
+	(*GetMFAStatusResponse)(nil),         // 17: forge.v1.GetMFAStatusResponse
+	(*BeginMFAEnrollmentRequest)(nil),    // 18: forge.v1.BeginMFAEnrollmentRequest
+	(*BeginMFAEnrollmentResponse)(nil),   // 19: forge.v1.BeginMFAEnrollmentResponse
+	(*ConfirmMFAEnrollmentRequest)(nil),  // 20: forge.v1.ConfirmMFAEnrollmentRequest
+	(*ConfirmMFAEnrollmentResponse)(nil), // 21: forge.v1.ConfirmMFAEnrollmentResponse
+	(*DisableMFARequest)(nil),            // 22: forge.v1.DisableMFARequest
+	(*DisableMFAResponse)(nil),           // 23: forge.v1.DisableMFAResponse
+	(*ListApiTokensRequest)(nil),         // 24: forge.v1.ListApiTokensRequest
+	(*ListApiTokensResponse)(nil),        // 25: forge.v1.ListApiTokensResponse
+	(*CreateApiTokenRequest)(nil),        // 26: forge.v1.CreateApiTokenRequest
+	(*CreateApiTokenResponse)(nil),       // 27: forge.v1.CreateApiTokenResponse
+	(*RevokeApiTokenRequest)(nil),        // 28: forge.v1.RevokeApiTokenRequest
+	(*RevokeApiTokenResponse)(nil),       // 29: forge.v1.RevokeApiTokenResponse
+	(*User)(nil),                         // 30: forge.v1.User
+	(*timestamppb.Timestamp)(nil),        // 31: google.protobuf.Timestamp
+	(*ApiToken)(nil),                     // 32: forge.v1.ApiToken
 }
 var file_forge_v1_identity_proto_depIdxs = []int32{
-	24, // 0: forge.v1.LoginResponse.user:type_name -> forge.v1.User
-	25, // 1: forge.v1.StepUpAuthenticationResponse.verified_at:type_name -> google.protobuf.Timestamp
-	24, // 2: forge.v1.GetCurrentUserResponse.user:type_name -> forge.v1.User
-	26, // 3: forge.v1.ListApiTokensResponse.tokens:type_name -> forge.v1.ApiToken
-	26, // 4: forge.v1.CreateApiTokenResponse.token:type_name -> forge.v1.ApiToken
-	0,  // 5: forge.v1.IdentityService.Login:input_type -> forge.v1.LoginRequest
-	2,  // 6: forge.v1.IdentityService.Logout:input_type -> forge.v1.LogoutRequest
-	4,  // 7: forge.v1.IdentityService.ChangePassword:input_type -> forge.v1.ChangePasswordRequest
-	6,  // 8: forge.v1.IdentityService.StepUpAuthentication:input_type -> forge.v1.StepUpAuthenticationRequest
-	8,  // 9: forge.v1.IdentityService.GetCurrentUser:input_type -> forge.v1.GetCurrentUserRequest
-	10, // 10: forge.v1.IdentityService.GetMFAStatus:input_type -> forge.v1.GetMFAStatusRequest
-	12, // 11: forge.v1.IdentityService.BeginMFAEnrollment:input_type -> forge.v1.BeginMFAEnrollmentRequest
-	14, // 12: forge.v1.IdentityService.ConfirmMFAEnrollment:input_type -> forge.v1.ConfirmMFAEnrollmentRequest
-	16, // 13: forge.v1.IdentityService.DisableMFA:input_type -> forge.v1.DisableMFARequest
-	18, // 14: forge.v1.IdentityService.ListApiTokens:input_type -> forge.v1.ListApiTokensRequest
-	20, // 15: forge.v1.IdentityService.CreateApiToken:input_type -> forge.v1.CreateApiTokenRequest
-	22, // 16: forge.v1.IdentityService.RevokeApiToken:input_type -> forge.v1.RevokeApiTokenRequest
-	1,  // 17: forge.v1.IdentityService.Login:output_type -> forge.v1.LoginResponse
-	3,  // 18: forge.v1.IdentityService.Logout:output_type -> forge.v1.LogoutResponse
-	5,  // 19: forge.v1.IdentityService.ChangePassword:output_type -> forge.v1.ChangePasswordResponse
-	7,  // 20: forge.v1.IdentityService.StepUpAuthentication:output_type -> forge.v1.StepUpAuthenticationResponse
-	9,  // 21: forge.v1.IdentityService.GetCurrentUser:output_type -> forge.v1.GetCurrentUserResponse
-	11, // 22: forge.v1.IdentityService.GetMFAStatus:output_type -> forge.v1.GetMFAStatusResponse
-	13, // 23: forge.v1.IdentityService.BeginMFAEnrollment:output_type -> forge.v1.BeginMFAEnrollmentResponse
-	15, // 24: forge.v1.IdentityService.ConfirmMFAEnrollment:output_type -> forge.v1.ConfirmMFAEnrollmentResponse
-	17, // 25: forge.v1.IdentityService.DisableMFA:output_type -> forge.v1.DisableMFAResponse
-	19, // 26: forge.v1.IdentityService.ListApiTokens:output_type -> forge.v1.ListApiTokensResponse
-	21, // 27: forge.v1.IdentityService.CreateApiToken:output_type -> forge.v1.CreateApiTokenResponse
-	23, // 28: forge.v1.IdentityService.RevokeApiToken:output_type -> forge.v1.RevokeApiTokenResponse
-	17, // [17:29] is the sub-list for method output_type
-	5,  // [5:17] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	30, // 0: forge.v1.LoginResponse.user:type_name -> forge.v1.User
+	30, // 1: forge.v1.CompleteOIDCLoginResponse.user:type_name -> forge.v1.User
+	30, // 2: forge.v1.LoginLDAPResponse.user:type_name -> forge.v1.User
+	31, // 3: forge.v1.StepUpAuthenticationResponse.verified_at:type_name -> google.protobuf.Timestamp
+	30, // 4: forge.v1.GetCurrentUserResponse.user:type_name -> forge.v1.User
+	32, // 5: forge.v1.ListApiTokensResponse.tokens:type_name -> forge.v1.ApiToken
+	32, // 6: forge.v1.CreateApiTokenResponse.token:type_name -> forge.v1.ApiToken
+	0,  // 7: forge.v1.IdentityService.Login:input_type -> forge.v1.LoginRequest
+	2,  // 8: forge.v1.IdentityService.BeginOIDCLogin:input_type -> forge.v1.BeginOIDCLoginRequest
+	4,  // 9: forge.v1.IdentityService.CompleteOIDCLogin:input_type -> forge.v1.CompleteOIDCLoginRequest
+	6,  // 10: forge.v1.IdentityService.LoginLDAP:input_type -> forge.v1.LoginLDAPRequest
+	8,  // 11: forge.v1.IdentityService.Logout:input_type -> forge.v1.LogoutRequest
+	10, // 12: forge.v1.IdentityService.ChangePassword:input_type -> forge.v1.ChangePasswordRequest
+	12, // 13: forge.v1.IdentityService.StepUpAuthentication:input_type -> forge.v1.StepUpAuthenticationRequest
+	14, // 14: forge.v1.IdentityService.GetCurrentUser:input_type -> forge.v1.GetCurrentUserRequest
+	16, // 15: forge.v1.IdentityService.GetMFAStatus:input_type -> forge.v1.GetMFAStatusRequest
+	18, // 16: forge.v1.IdentityService.BeginMFAEnrollment:input_type -> forge.v1.BeginMFAEnrollmentRequest
+	20, // 17: forge.v1.IdentityService.ConfirmMFAEnrollment:input_type -> forge.v1.ConfirmMFAEnrollmentRequest
+	22, // 18: forge.v1.IdentityService.DisableMFA:input_type -> forge.v1.DisableMFARequest
+	24, // 19: forge.v1.IdentityService.ListApiTokens:input_type -> forge.v1.ListApiTokensRequest
+	26, // 20: forge.v1.IdentityService.CreateApiToken:input_type -> forge.v1.CreateApiTokenRequest
+	28, // 21: forge.v1.IdentityService.RevokeApiToken:input_type -> forge.v1.RevokeApiTokenRequest
+	1,  // 22: forge.v1.IdentityService.Login:output_type -> forge.v1.LoginResponse
+	3,  // 23: forge.v1.IdentityService.BeginOIDCLogin:output_type -> forge.v1.BeginOIDCLoginResponse
+	5,  // 24: forge.v1.IdentityService.CompleteOIDCLogin:output_type -> forge.v1.CompleteOIDCLoginResponse
+	7,  // 25: forge.v1.IdentityService.LoginLDAP:output_type -> forge.v1.LoginLDAPResponse
+	9,  // 26: forge.v1.IdentityService.Logout:output_type -> forge.v1.LogoutResponse
+	11, // 27: forge.v1.IdentityService.ChangePassword:output_type -> forge.v1.ChangePasswordResponse
+	13, // 28: forge.v1.IdentityService.StepUpAuthentication:output_type -> forge.v1.StepUpAuthenticationResponse
+	15, // 29: forge.v1.IdentityService.GetCurrentUser:output_type -> forge.v1.GetCurrentUserResponse
+	17, // 30: forge.v1.IdentityService.GetMFAStatus:output_type -> forge.v1.GetMFAStatusResponse
+	19, // 31: forge.v1.IdentityService.BeginMFAEnrollment:output_type -> forge.v1.BeginMFAEnrollmentResponse
+	21, // 32: forge.v1.IdentityService.ConfirmMFAEnrollment:output_type -> forge.v1.ConfirmMFAEnrollmentResponse
+	23, // 33: forge.v1.IdentityService.DisableMFA:output_type -> forge.v1.DisableMFAResponse
+	25, // 34: forge.v1.IdentityService.ListApiTokens:output_type -> forge.v1.ListApiTokensResponse
+	27, // 35: forge.v1.IdentityService.CreateApiToken:output_type -> forge.v1.CreateApiTokenResponse
+	29, // 36: forge.v1.IdentityService.RevokeApiToken:output_type -> forge.v1.RevokeApiTokenResponse
+	22, // [22:37] is the sub-list for method output_type
+	7,  // [7:22] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_forge_v1_identity_proto_init() }
@@ -1338,7 +1706,7 @@ func file_forge_v1_identity_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_forge_v1_identity_proto_rawDesc), len(file_forge_v1_identity_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
