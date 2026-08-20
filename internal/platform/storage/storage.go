@@ -172,6 +172,7 @@ func (l *local) Capabilities() map[Capability]CapabilityStatus {
 
 type s3Store struct {
 	client  *s3.Client
+	presign *s3.PresignClient
 	bucket  string
 	profile ProviderProfile
 }
@@ -216,7 +217,7 @@ func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile) (Stor
 			o.BaseEndpoint = aws.String(c.Endpoint)
 		}
 	})
-	return &s3Store{client: cli, bucket: c.Bucket, profile: profile}, nil
+	return &s3Store{client: cli, presign: s3.NewPresignClient(cli), bucket: c.Bucket, profile: profile}, nil
 }
 func (s *s3Store) Put(ctx context.Context, key string, r io.Reader) error {
 	_, e := s.client.PutObject(ctx, &s3.PutObjectInput{Bucket: &s.bucket, Key: &key, Body: r})
