@@ -92,8 +92,24 @@ func New(ctx context.Context, c appcfg.Storage) (Store, error) {
 		}
 		return &local{root: c.LocalRoot}, nil
 	default:
-		return newS3(ctx, c, profile)
+		return newS3(ctx, c, profile, defaultCapabilityContract(profile))
 	}
+}
+
+// NewWithCapabilityContract enables advanced S3 operations only after the
+// configured target has passed an immutable, target-specific contract test.
+func NewWithCapabilityContract(ctx context.Context, c appcfg.Storage, contract CapabilityContract) (Store, error) {
+	profile, err := ResolveProviderProfile(c.Provider)
+	if err != nil {
+		return nil, err
+	}
+	if profile != contract.Profile {
+		return nil, fmt.Errorf("storage capability contract profile %q does not match configured profile %q", contract.Profile, profile)
+	}
+	if err := contract.Validate(CapabilityBasicObjectIO); err != nil {
+		return nil, err
+	}
+	return newS3(ctx, c, profile, contract)
 }
 
 type local struct{ root string }
@@ -171,13 +187,14 @@ func (l *local) Capabilities() map[Capability]CapabilityStatus {
 }
 
 type s3Store struct {
-	client  *s3.Client
-	presign *s3.PresignClient
-	bucket  string
-	profile ProviderProfile
+	client   *s3.Client
+	presign  *s3.PresignClient
+	bucket   string
+	profile  ProviderProfile
+	contract CapabilityContract
 }
 
-func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile) (Store, error) {
+func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile, contract CapabilityContract) (Store, error) {
 	if c.TLS && strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.Endpoint)), "http://") {
 		return nil, errors.New("storage tls=true requires https endpoint")
 	}
@@ -206,7 +223,7 @@ func newS3(ctx context.Context, c appcfg.Storage, profile ProviderProfile) (Stor
 			o.BaseEndpoint = aws.String(c.Endpoint)
 		}
 	})
-	return &s3Store{client: cli, presign: s3.NewPresignClient(cli), bucket: c.Bucket, profile: profile}, nil
+	return &s3Store{client: cli, presign: s3.NewPresignClient(cli), bucket: c.Bucket, profile: profile, contract: contract}, nil
 }
 func (s *s3Store) Put(ctx context.Context, key string, r io.Reader) error {
 	_, e := s.client.PutObject(ctx, &s3.PutObjectInput{Bucket: &s.bucket, Key: &key, Body: r})
@@ -232,18 +249,19 @@ func (s *s3Store) Ping(ctx context.Context) error {
 }
 func (s *s3Store) Provider() string         { return "s3" }
 func (s *s3Store) Profile() ProviderProfile { return s.profile }
+func (s *s3Store) CapabilityContract() CapabilityContract {
+	contract := s.contract
+	contract.Capabilities = cloneCapabilities(contract.Capabilities)
+	return contract
+}
 func (s *s3Store) Capabilities() map[Capability]CapabilityStatus {
-	return map[Capability]CapabilityStatus{
-		CapabilityBasicObjectIO:       {State: CapabilitySupported, Evidence: "S3 API PutObject/GetObject/DeleteObject/HeadBucket"},
-		CapabilityMultipartRecovery:   {State: CapabilityUnknown, Evidence: "target contract test required"},
-		CapabilityChecksum:            {State: CapabilityUnknown, Evidence: "target contract test required"},
-		CapabilitySSES3:               {State: CapabilityUnknown, Evidence: "target contract test required"},
-		CapabilitySSEKMS:              {State: CapabilityUnknown, Evidence: "target KMS contract test required"},
-		CapabilityVersioning:          {State: CapabilityUnknown, Evidence: "target contract test required"},
-		CapabilityObjectLock:          {State: CapabilityUnknown, Evidence: "target object-lock contract test required"},
-		CapabilityRetention:           {State: CapabilityUnknown, Evidence: "target retention contract test required"},
-		CapabilityLegalHold:           {State: CapabilityUnknown, Evidence: "target legal-hold contract test required"},
-		CapabilityConstrainedPresign:  {State: CapabilityUnknown, Evidence: "target presign contract test required"},
-		CapabilityTemporaryCredential: {State: CapabilityUnknown, Evidence: "target STS contract test required"},
+	return cloneCapabilities(s.contract.Capabilities)
+}
+
+func cloneCapabilities(input map[Capability]CapabilityStatus) map[Capability]CapabilityStatus {
+	output := make(map[Capability]CapabilityStatus, len(input))
+	for capability, status := range input {
+		output[capability] = status
 	}
+	return output
 }

@@ -60,7 +60,7 @@ func (s *s3Store) CreateMultipart(ctx context.Context, key, contentType string) 
 	if err := validateMultipartKey(key); err != nil {
 		return "", err
 	}
-	if err := RequireCapabilities(s, CapabilityMultipartRecovery); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityMultipartRecovery); err != nil {
 		return "", err
 	}
 	input := &s3.CreateMultipartUploadInput{Bucket: &s.bucket, Key: &key}
@@ -87,7 +87,7 @@ func (s *s3Store) UploadPart(ctx context.Context, key, uploadID string, partNumb
 	if strings.TrimSpace(uploadID) == "" || body == nil {
 		return MultipartPart{}, errors.New("multipart upload id and body are required")
 	}
-	if err := RequireCapabilities(s, CapabilityMultipartRecovery); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityMultipartRecovery); err != nil {
 		return MultipartPart{}, err
 	}
 	input := &s3.UploadPartInput{Bucket: &s.bucket, Key: &key, UploadId: &uploadID, PartNumber: aws.Int32(partNumber), Body: body}
@@ -115,7 +115,7 @@ func (s *s3Store) CompleteMultipart(ctx context.Context, key, uploadID string, p
 	if strings.TrimSpace(uploadID) == "" || len(parts) == 0 {
 		return errors.New("multipart upload id and parts are required")
 	}
-	if err := RequireCapabilities(s, CapabilityMultipartRecovery); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityMultipartRecovery); err != nil {
 		return err
 	}
 	ordered := append([]MultipartPart(nil), parts...)
@@ -146,7 +146,7 @@ func (s *s3Store) AbortMultipart(ctx context.Context, key, uploadID string) erro
 	if strings.TrimSpace(uploadID) == "" {
 		return errors.New("multipart upload id is required")
 	}
-	if err := RequireCapabilities(s, CapabilityMultipartRecovery); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityMultipartRecovery); err != nil {
 		return err
 	}
 	_, err := s.client.AbortMultipartUpload(ctx, &s3.AbortMultipartUploadInput{Bucket: &s.bucket, Key: &key, UploadId: &uploadID})
@@ -160,7 +160,7 @@ func (s *s3Store) PresignGet(ctx context.Context, key string, ttl time.Duration)
 	if err := validatePresignTTL(ttl); err != nil {
 		return "", err
 	}
-	if err := RequireCapabilities(s, CapabilityConstrainedPresign); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityConstrainedPresign); err != nil {
 		return "", err
 	}
 	out, err := s.presign.PresignGetObject(ctx, &s3.GetObjectInput{Bucket: &s.bucket, Key: &key}, func(options *s3.PresignOptions) { options.Expires = ttl })
@@ -177,7 +177,7 @@ func (s *s3Store) PresignPut(ctx context.Context, key string, ttl time.Duration,
 	if err := validatePresignTTL(ttl); err != nil {
 		return "", err
 	}
-	if err := RequireCapabilities(s, CapabilityConstrainedPresign); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityConstrainedPresign); err != nil {
 		return "", err
 	}
 	input := &s3.PutObjectInput{Bucket: &s.bucket, Key: &key}
