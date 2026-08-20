@@ -234,7 +234,7 @@ supply-chain-evidence: ci-policy
 release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
-verify: ci-go ci-web ci-deploy security-tools supply-chain-evidence
+verify: offline-check disaster-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-build:
 	bash scripts/build-offline-package.sh
