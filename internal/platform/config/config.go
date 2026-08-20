@@ -553,7 +553,7 @@ func normalizeStorageProvider(value string) string {
 	switch v {
 	case "", "local":
 		return "local"
-	case "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
+	case "s3", "aws", "aws-s3", "amazon-s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "aliyun-oss", "alibaba-oss", "cos", "tencent-cos", "ceph", "ceph-rgw", "radosgw", "obs", "huawei-obs":
 		return "s3"
 	default:
 		return v
@@ -642,9 +642,9 @@ func (c Config) Validate() error {
 		}
 	}
 	switch c.Storage.Provider {
-	case "local", "s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "cos", "ceph", "ceph-rgw", "radosgw":
+	case "local", "s3", "aws", "aws-s3", "amazon-s3", "s3-compatible", "s3_compatible", "minio", "minio-s3", "oss", "aliyun-oss", "alibaba-oss", "cos", "tencent-cos", "ceph", "ceph-rgw", "radosgw", "obs", "huawei-obs":
 	default:
-		errs = append(errs, "storage.provider must be local|s3 (s3-compatible aliases: s3-compatible/minio/oss/cos/ceph)")
+		errs = append(errs, "storage.provider must be local|s3 (aliases: aws-s3/minio/ceph-rgw/alibaba-oss/tencent-cos/huawei-obs)")
 	}
 	if normalizeStorageProvider(c.Storage.Provider) == "s3" && c.Storage.Bucket == "" {
 		errs = append(errs, "storage.bucket required for s3")
