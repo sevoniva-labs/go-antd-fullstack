@@ -79,6 +79,11 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - 等保测评、密评、金融监管验收或任何厂商认证。
 
 这些项目必须在目标机构的网络、硬件、数据库、中间件和安全设备上形成独立测试报告，不能由脚手架单元测试替代。
+## Identity runtime contract evidence (2026-08-21)
+
+- Using Lima rootful nerdctl and the domestic ARM64 image digests `docker.m.daocloud.io/bitnamilegacy/openldap@sha256:687f14a22b5c74fb057a57221acdbe7b8c82e2d3619fc380db3af48ec4aa04ed` and `quay.m.daocloud.io/keycloak/keycloak@sha256:98fab020a3a490aba0978f237e2a06cd0ea42bf149c6cf10f11c0aaf27728ff2`, `scripts/test-identity-contract.sh` passed LDAP test-user bind/search, Keycloak management health, and master-realm OIDC discovery.
+- Test secrets were temporary environment values and were not recorded. This is exact local development-profile evidence only, not production or regulatory certification.
+
 ## PostgreSQL runtime evidence (2026-08-21)
 
 - A local Linux ARM64 runtime contract used the domestic PostgreSQL image digest `docker.m.daocloud.io/library/postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685` through Lima/nerdctl.

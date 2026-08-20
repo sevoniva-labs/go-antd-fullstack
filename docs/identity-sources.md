@@ -50,6 +50,19 @@ make identity-compose-config
 
 Start it only in a disposable development environment with the same variables. Configure the application against `ldap://ldap:1389` or `ldaps://ldap:1636` according to the imported image contract, and `http://sso:8080` only for local development. Production must use TLS, a managed/approved identity topology, certificate validation, MFA, backup, HA and target-specific evidence. The overlay intentionally contains no credentials or runtime data in Git.
 
+For a real disposable runtime check, use the explicit contract target with immutable image digests and local-only environment secrets:
+
+```bash
+FORGE_LDAP_IMAGE='harbor.internal.example/approved/openldap@sha256:<digest>' \
+FORGE_SSO_IMAGE='harbor.internal.example/approved/keycloak@sha256:<digest>' \
+FORGE_LDAP_ADMIN_PASSWORD='local-only-admin-password' \
+FORGE_LDAP_USER_PASSWORD='local-only-user-password' \
+FORGE_SSO_ADMIN_PASSWORD='local-only-sso-password' \
+make identity-runtime-contract
+```
+
+The contract starts the disposable overlay, verifies the LDAP test-user bind/search, the Keycloak management health endpoint, and the master-realm OIDC discovery endpoint. Set `FORGE_IDENTITY_EVIDENCE_FILE` to write a non-secret JSON evidence record containing the source commit and exact image digests. The target is `Target-tested` only for the exact image, architecture, profile, and date recorded by that evidence; it is not a production, banking, or regulatory certification.
+
 ## Evidence boundary
 
 The scaffold provides the adapter and policy boundary. It does not certify a commercial IAM, OIDC issuer, LDAP/AD version, CA chain, browser fleet, or high-availability topology. Each target must record discovery, code exchange, nonce/state replay, TLS failure, directory timeout, disabled-account, unmapped-subject, MFA step-up, failover, and audit evidence before being labeled `Target-tested`.
