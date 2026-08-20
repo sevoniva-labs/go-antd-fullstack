@@ -180,6 +180,7 @@ verify: ci-go ci-web ci-deploy security-tools supply-chain-evidence
 offline-check: fmt contract
 	python3 -m json.tool web/apps/shell/package.json >/dev/null
 	bash -n scripts/init-project.sh
+	bash scripts/check-offline-package.sh
 
 docker-build:
 	@for value in "$$FORGE_NODE_IMAGE" "$$FORGE_GO_IMAGE" "$$FORGE_RUNTIME_IMAGE"; do \

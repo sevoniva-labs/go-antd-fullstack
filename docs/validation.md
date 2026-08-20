@@ -24,6 +24,7 @@
 - Helm 基础与信创 values 均通过 `helm lint`。
 - 基础开发配置与信创生产配置均完成 `helm template` 渲染。
 - 生产模板会拒绝关闭 NetworkPolicy、缺少明确 ingress/egress 或使用无 digest 镜像；基础默认 values 不能冒充生产可部署配置。
+- `make offline-check` 已具备锁文件、信创配置、公共 OCI 源、离线包 provenance、镜像 digest 和 SHA-256 manifest 的静态门禁；未提供 `OFFLINE_BUNDLE_DIR` 时不会宣称离线包验证完成。
 
 ## 可复现命令
 
@@ -42,6 +43,9 @@ helm lint deploy/helm/forge
 helm lint deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml
 helm template forge deploy/helm/forge --set config.environment=development >/tmp/forge-base.yaml
 helm template forge deploy/helm/forge -f deploy/helm/forge/values-xinchuang.yaml >/tmp/forge-xinchuang.yaml
+
+make offline-check
+OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 ```
 
 所有自动下载入口必须显式使用国内源，并在国内源失败时立即失败。禁止 `direct` 或其他参数造成不受控的海外静默回退；生产 CI 应优先使用组织内 Go Proxy/制品代理。
