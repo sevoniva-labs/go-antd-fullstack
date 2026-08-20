@@ -16,6 +16,7 @@
 - Kratos v2 后端单元测试、静态检查和 Phase 1 后端门禁已执行通过。
 - HTTP SPA 测试覆盖随机 CSP nonce 注入、脚本严格策略、Wujie 审批策略、独立 `connect-src`/`frame-src` 和签名静态资源 URL 不重定向。
 - 配置测试覆盖生产来源必须 HTTPS、拒绝通配符/路径/用户信息/查询参数以及重复来源。
+- `make contract` 还会交叉检查 PlatformService 的每个 Proto RPC 是否同时有具体后端实现和授权规则，并检查平台管理与账户安全页面的完整性；生成的 `Unimplemented` 默认方法不能掩盖缺失实现。
 
 ### Tencent COS S3 foundation contract
 

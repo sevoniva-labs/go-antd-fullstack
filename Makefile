@@ -89,6 +89,7 @@ contract:
 	python3 scripts/check-error-codes.py
 	python3 scripts/check-contract-coverage.py
 	python3 scripts/check-openapi-security.py
+	python3 scripts/check-platform-completeness.py
 
 module-boundaries:
 	bash scripts/check-module-boundaries.sh
