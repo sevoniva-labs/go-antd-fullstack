@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
+
+	"github.com/sevoniva-labs/forge/internal/platform/securefile"
 	"time"
 )
 
@@ -43,7 +44,7 @@ func LoadCapabilityContract(path string) (CapabilityContract, error) {
 	if path == "" {
 		return CapabilityContract{}, errors.New("storage capability contract path is required")
 	}
-	raw, err := os.ReadFile(path)
+	raw, err := securefile.Read(path)
 	if err != nil {
 		return CapabilityContract{}, fmt.Errorf("read storage capability contract: %w", err)
 	}
