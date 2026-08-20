@@ -4,6 +4,11 @@
 
 ## 当前已验证
 
+### Latest complete gate
+
+- 2026-08-20: `make verify` passed on the scaffold branch, including Go contract/module/race checks, frontend generated API/lint/typecheck/test/build/budget checks, APISIX and Helm policy checks, Gosec, govulncheck, Staticcheck, golangci-lint, SBOM, Gitleaks history/worktree scans, and license evidence generation.
+- The complete gate does not certify a target vendor, hardware, operating system, HSM/KMS, cluster, air-gapped bundle, or disaster-recovery topology; those require the target evidence workflows below.
+
 ### Go 与安全边界
 
 - Go 依赖通过 `https://goproxy.cn` 获取，`go.sum` 已固定。
