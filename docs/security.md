@@ -33,6 +33,7 @@
 - 主密钥要求至少 32 字节或等价 base64；短口令不会被静默 hash 成“看似可用”的主密钥。
 - 生产金融密码方案通常还需要 SM2、证书体系、KMS/HSM/密码机、双人管钥、密钥生命周期和密评；KMS/HSM 仍是 `Adapter slot`，扩展位见 `integrations/secrets/hsm`。
 - `security/masking` 提供手机号、证件、银行卡、邮箱、姓名脱敏 primitive；真正脱敏策略由数据分类分级决定。
+- `security/datapolicy` 提供字段目录策略边界；未登记字段不能被策略层导出，个人信息和受限字段强制脱敏、审批和水印。
 
 ## 审计与日志
 
