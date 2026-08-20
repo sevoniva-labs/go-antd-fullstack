@@ -17,6 +17,7 @@
 | Messaging | RocketMQ 5.x | Built-in default | Apache 官方 gRPC SDK；普通/FIFO/定时延时/事务消息、显式 ACK/重试、TLS/mTLS、ACL、Topic 白名单 |
 | Streaming | Kafka | Built-in optional | franz-go；仅承载日志、埋点、CDC 等流式记录，不作为业务消息降级项 |
 | Reliability | 本地可靠消息表 | Built-in | 与业务事务同库写入，Worker 租约恢复；at-least-once |
+| Reliability | Audit forwarding | Built-in | 审计与 outbox 同事务写入；RocketMQ `audit-events` allowlist 后才外发 |
 | Reliability | Idempotency | Built-in | DB 记录 request hash/result state |
 | Search | Elasticsearch | Built-in | REST adapter |
 | Search | OpenSearch | Built-in | REST-compatible adapter，目标版本仍需兼容测试 |

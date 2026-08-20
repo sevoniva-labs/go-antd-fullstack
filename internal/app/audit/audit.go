@@ -35,8 +35,9 @@ type Event struct {
 }
 
 type Writer struct {
-	db      *database.DB
-	archive WORMArchive
+	db        *database.DB
+	archive   WORMArchive
+	forwarder Forwarder
 }
 
 var ErrIntegrityViolation = errors.New("audit integrity violation")
@@ -45,6 +46,19 @@ func NewWriter(db *database.DB) *Writer { return &Writer{db: db} }
 
 func NewWriterWithArchive(db *database.DB, archive WORMArchive) *Writer {
 	return &Writer{db: db, archive: archive}
+}
+
+type Forwarder interface {
+	EnqueueTx(context.Context, *database.DB, *sql.Tx, Event) error
+	Provider() string
+}
+
+func NewWriterWithForwarder(db *database.DB, forwarder Forwarder) *Writer {
+	return &Writer{db: db, forwarder: forwarder}
+}
+
+func NewWriterWithArchiveAndForwarder(db *database.DB, archive WORMArchive, forwarder Forwarder) *Writer {
+	return &Writer{db: db, archive: archive, forwarder: forwarder}
 }
 
 func (w *Writer) Write(ctx context.Context, e Event) error {
@@ -81,6 +95,15 @@ func (w *Writer) Write(ctx context.Context, e Event) error {
 		e.EventHash = auditEventHash(e, string(raw))
 		if _, err := w.db.ExecContext(txCtx, w.db.Rebind(`INSERT INTO audit_logs(id,occurred_at,request_id,organization_id,actor_id,actor_name,action,resource_type,resource_id,result,client_ip,details_json,sequence_no,prev_hash,event_hash) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`), e.ID, e.OccurredAt, e.RequestID, nullIfEmpty(e.OrganizationID), nullIfEmpty(e.ActorID), e.ActorName, e.Action, e.ResourceType, e.ResourceID, e.Result, e.ClientIP, string(raw), e.SequenceNo, e.PrevHash, e.EventHash); err != nil {
 			return err
+		}
+		if w.forwarder != nil {
+			tx, ok := database.TransactionFromContext(txCtx)
+			if !ok {
+				return errors.New("audit reliable forwarder requires active transaction")
+			}
+			if err := w.forwarder.EnqueueTx(txCtx, w.db, tx, e); err != nil {
+				return fmt.Errorf("enqueue audit reliable event via %s: %w", w.forwarder.Provider(), err)
+			}
 		}
 		_, err := w.db.ExecContext(txCtx, w.db.Rebind(`UPDATE audit_chain_heads SET sequence_no=?,head_hash=? WHERE scope=?`), e.SequenceNo, e.EventHash, scope)
 		return err

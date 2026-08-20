@@ -16,6 +16,7 @@ import (
 	kgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 	forgev1 "github.com/sevoniva-labs/forge/api/gen/go/forge/v1"
+	"github.com/sevoniva-labs/forge/internal/adapters/auditsink"
 	"github.com/sevoniva-labs/forge/internal/adapters/kratosapi"
 	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	appapproval "github.com/sevoniva-labs/forge/internal/app/approval"
@@ -178,6 +179,15 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 
 	auditWriter := audit.NewWriter(db)
+	if hasTopic(cfg.Messaging.RocketMQTopics, "audit-events") {
+		forwarder, forwarderErr := auditsink.NewReliableForwarder("audit-events")
+		if forwarderErr != nil {
+			return nil, forwarderErr
+		}
+		auditWriter = audit.NewWriterWithForwarder(db, forwarder)
+	} else if cfg.Messaging.Provider == "rocketmq" {
+		log.Warn("audit reliable forwarding disabled because audit-events is not in the RocketMQ topic allowlist")
+	}
 	var met *metrics.Metrics
 	if cfg.Observability.MetricsEnabled {
 		met = metrics.New()

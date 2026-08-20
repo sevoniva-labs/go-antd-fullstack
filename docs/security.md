@@ -42,6 +42,7 @@
 - `mlps3/financial` profile 阻止网络日志留存天数配置低于 183 天。
 - 长期留存、防篡改、WORM/SIEM 由生产日志平台实现，不建议用单一业务数据库承担全部网络日志归档。
 - 业务审计日志包含事务内完整性链和校验接口；清理前必须由 WORM 归档适配器写入 Object Lock/Retention/Checksum/VersionId 证据，并在本地事务持久化 receipt 和 chain anchor。未配置或未验证适配器时 fail-closed。
+- 审计可靠汇聚使用本地 `reliable_messages` outbox 与审计记录同事务写入；只有 RocketMQ allowlist 明确包含 `audit-events` 时才启用转发，发布失败进入重试/死信，不静默降级。
 
 ## 多实例与可靠性安全
 

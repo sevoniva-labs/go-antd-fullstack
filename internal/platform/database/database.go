@@ -116,3 +116,10 @@ func transactionFromContext(ctx context.Context) *sql.Tx {
 	tx, _ := ctx.Value(transactionContextKey{}).(*sql.Tx)
 	return tx
 }
+
+// TransactionFromContext exposes the current transaction to infrastructure
+// adapters that must enqueue a reliable side effect atomically.
+func TransactionFromContext(ctx context.Context) (*sql.Tx, bool) {
+	tx := transactionFromContext(ctx)
+	return tx, tx != nil
+}
