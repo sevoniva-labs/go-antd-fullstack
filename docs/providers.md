@@ -25,6 +25,8 @@
 
 `FORGE_STORAGE_PROVIDER` 支持别名：`s3`, `s3-compatible`, `minio`, `oss`, `cos`, `ceph`, `ceph-rgw`，启动时会统一归一化为 `s3`（大小写不敏感，带下划线/短横线兼容）。
 
+S3 仅把基础对象读写标记为 `Built-in`。STS、临时凭证、分片恢复、checksum、SSE、版本控制、Object Lock、Retention、Legal Hold 和受限预签名均默认是 `unknown`，必须通过精确目标环境契约测试后才能标记 `Target-tested`；AWS S3、MinIO、Ceph RGW、阿里 OSS、腾讯 COS、华为 OBS 没有实测证据时统一是 `Not certified`。
+
 | Config Center | Nacos | Built-in | 启动拉取 + Watch API |
 | Service Registry | Nacos | Built-in | register/deregister/health |
 | Crypto | Standard | Built-in | SHA-256 + AES-GCM |

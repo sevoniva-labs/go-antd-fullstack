@@ -41,6 +41,7 @@
 - slog JSON/Text 统一输出，敏感 key 兜底 redaction；HTTP access log 不记录 query string。
 - `mlps3/financial` profile 阻止网络日志留存天数配置低于 183 天。
 - 长期留存、防篡改、WORM/SIEM 由生产日志平台实现，不建议用单一业务数据库承担全部网络日志归档。
+- 业务审计日志包含事务内完整性链和校验接口；直接清理被 fail-closed，只有完成 WORM 归档适配器和证据确认后才能实施保留期清理。
 
 ## 多实例与可靠性安全
 
