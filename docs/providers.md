@@ -28,6 +28,7 @@
 | Storage | 阿里 OSS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
 | Storage | 腾讯 COS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
 | Storage | 华为 OBS | Profile | S3 protocol profile；需核对目标版本和签名行为 |
+| Storage | WORM audit archive | Adapter slot | S3 Object Lock Compliance + Retention + Checksum + VersionId；未通过目标契约测试不可启用 |
 
 `FORGE_STORAGE_PROVIDER` 支持别名：`s3`, `s3-compatible`, `minio`, `oss`, `cos`, `ceph`, `ceph-rgw`，启动时会统一归一化为 `s3`（大小写不敏感，带下划线/短横线兼容）。
 

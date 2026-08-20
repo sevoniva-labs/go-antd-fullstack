@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 )
@@ -114,5 +115,19 @@ func TestS3StoreReportsExplicitProfile(t *testing.T) {
 	}
 	if reporter.Profile() != ProviderProfileTencentCOS {
 		t.Fatalf("storage profile = %v, want %q", reporter.Profile(), ProviderProfileTencentCOS)
+	}
+}
+
+func TestS3ImmutableStoreFailsClosedWithoutTargetEvidence(t *testing.T) {
+	store, err := New(context.Background(), config.Storage{Provider: "s3", Endpoint: "https://s3.example", Region: "cn-beijing", Bucket: "audit", TLS: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	immutable, ok := store.(ImmutableStore)
+	if !ok {
+		t.Fatal("s3 store does not expose immutable contract")
+	}
+	if _, err := immutable.PutImmutable(context.Background(), "audit/event.json", []byte(`{"event":1}`), time.Now().UTC().Add(time.Hour)); err == nil {
+		t.Fatal("immutable put was accepted without target capability evidence")
 	}
 }
