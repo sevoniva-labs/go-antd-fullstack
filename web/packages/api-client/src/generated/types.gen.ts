@@ -4,6 +4,32 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type ForgeV1AccessReview = {
+    id?: string;
+    organizationId?: string;
+    reviewerId?: string;
+    reviewerName?: string;
+    status?: string;
+    dueAt?: string;
+    createdBy?: string;
+    createdAt?: string;
+    completedAt?: string;
+};
+
+export type ForgeV1AccessReviewItem = {
+    id?: string;
+    reviewId?: string;
+    organizationId?: string;
+    userId?: string;
+    loginName?: string;
+    roleKey?: string;
+    decision?: string;
+    reason?: string;
+    decidedBy?: string;
+    decidedAt?: string;
+    createdAt?: string;
+};
+
 export type ForgeV1ApiToken = {
     id?: string;
     name?: string;
@@ -83,6 +109,15 @@ export type ForgeV1ConfirmMfaEnrollmentRequest = {
 
 export type ForgeV1ConfirmMfaEnrollmentResponse = {
     recoveryCodes?: Array<string>;
+};
+
+export type ForgeV1CreateAccessReviewRequest = {
+    reviewerId?: string;
+    dueAt?: string;
+};
+
+export type ForgeV1CreateAccessReviewResponse = {
+    review?: ForgeV1AccessReview;
 };
 
 export type ForgeV1CreateApiTokenRequest = {
@@ -173,6 +208,17 @@ export type ForgeV1CreateUserResponse = {
     user?: ForgeV1User;
 };
 
+export type ForgeV1DecideAccessReviewItemRequest = {
+    reviewId?: string;
+    itemId?: string;
+    decision?: string;
+    reason?: string;
+};
+
+export type ForgeV1DecideAccessReviewItemResponse = {
+    [key: string]: unknown;
+};
+
 export type ForgeV1DecideApprovalRequest = {
     approvalId?: string;
     decision?: string;
@@ -223,6 +269,19 @@ export type ForgeV1ExportAuditLogsResponse = {
     filename?: string;
 };
 
+export type ForgeV1FederatedIdentityLink = {
+    id?: string;
+    organizationId?: string;
+    provider?: string;
+    subject?: string;
+    userId?: string;
+    loginName?: string;
+    createdBy?: string;
+    approvalId?: string;
+    createdAt?: string;
+    lastAuthenticatedAt?: string;
+};
+
 export type ForgeV1GetApprovalResponse = {
     approval?: ForgeV1ApprovalRequest;
 };
@@ -267,6 +326,25 @@ export type ForgeV1HealthResponse = {
     version?: string;
 };
 
+export type ForgeV1LinkFederatedIdentityRequest = {
+    provider?: string;
+    subject?: string;
+    userId?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1LinkFederatedIdentityResponse = {
+    link?: ForgeV1FederatedIdentityLink;
+};
+
+export type ForgeV1ListAccessReviewItemsResponse = {
+    items?: Array<ForgeV1AccessReviewItem>;
+};
+
+export type ForgeV1ListAccessReviewsResponse = {
+    reviews?: Array<ForgeV1AccessReview>;
+};
+
 export type ForgeV1ListApiTokensResponse = {
     tokens?: Array<ForgeV1ApiToken>;
 };
@@ -281,6 +359,10 @@ export type ForgeV1ListAuditLogsResponse = {
 
 export type ForgeV1ListDepartmentsResponse = {
     departments?: Array<ForgeV1Department>;
+};
+
+export type ForgeV1ListFederatedIdentityLinksResponse = {
+    links?: Array<ForgeV1FederatedIdentityLink>;
 };
 
 export type ForgeV1ListPermissionsResponse = {
@@ -495,6 +577,14 @@ export type ForgeV1TransferApprovalResponse = {
     approval?: ForgeV1ApprovalRequest;
 };
 
+export type ForgeV1UnlinkFederatedIdentityRequest = {
+    linkId?: string;
+};
+
+export type ForgeV1UnlinkFederatedIdentityResponse = {
+    [key: string]: unknown;
+};
+
 export type ForgeV1UnlockUserRequest = {
     userId?: string;
 };
@@ -665,6 +755,75 @@ export type ForgeV1WithdrawApprovalResponse = {
     approval?: ForgeV1ApprovalRequest;
 };
 
+export type PlatformServiceListAccessReviewsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/access-reviews';
+};
+
+export type PlatformServiceListAccessReviewsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListAccessReviewsResponse;
+};
+
+export type PlatformServiceListAccessReviewsResponse = PlatformServiceListAccessReviewsResponses[keyof PlatformServiceListAccessReviewsResponses];
+
+export type PlatformServiceCreateAccessReviewData = {
+    body: ForgeV1CreateAccessReviewRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/access-reviews';
+};
+
+export type PlatformServiceCreateAccessReviewResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateAccessReviewResponse;
+};
+
+export type PlatformServiceCreateAccessReviewResponse = PlatformServiceCreateAccessReviewResponses[keyof PlatformServiceCreateAccessReviewResponses];
+
+export type PlatformServiceListAccessReviewItemsData = {
+    body?: never;
+    path: {
+        reviewId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/access-reviews/{reviewId}/items';
+};
+
+export type PlatformServiceListAccessReviewItemsResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListAccessReviewItemsResponse;
+};
+
+export type PlatformServiceListAccessReviewItemsResponse = PlatformServiceListAccessReviewItemsResponses[keyof PlatformServiceListAccessReviewItemsResponses];
+
+export type PlatformServiceDecideAccessReviewItemData = {
+    body: ForgeV1DecideAccessReviewItemRequest;
+    path: {
+        reviewId: string;
+        itemId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/access-reviews/{reviewId}/items/{itemId}/decisions';
+};
+
+export type PlatformServiceDecideAccessReviewItemResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1DecideAccessReviewItemResponse;
+};
+
+export type PlatformServiceDecideAccessReviewItemResponse = PlatformServiceDecideAccessReviewItemResponses[keyof PlatformServiceDecideAccessReviewItemResponses];
+
 export type PlatformServiceListAuditLogsData = {
     body?: never;
     path?: never;
@@ -752,6 +911,56 @@ export type PlatformServiceUpdateDepartmentResponses = {
 };
 
 export type PlatformServiceUpdateDepartmentResponse = PlatformServiceUpdateDepartmentResponses[keyof PlatformServiceUpdateDepartmentResponses];
+
+export type PlatformServiceListFederatedIdentityLinksData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/identity-mappings';
+};
+
+export type PlatformServiceListFederatedIdentityLinksResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListFederatedIdentityLinksResponse;
+};
+
+export type PlatformServiceListFederatedIdentityLinksResponse = PlatformServiceListFederatedIdentityLinksResponses[keyof PlatformServiceListFederatedIdentityLinksResponses];
+
+export type PlatformServiceLinkFederatedIdentityData = {
+    body: ForgeV1LinkFederatedIdentityRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/identity-mappings';
+};
+
+export type PlatformServiceLinkFederatedIdentityResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1LinkFederatedIdentityResponse;
+};
+
+export type PlatformServiceLinkFederatedIdentityResponse = PlatformServiceLinkFederatedIdentityResponses[keyof PlatformServiceLinkFederatedIdentityResponses];
+
+export type PlatformServiceUnlinkFederatedIdentityData = {
+    body: ForgeV1UnlinkFederatedIdentityRequest;
+    path: {
+        linkId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/identity-mappings/{linkId}:unlink';
+};
+
+export type PlatformServiceUnlinkFederatedIdentityResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1UnlinkFederatedIdentityResponse;
+};
+
+export type PlatformServiceUnlinkFederatedIdentityResponse = PlatformServiceUnlinkFederatedIdentityResponses[keyof PlatformServiceUnlinkFederatedIdentityResponses];
 
 export type PlatformServiceGetOrganizationData = {
     body?: never;

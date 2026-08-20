@@ -8,7 +8,7 @@ export interface Principal {
   permissions?: string[]
   scopes?: string[]
   must_change_password: boolean
-  authentication_level?: 'PASSWORD' | 'MFA'
+  authentication_level?: 'PASSWORD' | 'MFA' | 'FEDERATED'
   mfa_verified_at?: string
 }
 
@@ -152,6 +152,32 @@ export interface TemporaryRoleGrant {
   revoked_at?: string
   revoked_by?: string
   revoke_reason?: string
+  created_at: string
+}
+
+export interface AccessReview {
+  id: string
+  organization_id: string
+  reviewer_id: string
+  reviewer_name: string
+  status: 'OPEN' | 'COMPLETED' | 'EXPIRED'
+  due_at: string
+  created_by: string
+  created_at: string
+  completed_at?: string
+}
+
+export interface AccessReviewItem {
+  id: string
+  review_id: string
+  organization_id: string
+  user_id: string
+  login_name: string
+  role_key: string
+  decision: 'PENDING' | 'APPROVE' | 'REVOKE' | 'EXCEPTION'
+  reason: string
+  decided_by?: string
+  decided_at?: string
   created_at: string
 }
 

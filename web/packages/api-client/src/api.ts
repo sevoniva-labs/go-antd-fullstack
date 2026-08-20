@@ -16,6 +16,8 @@ import type {
   SessionInfo,
   SystemInfo,
   TemporaryRoleGrant,
+  AccessReview,
+  AccessReviewItem,
   User,
 } from './types'
 
@@ -62,6 +64,12 @@ export const api = {
   }) => apiFetch<TemporaryRoleGrant>('/admin/temporary-role-grants', { method: 'POST', body: JSON.stringify(payload) }),
   revokeTemporaryRoleGrant: (grantId: string, reason: string) =>
     apiFetch<void>(`/admin/temporary-role-grants/${encodeURIComponent(grantId)}:revoke`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  accessReviews: () => apiFetch<{ items: AccessReview[] }>('/admin/access-reviews'),
+  createAccessReview: (payload: { reviewer_id: string; due_at: string }) =>
+    apiFetch<AccessReview>('/admin/access-reviews', { method: 'POST', body: JSON.stringify(payload) }),
+  accessReviewItems: (reviewId: string) => apiFetch<{ items: AccessReviewItem[] }>(`/admin/access-reviews/${encodeURIComponent(reviewId)}/items`),
+  decideAccessReviewItem: (reviewId: string, itemId: string, decision: AccessReviewItem['decision'], reason: string) =>
+    apiFetch<void>(`/admin/access-reviews/${encodeURIComponent(reviewId)}/items/${encodeURIComponent(itemId)}/decisions`, { method: 'POST', body: JSON.stringify({ decision, reason }) }),
 
   organization: () => apiFetch<Organization>('/admin/organization'),
   updateOrganization: (payload: {
