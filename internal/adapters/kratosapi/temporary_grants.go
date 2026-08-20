@@ -16,13 +16,10 @@ func (s *PlatformService) CreateTemporaryRoleGrant(ctx context.Context, req *for
 	if err != nil {
 		return nil, err
 	}
-	validFrom := time.Now().UTC()
-	if req.GetValidFrom() != nil {
-		validFrom = req.GetValidFrom().AsTime().UTC()
-	}
-	if req.GetValidUntil() == nil {
+	if req.GetValidFrom() == nil || req.GetValidUntil() == nil {
 		return nil, serviceError(appidentity.ErrInvalidTemporaryGrant)
 	}
+	validFrom := req.GetValidFrom().AsTime().UTC()
 	validUntil := req.GetValidUntil().AsTime().UTC()
 	payloadBytes, err := json.Marshal(map[string]any{
 		"reason": req.GetReason(), "role_key": req.GetRoleKey(), "user_id": req.GetUserId(),

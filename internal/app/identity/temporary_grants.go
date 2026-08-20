@@ -23,10 +23,7 @@ func (s *Service) CreateTemporaryRoleGrant(ctx context.Context, actor domain.Pri
 	approvalID = strings.TrimSpace(approvalID)
 	validFrom = validFrom.UTC()
 	validUntil = validUntil.UTC()
-	if validFrom.IsZero() {
-		validFrom = time.Now().UTC()
-	}
-	if roleKey == "" || roleKey == "system_admin" || len(reason) < 8 || len(reason) > 500 || approvalID == "" || !validUntil.After(validFrom) || !validUntil.After(time.Now().UTC()) {
+	if roleKey == "" || roleKey == "system_admin" || len(reason) < 8 || len(reason) > 500 || approvalID == "" || validFrom.IsZero() || !validUntil.After(validFrom) || !validUntil.After(time.Now().UTC()) {
 		return domain.TemporaryRoleGrant{}, ErrInvalidTemporaryGrant
 	}
 	maxDuration := 30 * 24 * time.Hour
