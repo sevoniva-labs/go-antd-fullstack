@@ -111,6 +111,7 @@ var basePermissions = []struct{ Key, Name string }{
 	{"system.position.read", "查看岗位"}, {"system.position.manage", "管理岗位"},
 	{"system.user_group.read", "查看用户组"}, {"system.user_group.manage", "管理用户组"},
 	{"system.identity_mapping.read", "查看外部身份绑定"}, {"system.identity_mapping.manage", "管理外部身份绑定"},
+	{"system.access_review.read", "查看访问复核"}, {"system.access_review.manage", "管理访问复核"},
 	{"system.session.read", "查看在线会话"}, {"system.session.revoke", "强制下线会话"},
 	{"system.audit.read", "查看审计日志"}, {"system.audit.export", "导出审计日志"},
 	{"system.temporary_grant.read", "查看临时授权"}, {"system.temporary_grant.manage", "管理临时授权"},
@@ -150,7 +151,7 @@ func (s *Service) Bootstrap(ctx context.Context, orgKey, orgName, admin, passwor
 	// Keep system_admin as implicit superuser in code; seed explicit grants for
 	// other built-in roles to make the model extensible without hard-coding
 	// every endpoint to a role name.
-	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.identity_mapping.read", "system.identity_mapping.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
+	for _, k := range []string{"system.user.read", "system.user.assignment.read", "system.user.assignment.manage", "system.role.read", "system.organization.read", "system.organization.manage", "system.department.read", "system.department.manage", "system.position.read", "system.position.manage", "system.user_group.read", "system.user_group.manage", "system.identity_mapping.read", "system.identity_mapping.manage", "system.access_review.read", "system.access_review.manage", "system.session.read", "system.session.revoke", "system.temporary_grant.read", "system.temporary_grant.manage", "system.config.read", "system.security.manage"} {
 		if err = s.repo.GrantPermissionToRole(ctx, orgID, "security_admin", k); err != nil {
 			return err
 		}
