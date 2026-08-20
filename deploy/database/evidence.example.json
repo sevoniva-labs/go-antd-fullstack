@@ -1,0 +1,27 @@
+{
+  "kind": "forge-database-compatibility-evidence",
+  "level": "Not certified",
+  "provider": "adapter-slot",
+  "mode": "replace-with-database-mode",
+  "target": {
+    "product": "replace-with-database-product",
+    "version": "replace-with-version",
+    "patch": "replace-with-patch",
+    "architecture": "replace-with-cpu",
+    "os": "replace-with-os-and-kernel",
+    "runtime": "replace-with-runtime",
+    "driver": "replace-with-approved-driver-and-version",
+    "tested_at": "replace-with-rfc3339"
+  },
+  "controls": {
+    "migration": "not_tested",
+    "transactions": "not_tested",
+    "sql_types": "not_tested",
+    "locking": "not_tested",
+    "backup_restore": "not_tested",
+    "failover": "not_tested",
+    "performance": "not_tested",
+    "tls": "not_tested"
+  },
+  "evidence_refs": []
+}

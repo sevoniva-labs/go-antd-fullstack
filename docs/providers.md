@@ -61,3 +61,7 @@ S3 仅把基础对象读写标记为 `Built-in`。STS、临时凭证、分片恢
 4. 国产替换优先落在 adapter/provider，不为某个数据库把业务 SQL/类型扩散到 domain。
 5. Redis/RocketMQ/Kafka Streaming/Search/S3 的 TLS 使用统一安全策略，支持企业 CA、客户端证书和 ServerName；框架不提供跳过证书校验开关。数据库 TLS 由对应驱动 DSN 配置。
 6. `messaging` 与 `streaming` 是两条独立能力线，可同时启用；禁止用 Kafka 自动接管 RocketMQ 失败的业务消息。
+
+### Database compatibility evidence
+
+Database support is capability- and evidence-based. Run `make database-evidence-check` for the structural contract; a provider is not `Target-tested` until a real target report, non-secret evidence files, and SHA-256 digests are supplied. The example remains `Not certified` and does not claim compatibility with OceanBase, Kingbase, Dameng, or GaussDB.
