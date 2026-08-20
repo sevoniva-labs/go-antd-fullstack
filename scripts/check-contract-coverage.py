@@ -23,7 +23,7 @@ def openapi_operations() -> set[tuple[str, str]]:
             continue
         if in_paths and line and not line.startswith(" "):
             break
-        path_match = re.fullmatch(r"(\s+)(/[^:]+):", line)
+        path_match = re.fullmatch(r"(\s+)(/[^ ]*):", line)
         if path_match:
             path_indent = len(path_match.group(1))
             path = path_match.group(2)

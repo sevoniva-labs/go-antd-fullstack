@@ -12,10 +12,17 @@ PUBLIC = {
     ("get", "/api/v1/system/health"),
     ("get", "/api/v1/system/ready"),
     ("post", "/api/v1/auth/login"),
+    ("get", "/api/v1/auth/federated/oidc/{provider}/begin"),
+    ("post", "/api/v1/auth/federated/oidc/{provider}/callback"),
+    ("post", "/api/v1/auth/federated/ldap/{provider}"),
 }
 CSRF_REQUIRED = {
     ("post", "/api/v1/auth/logout"),
     ("patch", "/api/v1/auth/password"),
+    ("post", "/api/v1/auth/step-up"),
+    ("post", "/api/v1/mfa/totp/enrollment"),
+    ("post", "/api/v1/mfa/totp/enrollment/confirmation"),
+    ("post", "/api/v1/mfa/totp/disable"),
     ("post", "/api/v1/api-tokens"),
     ("delete", "/api/v1/api-tokens/{token_id}"),
     ("post", "/api/v1/admin/users"),
@@ -31,12 +38,23 @@ CSRF_REQUIRED = {
     ("patch", "/api/v1/admin/organization"),
     ("put", "/api/v1/admin/security-config"),
     ("put", "/api/v1/admin/roles/{role_key}/permissions"),
+    ("put", "/api/v1/admin/roles/{role_key}/data-scope"),
     ("patch", "/api/v1/admin/users/{user_id}/roles"),
     ("patch", "/api/v1/admin/users/{user_id}/status"),
     ("post", "/api/v1/admin/users/{user_id}/unlock"),
     ("post", "/api/v1/admin/users/{user_id}/reset-password"),
     ("delete", "/api/v1/admin/sessions/{session_id}"),
     ("get", "/api/v1/admin/audit-logs/export"),
+    ("post", "/api/v1/admin/temporary-role-grants"),
+    ("post", "/api/v1/admin/temporary-role-grants/{grant_id}:revoke"),
+    ("post", "/api/v1/admin/identity-mappings"),
+    ("post", "/api/v1/admin/identity-mappings/{link_id}:unlink"),
+    ("post", "/api/v1/admin/access-reviews"),
+    ("post", "/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions"),
+    ("post", "/api/v1/approvals"),
+    ("post", "/api/v1/approvals/{approval_id}/decisions"),
+    ("post", "/api/v1/approvals/{approval_id}/transfer"),
+    ("post", "/api/v1/approvals/{approval_id}/withdraw"),
 }
 INTERACTIVE_ONLY = {
     ("post", "/api/v1/auth/logout"),
@@ -61,7 +79,7 @@ def operations(lines: list[str]) -> dict[tuple[str, str], str]:
     current_key: tuple[str, str] | None = None
     block: list[str] = []
     for line in lines:
-        path_match = re.fullmatch(r"    (/[^:]+):", line)
+        path_match = re.fullmatch(r"    (/.*):", line)
         if path_match:
             if current_key:
                 result[current_key] = "\n".join(block)
