@@ -152,7 +152,7 @@ func NewLDAPProvider(cfg LDAPConfig) (*LDAPProvider, error) {
 		cfg.SearchTimeout = 5 * time.Second
 	}
 	if cfg.UserFilter == "" {
-		cfg.UserFilter = "(&(objectClass=person)(%s=%%s))"
+		cfg.UserFilter = "(&(objectClass=person)(%s=%s))"
 	}
 	if cfg.DisplayAttribute == "" {
 		cfg.DisplayAttribute = "displayName"

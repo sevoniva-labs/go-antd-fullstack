@@ -1,8 +1,11 @@
 package identitysource
 
 import (
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/go-ldap/ldap/v3"
 )
 
 func TestNewLDAPProviderRequiresSecureTransportByDefault(t *testing.T) {
@@ -19,6 +22,10 @@ func TestNewLDAPProviderAppliesSafeDefaults(t *testing.T) {
 	}
 	if provider.cfg.SearchTimeout != 5*time.Second || provider.cfg.DisplayAttribute != "displayName" || provider.cfg.GroupAttribute != "memberOf" {
 		t.Fatalf("unexpected LDAP defaults: %#v", provider.cfg)
+	}
+	filter := fmt.Sprintf(provider.cfg.UserFilter, ldap.EscapeFilter(provider.cfg.LoginAttribute), ldap.EscapeFilter("alice"))
+	if filter != "(&(objectClass=person)(sAMAccountName=alice))" {
+		t.Fatalf("LDAP user filter = %q", filter)
 	}
 }
 
