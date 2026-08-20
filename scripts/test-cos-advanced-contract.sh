@@ -177,11 +177,27 @@ if [[ "$(printf '%s' "$lock_config" | json_field ObjectLockConfiguration.ObjectL
     else
       mark_failed legal_hold
     fi
+
+    retention_key="$PREFIX/retention-object"
+    retention_output=$(aws_cmd put-object --bucket "$FORGE_COS_BUCKET" --key "$retention_key" --body "$payload" 2>"$TMP_DIR/retention-put.err" || true)
+    retention_version=$(printf '%s' "$retention_output" | json_field VersionId 2>/dev/null || true)
+    if [[ -n "$retention_version" ]]; then CREATED_KEYS+=("$retention_key"); fi
+    retain_until=$(date -u -v+1H '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%SZ')
+    if [[ -n "$retention_version" ]] && aws_cmd put-object-retention --bucket "$FORGE_COS_BUCKET" --key "$retention_key" --version-id "$retention_version" --retention "Mode=GOVERNANCE,RetainUntilDate=$retain_until" >/dev/null 2>"$TMP_DIR/retention-set.err"; then
+      retention_check=$(aws_cmd get-object-retention --bucket "$FORGE_COS_BUCKET" --key "$retention_key" --version-id "$retention_version" 2>"$TMP_DIR/retention-get.err" || true)
+      if [[ "$(printf '%s' "$retention_check" | json_field Retention.Mode 2>/dev/null || true)" == GOVERNANCE ]]; then
+        mark_passed retention
+      else
+        mark_failed retention
+      fi
+    else
+      mark_failed retention
+    fi
   else
     mark_not_tested legal_hold "mutating-test-disabled"
+    mark_not_tested retention "mutating-test-disabled"
   fi
-  mark_not_tested object_lock "retention-test-requires-explicit-approval"
-  mark_not_tested retention "retention-test-requires-explicit-approval"
+  mark_passed object_lock
 else
   mark_not_tested object_lock "bucket-not-configured"
   mark_not_tested retention "bucket-not-configured"
