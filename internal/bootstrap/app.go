@@ -82,6 +82,10 @@ func New(ctx context.Context, opts Options) (*App, error) {
 			}
 		}
 	}
+	oidcProviders, ldapProviders, err := newFederatedIdentityProviders(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	log := logx.New(cfg.Observability.LogLevel, cfg.Observability.LogFormat, cfg.App.Name, cfg.App.Environment, opts.Version)
 	slog.SetDefault(log)
@@ -185,7 +189,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	}
 	publicOperation := func(_ context.Context, operation string) bool {
 		switch operation {
-		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin, forgev1.OperationIdentityServiceBeginOidcLogin, forgev1.OperationIdentityServiceCompleteOidcLogin, forgev1.OperationIdentityServiceLoginLdap:
+		case forgev1.OperationSystemServiceHealth, forgev1.OperationSystemServiceReadiness, forgev1.OperationIdentityServiceLogin, forgev1.OperationIdentityServiceBeginOIDCLogin, forgev1.OperationIdentityServiceCompleteOIDCLogin, forgev1.OperationIdentityServiceLoginLDAP:
 			return false
 		default:
 			return true
@@ -227,6 +231,7 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	systemService := kratosapi.NewSystemService(cfg, opts.Version, checks, providers)
 	platformService := kratosapi.NewPlatformService(identitySvc, approvalSvc, auditWriter, db)
 	identityService := kratosapi.NewIdentityService(identitySvc, auditWriter, db, ratelimit.New(c), cfg.Security.SecureCookies, cfg.Security.SameSite)
+	identityService.ConfigureFederatedLogin(kratosapi.FederatedLoginOptions{Cache: c, OIDC: oidcProviders, LDAP: ldapProviders})
 	approvalService := kratosapi.NewApprovalService(approvalSvc, auditWriter, db)
 	forgev1.RegisterSystemServiceHTTPServer(httpServer, systemService)
 	forgev1.RegisterIdentityServiceHTTPServer(httpServer, identityService)

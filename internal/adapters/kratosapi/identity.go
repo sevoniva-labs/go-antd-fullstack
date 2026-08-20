@@ -24,12 +24,13 @@ const (
 
 type IdentityService struct {
 	forgev1.UnimplementedIdentityServiceServer
-	identity *appidentity.Service
-	audit    *audit.Writer
-	db       *database.DB
-	limiter  *ratelimit.Limiter
-	secure   bool
-	sameSite http.SameSite
+	identity  *appidentity.Service
+	audit     *audit.Writer
+	db        *database.DB
+	limiter   *ratelimit.Limiter
+	secure    bool
+	sameSite  http.SameSite
+	federated *FederatedLogin
 }
 
 func NewIdentityService(identity *appidentity.Service, auditWriter *audit.Writer, db *database.DB, limiter *ratelimit.Limiter, secureCookies bool, sameSite string) *IdentityService {
