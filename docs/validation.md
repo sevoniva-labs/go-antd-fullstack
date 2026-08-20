@@ -113,7 +113,7 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 
 - `scripts/test-otel-contract.sh` provides a disposable OTel Collector contract. It starts the Collector, probes the health extension, sends one OTLP/HTTP trace, and requires HTTP 200.
 - The exact domestic mirror image pulled for this contract is `docker.m.daocloud.io/otel/opentelemetry-collector-contrib@sha256:faf125d656fa47cea568b2f3b4494efd2525083bc75c1e96038bc23f05cd68fd`.
-- Run `make otel-runtime-contract` with `FORGE_OTEL_IMAGE` set to that exact digest and optionally set `FORGE_OTEL_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only; production TLS/mTLS, exporter persistence, trace storage, alerting, sampling policy, HA, and target-tested observability backends remain unverified.
+- 2026-08-21: the exact image passed the standalone contract with a health probe and one OTLP/HTTP trace accepted with HTTP 200. Run `make otel-runtime-contract` with `FORGE_OTEL_IMAGE` set to that exact digest and optionally set `FORGE_OTEL_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only; production TLS/mTLS, exporter persistence, trace storage, alerting, sampling policy, HA, and target-tested observability backends remain unverified.
 
 ## MySQL runtime contract evidence (2026-08-21)
 
@@ -132,3 +132,8 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - `scripts/test-s3-local-advanced-contract.sh` starts a disposable domestic MinIO S3-compatible endpoint, creates a versioned Object Lock bucket, and delegates to `scripts/test-cos-advanced-contract.sh` with generic S3 endpoint settings. It exercises checksum, multipart abort/recovery, constrained presign, versioning, and approved legal-hold mutation where the endpoint supports them.
 - The exact domestic mirror image used for the local capability contract is `docker.m.daocloud.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e`.
 - Run `make s3-local-advanced-contract` with temporary local `FORGE_S3_LOCAL_ACCESS_KEY` and `FORGE_S3_LOCAL_SECRET_KEY` values and optionally set `FORGE_S3_LOCAL_EVIDENCE_FILE`. This is generic S3-compatible capability evidence only; it does not certify Tencent COS, another vendor's KMS/STS/Object Lock semantics, production retention policy, or regulatory compliance.
+
+## APISIX runtime boundary
+
+- The APISIX integration remains an optional Helm integration and is covered by static fail-closed policy and render checks.
+- 2026-08-21: runtime image resolution was attempted through the configured domestic mirror for APISIX 3.13.0, 3.12.0, 3.11.0, and 3.10.0; each returned a real `403 Forbidden/denied`. No APISIX runtime route or mTLS evidence is claimed. The runtime target remains `Not certified` until an approved domestic or internal registry digest is supplied and tested.
