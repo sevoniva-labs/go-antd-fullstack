@@ -9,7 +9,7 @@ GO_ENV = GOPROXY=$(GOPROXY) GOSUMDB='$(GOSUMDB)'
 TOOL_RUN = $(GO_ENV) go run -modfile=tools/go.mod
 PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-grpc .tools/bin/protoc-gen-go-http .tools/bin/protoc-gen-openapi
 
-.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
+.PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check offline-check disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 
 help:
 	@echo "Sevoniva Forge"
@@ -27,6 +27,7 @@ help:
 	@echo "  make check         Format, vet, test, contract, frontend lint/build"
 	@echo "  make verify        Run the complete required CI verification gate"
 	@echo "  make release-evidence  Scan, sign, and verify an internal digest image"
+	@echo "  make disaster-check  Validate a dated disaster evidence report"
 	@echo "  make proto-check     Lint and regenerate the Buf API contracts"
 	@echo "  make compose-up    Start minimal compose stack"
 	@echo "  make init APP=x MODULE=example.com/x  Rename starter"
@@ -181,6 +182,13 @@ offline-check: fmt contract
 	python3 -m json.tool web/apps/shell/package.json >/dev/null
 	bash -n scripts/init-project.sh
 	bash scripts/check-offline-package.sh
+
+disaster-check:
+	python3 scripts/check-disaster-evidence.py
+
+disaster-check-certified:
+	@test -n "$(DR_EVIDENCE_FILE)" || (echo "DR_EVIDENCE_FILE is required" >&2; exit 1)
+	python3 scripts/check-disaster-evidence.py --file "$(DR_EVIDENCE_FILE)" --require-certified
 
 docker-build:
 	@for value in "$$FORGE_NODE_IMAGE" "$$FORGE_GO_IMAGE" "$$FORGE_RUNTIME_IMAGE"; do \
