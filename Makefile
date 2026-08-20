@@ -13,6 +13,7 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 .PHONY: crypto-evidence-check crypto-evidence-check-certified
 .PHONY: database-evidence-check database-evidence-check-certified
 .PHONY: s3-evidence-check s3-evidence-check-certified
+.PHONY: redis-tls-runtime-contract
 
 help:
 	@echo "Sevoniva Forge"
@@ -39,6 +40,7 @@ help:
 	@echo "  make identity-runtime-contract  Start and probe the local LDAP/SSO contract overlay"
 	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
 	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
+	@echo "  make redis-tls-runtime-contract  Verify local Redis TLS and ACL contract"
 	@echo "  make rocketmq-runtime-contract  Start and probe the local RocketMQ 5 contract overlay"
 	@echo "  make otel-runtime-contract  Start and probe the local OTel Collector contract overlay"
 	@echo "  make mysql-runtime-contract  Start MySQL and run the migration/schema contract"
@@ -153,6 +155,9 @@ nacos-runtime-contract:
 
 redis-runtime-contract:
 	bash scripts/test-redis-contract.sh
+
+redis-tls-runtime-contract:
+	bash scripts/test-redis-tls-contract.sh
 
 rocketmq-runtime-contract:
 	bash scripts/test-rocketmq-contract.sh
