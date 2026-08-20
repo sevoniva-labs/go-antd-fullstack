@@ -1,0 +1,32 @@
+{
+  "kind": "forge-s3-compatibility-evidence",
+  "level": "Not certified",
+  "provider": "generic-s3",
+  "target": {
+    "product": "replace-with-s3-product",
+    "version": "replace-with-version",
+    "architecture": "replace-with-architecture",
+    "os": "replace-with-os",
+    "runtime": "replace-with-runtime",
+    "driver": "aws-sdk-go-v2-s3",
+    "endpoint": "https://replace-with-s3-endpoint",
+    "region": "replace-with-region",
+    "bucket": "replace-with-disposable-bucket"
+  },
+  "tested_at": "2026-01-01T00:00:00Z",
+  "tested_capabilities": [],
+  "capabilities": {
+    "basic_object_io": {"state": "not_tested"},
+    "checksum": {"state": "not_tested"},
+    "multipart_recovery": {"state": "not_tested"},
+    "constrained_presign": {"state": "not_tested"},
+    "sse_s3": {"state": "not_tested"},
+    "sse_kms": {"state": "not_tested"},
+    "versioning": {"state": "not_tested"},
+    "object_lock": {"state": "not_tested"},
+    "retention": {"state": "not_tested"},
+    "legal_hold": {"state": "not_tested"},
+    "temporary_credential": {"state": "not_tested"}
+  },
+  "evidence": {}
+}

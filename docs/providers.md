@@ -65,3 +65,5 @@ S3 仅把基础对象读写标记为 `Built-in`。STS、临时凭证、分片恢
 ### Database compatibility evidence
 
 Database support is capability- and evidence-based. Run `make database-evidence-check` for the structural contract; a provider is not `Target-tested` until a real target report, non-secret evidence files, and SHA-256 digests are supplied. The example remains `Not certified` and does not claim compatibility with OceanBase, Kingbase, Dameng, or GaussDB.
+
+S3 compatibility uses the same evidence discipline. Run `make s3-evidence-check` for the provider-neutral schema; `Target-tested` requires exact target metadata, passed capability claims, non-secret reports, and digest verification under an evidence root. The checked-in example remains `Not certified` for all S3 profiles.

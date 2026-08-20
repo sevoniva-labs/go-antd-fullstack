@@ -153,3 +153,4 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - This evidence proves only the disposable standalone route/Admin API contract for the tested digests. Production mTLS, controller admission, HA, rate-limit topology, upgrade rehearsal, and regulatory/Xinchuang certification remain unverified; the broader APISIX target remains `Not certified`.
 
 - `make database-evidence-check` validates the non-secret database compatibility evidence contract. The checked-in example remains `Not certified`; certified mode requires real target evidence and digest verification.
+- `make s3-evidence-check` validates the provider-neutral S3 compatibility evidence contract. The checked-in example remains `Not certified`; certified mode requires exact target metadata, real capability reports, and digest verification.
