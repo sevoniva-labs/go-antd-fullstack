@@ -548,6 +548,71 @@ func (s *Service) LoginWithMFA(ctx context.Context, orgID, login, raw, mfaCode, 
 	return p, token, csrf, expires, nil
 }
 
+// LoginFederated completes a provider-authenticated login. The provider
+// adapter must authenticate the credential first; this method only accepts an
+// explicit, approved subject mapping and never provisions or matches by
+// email/login name.
+func (s *Service) LoginFederated(ctx context.Context, orgID, provider, subject, ip, ua string) (domain.Principal, string, string, time.Time, error) {
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	subject = strings.TrimSpace(subject)
+	if !federatedProviderPattern.MatchString(provider) || subject == "" || len(subject) > 512 {
+		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
+	}
+	link, err := s.repo.FederatedIdentityByProviderSubject(ctx, orgID, provider, subject)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
+	}
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	user, err := s.repo.UserByID(ctx, link.UserID)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	if user.OrganizationID != orgID || strings.ToUpper(user.Status) != "ACTIVE" {
+		return domain.Principal{}, "", "", time.Time{}, ErrInvalidCredentials
+	}
+	org, err := s.repo.OrganizationByID(ctx, orgID)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	if strings.ToUpper(org.Status) != "ACTIVE" {
+		return domain.Principal{}, "", "", time.Time{}, ErrDisabled
+	}
+	policy, err := s.resolveSecurityPolicy(ctx, orgID)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	token, err := randomToken(32)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	csrf, err := randomToken(24)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	expires := time.Now().UTC().Add(policy.sessionTTL)
+	sessionID, err := s.repo.CreateSession(ctx, user.ID, hashToken(token), expires, ip, ua, "FEDERATED", nil)
+	if err != nil {
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	if err := s.enforceMaxConcurrentSessions(ctx, user.ID, policy.maxConcurrent); err != nil {
+		_ = s.repo.DeleteSessionByID(ctx, sessionID)
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	if err := s.repo.ResetLoginFailure(ctx, user.ID); err != nil {
+		_ = s.repo.DeleteSessionByID(ctx, sessionID)
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	if err := s.repo.TouchFederatedIdentityAuthentication(ctx, orgID, link.ID, time.Now().UTC()); err != nil {
+		_ = s.repo.DeleteSessionByID(ctx, sessionID)
+		return domain.Principal{}, "", "", time.Time{}, err
+	}
+	mustChange := user.MustChangePassword || s.passwordExpiredAt(user.PasswordChangedAt, policy.maxAge)
+	p := domain.Principal{Type: "USER", UserID: user.ID, OrganizationID: user.OrganizationID, LoginName: user.LoginName, DisplayName: user.DisplayName, Roles: user.Roles, Permissions: user.Permissions, MustChangePassword: mustChange, SessionID: sessionID, PasswordChangedAt: user.PasswordChangedAt, AuthenticationLevel: "FEDERATED"}
+	return p, token, csrf, expires, nil
+}
+
 func (s *Service) verifyLoginMFA(ctx context.Context, userID, code, recoveryCode string) (bool, error) {
 	factor, err := s.repo.ActiveMFAFactor(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
