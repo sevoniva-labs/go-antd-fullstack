@@ -476,6 +476,67 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/emergency-access:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListEmergencyAccess
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListEmergencyAccessResponse'
+            security:
+                - SessionCookie: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreateEmergencyAccess
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateEmergencyAccessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateEmergencyAccessResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+    /api/v1/admin/emergency-access/{grantId}:revoke:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_RevokeEmergencyAccess
+            parameters:
+                - name: grantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.RevokeEmergencyAccessRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.RevokeEmergencyAccessResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
     /api/v1/admin/identity-mappings:
         get:
             tags:
@@ -2136,6 +2197,29 @@ components:
             properties:
                 department:
                     $ref: '#/components/schemas/forge.v1.Department'
+        forge.v1.CreateEmergencyAccessRequest:
+            type: object
+            properties:
+                targetUserId:
+                    type: string
+                scope:
+                    type: string
+                approvalId:
+                    type: string
+                reason:
+                    type: string
+                privilegeKeys:
+                    type: array
+                    items:
+                        type: string
+                expiresAt:
+                    type: string
+                    format: date-time
+        forge.v1.CreateEmergencyAccessResponse:
+            type: object
+            properties:
+                grant:
+                    $ref: '#/components/schemas/forge.v1.EmergencyAccessGrant'
         forge.v1.CreatePositionRequest:
             type: object
             properties:
@@ -2357,6 +2441,45 @@ components:
                     type: array
                     items:
                         type: string
+        forge.v1.EmergencyAccessGrant:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                requesterId:
+                    type: string
+                targetUserId:
+                    type: string
+                scope:
+                    type: string
+                approvalId:
+                    type: string
+                reason:
+                    type: string
+                privilegeKeys:
+                    type: array
+                    items:
+                        type: string
+                requestedAt:
+                    type: string
+                    format: date-time
+                expiresAt:
+                    type: string
+                    format: date-time
+                status:
+                    type: string
+                revokedAt:
+                    type: string
+                    format: date-time
+                revokedBy:
+                    type: string
+                revokeReason:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
         forge.v1.ExportAuditLogsResponse:
             type: object
             properties:
@@ -2528,6 +2651,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.Department'
+        forge.v1.ListEmergencyAccessResponse:
+            type: object
+            properties:
+                grants:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.EmergencyAccessGrant'
         forge.v1.ListFederatedIdentityLinksResponse:
             type: object
             properties:
@@ -2810,6 +2940,16 @@ components:
             type: object
             properties: {}
         forge.v1.RevokeApiTokenResponse:
+            type: object
+            properties: {}
+        forge.v1.RevokeEmergencyAccessRequest:
+            type: object
+            properties:
+                grantId:
+                    type: string
+                reason:
+                    type: string
+        forge.v1.RevokeEmergencyAccessResponse:
             type: object
             properties: {}
         forge.v1.RevokeSessionResponse:

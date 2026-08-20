@@ -61,6 +61,9 @@ const (
 	PlatformService_ListTemporaryRoleGrants_FullMethodName    = "/forge.v1.PlatformService/ListTemporaryRoleGrants"
 	PlatformService_CreateTemporaryRoleGrant_FullMethodName   = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
 	PlatformService_RevokeTemporaryRoleGrant_FullMethodName   = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
+	PlatformService_ListEmergencyAccess_FullMethodName        = "/forge.v1.PlatformService/ListEmergencyAccess"
+	PlatformService_CreateEmergencyAccess_FullMethodName      = "/forge.v1.PlatformService/CreateEmergencyAccess"
+	PlatformService_RevokeEmergencyAccess_FullMethodName      = "/forge.v1.PlatformService/RevokeEmergencyAccess"
 	PlatformService_ListFederatedIdentityLinks_FullMethodName = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
 	PlatformService_LinkFederatedIdentity_FullMethodName      = "/forge.v1.PlatformService/LinkFederatedIdentity"
 	PlatformService_UnlinkFederatedIdentity_FullMethodName    = "/forge.v1.PlatformService/UnlinkFederatedIdentity"
@@ -122,6 +125,9 @@ type PlatformServiceClient interface {
 	ListTemporaryRoleGrants(ctx context.Context, in *ListTemporaryRoleGrantsRequest, opts ...grpc.CallOption) (*ListTemporaryRoleGrantsResponse, error)
 	CreateTemporaryRoleGrant(ctx context.Context, in *CreateTemporaryRoleGrantRequest, opts ...grpc.CallOption) (*CreateTemporaryRoleGrantResponse, error)
 	RevokeTemporaryRoleGrant(ctx context.Context, in *RevokeTemporaryRoleGrantRequest, opts ...grpc.CallOption) (*RevokeTemporaryRoleGrantResponse, error)
+	ListEmergencyAccess(ctx context.Context, in *ListEmergencyAccessRequest, opts ...grpc.CallOption) (*ListEmergencyAccessResponse, error)
+	CreateEmergencyAccess(ctx context.Context, in *CreateEmergencyAccessRequest, opts ...grpc.CallOption) (*CreateEmergencyAccessResponse, error)
+	RevokeEmergencyAccess(ctx context.Context, in *RevokeEmergencyAccessRequest, opts ...grpc.CallOption) (*RevokeEmergencyAccessResponse, error)
 	ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...grpc.CallOption) (*ListFederatedIdentityLinksResponse, error)
 	LinkFederatedIdentity(ctx context.Context, in *LinkFederatedIdentityRequest, opts ...grpc.CallOption) (*LinkFederatedIdentityResponse, error)
 	UnlinkFederatedIdentity(ctx context.Context, in *UnlinkFederatedIdentityRequest, opts ...grpc.CallOption) (*UnlinkFederatedIdentityResponse, error)
@@ -565,6 +571,36 @@ func (c *platformServiceClient) RevokeTemporaryRoleGrant(ctx context.Context, in
 	return out, nil
 }
 
+func (c *platformServiceClient) ListEmergencyAccess(ctx context.Context, in *ListEmergencyAccessRequest, opts ...grpc.CallOption) (*ListEmergencyAccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEmergencyAccessResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListEmergencyAccess_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) CreateEmergencyAccess(ctx context.Context, in *CreateEmergencyAccessRequest, opts ...grpc.CallOption) (*CreateEmergencyAccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateEmergencyAccessResponse)
+	err := c.cc.Invoke(ctx, PlatformService_CreateEmergencyAccess_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) RevokeEmergencyAccess(ctx context.Context, in *RevokeEmergencyAccessRequest, opts ...grpc.CallOption) (*RevokeEmergencyAccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeEmergencyAccessResponse)
+	err := c.cc.Invoke(ctx, PlatformService_RevokeEmergencyAccess_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformServiceClient) ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...grpc.CallOption) (*ListFederatedIdentityLinksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListFederatedIdentityLinksResponse)
@@ -741,6 +777,9 @@ type PlatformServiceServer interface {
 	ListTemporaryRoleGrants(context.Context, *ListTemporaryRoleGrantsRequest) (*ListTemporaryRoleGrantsResponse, error)
 	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
 	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
+	ListEmergencyAccess(context.Context, *ListEmergencyAccessRequest) (*ListEmergencyAccessResponse, error)
+	CreateEmergencyAccess(context.Context, *CreateEmergencyAccessRequest) (*CreateEmergencyAccessResponse, error)
+	RevokeEmergencyAccess(context.Context, *RevokeEmergencyAccessRequest) (*RevokeEmergencyAccessResponse, error)
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
 	LinkFederatedIdentity(context.Context, *LinkFederatedIdentityRequest) (*LinkFederatedIdentityResponse, error)
 	UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error)
@@ -889,6 +928,15 @@ func (UnimplementedPlatformServiceServer) CreateTemporaryRoleGrant(context.Conte
 }
 func (UnimplementedPlatformServiceServer) RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeTemporaryRoleGrant not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListEmergencyAccess(context.Context, *ListEmergencyAccessRequest) (*ListEmergencyAccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEmergencyAccess not implemented")
+}
+func (UnimplementedPlatformServiceServer) CreateEmergencyAccess(context.Context, *CreateEmergencyAccessRequest) (*CreateEmergencyAccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateEmergencyAccess not implemented")
+}
+func (UnimplementedPlatformServiceServer) RevokeEmergencyAccess(context.Context, *RevokeEmergencyAccessRequest) (*RevokeEmergencyAccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeEmergencyAccess not implemented")
 }
 func (UnimplementedPlatformServiceServer) ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListFederatedIdentityLinks not implemented")
@@ -1706,6 +1754,60 @@ func _PlatformService_RevokeTemporaryRoleGrant_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_ListEmergencyAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEmergencyAccessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListEmergencyAccess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListEmergencyAccess_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListEmergencyAccess(ctx, req.(*ListEmergencyAccessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_CreateEmergencyAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateEmergencyAccessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).CreateEmergencyAccess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_CreateEmergencyAccess_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).CreateEmergencyAccess(ctx, req.(*CreateEmergencyAccessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_RevokeEmergencyAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeEmergencyAccessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).RevokeEmergencyAccess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_RevokeEmergencyAccess_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).RevokeEmergencyAccess(ctx, req.(*RevokeEmergencyAccessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlatformService_ListFederatedIdentityLinks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListFederatedIdentityLinksRequest)
 	if err := dec(in); err != nil {
@@ -2114,6 +2216,18 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RevokeTemporaryRoleGrant",
 			Handler:    _PlatformService_RevokeTemporaryRoleGrant_Handler,
+		},
+		{
+			MethodName: "ListEmergencyAccess",
+			Handler:    _PlatformService_ListEmergencyAccess_Handler,
+		},
+		{
+			MethodName: "CreateEmergencyAccess",
+			Handler:    _PlatformService_CreateEmergencyAccess_Handler,
+		},
+		{
+			MethodName: "RevokeEmergencyAccess",
+			Handler:    _PlatformService_RevokeEmergencyAccess_Handler,
 		},
 		{
 			MethodName: "ListFederatedIdentityLinks",

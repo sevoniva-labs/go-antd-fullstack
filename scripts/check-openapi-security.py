@@ -47,6 +47,8 @@ CSRF_REQUIRED = {
     ("get", "/api/v1/admin/audit-logs/export"),
     ("post", "/api/v1/admin/temporary-role-grants"),
     ("post", "/api/v1/admin/temporary-role-grants/{grant_id}:revoke"),
+    ("post", "/api/v1/admin/emergency-access"),
+    ("post", "/api/v1/admin/emergency-access/{grant_id}:revoke"),
     ("post", "/api/v1/admin/identity-mappings"),
     ("post", "/api/v1/admin/identity-mappings/{link_id}:unlink"),
     ("post", "/api/v1/admin/access-reviews"),

@@ -233,6 +233,19 @@ export type ForgeV1CreateDepartmentResponse = {
     department?: ForgeV1Department;
 };
 
+export type ForgeV1CreateEmergencyAccessRequest = {
+    targetUserId?: string;
+    scope?: string;
+    approvalId?: string;
+    reason?: string;
+    privilegeKeys?: Array<string>;
+    expiresAt?: string;
+};
+
+export type ForgeV1CreateEmergencyAccessResponse = {
+    grant?: ForgeV1EmergencyAccessGrant;
+};
+
 export type ForgeV1CreatePositionRequest = {
     positionKey?: string;
     name?: string;
@@ -366,6 +379,24 @@ export type ForgeV1EffectiveDataScope = {
     departmentIds?: Array<string>;
 };
 
+export type ForgeV1EmergencyAccessGrant = {
+    id?: string;
+    organizationId?: string;
+    requesterId?: string;
+    targetUserId?: string;
+    scope?: string;
+    approvalId?: string;
+    reason?: string;
+    privilegeKeys?: Array<string>;
+    requestedAt?: string;
+    expiresAt?: string;
+    status?: string;
+    revokedAt?: string;
+    revokedBy?: string;
+    revokeReason?: string;
+    createdAt?: string;
+};
+
 export type ForgeV1ExportAuditLogsResponse = {
     content?: string;
     contentType?: string;
@@ -474,6 +505,10 @@ export type ForgeV1ListDataFieldPoliciesResponse = {
 
 export type ForgeV1ListDepartmentsResponse = {
     departments?: Array<ForgeV1Department>;
+};
+
+export type ForgeV1ListEmergencyAccessResponse = {
+    grants?: Array<ForgeV1EmergencyAccessGrant>;
 };
 
 export type ForgeV1ListFederatedIdentityLinksResponse = {
@@ -652,6 +687,15 @@ export type ForgeV1ResetUserPasswordResponse = {
 };
 
 export type ForgeV1RevokeApiTokenResponse = {
+    [key: string]: unknown;
+};
+
+export type ForgeV1RevokeEmergencyAccessRequest = {
+    grantId?: string;
+    reason?: string;
+};
+
+export type ForgeV1RevokeEmergencyAccessResponse = {
     [key: string]: unknown;
 };
 
@@ -1327,6 +1371,56 @@ export type PlatformServiceUpdateDepartmentResponses = {
 };
 
 export type PlatformServiceUpdateDepartmentResponse = PlatformServiceUpdateDepartmentResponses[keyof PlatformServiceUpdateDepartmentResponses];
+
+export type PlatformServiceListEmergencyAccessData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/emergency-access';
+};
+
+export type PlatformServiceListEmergencyAccessResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListEmergencyAccessResponse;
+};
+
+export type PlatformServiceListEmergencyAccessResponse = PlatformServiceListEmergencyAccessResponses[keyof PlatformServiceListEmergencyAccessResponses];
+
+export type PlatformServiceCreateEmergencyAccessData = {
+    body: ForgeV1CreateEmergencyAccessRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/emergency-access';
+};
+
+export type PlatformServiceCreateEmergencyAccessResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1CreateEmergencyAccessResponse;
+};
+
+export type PlatformServiceCreateEmergencyAccessResponse = PlatformServiceCreateEmergencyAccessResponses[keyof PlatformServiceCreateEmergencyAccessResponses];
+
+export type PlatformServiceRevokeEmergencyAccessData = {
+    body: ForgeV1RevokeEmergencyAccessRequest;
+    path: {
+        grantId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/emergency-access/{grantId}:revoke';
+};
+
+export type PlatformServiceRevokeEmergencyAccessResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1RevokeEmergencyAccessResponse;
+};
+
+export type PlatformServiceRevokeEmergencyAccessResponse = PlatformServiceRevokeEmergencyAccessResponses[keyof PlatformServiceRevokeEmergencyAccessResponses];
 
 export type PlatformServiceListFederatedIdentityLinksData = {
     body?: never;
