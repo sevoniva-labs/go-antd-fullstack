@@ -42,5 +42,5 @@ export const platformAdminModules: readonly PlatformAdminModule[] = [
   { key: 'access-reviews', path: '/governance/access-reviews', name: '访问复核', group: '治理中心', permission: 'system.access_review.read' },
   { key: 'data-governance', path: '/admin/data-governance', name: '数据治理', group: '治理中心', permission: 'system.data_policy.read' },
   { key: 'config-changes', path: '/admin/config-changes', name: '配置变更', group: '治理中心', permission: 'system.config.read' },
-  { key: 'system-status', path: '/ops/system', name: '系统状态', group: '运维中心' },
+  { key: 'system-status', path: '/ops/system', name: '系统状态', group: '运维中心', permission: 'system.status.read' },
 ]

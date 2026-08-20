@@ -41,8 +41,12 @@ func (s *SystemService) Readiness(ctx context.Context, _ *forgev1.ReadinessReque
 }
 
 func (s *SystemService) GetSystemInfo(ctx context.Context, _ *forgev1.GetSystemInfoRequest) (*forgev1.GetSystemInfoResponse, error) {
-	if _, ok := authn.Principal(ctx); !ok {
+	principal, ok := authn.Principal(ctx)
+	if !ok {
 		return nil, kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication required")
+	}
+	if !principal.HasPermission("system.status.read") {
+		return nil, kratoserrors.Forbidden("PERMISSION_DENIED", "permission denied")
 	}
 	return &forgev1.GetSystemInfoResponse{
 		Service: s.cfg.App.Name, Version: s.version, Environment: s.cfg.App.Environment,
