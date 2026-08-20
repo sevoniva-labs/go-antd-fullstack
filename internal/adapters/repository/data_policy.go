@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -66,6 +65,38 @@ func (r *DataPolicyRepo) Upsert(ctx context.Context, organizationID string, poli
 	return result, err
 }
 
+func (r *DataPolicyRepo) ListDeletionEvidence(ctx context.Context, organizationID string) ([]securitypolicy.DeletionEvidence, error) {
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(`SELECT id,organization_id,resource_type,resource_digest,field_keys_json,reason,records_deleted,deleted_at,evidence_hash,created_at FROM data_deletion_evidence WHERE organization_id=? ORDER BY created_at DESC,id DESC LIMIT 200`), organizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	items := make([]securitypolicy.DeletionEvidence, 0)
+	for rows.Next() {
+		item, err := scanDeletionEvidence(rows)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (r *DataPolicyRepo) RecordDeletionEvidence(ctx context.Context, evidence securitypolicy.DeletionEvidence) (securitypolicy.DeletionEvidence, error) {
+	fieldKeysJSON, err := json.Marshal(evidence.FieldKeys)
+	if err != nil {
+		return securitypolicy.DeletionEvidence{}, err
+	}
+	_, err = r.db.ExecContext(ctx, r.db.Rebind(`INSERT INTO data_deletion_evidence(id,organization_id,resource_type,resource_digest,field_keys_json,reason,records_deleted,deleted_at,evidence_hash,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)`), evidence.ID, evidence.OrganizationID, evidence.ResourceType, evidence.ResourceDigest, string(fieldKeysJSON), evidence.Reason, evidence.RecordsDeleted, evidence.DeletedAt, evidence.EvidenceHash, evidence.CreatedAt)
+	if err != nil {
+		return securitypolicy.DeletionEvidence{}, err
+	}
+	return evidence, nil
+}
+
 type dataPolicyScanner interface {
 	Scan(dest ...any) error
 }
@@ -85,6 +116,14 @@ func scanDataPolicy(scanner dataPolicyScanner) (securitypolicy.Record, error) {
 	return item, nil
 }
 
-func validDataPolicyKey(key string) bool {
-	return key != "" && !strings.ContainsAny(key, "\r\n")
+func scanDeletionEvidence(scanner dataPolicyScanner) (securitypolicy.DeletionEvidence, error) {
+	var item securitypolicy.DeletionEvidence
+	var fieldKeysJSON string
+	if err := scanner.Scan(&item.ID, &item.OrganizationID, &item.ResourceType, &item.ResourceDigest, &fieldKeysJSON, &item.Reason, &item.RecordsDeleted, &item.DeletedAt, &item.EvidenceHash, &item.CreatedAt); err != nil {
+		return securitypolicy.DeletionEvidence{}, err
+	}
+	if err := json.Unmarshal([]byte(fieldKeysJSON), &item.FieldKeys); err != nil {
+		return securitypolicy.DeletionEvidence{}, fmt.Errorf("decode deletion evidence fields: %w", err)
+	}
+	return item, nil
 }

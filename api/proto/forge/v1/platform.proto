@@ -479,6 +479,32 @@ service PlatformService {
       ]
     };
   }
+  rpc ListDataDeletionEvidence(ListDataDeletionEvidenceRequest) returns (ListDataDeletionEvidenceResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/data-retention/evidence"};
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
+  rpc RecordDataDeletionEvidence(RecordDataDeletionEvidenceRequest) returns (RecordDataDeletionEvidenceResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/admin/data-retention/evidence"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {
+          additional_properties: [
+            {name: "SessionCookie" value: {value: []}},
+            {name: "CsrfToken" value: {value: []}}
+          ]
+        },
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
   rpc UpdateRoleDataScope(UpdateRoleDataScopeRequest) returns (UpdateRoleDataScopeResponse) {
     option (google.api.http) = {
       put: "/api/v1/admin/roles/{role_key}/data-scope"
@@ -1085,6 +1111,37 @@ message AuthorizeDataExportResponse {
   bool authorized = 1;
   string purpose = 2;
   string watermark = 3;
+}
+
+message ListDataDeletionEvidenceRequest {}
+message ListDataDeletionEvidenceResponse {
+  repeated DataDeletionEvidence evidence = 1;
+}
+
+message DataDeletionEvidence {
+  string id = 1;
+  string organization_id = 2;
+  string resource_type = 3;
+  string resource_digest = 4;
+  repeated string field_keys = 5;
+  string reason = 6;
+  int64 records_deleted = 7;
+  google.protobuf.Timestamp deleted_at = 8;
+  string evidence_hash = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+message RecordDataDeletionEvidenceRequest {
+  string resource_type = 1;
+  string resource_digest = 2;
+  repeated string field_keys = 3;
+  string reason = 4;
+  int64 records_deleted = 5;
+  google.protobuf.Timestamp deleted_at = 6;
+  string approval_id = 7;
+}
+message RecordDataDeletionEvidenceResponse {
+  DataDeletionEvidence evidence = 1;
 }
 
 message UpdateRolePermissionsRequest {

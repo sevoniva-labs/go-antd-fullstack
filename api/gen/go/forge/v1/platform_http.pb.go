@@ -34,6 +34,7 @@ const OperationPlatformServiceLinkFederatedIdentity = "/forge.v1.PlatformService
 const OperationPlatformServiceListAccessReviewItems = "/forge.v1.PlatformService/ListAccessReviewItems"
 const OperationPlatformServiceListAccessReviews = "/forge.v1.PlatformService/ListAccessReviews"
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
+const OperationPlatformServiceListDataDeletionEvidence = "/forge.v1.PlatformService/ListDataDeletionEvidence"
 const OperationPlatformServiceListDataFieldPolicies = "/forge.v1.PlatformService/ListDataFieldPolicies"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
 const OperationPlatformServiceListFederatedIdentityLinks = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
@@ -46,6 +47,7 @@ const OperationPlatformServiceListTemporaryRoleGrants = "/forge.v1.PlatformServi
 const OperationPlatformServiceListUserAssignments = "/forge.v1.PlatformService/ListUserAssignments"
 const OperationPlatformServiceListUserGroups = "/forge.v1.PlatformService/ListUserGroups"
 const OperationPlatformServiceListUsers = "/forge.v1.PlatformService/ListUsers"
+const OperationPlatformServiceRecordDataDeletionEvidence = "/forge.v1.PlatformService/RecordDataDeletionEvidence"
 const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformService/ReplaceUserAssignments"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
@@ -83,6 +85,7 @@ type PlatformServiceHTTPServer interface {
 	ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error)
 	ListAccessReviews(context.Context, *ListAccessReviewsRequest) (*ListAccessReviewsResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
+	ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error)
 	ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
@@ -95,6 +98,7 @@ type PlatformServiceHTTPServer interface {
 	ListUserAssignments(context.Context, *ListUserAssignmentsRequest) (*ListUserAssignmentsResponse, error)
 	ListUserGroups(context.Context, *ListUserGroupsRequest) (*ListUserGroupsResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	RecordDataDeletionEvidence(context.Context, *RecordDataDeletionEvidenceRequest) (*RecordDataDeletionEvidenceResponse, error)
 	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
@@ -145,6 +149,8 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/data-policies", _PlatformService_ListDataFieldPolicies0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/data-policies/{policy.field_key}", _PlatformService_UpsertDataFieldPolicy0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/data-exports/authorize", _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/data-retention/evidence", _PlatformService_ListDataDeletionEvidence0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/data-retention/evidence", _PlatformService_RecordDataDeletionEvidence0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/data-scope", _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/permissions", _PlatformService_UpdateRolePermissions0_HTTP_Handler(srv))
 	r.PATCH("/api/v1/admin/users/{user_id}/roles", _PlatformService_UpdateUserRoles0_HTTP_Handler(srv))
@@ -734,6 +740,47 @@ func _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv PlatformServiceHTTPS
 	}
 }
 
+func _PlatformService_ListDataDeletionEvidence0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListDataDeletionEvidenceRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListDataDeletionEvidence)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListDataDeletionEvidence(ctx, req.(*ListDataDeletionEvidenceRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListDataDeletionEvidenceResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_RecordDataDeletionEvidence0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RecordDataDeletionEvidenceRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceRecordDataDeletionEvidence)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RecordDataDeletionEvidence(ctx, req.(*RecordDataDeletionEvidenceRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RecordDataDeletionEvidenceResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in UpdateRoleDataScopeRequest
@@ -1218,6 +1265,7 @@ type PlatformServiceHTTPClient interface {
 	ListAccessReviewItems(ctx context.Context, req *ListAccessReviewItemsRequest, opts ...http.CallOption) (rsp *ListAccessReviewItemsResponse, err error)
 	ListAccessReviews(ctx context.Context, req *ListAccessReviewsRequest, opts ...http.CallOption) (rsp *ListAccessReviewsResponse, err error)
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
+	ListDataDeletionEvidence(ctx context.Context, req *ListDataDeletionEvidenceRequest, opts ...http.CallOption) (rsp *ListDataDeletionEvidenceResponse, err error)
 	ListDataFieldPolicies(ctx context.Context, req *ListDataFieldPoliciesRequest, opts ...http.CallOption) (rsp *ListDataFieldPoliciesResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
 	ListFederatedIdentityLinks(ctx context.Context, req *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (rsp *ListFederatedIdentityLinksResponse, err error)
@@ -1230,6 +1278,7 @@ type PlatformServiceHTTPClient interface {
 	ListUserAssignments(ctx context.Context, req *ListUserAssignmentsRequest, opts ...http.CallOption) (rsp *ListUserAssignmentsResponse, err error)
 	ListUserGroups(ctx context.Context, req *ListUserGroupsRequest, opts ...http.CallOption) (rsp *ListUserGroupsResponse, err error)
 	ListUsers(ctx context.Context, req *ListUsersRequest, opts ...http.CallOption) (rsp *ListUsersResponse, err error)
+	RecordDataDeletionEvidence(ctx context.Context, req *RecordDataDeletionEvidenceRequest, opts ...http.CallOption) (rsp *RecordDataDeletionEvidenceResponse, err error)
 	ReplaceUserAssignments(ctx context.Context, req *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (rsp *ReplaceUserAssignmentsResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
@@ -1455,6 +1504,19 @@ func (c *PlatformServiceHTTPClientImpl) ListAuditLogs(ctx context.Context, in *L
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) ListDataDeletionEvidence(ctx context.Context, in *ListDataDeletionEvidenceRequest, opts ...http.CallOption) (*ListDataDeletionEvidenceResponse, error) {
+	var out ListDataDeletionEvidenceResponse
+	pattern := "/api/v1/admin/data-retention/evidence"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListDataDeletionEvidence))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListDataFieldPolicies(ctx context.Context, in *ListDataFieldPoliciesRequest, opts ...http.CallOption) (*ListDataFieldPoliciesResponse, error) {
 	var out ListDataFieldPoliciesResponse
 	pattern := "/api/v1/admin/data-policies"
@@ -1605,6 +1667,19 @@ func (c *PlatformServiceHTTPClientImpl) ListUsers(ctx context.Context, in *ListU
 	opts = append(opts, http.Operation(OperationPlatformServiceListUsers))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) RecordDataDeletionEvidence(ctx context.Context, in *RecordDataDeletionEvidenceRequest, opts ...http.CallOption) (*RecordDataDeletionEvidenceResponse, error) {
+	var out RecordDataDeletionEvidenceResponse
+	pattern := "/api/v1/admin/data-retention/evidence"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceRecordDataDeletionEvidence))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -239,6 +239,19 @@ export type ForgeV1CreateUserResponse = {
     user?: ForgeV1User;
 };
 
+export type ForgeV1DataDeletionEvidence = {
+    id?: string;
+    organizationId?: string;
+    resourceType?: string;
+    resourceDigest?: string;
+    fieldKeys?: Array<string>;
+    reason?: string;
+    recordsDeleted?: string;
+    deletedAt?: string;
+    evidenceHash?: string;
+    createdAt?: string;
+};
+
 export type ForgeV1DataFieldPolicy = {
     id?: string;
     organizationId?: string;
@@ -405,6 +418,10 @@ export type ForgeV1ListAuditLogsResponse = {
     events?: Array<ForgeV1AuditEvent>;
 };
 
+export type ForgeV1ListDataDeletionEvidenceResponse = {
+    evidence?: Array<ForgeV1DataDeletionEvidence>;
+};
+
 export type ForgeV1ListDataFieldPoliciesResponse = {
     policies?: Array<ForgeV1DataFieldPolicy>;
 };
@@ -535,6 +552,20 @@ export type ForgeV1Position = {
 export type ForgeV1ReadinessResponse = {
     status?: string;
     dependencies?: Array<ForgeV1DependencyStatus>;
+};
+
+export type ForgeV1RecordDataDeletionEvidenceRequest = {
+    resourceType?: string;
+    resourceDigest?: string;
+    fieldKeys?: Array<string>;
+    reason?: string;
+    recordsDeleted?: string;
+    deletedAt?: string;
+    approvalId?: string;
+};
+
+export type ForgeV1RecordDataDeletionEvidenceResponse = {
+    evidence?: ForgeV1DataDeletionEvidence;
 };
 
 export type ForgeV1ReplaceUserAssignmentsRequest = {
@@ -1037,6 +1068,38 @@ export type PlatformServiceUpsertDataFieldPolicyResponses = {
 };
 
 export type PlatformServiceUpsertDataFieldPolicyResponse = PlatformServiceUpsertDataFieldPolicyResponses[keyof PlatformServiceUpsertDataFieldPolicyResponses];
+
+export type PlatformServiceListDataDeletionEvidenceData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/data-retention/evidence';
+};
+
+export type PlatformServiceListDataDeletionEvidenceResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1ListDataDeletionEvidenceResponse;
+};
+
+export type PlatformServiceListDataDeletionEvidenceResponse = PlatformServiceListDataDeletionEvidenceResponses[keyof PlatformServiceListDataDeletionEvidenceResponses];
+
+export type PlatformServiceRecordDataDeletionEvidenceData = {
+    body: ForgeV1RecordDataDeletionEvidenceRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/data-retention/evidence';
+};
+
+export type PlatformServiceRecordDataDeletionEvidenceResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1RecordDataDeletionEvidenceResponse;
+};
+
+export type PlatformServiceRecordDataDeletionEvidenceResponse = PlatformServiceRecordDataDeletionEvidenceResponses[keyof PlatformServiceRecordDataDeletionEvidenceResponses];
 
 export type PlatformServiceListDepartmentsData = {
     body?: never;

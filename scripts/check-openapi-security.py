@@ -54,6 +54,7 @@ CSRF_REQUIRED = {
     ("patch", "/api/v1/admin/menus/{menu_key}"),
     ("put", "/api/v1/admin/data-policies/{field_key}"),
     ("post", "/api/v1/admin/data-exports/authorize"),
+    ("post", "/api/v1/admin/data-retention/evidence"),
     ("post", "/api/v1/approvals"),
     ("post", "/api/v1/approvals/{approval_id}/decisions"),
     ("post", "/api/v1/approvals/{approval_id}/transfer"),

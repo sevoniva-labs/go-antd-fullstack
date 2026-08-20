@@ -55,6 +55,22 @@ type Record struct {
 	UpdatedAt time.Time
 }
 
+// DeletionEvidence is an append-only proof record. ResourceDigest is a
+// caller-provided digest so the platform never needs to persist raw business
+// identifiers in the governance log.
+type DeletionEvidence struct {
+	ID             string
+	OrganizationID string
+	ResourceType   string
+	ResourceDigest string
+	FieldKeys      []string
+	Reason         string
+	RecordsDeleted int64
+	DeletedAt      time.Time
+	EvidenceHash   string
+	CreatedAt      time.Time
+}
+
 type ExportRequest struct {
 	ApprovalID string
 	Purpose    string

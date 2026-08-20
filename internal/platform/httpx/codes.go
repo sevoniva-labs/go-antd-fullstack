@@ -78,6 +78,8 @@ var codeMap = map[string]string{
 	"MFA_ENROLLMENT_NOT_PENDING":    "100016",
 	"INVALID_DATA_POLICY":           "100017",
 	"DATA_POLICY_UNAVAILABLE":       "400006",
+	"INVALID_RETENTION_EVIDENCE":    "100018",
+	"DATA_RETENTION_UNAVAILABLE":    "400007",
 }
 
 func NumericCode(symbol string) string {

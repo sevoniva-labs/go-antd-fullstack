@@ -45,6 +45,8 @@ const (
 	PlatformService_ListDataFieldPolicies_FullMethodName      = "/forge.v1.PlatformService/ListDataFieldPolicies"
 	PlatformService_UpsertDataFieldPolicy_FullMethodName      = "/forge.v1.PlatformService/UpsertDataFieldPolicy"
 	PlatformService_AuthorizeDataExport_FullMethodName        = "/forge.v1.PlatformService/AuthorizeDataExport"
+	PlatformService_ListDataDeletionEvidence_FullMethodName   = "/forge.v1.PlatformService/ListDataDeletionEvidence"
+	PlatformService_RecordDataDeletionEvidence_FullMethodName = "/forge.v1.PlatformService/RecordDataDeletionEvidence"
 	PlatformService_UpdateRoleDataScope_FullMethodName        = "/forge.v1.PlatformService/UpdateRoleDataScope"
 	PlatformService_UpdateRolePermissions_FullMethodName      = "/forge.v1.PlatformService/UpdateRolePermissions"
 	PlatformService_UpdateUserRoles_FullMethodName            = "/forge.v1.PlatformService/UpdateUserRoles"
@@ -98,6 +100,8 @@ type PlatformServiceClient interface {
 	ListDataFieldPolicies(ctx context.Context, in *ListDataFieldPoliciesRequest, opts ...grpc.CallOption) (*ListDataFieldPoliciesResponse, error)
 	UpsertDataFieldPolicy(ctx context.Context, in *UpsertDataFieldPolicyRequest, opts ...grpc.CallOption) (*UpsertDataFieldPolicyResponse, error)
 	AuthorizeDataExport(ctx context.Context, in *AuthorizeDataExportRequest, opts ...grpc.CallOption) (*AuthorizeDataExportResponse, error)
+	ListDataDeletionEvidence(ctx context.Context, in *ListDataDeletionEvidenceRequest, opts ...grpc.CallOption) (*ListDataDeletionEvidenceResponse, error)
+	RecordDataDeletionEvidence(ctx context.Context, in *RecordDataDeletionEvidenceRequest, opts ...grpc.CallOption) (*RecordDataDeletionEvidenceResponse, error)
 	UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(ctx context.Context, in *UpdateRolePermissionsRequest, opts ...grpc.CallOption) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(ctx context.Context, in *UpdateUserRolesRequest, opts ...grpc.CallOption) (*UpdateUserRolesResponse, error)
@@ -389,6 +393,26 @@ func (c *platformServiceClient) AuthorizeDataExport(ctx context.Context, in *Aut
 	return out, nil
 }
 
+func (c *platformServiceClient) ListDataDeletionEvidence(ctx context.Context, in *ListDataDeletionEvidenceRequest, opts ...grpc.CallOption) (*ListDataDeletionEvidenceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDataDeletionEvidenceResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListDataDeletionEvidence_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) RecordDataDeletionEvidence(ctx context.Context, in *RecordDataDeletionEvidenceRequest, opts ...grpc.CallOption) (*RecordDataDeletionEvidenceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RecordDataDeletionEvidenceResponse)
+	err := c.cc.Invoke(ctx, PlatformService_RecordDataDeletionEvidence_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *platformServiceClient) UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateRoleDataScopeResponse)
@@ -629,6 +653,8 @@ type PlatformServiceServer interface {
 	ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error)
 	UpsertDataFieldPolicy(context.Context, *UpsertDataFieldPolicyRequest) (*UpsertDataFieldPolicyResponse, error)
 	AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error)
+	ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error)
+	RecordDataDeletionEvidence(context.Context, *RecordDataDeletionEvidenceRequest) (*RecordDataDeletionEvidenceResponse, error)
 	UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error)
 	UpdateRolePermissions(context.Context, *UpdateRolePermissionsRequest) (*UpdateRolePermissionsResponse, error)
 	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
@@ -737,6 +763,12 @@ func (UnimplementedPlatformServiceServer) UpsertDataFieldPolicy(context.Context,
 }
 func (UnimplementedPlatformServiceServer) AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AuthorizeDataExport not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDataDeletionEvidence not implemented")
+}
+func (UnimplementedPlatformServiceServer) RecordDataDeletionEvidence(context.Context, *RecordDataDeletionEvidenceRequest) (*RecordDataDeletionEvidenceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RecordDataDeletionEvidence not implemented")
 }
 func (UnimplementedPlatformServiceServer) UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateRoleDataScope not implemented")
@@ -1290,6 +1322,42 @@ func _PlatformService_AuthorizeDataExport_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_ListDataDeletionEvidence_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDataDeletionEvidenceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListDataDeletionEvidence(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListDataDeletionEvidence_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListDataDeletionEvidence(ctx, req.(*ListDataDeletionEvidenceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_RecordDataDeletionEvidence_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordDataDeletionEvidenceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).RecordDataDeletionEvidence(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_RecordDataDeletionEvidence_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).RecordDataDeletionEvidence(ctx, req.(*RecordDataDeletionEvidenceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PlatformService_UpdateRoleDataScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRoleDataScopeRequest)
 	if err := dec(in); err != nil {
@@ -1778,6 +1846,14 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AuthorizeDataExport",
 			Handler:    _PlatformService_AuthorizeDataExport_Handler,
+		},
+		{
+			MethodName: "ListDataDeletionEvidence",
+			Handler:    _PlatformService_ListDataDeletionEvidence_Handler,
+		},
+		{
+			MethodName: "RecordDataDeletionEvidence",
+			Handler:    _PlatformService_RecordDataDeletionEvidence_Handler,
 		},
 		{
 			MethodName: "UpdateRoleDataScope",

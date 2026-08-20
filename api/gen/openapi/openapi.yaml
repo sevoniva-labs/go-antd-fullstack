@@ -228,6 +228,42 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/data-retention/evidence:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListDataDeletionEvidence
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListDataDeletionEvidenceResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_RecordDataDeletionEvidence
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.RecordDataDeletionEvidenceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.RecordDataDeletionEvidenceResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/departments:
         get:
             tags:
@@ -1958,6 +1994,33 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.DataDeletionEvidence:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                resourceType:
+                    type: string
+                resourceDigest:
+                    type: string
+                fieldKeys:
+                    type: array
+                    items:
+                        type: string
+                reason:
+                    type: string
+                recordsDeleted:
+                    type: string
+                deletedAt:
+                    type: string
+                    format: date-time
+                evidenceHash:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
         forge.v1.DataFieldPolicy:
             type: object
             properties:
@@ -2219,6 +2282,13 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.AuditEvent'
+        forge.v1.ListDataDeletionEvidenceResponse:
+            type: object
+            properties:
+                evidence:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.DataDeletionEvidence'
         forge.v1.ListDataFieldPoliciesResponse:
             type: object
             properties:
@@ -2441,6 +2511,31 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/forge.v1.DependencyStatus'
+        forge.v1.RecordDataDeletionEvidenceRequest:
+            type: object
+            properties:
+                resourceType:
+                    type: string
+                resourceDigest:
+                    type: string
+                fieldKeys:
+                    type: array
+                    items:
+                        type: string
+                reason:
+                    type: string
+                recordsDeleted:
+                    type: string
+                deletedAt:
+                    type: string
+                    format: date-time
+                approvalId:
+                    type: string
+        forge.v1.RecordDataDeletionEvidenceResponse:
+            type: object
+            properties:
+                evidence:
+                    $ref: '#/components/schemas/forge.v1.DataDeletionEvidence'
         forge.v1.ReplaceUserAssignmentsRequest:
             type: object
             properties:
