@@ -42,6 +42,10 @@ func (s *IdentityService) BeginOIDCLogin(ctx context.Context, req *forgev1.Begin
 	if !ok {
 		return nil, kerrors.NotFound("FEDERATED_PROVIDER_NOT_FOUND", "OIDC provider is not configured")
 	}
+	attempt := newAuditEvent(ctx, domain.Principal{LoginName: providerName}, "auth.federated.begin", "oidc_state", "", nil)
+	if err := s.allow(ctx, attempt.ClientIP+"|oidc-begin|"+providerName, 20, time.Minute, "60"); err != nil {
+		return nil, err
+	}
 	state, err := randomFederatedValue()
 	if err != nil {
 		return nil, federatedUnavailable()
@@ -72,6 +76,10 @@ func (s *IdentityService) CompleteOIDCLogin(ctx context.Context, req *forgev1.Co
 	provider, ok := s.federated.oidc[providerName]
 	if !ok {
 		return nil, kerrors.NotFound("FEDERATED_PROVIDER_NOT_FOUND", "OIDC provider is not configured")
+	}
+	attempt := newAuditEvent(ctx, domain.Principal{LoginName: providerName}, "auth.federated.callback", "oidc_state", "", nil)
+	if err := s.allow(ctx, attempt.ClientIP+"|oidc-callback|"+providerName, 20, time.Minute, "60"); err != nil {
+		return nil, err
 	}
 	state := strings.TrimSpace(req.GetState())
 	if state == "" || strings.TrimSpace(req.GetCode()) == "" {
