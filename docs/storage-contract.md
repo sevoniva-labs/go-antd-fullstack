@@ -8,6 +8,8 @@
 
 - `New` 只启用基础对象读写；高级能力保持 `Unknown`。
 - 分片恢复、校验和、SSE-S3、SSE-KMS、版本、Object Lock、Retention、Legal Hold、受限预签名和临时凭证，必须由目标环境的契约测试逐项证明。
+- 统一 `GovernanceStore` 提供受控对象写入、版本读取、版本控制、Retention 和 Legal Hold；写入参数会按请求能力逐项校验并 fail-closed。
+- STS/临时凭证通过 `TemporaryCredentialIssuer` 适配位接入，因为不同 S3 产品的 STS 地址、签名和最小权限模型不一致。
 - 契约必须标为 `Target-tested`，包含目标标识、测试时间、不可变证据引用和证据文件 SHA-256 摘要。
 - 未通过的能力不可通过厂商名称、配置别名或前端开关绕过。
 

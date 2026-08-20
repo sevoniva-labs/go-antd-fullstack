@@ -34,7 +34,7 @@ func (s *s3Store) PutImmutable(ctx context.Context, key string, payload []byte, 
 	if retainUntil.IsZero() || !retainUntil.After(time.Now().UTC()) {
 		return ImmutableReceipt{}, errors.New("immutable object retention must be in the future")
 	}
-	if err := RequireCapabilities(s, CapabilityChecksum, CapabilityVersioning, CapabilityObjectLock, CapabilityRetention); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityChecksum, CapabilityVersioning, CapabilityObjectLock, CapabilityRetention); err != nil {
 		return ImmutableReceipt{}, err
 	}
 	digest := sha256.Sum256(payload)
@@ -62,7 +62,7 @@ func (s *s3Store) VerifyImmutable(ctx context.Context, receipt ImmutableReceipt)
 	if receipt.Key == "" || receipt.VersionID == "" || receipt.SHA256 == "" || receipt.RetainUntil.IsZero() {
 		return errors.New("immutable receipt is incomplete")
 	}
-	if err := RequireCapabilities(s, CapabilityChecksum, CapabilityVersioning, CapabilityObjectLock, CapabilityRetention); err != nil {
+	if err := RequireTargetTestedCapabilities(s, CapabilityChecksum, CapabilityVersioning, CapabilityObjectLock, CapabilityRetention); err != nil {
 		return err
 	}
 	out, err := s.client.HeadObject(ctx, &s3.HeadObjectInput{Bucket: &s.bucket, Key: &receipt.Key, VersionId: &receipt.VersionID})
