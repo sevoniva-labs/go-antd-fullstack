@@ -4,17 +4,16 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 
-snapshot() {
-  if [[ ! -d api/gen/go || ! -d api/gen/openapi ]]; then
-    return
-  fi
-  find api/gen/go api/gen/openapi -type f -print0 | LC_ALL=C sort -z | xargs -0 shasum -a 256
-}
+TEMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/forge-proto.XXXXXX")
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
-before=$(snapshot)
-.tools/bin/buf generate --path api/proto/forge
-after=$(snapshot)
-if [[ "$before" != "$after" ]]; then
+.tools/bin/buf generate \
+  --template buf.gen.yaml \
+  --output "$TEMP_DIR" \
+  --path api/proto/forge
+
+if ! diff -ru api/gen/go "$TEMP_DIR/api/gen/go" \
+  || ! diff -ru api/gen/openapi "$TEMP_DIR/api/gen/openapi"; then
   echo "generated Proto files are stale; run make proto-generate and commit the result" >&2
   exit 1
 fi
