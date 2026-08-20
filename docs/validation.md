@@ -142,6 +142,7 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 ## Local generic S3 advanced contract evidence (2026-08-21)
 
 - `scripts/test-s3-local-advanced-contract.sh` starts a disposable domestic MinIO S3-compatible endpoint, creates a versioned Object Lock bucket, and delegates to `scripts/test-cos-advanced-contract.sh` with generic S3 endpoint settings. It exercises checksum, multipart abort/recovery, constrained presign, versioning, and approved legal-hold mutation where the endpoint supports them.
+- Set `FORGE_S3_LOCAL_COMPATIBILITY_EVIDENCE_FILE` together with the non-secret `FORGE_S3_LOCAL_TARGET_*` metadata to emit the standard `forge-s3-compatibility-evidence` document; validate it with `FORGE_S3_EVIDENCE_ROOT` and `make s3-evidence-check-certified`. The result is generic S3-compatible evidence only.
 - The exact domestic mirror image used for the local capability contract is `docker.m.daocloud.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e`.
 - Run `make s3-local-advanced-contract` with temporary local `FORGE_S3_LOCAL_ACCESS_KEY` and `FORGE_S3_LOCAL_SECRET_KEY` values and optionally set `FORGE_S3_LOCAL_EVIDENCE_FILE`. This is generic S3-compatible capability evidence only; it does not certify Tencent COS, another vendor's KMS/STS/Object Lock semantics, production retention policy, or regulatory compliance.
 
