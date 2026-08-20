@@ -84,6 +84,7 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - 真实 Nacos 3、RocketMQ 5、Kafka、Redis 集群和除腾讯 COS 基础契约外的各云厂商 S3 端点兼容认证。
 - OceanBase、达梦、人大金仓、GaussDB 等国产数据库的驱动、SQL 方言、迁移、故障切换和性能认证。
 - 国密 SSL、SM2 证书链、HSM/密码机、KMS 和密钥轮换演练。
+- `make crypto-evidence-check` now validates the non-secret crypto-device evidence format and regression cases; the checked-in example remains `Not certified`. `crypto-evidence-check-certified` is intentionally unavailable without exact target-device evidence files and a matching digest root.
 - 组织内 Harbor、多架构镜像、离线包、Kubernetes 集群、备份恢复和两地三中心容灾演练。
 - 等保测评、密评、金融监管验收或任何厂商认证。
 

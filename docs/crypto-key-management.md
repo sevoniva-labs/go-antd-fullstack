@@ -11,3 +11,5 @@ The scaffold now provides:
 `KeyManager.Rotate` refuses missing approvals, missing identities, identical operators, malformed versions, or an adapter approval failure. It activates no key before dual control succeeds.
 
 The KMS/HSM adapter is intentionally not vendor-specific. Production certification still requires a real target device, key custody policy, backup/restore test, rotation drill, TLS/certificate validation, SM2 certificate/signature verification where required, and an institution-approved audit trail. Until those artifacts exist the target remains `Not certified`; the local provider tests must not be used as a password-device certification.
+
+The machine-checkable evidence contract is under `deploy/crypto`. Run `make crypto-evidence-check` for format and regression checks. `crypto-evidence-check-certified` requires exact target metadata, all required controls to be `passed`, relative evidence references below `FORGE_CRYPTO_EVIDENCE_ROOT`, and matching SHA-256 digests. It rejects secret-bearing fields and does not upgrade the adapter slot without real target evidence.
