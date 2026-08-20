@@ -21,11 +21,34 @@
 
 OIDC is enabled only when `FORGE_OIDC_ISSUER` is set. Required values are `FORGE_OIDC_NAME`, `FORGE_OIDC_CLIENT_ID`, `FORGE_OIDC_CLIENT_SECRET` or `FORGE_OIDC_CLIENT_SECRET_FILE`, and `FORGE_OIDC_REDIRECT_URL`.
 
+### Casdoor profile
+
+Casdoor is used unchanged as a standard external OIDC issuer. Register a confidential client in its existing administration plane and set its redirect URI to `https://<velora-host>/api/v1/auth/federated/oidc/casdoor/callback`. The backend accepts the OIDC authorization-server browser `GET` callback (and retains the JSON `POST` callback for API clients), exchanges the authorization code server-side, and validates issuer, signature, audience, nonce, and one-time state.
+
+This integration does not call Casdoor management APIs, use resource-owner-password login, or turn Forge into an OIDC provider. Authentication is bound only through the immutable `sub` claim and an approved local `(organization, provider, subject)` mapping. Portal resource permissions remain local policy data until a separately approved, tested Casdoor claim-to-role mapping is implemented; raw `groups`/`roles` claims must not be trusted implicitly.
+
 LDAP/AD is enabled only when `FORGE_LDAP_URL` is set. Required values are `FORGE_LDAP_NAME`, `FORGE_LDAP_BIND_DN`, `FORGE_LDAP_BIND_PASSWORD` or `FORGE_LDAP_BIND_PASSWORD_FILE`, `FORGE_LDAP_BASE_DN`, and `FORGE_LDAP_LOGIN_ATTRIBUTE`.
 
 `FORGE_LDAP_STARTTLS=true` enables StartTLS for an `ldap://` endpoint. `FORGE_LDAP_ALLOW_INSECURE=true` is an explicit development-only escape hatch and must not be used in a production profile.
 
 Provider credentials are environment/file-only secrets. Do not place them in YAML, Helm values, Git, approval payloads, or audit details.
+
+## Self-hosted development contract environment
+
+The repository provides `deploy/compose/identity-dev.yaml` for local LDAP/OIDC contract testing. It runs an OpenLDAP-compatible directory and a Keycloak-compatible OIDC issuer as a development overlay; it does not change production identity architecture and it does not certify either product.
+
+Import approved versions into the enterprise Harbor first, then render the overlay with immutable digest references and local-only secrets:
+
+```bash
+FORGE_LDAP_IMAGE='harbor.internal.example/approved/openldap@sha256:<digest>' \
+FORGE_SSO_IMAGE='harbor.internal.example/approved/keycloak@sha256:<digest>' \
+FORGE_LDAP_ADMIN_PASSWORD='local-only-admin-password' \
+FORGE_LDAP_USER_PASSWORD='local-only-user-password' \
+FORGE_SSO_ADMIN_PASSWORD='local-only-sso-password' \
+make identity-compose-config
+```
+
+Start it only in a disposable development environment with the same variables. Configure the application against `ldap://ldap:1389` or `ldaps://ldap:1636` according to the imported image contract, and `http://sso:8080` only for local development. Production must use TLS, a managed/approved identity topology, certificate validation, MFA, backup, HA and target-specific evidence. The overlay intentionally contains no credentials or runtime data in Git.
 
 ## Evidence boundary
 
