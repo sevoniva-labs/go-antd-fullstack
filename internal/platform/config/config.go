@@ -255,7 +255,10 @@ func Default() Config {
 			ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
 			ShutdownTimeout: 15 * time.Second, MaxBodyBytes: 8 << 20,
 		},
-		Database: Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: true},
+		// Schema changes are a release operation, not an API/worker start-up
+		// side effect. Development profiles may explicitly enable this for a
+		// disposable local database, but the safe default must be disabled.
+		Database: Database{Provider: "postgres", MaxOpenConns: 30, MaxIdleConns: 10, MaxLifetime: 30 * time.Minute, QueryTimeout: 10 * time.Second, AutoMigrate: false},
 		Cache:    Cache{Provider: "memory", Mode: "standalone", Prefix: "forge:", TTL: 10 * time.Minute},
 		Messaging: Messaging{
 			Provider: "disabled", RocketMQBatchSize: 16,
@@ -766,6 +769,9 @@ func (c Config) Validate() error {
 	}
 	if c.Compliance.NetworkLogRetentionDays < 183 && (c.Compliance.Profile == "mlps3" || c.Compliance.Profile == "financial") {
 		errs = append(errs, "mlps3/financial profile requires network_log_retention_days >= 183")
+	}
+	if isProduction(c.App.Environment) && c.Database.AutoMigrate {
+		errs = append(errs, "database.auto_migrate must be false in production; run forge-migrate as a one-shot release job")
 	}
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, "; "))
