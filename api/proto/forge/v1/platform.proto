@@ -751,6 +751,22 @@ service PlatformService {
     option (google.api.http) = {post: "/api/v1/admin/identity-mappings/{link_id}:unlink" body: "*"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
   }
+  rpc ListAccessReviews(ListAccessReviewsRequest) returns (ListAccessReviewsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/access-reviews"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc CreateAccessReview(CreateAccessReviewRequest) returns (CreateAccessReviewResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/access-reviews" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc ListAccessReviewItems(ListAccessReviewItemsRequest) returns (ListAccessReviewItemsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/access-reviews/{review_id}/items"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
+  rpc DecideAccessReviewItem(DecideAccessReviewItemRequest) returns (DecideAccessReviewItemResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
+  }
 }
 
 message ListUsersRequest {
@@ -1040,3 +1056,36 @@ message LinkFederatedIdentityRequest {
 message LinkFederatedIdentityResponse { FederatedIdentityLink link = 1; }
 message UnlinkFederatedIdentityRequest { string link_id = 1; }
 message UnlinkFederatedIdentityResponse {}
+
+message AccessReview {
+  string id = 1;
+  string organization_id = 2;
+  string reviewer_id = 3;
+  string reviewer_name = 4;
+  string status = 5;
+  google.protobuf.Timestamp due_at = 6;
+  string created_by = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp completed_at = 9;
+}
+message AccessReviewItem {
+  string id = 1;
+  string review_id = 2;
+  string organization_id = 3;
+  string user_id = 4;
+  string login_name = 5;
+  string role_key = 6;
+  string decision = 7;
+  string reason = 8;
+  string decided_by = 9;
+  google.protobuf.Timestamp decided_at = 10;
+  google.protobuf.Timestamp created_at = 11;
+}
+message ListAccessReviewsRequest {}
+message ListAccessReviewsResponse { repeated AccessReview reviews = 1; }
+message CreateAccessReviewRequest { string reviewer_id = 1; google.protobuf.Timestamp due_at = 2; }
+message CreateAccessReviewResponse { AccessReview review = 1; }
+message ListAccessReviewItemsRequest { string review_id = 1; }
+message ListAccessReviewItemsResponse { repeated AccessReviewItem items = 1; }
+message DecideAccessReviewItemRequest { string review_id = 1; string item_id = 2; string decision = 3; string reason = 4; }
+message DecideAccessReviewItemResponse {}

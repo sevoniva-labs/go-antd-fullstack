@@ -7,6 +7,96 @@ info:
     description: Contract-first HTTP API for the Forge enterprise and financial scaffold.
     version: 1.0.0
 paths:
+    /api/v1/admin/access-reviews:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListAccessReviews
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListAccessReviewsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_CreateAccessReview
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.CreateAccessReviewRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.CreateAccessReviewResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
+    /api/v1/admin/access-reviews/{reviewId}/items:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_ListAccessReviewItems
+            parameters:
+                - name: reviewId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.ListAccessReviewItemsResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
+    /api/v1/admin/access-reviews/{reviewId}/items/{itemId}/decisions:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_DecideAccessReviewItem
+            parameters:
+                - name: reviewId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: itemId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.DecideAccessReviewItemRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.DecideAccessReviewItemResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/audit-logs:
         get:
             tags:
@@ -1273,6 +1363,57 @@ paths:
                                 $ref: '#/components/schemas/forge.v1.ReadinessResponse'
 components:
     schemas:
+        forge.v1.AccessReview:
+            type: object
+            properties:
+                id:
+                    type: string
+                organizationId:
+                    type: string
+                reviewerId:
+                    type: string
+                reviewerName:
+                    type: string
+                status:
+                    type: string
+                dueAt:
+                    type: string
+                    format: date-time
+                createdBy:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                completedAt:
+                    type: string
+                    format: date-time
+        forge.v1.AccessReviewItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                reviewId:
+                    type: string
+                organizationId:
+                    type: string
+                userId:
+                    type: string
+                loginName:
+                    type: string
+                roleKey:
+                    type: string
+                decision:
+                    type: string
+                reason:
+                    type: string
+                decidedBy:
+                    type: string
+                decidedAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
         forge.v1.ApiToken:
             type: object
             properties:
@@ -1418,6 +1559,19 @@ components:
                     type: array
                     items:
                         type: string
+        forge.v1.CreateAccessReviewRequest:
+            type: object
+            properties:
+                reviewerId:
+                    type: string
+                dueAt:
+                    type: string
+                    format: date-time
+        forge.v1.CreateAccessReviewResponse:
+            type: object
+            properties:
+                review:
+                    $ref: '#/components/schemas/forge.v1.AccessReview'
         forge.v1.CreateApiTokenRequest:
             type: object
             properties:
@@ -1562,6 +1716,20 @@ components:
             properties:
                 user:
                     $ref: '#/components/schemas/forge.v1.User'
+        forge.v1.DecideAccessReviewItemRequest:
+            type: object
+            properties:
+                reviewId:
+                    type: string
+                itemId:
+                    type: string
+                decision:
+                    type: string
+                reason:
+                    type: string
+        forge.v1.DecideAccessReviewItemResponse:
+            type: object
+            properties: {}
         forge.v1.DecideApprovalRequest:
             type: object
             properties:
@@ -1739,6 +1907,20 @@ components:
             properties:
                 link:
                     $ref: '#/components/schemas/forge.v1.FederatedIdentityLink'
+        forge.v1.ListAccessReviewItemsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.AccessReviewItem'
+        forge.v1.ListAccessReviewsResponse:
+            type: object
+            properties:
+                reviews:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/forge.v1.AccessReview'
         forge.v1.ListApiTokensResponse:
             type: object
             properties:

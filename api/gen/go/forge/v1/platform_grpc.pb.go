@@ -56,6 +56,10 @@ const (
 	PlatformService_ListFederatedIdentityLinks_FullMethodName = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
 	PlatformService_LinkFederatedIdentity_FullMethodName      = "/forge.v1.PlatformService/LinkFederatedIdentity"
 	PlatformService_UnlinkFederatedIdentity_FullMethodName    = "/forge.v1.PlatformService/UnlinkFederatedIdentity"
+	PlatformService_ListAccessReviews_FullMethodName          = "/forge.v1.PlatformService/ListAccessReviews"
+	PlatformService_CreateAccessReview_FullMethodName         = "/forge.v1.PlatformService/CreateAccessReview"
+	PlatformService_ListAccessReviewItems_FullMethodName      = "/forge.v1.PlatformService/ListAccessReviewItems"
+	PlatformService_DecideAccessReviewItem_FullMethodName     = "/forge.v1.PlatformService/DecideAccessReviewItem"
 )
 
 // PlatformServiceClient is the client API for PlatformService service.
@@ -99,6 +103,10 @@ type PlatformServiceClient interface {
 	ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...grpc.CallOption) (*ListFederatedIdentityLinksResponse, error)
 	LinkFederatedIdentity(ctx context.Context, in *LinkFederatedIdentityRequest, opts ...grpc.CallOption) (*LinkFederatedIdentityResponse, error)
 	UnlinkFederatedIdentity(ctx context.Context, in *UnlinkFederatedIdentityRequest, opts ...grpc.CallOption) (*UnlinkFederatedIdentityResponse, error)
+	ListAccessReviews(ctx context.Context, in *ListAccessReviewsRequest, opts ...grpc.CallOption) (*ListAccessReviewsResponse, error)
+	CreateAccessReview(ctx context.Context, in *CreateAccessReviewRequest, opts ...grpc.CallOption) (*CreateAccessReviewResponse, error)
+	ListAccessReviewItems(ctx context.Context, in *ListAccessReviewItemsRequest, opts ...grpc.CallOption) (*ListAccessReviewItemsResponse, error)
+	DecideAccessReviewItem(ctx context.Context, in *DecideAccessReviewItemRequest, opts ...grpc.CallOption) (*DecideAccessReviewItemResponse, error)
 }
 
 type platformServiceClient struct {
@@ -479,6 +487,46 @@ func (c *platformServiceClient) UnlinkFederatedIdentity(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *platformServiceClient) ListAccessReviews(ctx context.Context, in *ListAccessReviewsRequest, opts ...grpc.CallOption) (*ListAccessReviewsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAccessReviewsResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListAccessReviews_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) CreateAccessReview(ctx context.Context, in *CreateAccessReviewRequest, opts ...grpc.CallOption) (*CreateAccessReviewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAccessReviewResponse)
+	err := c.cc.Invoke(ctx, PlatformService_CreateAccessReview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) ListAccessReviewItems(ctx context.Context, in *ListAccessReviewItemsRequest, opts ...grpc.CallOption) (*ListAccessReviewItemsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAccessReviewItemsResponse)
+	err := c.cc.Invoke(ctx, PlatformService_ListAccessReviewItems_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) DecideAccessReviewItem(ctx context.Context, in *DecideAccessReviewItemRequest, opts ...grpc.CallOption) (*DecideAccessReviewItemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DecideAccessReviewItemResponse)
+	err := c.cc.Invoke(ctx, PlatformService_DecideAccessReviewItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlatformServiceServer is the server API for PlatformService service.
 // All implementations must embed UnimplementedPlatformServiceServer
 // for forward compatibility.
@@ -520,6 +568,10 @@ type PlatformServiceServer interface {
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
 	LinkFederatedIdentity(context.Context, *LinkFederatedIdentityRequest) (*LinkFederatedIdentityResponse, error)
 	UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error)
+	ListAccessReviews(context.Context, *ListAccessReviewsRequest) (*ListAccessReviewsResponse, error)
+	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
+	ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error)
+	DecideAccessReviewItem(context.Context, *DecideAccessReviewItemRequest) (*DecideAccessReviewItemResponse, error)
 	mustEmbedUnimplementedPlatformServiceServer()
 }
 
@@ -640,6 +692,18 @@ func (UnimplementedPlatformServiceServer) LinkFederatedIdentity(context.Context,
 }
 func (UnimplementedPlatformServiceServer) UnlinkFederatedIdentity(context.Context, *UnlinkFederatedIdentityRequest) (*UnlinkFederatedIdentityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UnlinkFederatedIdentity not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListAccessReviews(context.Context, *ListAccessReviewsRequest) (*ListAccessReviewsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAccessReviews not implemented")
+}
+func (UnimplementedPlatformServiceServer) CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateAccessReview not implemented")
+}
+func (UnimplementedPlatformServiceServer) ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAccessReviewItems not implemented")
+}
+func (UnimplementedPlatformServiceServer) DecideAccessReviewItem(context.Context, *DecideAccessReviewItemRequest) (*DecideAccessReviewItemResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DecideAccessReviewItem not implemented")
 }
 func (UnimplementedPlatformServiceServer) mustEmbedUnimplementedPlatformServiceServer() {}
 func (UnimplementedPlatformServiceServer) testEmbeddedByValue()                         {}
@@ -1328,6 +1392,78 @@ func _PlatformService_UnlinkFederatedIdentity_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlatformService_ListAccessReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAccessReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListAccessReviews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListAccessReviews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListAccessReviews(ctx, req.(*ListAccessReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_CreateAccessReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAccessReviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).CreateAccessReview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_CreateAccessReview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).CreateAccessReview(ctx, req.(*CreateAccessReviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_ListAccessReviewItems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAccessReviewItemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).ListAccessReviewItems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_ListAccessReviewItems_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).ListAccessReviewItems(ctx, req.(*ListAccessReviewItemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_DecideAccessReviewItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DecideAccessReviewItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).DecideAccessReviewItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_DecideAccessReviewItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).DecideAccessReviewItem(ctx, req.(*DecideAccessReviewItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlatformService_ServiceDesc is the grpc.ServiceDesc for PlatformService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1482,6 +1618,22 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnlinkFederatedIdentity",
 			Handler:    _PlatformService_UnlinkFederatedIdentity_Handler,
+		},
+		{
+			MethodName: "ListAccessReviews",
+			Handler:    _PlatformService_ListAccessReviews_Handler,
+		},
+		{
+			MethodName: "CreateAccessReview",
+			Handler:    _PlatformService_CreateAccessReview_Handler,
+		},
+		{
+			MethodName: "ListAccessReviewItems",
+			Handler:    _PlatformService_ListAccessReviewItems_Handler,
+		},
+		{
+			MethodName: "DecideAccessReviewItem",
+			Handler:    _PlatformService_DecideAccessReviewItem_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -3880,6 +3880,606 @@ func (*UnlinkFederatedIdentityResponse) Descriptor() ([]byte, []int) {
 	return file_forge_v1_platform_proto_rawDescGZIP(), []int{75}
 }
 
+type AccessReview struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	ReviewerId     string                 `protobuf:"bytes,3,opt,name=reviewer_id,json=reviewerId,proto3" json:"reviewer_id,omitempty"`
+	ReviewerName   string                 `protobuf:"bytes,4,opt,name=reviewer_name,json=reviewerName,proto3" json:"reviewer_name,omitempty"`
+	Status         string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	DueAt          *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=due_at,json=dueAt,proto3" json:"due_at,omitempty"`
+	CreatedBy      string                 `protobuf:"bytes,7,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CompletedAt    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *AccessReview) Reset() {
+	*x = AccessReview{}
+	mi := &file_forge_v1_platform_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessReview) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessReview) ProtoMessage() {}
+
+func (x *AccessReview) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessReview.ProtoReflect.Descriptor instead.
+func (*AccessReview) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *AccessReview) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AccessReview) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *AccessReview) GetReviewerId() string {
+	if x != nil {
+		return x.ReviewerId
+	}
+	return ""
+}
+
+func (x *AccessReview) GetReviewerName() string {
+	if x != nil {
+		return x.ReviewerName
+	}
+	return ""
+}
+
+func (x *AccessReview) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *AccessReview) GetDueAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DueAt
+	}
+	return nil
+}
+
+func (x *AccessReview) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *AccessReview) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *AccessReview) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return nil
+}
+
+type AccessReviewItem struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ReviewId       string                 `protobuf:"bytes,2,opt,name=review_id,json=reviewId,proto3" json:"review_id,omitempty"`
+	OrganizationId string                 `protobuf:"bytes,3,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	LoginName      string                 `protobuf:"bytes,5,opt,name=login_name,json=loginName,proto3" json:"login_name,omitempty"`
+	RoleKey        string                 `protobuf:"bytes,6,opt,name=role_key,json=roleKey,proto3" json:"role_key,omitempty"`
+	Decision       string                 `protobuf:"bytes,7,opt,name=decision,proto3" json:"decision,omitempty"`
+	Reason         string                 `protobuf:"bytes,8,opt,name=reason,proto3" json:"reason,omitempty"`
+	DecidedBy      string                 `protobuf:"bytes,9,opt,name=decided_by,json=decidedBy,proto3" json:"decided_by,omitempty"`
+	DecidedAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=decided_at,json=decidedAt,proto3" json:"decided_at,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *AccessReviewItem) Reset() {
+	*x = AccessReviewItem{}
+	mi := &file_forge_v1_platform_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessReviewItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessReviewItem) ProtoMessage() {}
+
+func (x *AccessReviewItem) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessReviewItem.ProtoReflect.Descriptor instead.
+func (*AccessReviewItem) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *AccessReviewItem) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetReviewId() string {
+	if x != nil {
+		return x.ReviewId
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetLoginName() string {
+	if x != nil {
+		return x.LoginName
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetRoleKey() string {
+	if x != nil {
+		return x.RoleKey
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetDecision() string {
+	if x != nil {
+		return x.Decision
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetDecidedBy() string {
+	if x != nil {
+		return x.DecidedBy
+	}
+	return ""
+}
+
+func (x *AccessReviewItem) GetDecidedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DecidedAt
+	}
+	return nil
+}
+
+func (x *AccessReviewItem) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+type ListAccessReviewsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAccessReviewsRequest) Reset() {
+	*x = ListAccessReviewsRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[78]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAccessReviewsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAccessReviewsRequest) ProtoMessage() {}
+
+func (x *ListAccessReviewsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[78]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAccessReviewsRequest.ProtoReflect.Descriptor instead.
+func (*ListAccessReviewsRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{78}
+}
+
+type ListAccessReviewsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reviews       []*AccessReview        `protobuf:"bytes,1,rep,name=reviews,proto3" json:"reviews,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAccessReviewsResponse) Reset() {
+	*x = ListAccessReviewsResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[79]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAccessReviewsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAccessReviewsResponse) ProtoMessage() {}
+
+func (x *ListAccessReviewsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[79]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAccessReviewsResponse.ProtoReflect.Descriptor instead.
+func (*ListAccessReviewsResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *ListAccessReviewsResponse) GetReviews() []*AccessReview {
+	if x != nil {
+		return x.Reviews
+	}
+	return nil
+}
+
+type CreateAccessReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReviewerId    string                 `protobuf:"bytes,1,opt,name=reviewer_id,json=reviewerId,proto3" json:"reviewer_id,omitempty"`
+	DueAt         *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=due_at,json=dueAt,proto3" json:"due_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAccessReviewRequest) Reset() {
+	*x = CreateAccessReviewRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[80]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAccessReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAccessReviewRequest) ProtoMessage() {}
+
+func (x *CreateAccessReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[80]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAccessReviewRequest.ProtoReflect.Descriptor instead.
+func (*CreateAccessReviewRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{80}
+}
+
+func (x *CreateAccessReviewRequest) GetReviewerId() string {
+	if x != nil {
+		return x.ReviewerId
+	}
+	return ""
+}
+
+func (x *CreateAccessReviewRequest) GetDueAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DueAt
+	}
+	return nil
+}
+
+type CreateAccessReviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *AccessReview          `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAccessReviewResponse) Reset() {
+	*x = CreateAccessReviewResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAccessReviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAccessReviewResponse) ProtoMessage() {}
+
+func (x *CreateAccessReviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAccessReviewResponse.ProtoReflect.Descriptor instead.
+func (*CreateAccessReviewResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{81}
+}
+
+func (x *CreateAccessReviewResponse) GetReview() *AccessReview {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
+type ListAccessReviewItemsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReviewId      string                 `protobuf:"bytes,1,opt,name=review_id,json=reviewId,proto3" json:"review_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAccessReviewItemsRequest) Reset() {
+	*x = ListAccessReviewItemsRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAccessReviewItemsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAccessReviewItemsRequest) ProtoMessage() {}
+
+func (x *ListAccessReviewItemsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAccessReviewItemsRequest.ProtoReflect.Descriptor instead.
+func (*ListAccessReviewItemsRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{82}
+}
+
+func (x *ListAccessReviewItemsRequest) GetReviewId() string {
+	if x != nil {
+		return x.ReviewId
+	}
+	return ""
+}
+
+type ListAccessReviewItemsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*AccessReviewItem    `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAccessReviewItemsResponse) Reset() {
+	*x = ListAccessReviewItemsResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[83]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAccessReviewItemsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAccessReviewItemsResponse) ProtoMessage() {}
+
+func (x *ListAccessReviewItemsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[83]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAccessReviewItemsResponse.ProtoReflect.Descriptor instead.
+func (*ListAccessReviewItemsResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{83}
+}
+
+func (x *ListAccessReviewItemsResponse) GetItems() []*AccessReviewItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type DecideAccessReviewItemRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReviewId      string                 `protobuf:"bytes,1,opt,name=review_id,json=reviewId,proto3" json:"review_id,omitempty"`
+	ItemId        string                 `protobuf:"bytes,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	Decision      string                 `protobuf:"bytes,3,opt,name=decision,proto3" json:"decision,omitempty"`
+	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DecideAccessReviewItemRequest) Reset() {
+	*x = DecideAccessReviewItemRequest{}
+	mi := &file_forge_v1_platform_proto_msgTypes[84]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DecideAccessReviewItemRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DecideAccessReviewItemRequest) ProtoMessage() {}
+
+func (x *DecideAccessReviewItemRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[84]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DecideAccessReviewItemRequest.ProtoReflect.Descriptor instead.
+func (*DecideAccessReviewItemRequest) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{84}
+}
+
+func (x *DecideAccessReviewItemRequest) GetReviewId() string {
+	if x != nil {
+		return x.ReviewId
+	}
+	return ""
+}
+
+func (x *DecideAccessReviewItemRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *DecideAccessReviewItemRequest) GetDecision() string {
+	if x != nil {
+		return x.Decision
+	}
+	return ""
+}
+
+func (x *DecideAccessReviewItemRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type DecideAccessReviewItemResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DecideAccessReviewItemResponse) Reset() {
+	*x = DecideAccessReviewItemResponse{}
+	mi := &file_forge_v1_platform_proto_msgTypes[85]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DecideAccessReviewItemResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DecideAccessReviewItemResponse) ProtoMessage() {}
+
+func (x *DecideAccessReviewItemResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_forge_v1_platform_proto_msgTypes[85]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DecideAccessReviewItemResponse.ProtoReflect.Descriptor instead.
+func (*DecideAccessReviewItemResponse) Descriptor() ([]byte, []int) {
+	return file_forge_v1_platform_proto_rawDescGZIP(), []int{85}
+}
+
 var File_forge_v1_platform_proto protoreflect.FileDescriptor
 
 const file_forge_v1_platform_proto_rawDesc = "" +
@@ -4137,7 +4737,56 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\x04link\x18\x01 \x01(\v2\x1f.forge.v1.FederatedIdentityLinkR\x04link\"9\n" +
 	"\x1eUnlinkFederatedIdentityRequest\x12\x17\n" +
 	"\alink_id\x18\x01 \x01(\tR\x06linkId\"!\n" +
-	"\x1fUnlinkFederatedIdentityResponse2\xef6\n" +
+	"\x1fUnlinkFederatedIdentityResponse\"\xf1\x02\n" +
+	"\fAccessReview\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x1f\n" +
+	"\vreviewer_id\x18\x03 \x01(\tR\n" +
+	"reviewerId\x12#\n" +
+	"\rreviewer_name\x18\x04 \x01(\tR\freviewerName\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x121\n" +
+	"\x06due_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x05dueAt\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\a \x01(\tR\tcreatedBy\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12=\n" +
+	"\fcompleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\"\x84\x03\n" +
+	"\x10AccessReviewItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
+	"\treview_id\x18\x02 \x01(\tR\breviewId\x12'\n" +
+	"\x0forganization_id\x18\x03 \x01(\tR\x0eorganizationId\x12\x17\n" +
+	"\auser_id\x18\x04 \x01(\tR\x06userId\x12\x1d\n" +
+	"\n" +
+	"login_name\x18\x05 \x01(\tR\tloginName\x12\x19\n" +
+	"\brole_key\x18\x06 \x01(\tR\aroleKey\x12\x1a\n" +
+	"\bdecision\x18\a \x01(\tR\bdecision\x12\x16\n" +
+	"\x06reason\x18\b \x01(\tR\x06reason\x12\x1d\n" +
+	"\n" +
+	"decided_by\x18\t \x01(\tR\tdecidedBy\x129\n" +
+	"\n" +
+	"decided_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdecidedAt\x129\n" +
+	"\n" +
+	"created_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x1a\n" +
+	"\x18ListAccessReviewsRequest\"M\n" +
+	"\x19ListAccessReviewsResponse\x120\n" +
+	"\areviews\x18\x01 \x03(\v2\x16.forge.v1.AccessReviewR\areviews\"o\n" +
+	"\x19CreateAccessReviewRequest\x12\x1f\n" +
+	"\vreviewer_id\x18\x01 \x01(\tR\n" +
+	"reviewerId\x121\n" +
+	"\x06due_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x05dueAt\"L\n" +
+	"\x1aCreateAccessReviewResponse\x12.\n" +
+	"\x06review\x18\x01 \x01(\v2\x16.forge.v1.AccessReviewR\x06review\";\n" +
+	"\x1cListAccessReviewItemsRequest\x12\x1b\n" +
+	"\treview_id\x18\x01 \x01(\tR\breviewId\"Q\n" +
+	"\x1dListAccessReviewItemsResponse\x120\n" +
+	"\x05items\x18\x01 \x03(\v2\x1a.forge.v1.AccessReviewItemR\x05items\"\x89\x01\n" +
+	"\x1dDecideAccessReviewItemRequest\x12\x1b\n" +
+	"\treview_id\x18\x01 \x01(\tR\breviewId\x12\x17\n" +
+	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1a\n" +
+	"\bdecision\x18\x03 \x01(\tR\bdecision\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\" \n" +
+	"\x1eDecideAccessReviewItemResponse2\xa6=\n" +
 	"\x0fPlatformService\x12\x8b\x01\n" +
 	"\tListUsers\x12\x1a.forge.v1.ListUsersRequest\x1a\x1b.forge.v1.ListUsersResponse\"E\xbaG'Z\x13\n" +
 	"\x11\n" +
@@ -4404,7 +5053,35 @@ const file_forge_v1_platform_proto_rawDesc = "" +
 	"\tCsrfToken\x12\x00Z\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/admin/identity-mappings/{link_id}:unlinkB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/admin/identity-mappings/{link_id}:unlink\x12\xac\x01\n" +
+	"\x11ListAccessReviews\x12\".forge.v1.ListAccessReviewsRequest\x1a#.forge.v1.ListAccessReviewsResponse\"N\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/admin/access-reviews\x12\xc1\x01\n" +
+	"\x12CreateAccessReview\x12#.forge.v1.CreateAccessReviewRequest\x1a$.forge.v1.CreateAccessReviewResponse\"`\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/api/v1/admin/access-reviews\x12\xca\x01\n" +
+	"\x15ListAccessReviewItems\x12&.forge.v1.ListAccessReviewItemsRequest\x1a'.forge.v1.ListAccessReviewItemsResponse\"`\xbaG'Z\x13\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x020\x12./api/v1/admin/access-reviews/{review_id}/items\x12\xf4\x01\n" +
+	"\x16DecideAccessReviewItem\x12'.forge.v1.DecideAccessReviewItemRequest\x1a(.forge.v1.DecideAccessReviewItemResponse\"\x86\x01\xbaG6Z\"\n" +
+	"\x11\n" +
+	"\rSessionCookie\x12\x00\n" +
+	"\r\n" +
+	"\tCsrfToken\x12\x00Z\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02G:\x01*\"B/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisionsB<Z:github.com/sevoniva-labs/forge/api/gen/go/forge/v1;forgev1b\x06proto3"
 
 var (
 	file_forge_v1_platform_proto_rawDescOnce sync.Once
@@ -4418,7 +5095,7 @@ func file_forge_v1_platform_proto_rawDescGZIP() []byte {
 	return file_forge_v1_platform_proto_rawDescData
 }
 
-var file_forge_v1_platform_proto_msgTypes = make([]protoimpl.MessageInfo, 76)
+var file_forge_v1_platform_proto_msgTypes = make([]protoimpl.MessageInfo, 86)
 var file_forge_v1_platform_proto_goTypes = []any{
 	(*ListUsersRequest)(nil),                   // 0: forge.v1.ListUsersRequest
 	(*ListUsersResponse)(nil),                  // 1: forge.v1.ListUsersResponse
@@ -4496,138 +5173,165 @@ var file_forge_v1_platform_proto_goTypes = []any{
 	(*LinkFederatedIdentityResponse)(nil),      // 73: forge.v1.LinkFederatedIdentityResponse
 	(*UnlinkFederatedIdentityRequest)(nil),     // 74: forge.v1.UnlinkFederatedIdentityRequest
 	(*UnlinkFederatedIdentityResponse)(nil),    // 75: forge.v1.UnlinkFederatedIdentityResponse
-	(*User)(nil),                               // 76: forge.v1.User
-	(*Department)(nil),                         // 77: forge.v1.Department
-	(*Position)(nil),                           // 78: forge.v1.Position
-	(*UserGroup)(nil),                          // 79: forge.v1.UserGroup
-	(*UserAssignment)(nil),                     // 80: forge.v1.UserAssignment
-	(*Organization)(nil),                       // 81: forge.v1.Organization
-	(*SecurityPolicy)(nil),                     // 82: forge.v1.SecurityPolicy
-	(*Role)(nil),                               // 83: forge.v1.Role
-	(*Permission)(nil),                         // 84: forge.v1.Permission
-	(*Session)(nil),                            // 85: forge.v1.Session
-	(*AuditEvent)(nil),                         // 86: forge.v1.AuditEvent
-	(*timestamppb.Timestamp)(nil),              // 87: google.protobuf.Timestamp
+	(*AccessReview)(nil),                       // 76: forge.v1.AccessReview
+	(*AccessReviewItem)(nil),                   // 77: forge.v1.AccessReviewItem
+	(*ListAccessReviewsRequest)(nil),           // 78: forge.v1.ListAccessReviewsRequest
+	(*ListAccessReviewsResponse)(nil),          // 79: forge.v1.ListAccessReviewsResponse
+	(*CreateAccessReviewRequest)(nil),          // 80: forge.v1.CreateAccessReviewRequest
+	(*CreateAccessReviewResponse)(nil),         // 81: forge.v1.CreateAccessReviewResponse
+	(*ListAccessReviewItemsRequest)(nil),       // 82: forge.v1.ListAccessReviewItemsRequest
+	(*ListAccessReviewItemsResponse)(nil),      // 83: forge.v1.ListAccessReviewItemsResponse
+	(*DecideAccessReviewItemRequest)(nil),      // 84: forge.v1.DecideAccessReviewItemRequest
+	(*DecideAccessReviewItemResponse)(nil),     // 85: forge.v1.DecideAccessReviewItemResponse
+	(*User)(nil),                               // 86: forge.v1.User
+	(*Department)(nil),                         // 87: forge.v1.Department
+	(*Position)(nil),                           // 88: forge.v1.Position
+	(*UserGroup)(nil),                          // 89: forge.v1.UserGroup
+	(*UserAssignment)(nil),                     // 90: forge.v1.UserAssignment
+	(*Organization)(nil),                       // 91: forge.v1.Organization
+	(*SecurityPolicy)(nil),                     // 92: forge.v1.SecurityPolicy
+	(*Role)(nil),                               // 93: forge.v1.Role
+	(*Permission)(nil),                         // 94: forge.v1.Permission
+	(*Session)(nil),                            // 95: forge.v1.Session
+	(*AuditEvent)(nil),                         // 96: forge.v1.AuditEvent
+	(*timestamppb.Timestamp)(nil),              // 97: google.protobuf.Timestamp
 }
 var file_forge_v1_platform_proto_depIdxs = []int32{
-	76, // 0: forge.v1.ListUsersResponse.users:type_name -> forge.v1.User
-	76, // 1: forge.v1.CreateUserResponse.user:type_name -> forge.v1.User
-	77, // 2: forge.v1.ListDepartmentsResponse.departments:type_name -> forge.v1.Department
-	77, // 3: forge.v1.CreateDepartmentResponse.department:type_name -> forge.v1.Department
-	77, // 4: forge.v1.UpdateDepartmentResponse.department:type_name -> forge.v1.Department
-	78, // 5: forge.v1.ListPositionsResponse.positions:type_name -> forge.v1.Position
-	78, // 6: forge.v1.CreatePositionResponse.position:type_name -> forge.v1.Position
-	78, // 7: forge.v1.UpdatePositionResponse.position:type_name -> forge.v1.Position
-	79, // 8: forge.v1.ListUserGroupsResponse.user_groups:type_name -> forge.v1.UserGroup
-	79, // 9: forge.v1.CreateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
-	79, // 10: forge.v1.UpdateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
-	80, // 11: forge.v1.ListUserAssignmentsResponse.assignments:type_name -> forge.v1.UserAssignment
-	80, // 12: forge.v1.ReplaceUserAssignmentsRequest.assignments:type_name -> forge.v1.UserAssignment
-	81, // 13: forge.v1.GetOrganizationResponse.organization:type_name -> forge.v1.Organization
-	81, // 14: forge.v1.UpdateOrganizationResponse.organization:type_name -> forge.v1.Organization
-	82, // 15: forge.v1.GetSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
-	82, // 16: forge.v1.UpdateSecurityPolicyRequest.policy:type_name -> forge.v1.SecurityPolicy
-	82, // 17: forge.v1.UpdateSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
-	83, // 18: forge.v1.ListRolesResponse.roles:type_name -> forge.v1.Role
-	84, // 19: forge.v1.ListPermissionsResponse.permissions:type_name -> forge.v1.Permission
-	83, // 20: forge.v1.UpdateRolePermissionsResponse.role:type_name -> forge.v1.Role
-	83, // 21: forge.v1.UpdateRoleDataScopeResponse.role:type_name -> forge.v1.Role
-	76, // 22: forge.v1.UpdateUserRolesResponse.user:type_name -> forge.v1.User
-	76, // 23: forge.v1.UpdateUserStatusResponse.user:type_name -> forge.v1.User
-	76, // 24: forge.v1.UnlockUserResponse.user:type_name -> forge.v1.User
-	85, // 25: forge.v1.ListSessionsResponse.sessions:type_name -> forge.v1.Session
-	86, // 26: forge.v1.ListAuditLogsResponse.events:type_name -> forge.v1.AuditEvent
-	87, // 27: forge.v1.TemporaryRoleGrant.valid_from:type_name -> google.protobuf.Timestamp
-	87, // 28: forge.v1.TemporaryRoleGrant.valid_until:type_name -> google.protobuf.Timestamp
-	87, // 29: forge.v1.TemporaryRoleGrant.revoked_at:type_name -> google.protobuf.Timestamp
-	87, // 30: forge.v1.TemporaryRoleGrant.created_at:type_name -> google.protobuf.Timestamp
+	86, // 0: forge.v1.ListUsersResponse.users:type_name -> forge.v1.User
+	86, // 1: forge.v1.CreateUserResponse.user:type_name -> forge.v1.User
+	87, // 2: forge.v1.ListDepartmentsResponse.departments:type_name -> forge.v1.Department
+	87, // 3: forge.v1.CreateDepartmentResponse.department:type_name -> forge.v1.Department
+	87, // 4: forge.v1.UpdateDepartmentResponse.department:type_name -> forge.v1.Department
+	88, // 5: forge.v1.ListPositionsResponse.positions:type_name -> forge.v1.Position
+	88, // 6: forge.v1.CreatePositionResponse.position:type_name -> forge.v1.Position
+	88, // 7: forge.v1.UpdatePositionResponse.position:type_name -> forge.v1.Position
+	89, // 8: forge.v1.ListUserGroupsResponse.user_groups:type_name -> forge.v1.UserGroup
+	89, // 9: forge.v1.CreateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
+	89, // 10: forge.v1.UpdateUserGroupResponse.user_group:type_name -> forge.v1.UserGroup
+	90, // 11: forge.v1.ListUserAssignmentsResponse.assignments:type_name -> forge.v1.UserAssignment
+	90, // 12: forge.v1.ReplaceUserAssignmentsRequest.assignments:type_name -> forge.v1.UserAssignment
+	91, // 13: forge.v1.GetOrganizationResponse.organization:type_name -> forge.v1.Organization
+	91, // 14: forge.v1.UpdateOrganizationResponse.organization:type_name -> forge.v1.Organization
+	92, // 15: forge.v1.GetSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
+	92, // 16: forge.v1.UpdateSecurityPolicyRequest.policy:type_name -> forge.v1.SecurityPolicy
+	92, // 17: forge.v1.UpdateSecurityPolicyResponse.policy:type_name -> forge.v1.SecurityPolicy
+	93, // 18: forge.v1.ListRolesResponse.roles:type_name -> forge.v1.Role
+	94, // 19: forge.v1.ListPermissionsResponse.permissions:type_name -> forge.v1.Permission
+	93, // 20: forge.v1.UpdateRolePermissionsResponse.role:type_name -> forge.v1.Role
+	93, // 21: forge.v1.UpdateRoleDataScopeResponse.role:type_name -> forge.v1.Role
+	86, // 22: forge.v1.UpdateUserRolesResponse.user:type_name -> forge.v1.User
+	86, // 23: forge.v1.UpdateUserStatusResponse.user:type_name -> forge.v1.User
+	86, // 24: forge.v1.UnlockUserResponse.user:type_name -> forge.v1.User
+	95, // 25: forge.v1.ListSessionsResponse.sessions:type_name -> forge.v1.Session
+	96, // 26: forge.v1.ListAuditLogsResponse.events:type_name -> forge.v1.AuditEvent
+	97, // 27: forge.v1.TemporaryRoleGrant.valid_from:type_name -> google.protobuf.Timestamp
+	97, // 28: forge.v1.TemporaryRoleGrant.valid_until:type_name -> google.protobuf.Timestamp
+	97, // 29: forge.v1.TemporaryRoleGrant.revoked_at:type_name -> google.protobuf.Timestamp
+	97, // 30: forge.v1.TemporaryRoleGrant.created_at:type_name -> google.protobuf.Timestamp
 	62, // 31: forge.v1.ListTemporaryRoleGrantsResponse.grants:type_name -> forge.v1.TemporaryRoleGrant
-	87, // 32: forge.v1.CreateTemporaryRoleGrantRequest.valid_from:type_name -> google.protobuf.Timestamp
-	87, // 33: forge.v1.CreateTemporaryRoleGrantRequest.valid_until:type_name -> google.protobuf.Timestamp
+	97, // 32: forge.v1.CreateTemporaryRoleGrantRequest.valid_from:type_name -> google.protobuf.Timestamp
+	97, // 33: forge.v1.CreateTemporaryRoleGrantRequest.valid_until:type_name -> google.protobuf.Timestamp
 	62, // 34: forge.v1.CreateTemporaryRoleGrantResponse.grant:type_name -> forge.v1.TemporaryRoleGrant
-	87, // 35: forge.v1.FederatedIdentityLink.created_at:type_name -> google.protobuf.Timestamp
-	87, // 36: forge.v1.FederatedIdentityLink.last_authenticated_at:type_name -> google.protobuf.Timestamp
+	97, // 35: forge.v1.FederatedIdentityLink.created_at:type_name -> google.protobuf.Timestamp
+	97, // 36: forge.v1.FederatedIdentityLink.last_authenticated_at:type_name -> google.protobuf.Timestamp
 	69, // 37: forge.v1.ListFederatedIdentityLinksResponse.links:type_name -> forge.v1.FederatedIdentityLink
 	69, // 38: forge.v1.LinkFederatedIdentityResponse.link:type_name -> forge.v1.FederatedIdentityLink
-	0,  // 39: forge.v1.PlatformService.ListUsers:input_type -> forge.v1.ListUsersRequest
-	2,  // 40: forge.v1.PlatformService.CreateUser:input_type -> forge.v1.CreateUserRequest
-	4,  // 41: forge.v1.PlatformService.ListDepartments:input_type -> forge.v1.ListDepartmentsRequest
-	6,  // 42: forge.v1.PlatformService.CreateDepartment:input_type -> forge.v1.CreateDepartmentRequest
-	8,  // 43: forge.v1.PlatformService.UpdateDepartment:input_type -> forge.v1.UpdateDepartmentRequest
-	10, // 44: forge.v1.PlatformService.ListPositions:input_type -> forge.v1.ListPositionsRequest
-	12, // 45: forge.v1.PlatformService.CreatePosition:input_type -> forge.v1.CreatePositionRequest
-	14, // 46: forge.v1.PlatformService.UpdatePosition:input_type -> forge.v1.UpdatePositionRequest
-	16, // 47: forge.v1.PlatformService.ListUserGroups:input_type -> forge.v1.ListUserGroupsRequest
-	18, // 48: forge.v1.PlatformService.CreateUserGroup:input_type -> forge.v1.CreateUserGroupRequest
-	20, // 49: forge.v1.PlatformService.UpdateUserGroup:input_type -> forge.v1.UpdateUserGroupRequest
-	22, // 50: forge.v1.PlatformService.UpdateUserGroupMembers:input_type -> forge.v1.UpdateUserGroupMembersRequest
-	24, // 51: forge.v1.PlatformService.UpdateUserGroupRoles:input_type -> forge.v1.UpdateUserGroupRolesRequest
-	26, // 52: forge.v1.PlatformService.ListUserAssignments:input_type -> forge.v1.ListUserAssignmentsRequest
-	28, // 53: forge.v1.PlatformService.ReplaceUserAssignments:input_type -> forge.v1.ReplaceUserAssignmentsRequest
-	30, // 54: forge.v1.PlatformService.GetOrganization:input_type -> forge.v1.GetOrganizationRequest
-	32, // 55: forge.v1.PlatformService.UpdateOrganization:input_type -> forge.v1.UpdateOrganizationRequest
-	34, // 56: forge.v1.PlatformService.GetSecurityPolicy:input_type -> forge.v1.GetSecurityPolicyRequest
-	36, // 57: forge.v1.PlatformService.UpdateSecurityPolicy:input_type -> forge.v1.UpdateSecurityPolicyRequest
-	38, // 58: forge.v1.PlatformService.ListRoles:input_type -> forge.v1.ListRolesRequest
-	40, // 59: forge.v1.PlatformService.ListPermissions:input_type -> forge.v1.ListPermissionsRequest
-	44, // 60: forge.v1.PlatformService.UpdateRoleDataScope:input_type -> forge.v1.UpdateRoleDataScopeRequest
-	42, // 61: forge.v1.PlatformService.UpdateRolePermissions:input_type -> forge.v1.UpdateRolePermissionsRequest
-	46, // 62: forge.v1.PlatformService.UpdateUserRoles:input_type -> forge.v1.UpdateUserRolesRequest
-	48, // 63: forge.v1.PlatformService.UpdateUserStatus:input_type -> forge.v1.UpdateUserStatusRequest
-	50, // 64: forge.v1.PlatformService.UnlockUser:input_type -> forge.v1.UnlockUserRequest
-	52, // 65: forge.v1.PlatformService.ResetUserPassword:input_type -> forge.v1.ResetUserPasswordRequest
-	54, // 66: forge.v1.PlatformService.ListSessions:input_type -> forge.v1.ListSessionsRequest
-	56, // 67: forge.v1.PlatformService.RevokeSession:input_type -> forge.v1.RevokeSessionRequest
-	58, // 68: forge.v1.PlatformService.ListAuditLogs:input_type -> forge.v1.ListAuditLogsRequest
-	60, // 69: forge.v1.PlatformService.ExportAuditLogs:input_type -> forge.v1.ExportAuditLogsRequest
-	63, // 70: forge.v1.PlatformService.ListTemporaryRoleGrants:input_type -> forge.v1.ListTemporaryRoleGrantsRequest
-	65, // 71: forge.v1.PlatformService.CreateTemporaryRoleGrant:input_type -> forge.v1.CreateTemporaryRoleGrantRequest
-	67, // 72: forge.v1.PlatformService.RevokeTemporaryRoleGrant:input_type -> forge.v1.RevokeTemporaryRoleGrantRequest
-	70, // 73: forge.v1.PlatformService.ListFederatedIdentityLinks:input_type -> forge.v1.ListFederatedIdentityLinksRequest
-	72, // 74: forge.v1.PlatformService.LinkFederatedIdentity:input_type -> forge.v1.LinkFederatedIdentityRequest
-	74, // 75: forge.v1.PlatformService.UnlinkFederatedIdentity:input_type -> forge.v1.UnlinkFederatedIdentityRequest
-	1,  // 76: forge.v1.PlatformService.ListUsers:output_type -> forge.v1.ListUsersResponse
-	3,  // 77: forge.v1.PlatformService.CreateUser:output_type -> forge.v1.CreateUserResponse
-	5,  // 78: forge.v1.PlatformService.ListDepartments:output_type -> forge.v1.ListDepartmentsResponse
-	7,  // 79: forge.v1.PlatformService.CreateDepartment:output_type -> forge.v1.CreateDepartmentResponse
-	9,  // 80: forge.v1.PlatformService.UpdateDepartment:output_type -> forge.v1.UpdateDepartmentResponse
-	11, // 81: forge.v1.PlatformService.ListPositions:output_type -> forge.v1.ListPositionsResponse
-	13, // 82: forge.v1.PlatformService.CreatePosition:output_type -> forge.v1.CreatePositionResponse
-	15, // 83: forge.v1.PlatformService.UpdatePosition:output_type -> forge.v1.UpdatePositionResponse
-	17, // 84: forge.v1.PlatformService.ListUserGroups:output_type -> forge.v1.ListUserGroupsResponse
-	19, // 85: forge.v1.PlatformService.CreateUserGroup:output_type -> forge.v1.CreateUserGroupResponse
-	21, // 86: forge.v1.PlatformService.UpdateUserGroup:output_type -> forge.v1.UpdateUserGroupResponse
-	23, // 87: forge.v1.PlatformService.UpdateUserGroupMembers:output_type -> forge.v1.UpdateUserGroupMembersResponse
-	25, // 88: forge.v1.PlatformService.UpdateUserGroupRoles:output_type -> forge.v1.UpdateUserGroupRolesResponse
-	27, // 89: forge.v1.PlatformService.ListUserAssignments:output_type -> forge.v1.ListUserAssignmentsResponse
-	29, // 90: forge.v1.PlatformService.ReplaceUserAssignments:output_type -> forge.v1.ReplaceUserAssignmentsResponse
-	31, // 91: forge.v1.PlatformService.GetOrganization:output_type -> forge.v1.GetOrganizationResponse
-	33, // 92: forge.v1.PlatformService.UpdateOrganization:output_type -> forge.v1.UpdateOrganizationResponse
-	35, // 93: forge.v1.PlatformService.GetSecurityPolicy:output_type -> forge.v1.GetSecurityPolicyResponse
-	37, // 94: forge.v1.PlatformService.UpdateSecurityPolicy:output_type -> forge.v1.UpdateSecurityPolicyResponse
-	39, // 95: forge.v1.PlatformService.ListRoles:output_type -> forge.v1.ListRolesResponse
-	41, // 96: forge.v1.PlatformService.ListPermissions:output_type -> forge.v1.ListPermissionsResponse
-	45, // 97: forge.v1.PlatformService.UpdateRoleDataScope:output_type -> forge.v1.UpdateRoleDataScopeResponse
-	43, // 98: forge.v1.PlatformService.UpdateRolePermissions:output_type -> forge.v1.UpdateRolePermissionsResponse
-	47, // 99: forge.v1.PlatformService.UpdateUserRoles:output_type -> forge.v1.UpdateUserRolesResponse
-	49, // 100: forge.v1.PlatformService.UpdateUserStatus:output_type -> forge.v1.UpdateUserStatusResponse
-	51, // 101: forge.v1.PlatformService.UnlockUser:output_type -> forge.v1.UnlockUserResponse
-	53, // 102: forge.v1.PlatformService.ResetUserPassword:output_type -> forge.v1.ResetUserPasswordResponse
-	55, // 103: forge.v1.PlatformService.ListSessions:output_type -> forge.v1.ListSessionsResponse
-	57, // 104: forge.v1.PlatformService.RevokeSession:output_type -> forge.v1.RevokeSessionResponse
-	59, // 105: forge.v1.PlatformService.ListAuditLogs:output_type -> forge.v1.ListAuditLogsResponse
-	61, // 106: forge.v1.PlatformService.ExportAuditLogs:output_type -> forge.v1.ExportAuditLogsResponse
-	64, // 107: forge.v1.PlatformService.ListTemporaryRoleGrants:output_type -> forge.v1.ListTemporaryRoleGrantsResponse
-	66, // 108: forge.v1.PlatformService.CreateTemporaryRoleGrant:output_type -> forge.v1.CreateTemporaryRoleGrantResponse
-	68, // 109: forge.v1.PlatformService.RevokeTemporaryRoleGrant:output_type -> forge.v1.RevokeTemporaryRoleGrantResponse
-	71, // 110: forge.v1.PlatformService.ListFederatedIdentityLinks:output_type -> forge.v1.ListFederatedIdentityLinksResponse
-	73, // 111: forge.v1.PlatformService.LinkFederatedIdentity:output_type -> forge.v1.LinkFederatedIdentityResponse
-	75, // 112: forge.v1.PlatformService.UnlinkFederatedIdentity:output_type -> forge.v1.UnlinkFederatedIdentityResponse
-	76, // [76:113] is the sub-list for method output_type
-	39, // [39:76] is the sub-list for method input_type
-	39, // [39:39] is the sub-list for extension type_name
-	39, // [39:39] is the sub-list for extension extendee
-	0,  // [0:39] is the sub-list for field type_name
+	97, // 39: forge.v1.AccessReview.due_at:type_name -> google.protobuf.Timestamp
+	97, // 40: forge.v1.AccessReview.created_at:type_name -> google.protobuf.Timestamp
+	97, // 41: forge.v1.AccessReview.completed_at:type_name -> google.protobuf.Timestamp
+	97, // 42: forge.v1.AccessReviewItem.decided_at:type_name -> google.protobuf.Timestamp
+	97, // 43: forge.v1.AccessReviewItem.created_at:type_name -> google.protobuf.Timestamp
+	76, // 44: forge.v1.ListAccessReviewsResponse.reviews:type_name -> forge.v1.AccessReview
+	97, // 45: forge.v1.CreateAccessReviewRequest.due_at:type_name -> google.protobuf.Timestamp
+	76, // 46: forge.v1.CreateAccessReviewResponse.review:type_name -> forge.v1.AccessReview
+	77, // 47: forge.v1.ListAccessReviewItemsResponse.items:type_name -> forge.v1.AccessReviewItem
+	0,  // 48: forge.v1.PlatformService.ListUsers:input_type -> forge.v1.ListUsersRequest
+	2,  // 49: forge.v1.PlatformService.CreateUser:input_type -> forge.v1.CreateUserRequest
+	4,  // 50: forge.v1.PlatformService.ListDepartments:input_type -> forge.v1.ListDepartmentsRequest
+	6,  // 51: forge.v1.PlatformService.CreateDepartment:input_type -> forge.v1.CreateDepartmentRequest
+	8,  // 52: forge.v1.PlatformService.UpdateDepartment:input_type -> forge.v1.UpdateDepartmentRequest
+	10, // 53: forge.v1.PlatformService.ListPositions:input_type -> forge.v1.ListPositionsRequest
+	12, // 54: forge.v1.PlatformService.CreatePosition:input_type -> forge.v1.CreatePositionRequest
+	14, // 55: forge.v1.PlatformService.UpdatePosition:input_type -> forge.v1.UpdatePositionRequest
+	16, // 56: forge.v1.PlatformService.ListUserGroups:input_type -> forge.v1.ListUserGroupsRequest
+	18, // 57: forge.v1.PlatformService.CreateUserGroup:input_type -> forge.v1.CreateUserGroupRequest
+	20, // 58: forge.v1.PlatformService.UpdateUserGroup:input_type -> forge.v1.UpdateUserGroupRequest
+	22, // 59: forge.v1.PlatformService.UpdateUserGroupMembers:input_type -> forge.v1.UpdateUserGroupMembersRequest
+	24, // 60: forge.v1.PlatformService.UpdateUserGroupRoles:input_type -> forge.v1.UpdateUserGroupRolesRequest
+	26, // 61: forge.v1.PlatformService.ListUserAssignments:input_type -> forge.v1.ListUserAssignmentsRequest
+	28, // 62: forge.v1.PlatformService.ReplaceUserAssignments:input_type -> forge.v1.ReplaceUserAssignmentsRequest
+	30, // 63: forge.v1.PlatformService.GetOrganization:input_type -> forge.v1.GetOrganizationRequest
+	32, // 64: forge.v1.PlatformService.UpdateOrganization:input_type -> forge.v1.UpdateOrganizationRequest
+	34, // 65: forge.v1.PlatformService.GetSecurityPolicy:input_type -> forge.v1.GetSecurityPolicyRequest
+	36, // 66: forge.v1.PlatformService.UpdateSecurityPolicy:input_type -> forge.v1.UpdateSecurityPolicyRequest
+	38, // 67: forge.v1.PlatformService.ListRoles:input_type -> forge.v1.ListRolesRequest
+	40, // 68: forge.v1.PlatformService.ListPermissions:input_type -> forge.v1.ListPermissionsRequest
+	44, // 69: forge.v1.PlatformService.UpdateRoleDataScope:input_type -> forge.v1.UpdateRoleDataScopeRequest
+	42, // 70: forge.v1.PlatformService.UpdateRolePermissions:input_type -> forge.v1.UpdateRolePermissionsRequest
+	46, // 71: forge.v1.PlatformService.UpdateUserRoles:input_type -> forge.v1.UpdateUserRolesRequest
+	48, // 72: forge.v1.PlatformService.UpdateUserStatus:input_type -> forge.v1.UpdateUserStatusRequest
+	50, // 73: forge.v1.PlatformService.UnlockUser:input_type -> forge.v1.UnlockUserRequest
+	52, // 74: forge.v1.PlatformService.ResetUserPassword:input_type -> forge.v1.ResetUserPasswordRequest
+	54, // 75: forge.v1.PlatformService.ListSessions:input_type -> forge.v1.ListSessionsRequest
+	56, // 76: forge.v1.PlatformService.RevokeSession:input_type -> forge.v1.RevokeSessionRequest
+	58, // 77: forge.v1.PlatformService.ListAuditLogs:input_type -> forge.v1.ListAuditLogsRequest
+	60, // 78: forge.v1.PlatformService.ExportAuditLogs:input_type -> forge.v1.ExportAuditLogsRequest
+	63, // 79: forge.v1.PlatformService.ListTemporaryRoleGrants:input_type -> forge.v1.ListTemporaryRoleGrantsRequest
+	65, // 80: forge.v1.PlatformService.CreateTemporaryRoleGrant:input_type -> forge.v1.CreateTemporaryRoleGrantRequest
+	67, // 81: forge.v1.PlatformService.RevokeTemporaryRoleGrant:input_type -> forge.v1.RevokeTemporaryRoleGrantRequest
+	70, // 82: forge.v1.PlatformService.ListFederatedIdentityLinks:input_type -> forge.v1.ListFederatedIdentityLinksRequest
+	72, // 83: forge.v1.PlatformService.LinkFederatedIdentity:input_type -> forge.v1.LinkFederatedIdentityRequest
+	74, // 84: forge.v1.PlatformService.UnlinkFederatedIdentity:input_type -> forge.v1.UnlinkFederatedIdentityRequest
+	78, // 85: forge.v1.PlatformService.ListAccessReviews:input_type -> forge.v1.ListAccessReviewsRequest
+	80, // 86: forge.v1.PlatformService.CreateAccessReview:input_type -> forge.v1.CreateAccessReviewRequest
+	82, // 87: forge.v1.PlatformService.ListAccessReviewItems:input_type -> forge.v1.ListAccessReviewItemsRequest
+	84, // 88: forge.v1.PlatformService.DecideAccessReviewItem:input_type -> forge.v1.DecideAccessReviewItemRequest
+	1,  // 89: forge.v1.PlatformService.ListUsers:output_type -> forge.v1.ListUsersResponse
+	3,  // 90: forge.v1.PlatformService.CreateUser:output_type -> forge.v1.CreateUserResponse
+	5,  // 91: forge.v1.PlatformService.ListDepartments:output_type -> forge.v1.ListDepartmentsResponse
+	7,  // 92: forge.v1.PlatformService.CreateDepartment:output_type -> forge.v1.CreateDepartmentResponse
+	9,  // 93: forge.v1.PlatformService.UpdateDepartment:output_type -> forge.v1.UpdateDepartmentResponse
+	11, // 94: forge.v1.PlatformService.ListPositions:output_type -> forge.v1.ListPositionsResponse
+	13, // 95: forge.v1.PlatformService.CreatePosition:output_type -> forge.v1.CreatePositionResponse
+	15, // 96: forge.v1.PlatformService.UpdatePosition:output_type -> forge.v1.UpdatePositionResponse
+	17, // 97: forge.v1.PlatformService.ListUserGroups:output_type -> forge.v1.ListUserGroupsResponse
+	19, // 98: forge.v1.PlatformService.CreateUserGroup:output_type -> forge.v1.CreateUserGroupResponse
+	21, // 99: forge.v1.PlatformService.UpdateUserGroup:output_type -> forge.v1.UpdateUserGroupResponse
+	23, // 100: forge.v1.PlatformService.UpdateUserGroupMembers:output_type -> forge.v1.UpdateUserGroupMembersResponse
+	25, // 101: forge.v1.PlatformService.UpdateUserGroupRoles:output_type -> forge.v1.UpdateUserGroupRolesResponse
+	27, // 102: forge.v1.PlatformService.ListUserAssignments:output_type -> forge.v1.ListUserAssignmentsResponse
+	29, // 103: forge.v1.PlatformService.ReplaceUserAssignments:output_type -> forge.v1.ReplaceUserAssignmentsResponse
+	31, // 104: forge.v1.PlatformService.GetOrganization:output_type -> forge.v1.GetOrganizationResponse
+	33, // 105: forge.v1.PlatformService.UpdateOrganization:output_type -> forge.v1.UpdateOrganizationResponse
+	35, // 106: forge.v1.PlatformService.GetSecurityPolicy:output_type -> forge.v1.GetSecurityPolicyResponse
+	37, // 107: forge.v1.PlatformService.UpdateSecurityPolicy:output_type -> forge.v1.UpdateSecurityPolicyResponse
+	39, // 108: forge.v1.PlatformService.ListRoles:output_type -> forge.v1.ListRolesResponse
+	41, // 109: forge.v1.PlatformService.ListPermissions:output_type -> forge.v1.ListPermissionsResponse
+	45, // 110: forge.v1.PlatformService.UpdateRoleDataScope:output_type -> forge.v1.UpdateRoleDataScopeResponse
+	43, // 111: forge.v1.PlatformService.UpdateRolePermissions:output_type -> forge.v1.UpdateRolePermissionsResponse
+	47, // 112: forge.v1.PlatformService.UpdateUserRoles:output_type -> forge.v1.UpdateUserRolesResponse
+	49, // 113: forge.v1.PlatformService.UpdateUserStatus:output_type -> forge.v1.UpdateUserStatusResponse
+	51, // 114: forge.v1.PlatformService.UnlockUser:output_type -> forge.v1.UnlockUserResponse
+	53, // 115: forge.v1.PlatformService.ResetUserPassword:output_type -> forge.v1.ResetUserPasswordResponse
+	55, // 116: forge.v1.PlatformService.ListSessions:output_type -> forge.v1.ListSessionsResponse
+	57, // 117: forge.v1.PlatformService.RevokeSession:output_type -> forge.v1.RevokeSessionResponse
+	59, // 118: forge.v1.PlatformService.ListAuditLogs:output_type -> forge.v1.ListAuditLogsResponse
+	61, // 119: forge.v1.PlatformService.ExportAuditLogs:output_type -> forge.v1.ExportAuditLogsResponse
+	64, // 120: forge.v1.PlatformService.ListTemporaryRoleGrants:output_type -> forge.v1.ListTemporaryRoleGrantsResponse
+	66, // 121: forge.v1.PlatformService.CreateTemporaryRoleGrant:output_type -> forge.v1.CreateTemporaryRoleGrantResponse
+	68, // 122: forge.v1.PlatformService.RevokeTemporaryRoleGrant:output_type -> forge.v1.RevokeTemporaryRoleGrantResponse
+	71, // 123: forge.v1.PlatformService.ListFederatedIdentityLinks:output_type -> forge.v1.ListFederatedIdentityLinksResponse
+	73, // 124: forge.v1.PlatformService.LinkFederatedIdentity:output_type -> forge.v1.LinkFederatedIdentityResponse
+	75, // 125: forge.v1.PlatformService.UnlinkFederatedIdentity:output_type -> forge.v1.UnlinkFederatedIdentityResponse
+	79, // 126: forge.v1.PlatformService.ListAccessReviews:output_type -> forge.v1.ListAccessReviewsResponse
+	81, // 127: forge.v1.PlatformService.CreateAccessReview:output_type -> forge.v1.CreateAccessReviewResponse
+	83, // 128: forge.v1.PlatformService.ListAccessReviewItems:output_type -> forge.v1.ListAccessReviewItemsResponse
+	85, // 129: forge.v1.PlatformService.DecideAccessReviewItem:output_type -> forge.v1.DecideAccessReviewItemResponse
+	89, // [89:130] is the sub-list for method output_type
+	48, // [48:89] is the sub-list for method input_type
+	48, // [48:48] is the sub-list for extension type_name
+	48, // [48:48] is the sub-list for extension extendee
+	0,  // [0:48] is the sub-list for field type_name
 }
 
 func init() { file_forge_v1_platform_proto_init() }
@@ -4642,7 +5346,7 @@ func file_forge_v1_platform_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_forge_v1_platform_proto_rawDesc), len(file_forge_v1_platform_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   76,
+			NumMessages:   86,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

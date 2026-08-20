@@ -770,6 +770,8 @@ func serviceError(err error) error {
 		return kratoserrors.BadRequest("INVALID_ARGUMENT", "request violates policy")
 	case errors.Is(err, appidentity.ErrInvalidFederatedIdentity):
 		return kratoserrors.BadRequest("INVALID_FEDERATED_IDENTITY", "external identity mapping violates policy")
+	case errors.Is(err, appidentity.ErrInvalidAccessReview):
+		return kratoserrors.BadRequest("INVALID_ACCESS_REVIEW", "access review violates policy")
 	case errors.Is(err, appidentity.ErrInvalidTemporaryGrant):
 		return kratoserrors.BadRequest("INVALID_TEMPORARY_GRANT", "temporary role grant violates policy")
 	default:

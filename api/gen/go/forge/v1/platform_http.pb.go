@@ -19,15 +19,19 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationPlatformServiceCreateAccessReview = "/forge.v1.PlatformService/CreateAccessReview"
 const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
 const OperationPlatformServiceCreatePosition = "/forge.v1.PlatformService/CreatePosition"
 const OperationPlatformServiceCreateTemporaryRoleGrant = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
 const OperationPlatformServiceCreateUser = "/forge.v1.PlatformService/CreateUser"
 const OperationPlatformServiceCreateUserGroup = "/forge.v1.PlatformService/CreateUserGroup"
+const OperationPlatformServiceDecideAccessReviewItem = "/forge.v1.PlatformService/DecideAccessReviewItem"
 const OperationPlatformServiceExportAuditLogs = "/forge.v1.PlatformService/ExportAuditLogs"
 const OperationPlatformServiceGetOrganization = "/forge.v1.PlatformService/GetOrganization"
 const OperationPlatformServiceGetSecurityPolicy = "/forge.v1.PlatformService/GetSecurityPolicy"
 const OperationPlatformServiceLinkFederatedIdentity = "/forge.v1.PlatformService/LinkFederatedIdentity"
+const OperationPlatformServiceListAccessReviewItems = "/forge.v1.PlatformService/ListAccessReviewItems"
+const OperationPlatformServiceListAccessReviews = "/forge.v1.PlatformService/ListAccessReviews"
 const OperationPlatformServiceListAuditLogs = "/forge.v1.PlatformService/ListAuditLogs"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
 const OperationPlatformServiceListFederatedIdentityLinks = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
@@ -58,15 +62,19 @@ const OperationPlatformServiceUpdateUserRoles = "/forge.v1.PlatformService/Updat
 const OperationPlatformServiceUpdateUserStatus = "/forge.v1.PlatformService/UpdateUserStatus"
 
 type PlatformServiceHTTPServer interface {
+	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
 	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	CreateUserGroup(context.Context, *CreateUserGroupRequest) (*CreateUserGroupResponse, error)
+	DecideAccessReviewItem(context.Context, *DecideAccessReviewItemRequest) (*DecideAccessReviewItemResponse, error)
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
 	LinkFederatedIdentity(context.Context, *LinkFederatedIdentityRequest) (*LinkFederatedIdentityResponse, error)
+	ListAccessReviewItems(context.Context, *ListAccessReviewItemsRequest) (*ListAccessReviewItemsResponse, error)
+	ListAccessReviews(context.Context, *ListAccessReviewsRequest) (*ListAccessReviewsResponse, error)
 	ListAuditLogs(context.Context, *ListAuditLogsRequest) (*ListAuditLogsResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
@@ -136,6 +144,10 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/identity-mappings", _PlatformService_ListFederatedIdentityLinks0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/identity-mappings", _PlatformService_LinkFederatedIdentity0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/identity-mappings/{link_id}:unlink", _PlatformService_UnlinkFederatedIdentity0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/access-reviews", _PlatformService_ListAccessReviews0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/access-reviews", _PlatformService_CreateAccessReview0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/access-reviews/{review_id}/items", _PlatformService_ListAccessReviewItems0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions", _PlatformService_DecideAccessReviewItem0_HTTP_Handler(srv))
 }
 
 func _PlatformService_ListUsers0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
@@ -955,16 +967,108 @@ func _PlatformService_UnlinkFederatedIdentity0_HTTP_Handler(srv PlatformServiceH
 	}
 }
 
+func _PlatformService_ListAccessReviews0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAccessReviewsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListAccessReviews)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAccessReviews(ctx, req.(*ListAccessReviewsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAccessReviewsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_CreateAccessReview0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateAccessReviewRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceCreateAccessReview)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateAccessReview(ctx, req.(*CreateAccessReviewRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateAccessReviewResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_ListAccessReviewItems0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAccessReviewItemsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListAccessReviewItems)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAccessReviewItems(ctx, req.(*ListAccessReviewItemsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAccessReviewItemsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_DecideAccessReviewItem0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DecideAccessReviewItemRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceDecideAccessReviewItem)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DecideAccessReviewItem(ctx, req.(*DecideAccessReviewItemRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DecideAccessReviewItemResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type PlatformServiceHTTPClient interface {
+	CreateAccessReview(ctx context.Context, req *CreateAccessReviewRequest, opts ...http.CallOption) (rsp *CreateAccessReviewResponse, err error)
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
 	CreateTemporaryRoleGrant(ctx context.Context, req *CreateTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *CreateTemporaryRoleGrantResponse, err error)
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
 	CreateUserGroup(ctx context.Context, req *CreateUserGroupRequest, opts ...http.CallOption) (rsp *CreateUserGroupResponse, err error)
+	DecideAccessReviewItem(ctx context.Context, req *DecideAccessReviewItemRequest, opts ...http.CallOption) (rsp *DecideAccessReviewItemResponse, err error)
 	ExportAuditLogs(ctx context.Context, req *ExportAuditLogsRequest, opts ...http.CallOption) (rsp *ExportAuditLogsResponse, err error)
 	GetOrganization(ctx context.Context, req *GetOrganizationRequest, opts ...http.CallOption) (rsp *GetOrganizationResponse, err error)
 	GetSecurityPolicy(ctx context.Context, req *GetSecurityPolicyRequest, opts ...http.CallOption) (rsp *GetSecurityPolicyResponse, err error)
 	LinkFederatedIdentity(ctx context.Context, req *LinkFederatedIdentityRequest, opts ...http.CallOption) (rsp *LinkFederatedIdentityResponse, err error)
+	ListAccessReviewItems(ctx context.Context, req *ListAccessReviewItemsRequest, opts ...http.CallOption) (rsp *ListAccessReviewItemsResponse, err error)
+	ListAccessReviews(ctx context.Context, req *ListAccessReviewsRequest, opts ...http.CallOption) (rsp *ListAccessReviewsResponse, err error)
 	ListAuditLogs(ctx context.Context, req *ListAuditLogsRequest, opts ...http.CallOption) (rsp *ListAuditLogsResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
 	ListFederatedIdentityLinks(ctx context.Context, req *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (rsp *ListFederatedIdentityLinksResponse, err error)
@@ -1001,6 +1105,19 @@ type PlatformServiceHTTPClientImpl struct {
 
 func NewPlatformServiceHTTPClient(client *http.Client) PlatformServiceHTTPClient {
 	return &PlatformServiceHTTPClientImpl{client}
+}
+
+func (c *PlatformServiceHTTPClientImpl) CreateAccessReview(ctx context.Context, in *CreateAccessReviewRequest, opts ...http.CallOption) (*CreateAccessReviewResponse, error) {
+	var out CreateAccessReviewResponse
+	pattern := "/api/v1/admin/access-reviews"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceCreateAccessReview))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *PlatformServiceHTTPClientImpl) CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...http.CallOption) (*CreateDepartmentResponse, error) {
@@ -1068,6 +1185,19 @@ func (c *PlatformServiceHTTPClientImpl) CreateUserGroup(ctx context.Context, in 
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) DecideAccessReviewItem(ctx context.Context, in *DecideAccessReviewItemRequest, opts ...http.CallOption) (*DecideAccessReviewItemResponse, error) {
+	var out DecideAccessReviewItemResponse
+	pattern := "/api/v1/admin/access-reviews/{review_id}/items/{item_id}/decisions"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceDecideAccessReviewItem))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ExportAuditLogs(ctx context.Context, in *ExportAuditLogsRequest, opts ...http.CallOption) (*ExportAuditLogsResponse, error) {
 	var out ExportAuditLogsResponse
 	pattern := "/api/v1/admin/audit-logs/export"
@@ -1114,6 +1244,32 @@ func (c *PlatformServiceHTTPClientImpl) LinkFederatedIdentity(ctx context.Contex
 	opts = append(opts, http.Operation(OperationPlatformServiceLinkFederatedIdentity))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ListAccessReviewItems(ctx context.Context, in *ListAccessReviewItemsRequest, opts ...http.CallOption) (*ListAccessReviewItemsResponse, error) {
+	var out ListAccessReviewItemsResponse
+	pattern := "/api/v1/admin/access-reviews/{review_id}/items"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListAccessReviewItems))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) ListAccessReviews(ctx context.Context, in *ListAccessReviewsRequest, opts ...http.CallOption) (*ListAccessReviewsResponse, error) {
+	var out ListAccessReviewsResponse
+	pattern := "/api/v1/admin/access-reviews"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListAccessReviews))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
