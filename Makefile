@@ -245,11 +245,13 @@ offline-check: fmt contract
 	bash scripts/check-offline-package.sh
 
 disaster-check:
+	python3 scripts/check-disaster-evidence_test.py
 	python3 scripts/check-disaster-evidence.py
 
 disaster-check-certified:
 	@test -n "$(DR_EVIDENCE_FILE)" || (echo "DR_EVIDENCE_FILE is required" >&2; exit 1)
-	python3 scripts/check-disaster-evidence.py --file "$(DR_EVIDENCE_FILE)" --require-certified
+	@test -n "$(DR_EVIDENCE_ROOT)" || (echo "DR_EVIDENCE_ROOT is required" >&2; exit 1)
+	python3 scripts/check-disaster-evidence.py --file "$(DR_EVIDENCE_FILE)" --evidence-root "$(DR_EVIDENCE_ROOT)" --require-certified
 
 docker-build:
 	@for value in "$$FORGE_NODE_IMAGE" "$$FORGE_GO_IMAGE" "$$FORGE_RUNTIME_IMAGE"; do \
