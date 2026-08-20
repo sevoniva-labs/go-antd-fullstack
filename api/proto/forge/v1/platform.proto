@@ -857,6 +857,18 @@ service PlatformService {
     option (google.api.http) = {post: "/api/v1/admin/temporary-role-grants/{grant_id}:revoke" body: "*"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
   }
+  rpc ListEmergencyAccess(ListEmergencyAccessRequest) returns (ListEmergencyAccessResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/emergency-access"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}]};
+  }
+  rpc CreateEmergencyAccess(CreateEmergencyAccessRequest) returns (CreateEmergencyAccessResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/emergency-access" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
+  }
+  rpc RevokeEmergencyAccess(RevokeEmergencyAccessRequest) returns (RevokeEmergencyAccessResponse) {
+    option (google.api.http) = {post: "/api/v1/admin/emergency-access/{grant_id}:revoke" body: "*"};
+    option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]}]};
+  }
   rpc ListFederatedIdentityLinks(ListFederatedIdentityLinksRequest) returns (ListFederatedIdentityLinksResponse) {
     option (google.api.http) = {get: "/api/v1/admin/identity-mappings"};
     option (openapi.v3.operation) = {security: [{additional_properties: [{name: "SessionCookie" value: {value: []}}]}, {additional_properties: [{name: "BearerAuth" value: {value: []}}]}]};
@@ -1321,6 +1333,40 @@ message RevokeTemporaryRoleGrantRequest {
   string reason = 2;
 }
 message RevokeTemporaryRoleGrantResponse {}
+
+message EmergencyAccessGrant {
+  string id = 1;
+  string organization_id = 2;
+  string requester_id = 3;
+  string target_user_id = 4;
+  string scope = 5;
+  string approval_id = 6;
+  string reason = 7;
+  repeated string privilege_keys = 8;
+  google.protobuf.Timestamp requested_at = 9;
+  google.protobuf.Timestamp expires_at = 10;
+  string status = 11;
+  google.protobuf.Timestamp revoked_at = 12;
+  string revoked_by = 13;
+  string revoke_reason = 14;
+  google.protobuf.Timestamp created_at = 15;
+}
+message ListEmergencyAccessRequest {}
+message ListEmergencyAccessResponse { repeated EmergencyAccessGrant grants = 1; }
+message CreateEmergencyAccessRequest {
+  string target_user_id = 1;
+  string scope = 2;
+  string approval_id = 3;
+  string reason = 4;
+  repeated string privilege_keys = 5;
+  google.protobuf.Timestamp expires_at = 6;
+}
+message CreateEmergencyAccessResponse { EmergencyAccessGrant grant = 1; }
+message RevokeEmergencyAccessRequest {
+  string grant_id = 1;
+  string reason = 2;
+}
+message RevokeEmergencyAccessResponse {}
 
 message FederatedIdentityLink {
   string id = 1;

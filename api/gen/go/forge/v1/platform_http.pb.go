@@ -24,6 +24,7 @@ const OperationPlatformServiceAuthorizeDataExport = "/forge.v1.PlatformService/A
 const OperationPlatformServiceCreateAccessReview = "/forge.v1.PlatformService/CreateAccessReview"
 const OperationPlatformServiceCreateConfigChange = "/forge.v1.PlatformService/CreateConfigChange"
 const OperationPlatformServiceCreateDepartment = "/forge.v1.PlatformService/CreateDepartment"
+const OperationPlatformServiceCreateEmergencyAccess = "/forge.v1.PlatformService/CreateEmergencyAccess"
 const OperationPlatformServiceCreatePosition = "/forge.v1.PlatformService/CreatePosition"
 const OperationPlatformServiceCreateTemporaryRoleGrant = "/forge.v1.PlatformService/CreateTemporaryRoleGrant"
 const OperationPlatformServiceCreateUser = "/forge.v1.PlatformService/CreateUser"
@@ -40,6 +41,7 @@ const OperationPlatformServiceListConfigChanges = "/forge.v1.PlatformService/Lis
 const OperationPlatformServiceListDataDeletionEvidence = "/forge.v1.PlatformService/ListDataDeletionEvidence"
 const OperationPlatformServiceListDataFieldPolicies = "/forge.v1.PlatformService/ListDataFieldPolicies"
 const OperationPlatformServiceListDepartments = "/forge.v1.PlatformService/ListDepartments"
+const OperationPlatformServiceListEmergencyAccess = "/forge.v1.PlatformService/ListEmergencyAccess"
 const OperationPlatformServiceListFederatedIdentityLinks = "/forge.v1.PlatformService/ListFederatedIdentityLinks"
 const OperationPlatformServiceListMenus = "/forge.v1.PlatformService/ListMenus"
 const OperationPlatformServiceListPermissions = "/forge.v1.PlatformService/ListPermissions"
@@ -55,6 +57,7 @@ const OperationPlatformServiceRecordDataDeletionEvidence = "/forge.v1.PlatformSe
 const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformService/ReplaceUserAssignments"
 const OperationPlatformServiceRequestConfigRollback = "/forge.v1.PlatformService/RequestConfigRollback"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
+const OperationPlatformServiceRevokeEmergencyAccess = "/forge.v1.PlatformService/RevokeEmergencyAccess"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
 const OperationPlatformServiceRevokeTemporaryRoleGrant = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
 const OperationPlatformServiceRollbackConfigChange = "/forge.v1.PlatformService/RollbackConfigChange"
@@ -81,6 +84,7 @@ type PlatformServiceHTTPServer interface {
 	CreateAccessReview(context.Context, *CreateAccessReviewRequest) (*CreateAccessReviewResponse, error)
 	CreateConfigChange(context.Context, *CreateConfigChangeRequest) (*CreateConfigChangeResponse, error)
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*CreateDepartmentResponse, error)
+	CreateEmergencyAccess(context.Context, *CreateEmergencyAccessRequest) (*CreateEmergencyAccessResponse, error)
 	CreatePosition(context.Context, *CreatePositionRequest) (*CreatePositionResponse, error)
 	CreateTemporaryRoleGrant(context.Context, *CreateTemporaryRoleGrantRequest) (*CreateTemporaryRoleGrantResponse, error)
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
@@ -97,6 +101,7 @@ type PlatformServiceHTTPServer interface {
 	ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error)
 	ListDataFieldPolicies(context.Context, *ListDataFieldPoliciesRequest) (*ListDataFieldPoliciesResponse, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
+	ListEmergencyAccess(context.Context, *ListEmergencyAccessRequest) (*ListEmergencyAccessResponse, error)
 	ListFederatedIdentityLinks(context.Context, *ListFederatedIdentityLinksRequest) (*ListFederatedIdentityLinksResponse, error)
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
@@ -112,6 +117,7 @@ type PlatformServiceHTTPServer interface {
 	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
 	RequestConfigRollback(context.Context, *RequestConfigRollbackRequest) (*RequestConfigRollbackResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
+	RevokeEmergencyAccess(context.Context, *RevokeEmergencyAccessRequest) (*RevokeEmergencyAccessResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
 	RollbackConfigChange(context.Context, *RollbackConfigChangeRequest) (*RollbackConfigChangeResponse, error)
@@ -177,6 +183,9 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/temporary-role-grants", _PlatformService_ListTemporaryRoleGrants0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/temporary-role-grants", _PlatformService_CreateTemporaryRoleGrant0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/temporary-role-grants/{grant_id}:revoke", _PlatformService_RevokeTemporaryRoleGrant0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/emergency-access", _PlatformService_ListEmergencyAccess0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/emergency-access", _PlatformService_CreateEmergencyAccess0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/emergency-access/{grant_id}:revoke", _PlatformService_RevokeEmergencyAccess0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/identity-mappings", _PlatformService_ListFederatedIdentityLinks0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/identity-mappings", _PlatformService_LinkFederatedIdentity0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/identity-mappings/{link_id}:unlink", _PlatformService_UnlinkFederatedIdentity0_HTTP_Handler(srv))
@@ -1113,6 +1122,72 @@ func _PlatformService_RevokeTemporaryRoleGrant0_HTTP_Handler(srv PlatformService
 	}
 }
 
+func _PlatformService_ListEmergencyAccess0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListEmergencyAccessRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceListEmergencyAccess)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListEmergencyAccess(ctx, req.(*ListEmergencyAccessRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListEmergencyAccessResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_CreateEmergencyAccess0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateEmergencyAccessRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceCreateEmergencyAccess)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateEmergencyAccess(ctx, req.(*CreateEmergencyAccessRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateEmergencyAccessResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_RevokeEmergencyAccess0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RevokeEmergencyAccessRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceRevokeEmergencyAccess)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RevokeEmergencyAccess(ctx, req.(*RevokeEmergencyAccessRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RevokeEmergencyAccessResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _PlatformService_ListFederatedIdentityLinks0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ListFederatedIdentityLinksRequest
@@ -1414,6 +1489,7 @@ type PlatformServiceHTTPClient interface {
 	CreateAccessReview(ctx context.Context, req *CreateAccessReviewRequest, opts ...http.CallOption) (rsp *CreateAccessReviewResponse, err error)
 	CreateConfigChange(ctx context.Context, req *CreateConfigChangeRequest, opts ...http.CallOption) (rsp *CreateConfigChangeResponse, err error)
 	CreateDepartment(ctx context.Context, req *CreateDepartmentRequest, opts ...http.CallOption) (rsp *CreateDepartmentResponse, err error)
+	CreateEmergencyAccess(ctx context.Context, req *CreateEmergencyAccessRequest, opts ...http.CallOption) (rsp *CreateEmergencyAccessResponse, err error)
 	CreatePosition(ctx context.Context, req *CreatePositionRequest, opts ...http.CallOption) (rsp *CreatePositionResponse, err error)
 	CreateTemporaryRoleGrant(ctx context.Context, req *CreateTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *CreateTemporaryRoleGrantResponse, err error)
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
@@ -1430,6 +1506,7 @@ type PlatformServiceHTTPClient interface {
 	ListDataDeletionEvidence(ctx context.Context, req *ListDataDeletionEvidenceRequest, opts ...http.CallOption) (rsp *ListDataDeletionEvidenceResponse, err error)
 	ListDataFieldPolicies(ctx context.Context, req *ListDataFieldPoliciesRequest, opts ...http.CallOption) (rsp *ListDataFieldPoliciesResponse, err error)
 	ListDepartments(ctx context.Context, req *ListDepartmentsRequest, opts ...http.CallOption) (rsp *ListDepartmentsResponse, err error)
+	ListEmergencyAccess(ctx context.Context, req *ListEmergencyAccessRequest, opts ...http.CallOption) (rsp *ListEmergencyAccessResponse, err error)
 	ListFederatedIdentityLinks(ctx context.Context, req *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (rsp *ListFederatedIdentityLinksResponse, err error)
 	ListMenus(ctx context.Context, req *ListMenusRequest, opts ...http.CallOption) (rsp *ListMenusResponse, err error)
 	ListPermissions(ctx context.Context, req *ListPermissionsRequest, opts ...http.CallOption) (rsp *ListPermissionsResponse, err error)
@@ -1445,6 +1522,7 @@ type PlatformServiceHTTPClient interface {
 	ReplaceUserAssignments(ctx context.Context, req *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (rsp *ReplaceUserAssignmentsResponse, err error)
 	RequestConfigRollback(ctx context.Context, req *RequestConfigRollbackRequest, opts ...http.CallOption) (rsp *RequestConfigRollbackResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
+	RevokeEmergencyAccess(ctx context.Context, req *RevokeEmergencyAccessRequest, opts ...http.CallOption) (rsp *RevokeEmergencyAccessResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
 	RevokeTemporaryRoleGrant(ctx context.Context, req *RevokeTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *RevokeTemporaryRoleGrantResponse, err error)
 	RollbackConfigChange(ctx context.Context, req *RollbackConfigChangeRequest, opts ...http.CallOption) (rsp *RollbackConfigChangeResponse, err error)
@@ -1531,6 +1609,19 @@ func (c *PlatformServiceHTTPClientImpl) CreateDepartment(ctx context.Context, in
 	pattern := "/api/v1/admin/departments"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceCreateDepartment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) CreateEmergencyAccess(ctx context.Context, in *CreateEmergencyAccessRequest, opts ...http.CallOption) (*CreateEmergencyAccessResponse, error) {
+	var out CreateEmergencyAccessResponse
+	pattern := "/api/v1/admin/emergency-access"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceCreateEmergencyAccess))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -1747,6 +1838,19 @@ func (c *PlatformServiceHTTPClientImpl) ListDepartments(ctx context.Context, in 
 	return &out, nil
 }
 
+func (c *PlatformServiceHTTPClientImpl) ListEmergencyAccess(ctx context.Context, in *ListEmergencyAccessRequest, opts ...http.CallOption) (*ListEmergencyAccessResponse, error) {
+	var out ListEmergencyAccessResponse
+	pattern := "/api/v1/admin/emergency-access"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceListEmergencyAccess))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *PlatformServiceHTTPClientImpl) ListFederatedIdentityLinks(ctx context.Context, in *ListFederatedIdentityLinksRequest, opts ...http.CallOption) (*ListFederatedIdentityLinksResponse, error) {
 	var out ListFederatedIdentityLinksResponse
 	pattern := "/api/v1/admin/identity-mappings"
@@ -1934,6 +2038,19 @@ func (c *PlatformServiceHTTPClientImpl) ResetUserPassword(ctx context.Context, i
 	pattern := "/api/v1/admin/users/{user_id}/reset-password"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceResetUserPassword))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) RevokeEmergencyAccess(ctx context.Context, in *RevokeEmergencyAccessRequest, opts ...http.CallOption) (*RevokeEmergencyAccessResponse, error) {
+	var out RevokeEmergencyAccessResponse
+	pattern := "/api/v1/admin/emergency-access/{grant_id}:revoke"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceRevokeEmergencyAccess))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

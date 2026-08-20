@@ -16,6 +16,7 @@ import type {
   SessionInfo,
   SystemInfo,
   TemporaryRoleGrant,
+  EmergencyAccessGrant,
   AccessReview,
   AccessReviewItem,
   Menu,
@@ -68,6 +69,12 @@ export const api = {
   }) => apiFetch<TemporaryRoleGrant>('/admin/temporary-role-grants', { method: 'POST', body: JSON.stringify(payload) }),
   revokeTemporaryRoleGrant: (grantId: string, reason: string) =>
     apiFetch<void>(`/admin/temporary-role-grants/${encodeURIComponent(grantId)}:revoke`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  emergencyAccess: () => apiFetch<{ grants?: EmergencyAccessGrant[] }>('/admin/emergency-access'),
+  createEmergencyAccess: (payload: {
+    target_user_id?: string; scope?: string; approval_id: string; reason: string; privilege_keys: string[]; expires_at: string;
+  }) => apiFetch<{ grant?: EmergencyAccessGrant }>('/admin/emergency-access', { method: 'POST', body: JSON.stringify(payload) }),
+  revokeEmergencyAccess: (grantId: string, reason: string) =>
+    apiFetch<void>(`/admin/emergency-access/${encodeURIComponent(grantId)}:revoke`, { method: 'POST', body: JSON.stringify({ reason }) }),
   accessReviews: () => apiFetch<{ items: AccessReview[] }>('/admin/access-reviews'),
   createAccessReview: (payload: { reviewer_id: string; due_at: string }) =>
     apiFetch<AccessReview>('/admin/access-reviews', { method: 'POST', body: JSON.stringify(payload) }),

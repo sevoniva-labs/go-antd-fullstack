@@ -9,6 +9,7 @@
     "./audit-logs": "./src/pages/AuditLogs.tsx",
     "./approvals": "./src/pages/Approvals.tsx",
     "./temporary-grants": "./src/pages/TemporaryGrants.tsx",
+    "./emergency-access": "./src/pages/EmergencyAccess.tsx",
     "./access-reviews": "./src/pages/AccessReviews.tsx",
     "./departments": "./src/pages/Departments.tsx",
     "./organization": "./src/pages/Organization.tsx",

@@ -216,6 +216,24 @@ export interface TemporaryRoleGrant {
   created_at: string
 }
 
+export interface EmergencyAccessGrant {
+  id: string
+  organization_id: string
+  requester_id: string
+  target_user_id?: string
+  scope: string
+  approval_id: string
+  reason: string
+  privilege_keys: string[]
+  requested_at: string
+  expires_at: string
+  status: 'SCHEDULED' | 'ACTIVE' | 'EXPIRED' | 'REVOKED'
+  revoked_at?: string
+  revoked_by?: string
+  revoke_reason?: string
+  created_at: string
+}
+
 export interface AccessReview {
   id: string
   organization_id: string
