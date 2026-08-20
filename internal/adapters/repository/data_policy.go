@@ -47,10 +47,10 @@ func (r *DataPolicyRepo) Upsert(ctx context.Context, organizationID string, poli
 	err = r.db.WithTx(ctx, func(tx *sql.Tx) error {
 		var id string
 		err := tx.QueryRowContext(ctx, r.db.Rebind(`SELECT id FROM data_field_policies WHERE organization_id=? AND field_key=? FOR UPDATE`), organizationID, policy.Key).Scan(&id)
-		switch {
-		case err == nil:
+		switch err {
+		case nil:
 			_, err = tx.ExecContext(ctx, r.db.Rebind(`UPDATE data_field_policies SET classification=?,owner=?,purpose=?,residency=?,retention_days=?,tags_json=?,mask_strategy=?,export_approval=?,watermark=?,updated_at=? WHERE id=? AND organization_id=?`), policy.Classification, policy.Owner, policy.Purpose, policy.Residency, policy.RetentionDays, string(tagsJSON), policy.Mask, policy.ExportApproval, policy.Watermark, now, id, organizationID)
-		case err == sql.ErrNoRows:
+		case sql.ErrNoRows:
 			id = uuid.NewString()
 			_, err = tx.ExecContext(ctx, r.db.Rebind(`INSERT INTO data_field_policies(id,organization_id,field_key,classification,owner,purpose,residency,retention_days,tags_json,mask_strategy,export_approval,watermark,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`), id, organizationID, policy.Key, policy.Classification, policy.Owner, policy.Purpose, policy.Residency, policy.RetentionDays, string(tagsJSON), policy.Mask, policy.ExportApproval, policy.Watermark, now, now)
 		default:
