@@ -29,6 +29,7 @@ import (
 	domain "github.com/sevoniva-labs/forge/internal/domain/identity"
 	"github.com/sevoniva-labs/forge/internal/platform/authn"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
+	securitypolicy "github.com/sevoniva-labs/forge/internal/platform/security/datapolicy"
 )
 
 type PlatformService struct {
@@ -832,6 +833,18 @@ func serviceError(err error) error {
 		return kratoserrors.Forbidden("APPROVAL_ACCESS_DENIED", "approval execution is not permitted")
 	case errors.Is(err, audit.ErrIntegrityViolation):
 		return kratoserrors.Conflict("AUDIT_INTEGRITY_FAILED", "audit log integrity verification failed")
+	case errors.Is(err, securitypolicy.ErrDownloadArtifactNotFound):
+		return kratoserrors.NotFound("EXPORT_NOT_FOUND", "export artifact not found")
+	case errors.Is(err, securitypolicy.ErrDownloadArtifactActor):
+		return kratoserrors.Forbidden("EXPORT_ACCESS_DENIED", "export artifact access is not permitted")
+	case errors.Is(err, securitypolicy.ErrDownloadArtifactExpired), errors.Is(err, securitypolicy.ErrDownloadArtifactRevoked), errors.Is(err, securitypolicy.ErrDownloadArtifactConsumed):
+		return kratoserrors.Conflict("EXPORT_UNAVAILABLE", "export artifact is no longer downloadable")
+	case errors.Is(err, securitypolicy.ErrDownloadArtifactChecksum):
+		return kratoserrors.InternalServer("EXPORT_INTEGRITY_FAILED", "export artifact integrity validation failed")
+	case errors.Is(err, appdatapolicy.ErrExportDownloadUnavailable):
+		return kratoserrors.InternalServer("EXPORT_UNAVAILABLE", "export download control is unavailable")
+	case errors.Is(err, appdatapolicy.ErrExportActorRequired):
+		return kratoserrors.Forbidden("INTERACTIVE_SESSION_REQUIRED", "interactive session is required")
 	case errors.Is(err, appidentity.ErrInvalidCredentials):
 		return kratoserrors.Unauthorized("UNAUTHENTICATED", "authentication failed")
 	case errors.Is(err, appidentity.ErrInvalidMFA):

@@ -42,6 +42,7 @@ import (
 	"github.com/sevoniva-labs/forge/internal/platform/search"
 	"github.com/sevoniva-labs/forge/internal/platform/securefile"
 	appcrypto "github.com/sevoniva-labs/forge/internal/platform/security/crypto"
+	securitydatapolicy "github.com/sevoniva-labs/forge/internal/platform/security/datapolicy"
 	"github.com/sevoniva-labs/forge/internal/platform/storage"
 )
 
@@ -160,6 +161,11 @@ func New(ctx context.Context, opts Options) (*App, error) {
 	approvalSvc := appapproval.NewService(repository.NewApprovalRepo(db))
 	configChangeSvc := appconfigchange.NewService(repository.NewConfigChangeRepo(db))
 	dataPolicySvc := appdatapolicy.NewService(repository.NewDataPolicyRepo(db))
+	downloadController, err := securitydatapolicy.NewDownloadController(repository.NewDownloadArtifactRepo(db), st, 0)
+	if err != nil {
+		return nil, fmt.Errorf("data export download control: %w", err)
+	}
+	dataPolicySvc.ConfigureDownloadController(downloadController)
 	identitySvc := appidentity.NewService(repo, appidentity.Options{
 		MinLength:     cfg.Security.PasswordMinLength,
 		RequireUpper:  cfg.Security.PasswordUpper,
