@@ -1,6 +1,6 @@
 # Middleware runtime evidence
 
-The RocketMQ, Kafka, Nacos, and OTel runtime contracts can emit the common
+The RocketMQ, Kafka, Nacos, Prometheus, and OTel runtime contracts can emit the common
 `forge-middleware-runtime-evidence` record by setting `FORGE_MIDDLEWARE_EVIDENCE_FILE`.
 The legacy provider-specific evidence variables remain supported for local
 compatibility, but they are not a production or Xinchuang certification.

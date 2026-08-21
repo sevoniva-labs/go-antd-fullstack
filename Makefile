@@ -16,7 +16,7 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 .PHONY: middleware-evidence-check middleware-evidence-check-certified
 .PHONY: identity-evidence-check identity-evidence-check-certified
 .PHONY: compose-storage-policy-check
-.PHONY: malware-evidence-check malware-evidence-check-certified clamav-runtime-contract
+.PHONY: malware-evidence-check malware-evidence-check-certified clamav-runtime-contract prometheus-runtime-contract
 .PHONY: redis-tls-runtime-contract
 
 help:
@@ -45,6 +45,7 @@ help:
 	@echo "  make identity-evidence-check  Validate optional identity runtime evidence"
 	@echo "  make compose-storage-policy-check  Enforce generic external S3 Compose defaults"
 	@echo "  make clamav-runtime-contract  Run the disposable ClamAV malware scan contract"
+	@echo "  make prometheus-runtime-contract  Run the disposable Prometheus query contract"
 	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
 	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
 	@echo "  make redis-tls-runtime-contract  Verify local Redis TLS and ACL contract"
@@ -178,6 +179,9 @@ malware-evidence-check-certified:
 
 clamav-runtime-contract:
 	bash scripts/test-clamav-contract.sh
+
+prometheus-runtime-contract:
+	bash scripts/test-prometheus-contract.sh
 
 nacos-runtime-contract:
 	bash scripts/test-nacos-contract.sh

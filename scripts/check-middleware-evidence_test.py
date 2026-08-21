@@ -42,6 +42,15 @@ class MiddlewareEvidenceTest(unittest.TestCase):
             result = self.run_checker(path)
             self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_prometheus_provider(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "evidence.json"
+            payload = record()
+            payload["provider"] = "prometheus"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            result = self.run_checker(path)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_secret_and_non_digest_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             path = pathlib.Path(directory) / "evidence.json"
