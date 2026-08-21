@@ -30,6 +30,7 @@ const OperationPlatformServiceCreateTemporaryRoleGrant = "/forge.v1.PlatformServ
 const OperationPlatformServiceCreateUser = "/forge.v1.PlatformService/CreateUser"
 const OperationPlatformServiceCreateUserGroup = "/forge.v1.PlatformService/CreateUserGroup"
 const OperationPlatformServiceDecideAccessReviewItem = "/forge.v1.PlatformService/DecideAccessReviewItem"
+const OperationPlatformServiceDownloadDataExport = "/forge.v1.PlatformService/DownloadDataExport"
 const OperationPlatformServiceExportAuditLogs = "/forge.v1.PlatformService/ExportAuditLogs"
 const OperationPlatformServiceGetOrganization = "/forge.v1.PlatformService/GetOrganization"
 const OperationPlatformServiceGetSecurityPolicy = "/forge.v1.PlatformService/GetSecurityPolicy"
@@ -90,6 +91,7 @@ type PlatformServiceHTTPServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	CreateUserGroup(context.Context, *CreateUserGroupRequest) (*CreateUserGroupResponse, error)
 	DecideAccessReviewItem(context.Context, *DecideAccessReviewItemRequest) (*DecideAccessReviewItemResponse, error)
+	DownloadDataExport(context.Context, *DownloadDataExportRequest) (*DownloadDataExportResponse, error)
 	ExportAuditLogs(context.Context, *ExportAuditLogsRequest) (*ExportAuditLogsResponse, error)
 	GetOrganization(context.Context, *GetOrganizationRequest) (*GetOrganizationResponse, error)
 	GetSecurityPolicy(context.Context, *GetSecurityPolicyRequest) (*GetSecurityPolicyResponse, error)
@@ -167,6 +169,7 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.GET("/api/v1/admin/data-policies", _PlatformService_ListDataFieldPolicies0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/data-policies/{policy.field_key}", _PlatformService_UpsertDataFieldPolicy0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/data-exports/authorize", _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/data-exports/{artifact_id}", _PlatformService_DownloadDataExport0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/data-retention/evidence", _PlatformService_ListDataDeletionEvidence0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/data-retention/evidence", _PlatformService_RecordDataDeletionEvidence0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/data-scope", _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv))
@@ -763,6 +766,28 @@ func _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv PlatformServiceHTTPS
 			return err
 		}
 		reply := out.(*AuthorizeDataExportResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_DownloadDataExport0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DownloadDataExportRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceDownloadDataExport)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DownloadDataExport(ctx, req.(*DownloadDataExportRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DownloadDataExportResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1495,6 +1520,7 @@ type PlatformServiceHTTPClient interface {
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
 	CreateUserGroup(ctx context.Context, req *CreateUserGroupRequest, opts ...http.CallOption) (rsp *CreateUserGroupResponse, err error)
 	DecideAccessReviewItem(ctx context.Context, req *DecideAccessReviewItemRequest, opts ...http.CallOption) (rsp *DecideAccessReviewItemResponse, err error)
+	DownloadDataExport(ctx context.Context, req *DownloadDataExportRequest, opts ...http.CallOption) (rsp *DownloadDataExportResponse, err error)
 	ExportAuditLogs(ctx context.Context, req *ExportAuditLogsRequest, opts ...http.CallOption) (rsp *ExportAuditLogsResponse, err error)
 	GetOrganization(ctx context.Context, req *GetOrganizationRequest, opts ...http.CallOption) (rsp *GetOrganizationResponse, err error)
 	GetSecurityPolicy(ctx context.Context, req *GetSecurityPolicyRequest, opts ...http.CallOption) (rsp *GetSecurityPolicyResponse, err error)
@@ -1689,6 +1715,19 @@ func (c *PlatformServiceHTTPClientImpl) DecideAccessReviewItem(ctx context.Conte
 	opts = append(opts, http.Operation(OperationPlatformServiceDecideAccessReviewItem))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) DownloadDataExport(ctx context.Context, in *DownloadDataExportRequest, opts ...http.CallOption) (*DownloadDataExportResponse, error) {
+	var out DownloadDataExportResponse
+	pattern := "/api/v1/admin/data-exports/{artifact_id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlatformServiceDownloadDataExport))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

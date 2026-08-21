@@ -333,6 +333,27 @@ paths:
                 - SessionCookie: []
                   CsrfToken: []
                 - BearerAuth: []
+    /api/v1/admin/data-exports/{artifactId}:
+        get:
+            tags:
+                - PlatformService
+            operationId: PlatformService_DownloadDataExport
+            parameters:
+                - name: artifactId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.DownloadDataExportResponse'
+            security:
+                - SessionCookie: []
+                - BearerAuth: []
     /api/v1/admin/data-policies:
         get:
             tags:
@@ -2430,6 +2451,18 @@ components:
         forge.v1.DisableMFAResponse:
             type: object
             properties: {}
+        forge.v1.DownloadDataExportResponse:
+            type: object
+            properties:
+                content:
+                    type: string
+                    format: bytes
+                contentType:
+                    type: string
+                filename:
+                    type: string
+                sha256:
+                    type: string
         forge.v1.EffectiveDataScope:
             type: object
             properties:

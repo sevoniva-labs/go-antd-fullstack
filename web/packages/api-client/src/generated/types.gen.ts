@@ -373,6 +373,13 @@ export type ForgeV1DisableMfaResponse = {
     [key: string]: unknown;
 };
 
+export type ForgeV1DownloadDataExportResponse = {
+    content?: string;
+    contentType?: string;
+    filename?: string;
+    sha256?: string;
+};
+
 export type ForgeV1EffectiveDataScope = {
     organizationWide?: boolean;
     self?: boolean;
@@ -1255,6 +1262,24 @@ export type PlatformServiceAuthorizeDataExportResponses = {
 };
 
 export type PlatformServiceAuthorizeDataExportResponse = PlatformServiceAuthorizeDataExportResponses[keyof PlatformServiceAuthorizeDataExportResponses];
+
+export type PlatformServiceDownloadDataExportData = {
+    body?: never;
+    path: {
+        artifactId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/data-exports/{artifactId}';
+};
+
+export type PlatformServiceDownloadDataExportResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1DownloadDataExportResponse;
+};
+
+export type PlatformServiceDownloadDataExportResponse = PlatformServiceDownloadDataExportResponses[keyof PlatformServiceDownloadDataExportResponses];
 
 export type PlatformServiceListDataFieldPoliciesData = {
     body?: never;
