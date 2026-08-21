@@ -9,13 +9,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/sevoniva-labs/forge/internal/adapters/auditsink"
+	"github.com/sevoniva-labs/forge/internal/adapters/mailer"
+	"github.com/sevoniva-labs/forge/internal/adapters/notificationdelivery"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
+	"github.com/sevoniva-labs/forge/internal/app/notification"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
 	"github.com/sevoniva-labs/forge/internal/platform/idempotency"
 	"github.com/sevoniva-labs/forge/internal/platform/logx"
+	"github.com/sevoniva-labs/forge/internal/platform/messageworker"
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
 	"github.com/sevoniva-labs/forge/internal/platform/reliablemsg"
+	"github.com/sevoniva-labs/forge/internal/platform/tlsx"
 )
 
 var version = "0.2.0-dev"
@@ -50,6 +56,14 @@ func run(ctx context.Context) error {
 		<-ctx.Done()
 		return nil
 	}
+	deliveryRunner, err := newDeliveryRunner(cfg, db, log)
+	if err != nil {
+		return err
+	}
+	deliveryErrors := make(chan error, 1)
+	if deliveryRunner != nil {
+		go func() { deliveryErrors <- deliveryRunner.Run(ctx) }()
+	}
 	messages := reliablemsg.New(db)
 	idem := idempotency.New(db)
 	auditWriter := audit.NewWriter(db)
@@ -77,6 +91,10 @@ func run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return nil
+		case err := <-deliveryErrors:
+			if err != nil && !errors.Is(err, context.Canceled) {
+				return err
+			}
 		case <-gc.C:
 			if err := idem.PurgeExpired(ctx); err != nil && !errors.Is(err, context.Canceled) {
 				log.Error("idempotency gc", "err", err)
@@ -92,4 +110,58 @@ func run(ctx context.Context) error {
 			}
 		}
 	}
+}
+
+func newDeliveryRunner(cfg config.Config, db *database.DB, log *slog.Logger) (*messageworker.Runner, error) {
+	handlers := make(map[string]messageworker.Handler)
+	if cfg.Notification.Provider == "smtp" {
+		tlsConfig, err := tlsx.ClientConfig(tlsx.ClientOptions{
+			Enabled: true, CAFile: cfg.Notification.SMTPCACertFile,
+			CertFile: cfg.Notification.SMTPCertFile, KeyFile: cfg.Notification.SMTPKeyFile,
+			ServerName: cfg.Notification.SMTPTLSServer,
+		})
+		if err != nil {
+			return nil, err
+		}
+		sender, err := mailer.NewSMTPClient(mailer.Config{
+			Address: cfg.Notification.SMTPAddress, Username: cfg.Notification.SMTPUsername,
+			Password: cfg.Notification.SMTPPassword, TLSConfig: tlsConfig,
+			TLSMode: mailer.TLSMode(cfg.Notification.SMTPTLSMode),
+		})
+		if err != nil {
+			return nil, err
+		}
+		handler, err := notificationdelivery.NewEmailHandler(sender)
+		if err != nil {
+			return nil, err
+		}
+		handlers[notification.EmailMessageType] = handler.Handle
+	}
+	if cfg.SIEM.Provider == "cef-tls" {
+		tlsConfig, err := tlsx.ClientConfig(tlsx.ClientOptions{
+			Enabled: true, CAFile: cfg.SIEM.TLSCAFile,
+			CertFile: cfg.SIEM.TLSCertFile, KeyFile: cfg.SIEM.TLSKeyFile,
+			ServerName: cfg.SIEM.TLSServerName,
+		})
+		if err != nil {
+			return nil, err
+		}
+		sink, err := auditsink.NewCEFClient(cfg.SIEM.Address, tlsConfig)
+		if err != nil {
+			return nil, err
+		}
+		handler, err := auditsink.NewEventHandler(sink)
+		if err != nil {
+			return nil, err
+		}
+		handlers["audit.event"] = handler.Handle
+	}
+	if len(handlers) == 0 {
+		return nil, nil
+	}
+	consumer, err := messaging.NewConsumer(cfg.Messaging)
+	if err != nil {
+		return nil, err
+	}
+	return messageworker.New(db, consumer, handlers, log)
 }

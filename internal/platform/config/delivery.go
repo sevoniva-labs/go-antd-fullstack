@@ -67,6 +67,9 @@ func validateDelivery(c Config) []string {
 		if (c.Notification.SMTPCertFile == "") != (c.Notification.SMTPKeyFile == "") {
 			errs = append(errs, "notification smtp tls cert and key must be configured together")
 		}
+		if !contains(c.Messaging.RocketMQTopics, c.Notification.Topic) {
+			errs = append(errs, "notification topic must be included in messaging.rocketmq_topics")
+		}
 	}
 	if c.SIEM.Provider == "cef-tls" {
 		if strings.TrimSpace(c.SIEM.Address) == "" || strings.TrimSpace(c.SIEM.Topic) == "" {
@@ -74,6 +77,9 @@ func validateDelivery(c Config) []string {
 		}
 		if (c.SIEM.TLSCertFile == "") != (c.SIEM.TLSKeyFile == "") {
 			errs = append(errs, "siem tls cert and key must be configured together")
+		}
+		if !contains(c.Messaging.RocketMQTopics, c.SIEM.Topic) {
+			errs = append(errs, "siem topic must be included in messaging.rocketmq_topics")
 		}
 	}
 	if (c.Notification.Provider == "smtp" || c.SIEM.Provider == "cef-tls") && c.Messaging.Provider != "rocketmq" {
@@ -88,4 +94,13 @@ func validateDelivery(c Config) []string {
 		}
 	}
 	return errs
+}
+
+func contains(values []string, target string) bool {
+	for _, value := range values {
+		if strings.TrimSpace(value) == strings.TrimSpace(target) {
+			return true
+		}
+	}
+	return false
 }
