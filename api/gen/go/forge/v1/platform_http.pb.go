@@ -58,6 +58,7 @@ const OperationPlatformServiceRecordDataDeletionEvidence = "/forge.v1.PlatformSe
 const OperationPlatformServiceReplaceUserAssignments = "/forge.v1.PlatformService/ReplaceUserAssignments"
 const OperationPlatformServiceRequestConfigRollback = "/forge.v1.PlatformService/RequestConfigRollback"
 const OperationPlatformServiceResetUserPassword = "/forge.v1.PlatformService/ResetUserPassword"
+const OperationPlatformServiceRevokeDataExport = "/forge.v1.PlatformService/RevokeDataExport"
 const OperationPlatformServiceRevokeEmergencyAccess = "/forge.v1.PlatformService/RevokeEmergencyAccess"
 const OperationPlatformServiceRevokeSession = "/forge.v1.PlatformService/RevokeSession"
 const OperationPlatformServiceRevokeTemporaryRoleGrant = "/forge.v1.PlatformService/RevokeTemporaryRoleGrant"
@@ -119,6 +120,7 @@ type PlatformServiceHTTPServer interface {
 	ReplaceUserAssignments(context.Context, *ReplaceUserAssignmentsRequest) (*ReplaceUserAssignmentsResponse, error)
 	RequestConfigRollback(context.Context, *RequestConfigRollbackRequest) (*RequestConfigRollbackResponse, error)
 	ResetUserPassword(context.Context, *ResetUserPasswordRequest) (*ResetUserPasswordResponse, error)
+	RevokeDataExport(context.Context, *RevokeDataExportRequest) (*RevokeDataExportResponse, error)
 	RevokeEmergencyAccess(context.Context, *RevokeEmergencyAccessRequest) (*RevokeEmergencyAccessResponse, error)
 	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
 	RevokeTemporaryRoleGrant(context.Context, *RevokeTemporaryRoleGrantRequest) (*RevokeTemporaryRoleGrantResponse, error)
@@ -170,6 +172,7 @@ func RegisterPlatformServiceHTTPServer(s *http.Server, srv PlatformServiceHTTPSe
 	r.PUT("/api/v1/admin/data-policies/{policy.field_key}", _PlatformService_UpsertDataFieldPolicy0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/data-exports/authorize", _PlatformService_AuthorizeDataExport0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/data-exports/{artifact_id}", _PlatformService_DownloadDataExport0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/data-exports/{artifact_id}/revoke", _PlatformService_RevokeDataExport0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/data-retention/evidence", _PlatformService_ListDataDeletionEvidence0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/data-retention/evidence", _PlatformService_RecordDataDeletionEvidence0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/roles/{role_key}/data-scope", _PlatformService_UpdateRoleDataScope0_HTTP_Handler(srv))
@@ -788,6 +791,31 @@ func _PlatformService_DownloadDataExport0_HTTP_Handler(srv PlatformServiceHTTPSe
 			return err
 		}
 		reply := out.(*DownloadDataExportResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _PlatformService_RevokeDataExport0_HTTP_Handler(srv PlatformServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RevokeDataExportRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlatformServiceRevokeDataExport)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RevokeDataExport(ctx, req.(*RevokeDataExportRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RevokeDataExportResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1548,6 +1576,7 @@ type PlatformServiceHTTPClient interface {
 	ReplaceUserAssignments(ctx context.Context, req *ReplaceUserAssignmentsRequest, opts ...http.CallOption) (rsp *ReplaceUserAssignmentsResponse, err error)
 	RequestConfigRollback(ctx context.Context, req *RequestConfigRollbackRequest, opts ...http.CallOption) (rsp *RequestConfigRollbackResponse, err error)
 	ResetUserPassword(ctx context.Context, req *ResetUserPasswordRequest, opts ...http.CallOption) (rsp *ResetUserPasswordResponse, err error)
+	RevokeDataExport(ctx context.Context, req *RevokeDataExportRequest, opts ...http.CallOption) (rsp *RevokeDataExportResponse, err error)
 	RevokeEmergencyAccess(ctx context.Context, req *RevokeEmergencyAccessRequest, opts ...http.CallOption) (rsp *RevokeEmergencyAccessResponse, err error)
 	RevokeSession(ctx context.Context, req *RevokeSessionRequest, opts ...http.CallOption) (rsp *RevokeSessionResponse, err error)
 	RevokeTemporaryRoleGrant(ctx context.Context, req *RevokeTemporaryRoleGrantRequest, opts ...http.CallOption) (rsp *RevokeTemporaryRoleGrantResponse, err error)
@@ -2077,6 +2106,19 @@ func (c *PlatformServiceHTTPClientImpl) ResetUserPassword(ctx context.Context, i
 	pattern := "/api/v1/admin/users/{user_id}/reset-password"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlatformServiceResetUserPassword))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *PlatformServiceHTTPClientImpl) RevokeDataExport(ctx context.Context, in *RevokeDataExportRequest, opts ...http.CallOption) (*RevokeDataExportResponse, error) {
+	var out RevokeDataExportResponse
+	pattern := "/api/v1/admin/data-exports/{artifact_id}/revoke"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationPlatformServiceRevokeDataExport))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

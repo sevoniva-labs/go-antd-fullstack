@@ -46,6 +46,7 @@ const (
 	PlatformService_UpsertDataFieldPolicy_FullMethodName      = "/forge.v1.PlatformService/UpsertDataFieldPolicy"
 	PlatformService_AuthorizeDataExport_FullMethodName        = "/forge.v1.PlatformService/AuthorizeDataExport"
 	PlatformService_DownloadDataExport_FullMethodName         = "/forge.v1.PlatformService/DownloadDataExport"
+	PlatformService_RevokeDataExport_FullMethodName           = "/forge.v1.PlatformService/RevokeDataExport"
 	PlatformService_ListDataDeletionEvidence_FullMethodName   = "/forge.v1.PlatformService/ListDataDeletionEvidence"
 	PlatformService_RecordDataDeletionEvidence_FullMethodName = "/forge.v1.PlatformService/RecordDataDeletionEvidence"
 	PlatformService_UpdateRoleDataScope_FullMethodName        = "/forge.v1.PlatformService/UpdateRoleDataScope"
@@ -111,6 +112,7 @@ type PlatformServiceClient interface {
 	UpsertDataFieldPolicy(ctx context.Context, in *UpsertDataFieldPolicyRequest, opts ...grpc.CallOption) (*UpsertDataFieldPolicyResponse, error)
 	AuthorizeDataExport(ctx context.Context, in *AuthorizeDataExportRequest, opts ...grpc.CallOption) (*AuthorizeDataExportResponse, error)
 	DownloadDataExport(ctx context.Context, in *DownloadDataExportRequest, opts ...grpc.CallOption) (*DownloadDataExportResponse, error)
+	RevokeDataExport(ctx context.Context, in *RevokeDataExportRequest, opts ...grpc.CallOption) (*RevokeDataExportResponse, error)
 	ListDataDeletionEvidence(ctx context.Context, in *ListDataDeletionEvidenceRequest, opts ...grpc.CallOption) (*ListDataDeletionEvidenceResponse, error)
 	RecordDataDeletionEvidence(ctx context.Context, in *RecordDataDeletionEvidenceRequest, opts ...grpc.CallOption) (*RecordDataDeletionEvidenceResponse, error)
 	UpdateRoleDataScope(ctx context.Context, in *UpdateRoleDataScopeRequest, opts ...grpc.CallOption) (*UpdateRoleDataScopeResponse, error)
@@ -417,6 +419,16 @@ func (c *platformServiceClient) DownloadDataExport(ctx context.Context, in *Down
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DownloadDataExportResponse)
 	err := c.cc.Invoke(ctx, PlatformService_DownloadDataExport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *platformServiceClient) RevokeDataExport(ctx context.Context, in *RevokeDataExportRequest, opts ...grpc.CallOption) (*RevokeDataExportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeDataExportResponse)
+	err := c.cc.Invoke(ctx, PlatformService_RevokeDataExport_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -774,6 +786,7 @@ type PlatformServiceServer interface {
 	UpsertDataFieldPolicy(context.Context, *UpsertDataFieldPolicyRequest) (*UpsertDataFieldPolicyResponse, error)
 	AuthorizeDataExport(context.Context, *AuthorizeDataExportRequest) (*AuthorizeDataExportResponse, error)
 	DownloadDataExport(context.Context, *DownloadDataExportRequest) (*DownloadDataExportResponse, error)
+	RevokeDataExport(context.Context, *RevokeDataExportRequest) (*RevokeDataExportResponse, error)
 	ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error)
 	RecordDataDeletionEvidence(context.Context, *RecordDataDeletionEvidenceRequest) (*RecordDataDeletionEvidenceResponse, error)
 	UpdateRoleDataScope(context.Context, *UpdateRoleDataScopeRequest) (*UpdateRoleDataScopeResponse, error)
@@ -896,6 +909,9 @@ func (UnimplementedPlatformServiceServer) AuthorizeDataExport(context.Context, *
 }
 func (UnimplementedPlatformServiceServer) DownloadDataExport(context.Context, *DownloadDataExportRequest) (*DownloadDataExportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DownloadDataExport not implemented")
+}
+func (UnimplementedPlatformServiceServer) RevokeDataExport(context.Context, *RevokeDataExportRequest) (*RevokeDataExportResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeDataExport not implemented")
 }
 func (UnimplementedPlatformServiceServer) ListDataDeletionEvidence(context.Context, *ListDataDeletionEvidenceRequest) (*ListDataDeletionEvidenceResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListDataDeletionEvidence not implemented")
@@ -1496,6 +1512,24 @@ func _PlatformService_DownloadDataExport_Handler(srv interface{}, ctx context.Co
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlatformServiceServer).DownloadDataExport(ctx, req.(*DownloadDataExportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PlatformService_RevokeDataExport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeDataExportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlatformServiceServer).RevokeDataExport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlatformService_RevokeDataExport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlatformServiceServer).RevokeDataExport(ctx, req.(*RevokeDataExportRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2190,6 +2224,10 @@ var PlatformService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DownloadDataExport",
 			Handler:    _PlatformService_DownloadDataExport_Handler,
+		},
+		{
+			MethodName: "RevokeDataExport",
+			Handler:    _PlatformService_RevokeDataExport_Handler,
 		},
 		{
 			MethodName: "ListDataDeletionEvidence",

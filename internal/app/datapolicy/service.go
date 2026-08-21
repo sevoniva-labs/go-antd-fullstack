@@ -140,6 +140,30 @@ func (s *Service) RevokeExport(ctx context.Context, actor identitydomain.Princip
 	return s.downloads.Revoke(ctx, actor.OrganizationID, artifactID, actor.UserID, reason)
 }
 
+func (s *Service) RevokeExportState(ctx context.Context, actor identitydomain.Principal, artifactID, reason string) error {
+	if actor.OrganizationID == "" {
+		return ErrOrganizationRequired
+	}
+	if actor.UserID == "" {
+		return ErrExportActorRequired
+	}
+	if s.downloads == nil {
+		return ErrExportDownloadUnavailable
+	}
+	_, err := s.downloads.RevokeState(ctx, actor.OrganizationID, artifactID, actor.UserID, reason)
+	return err
+}
+
+func (s *Service) CleanupExport(ctx context.Context, actor identitydomain.Principal, artifactID string) error {
+	if actor.OrganizationID == "" {
+		return ErrOrganizationRequired
+	}
+	if s.downloads == nil {
+		return ErrExportDownloadUnavailable
+	}
+	return s.downloads.Cleanup(ctx, actor.OrganizationID, artifactID)
+}
+
 func (s *Service) catalog(ctx context.Context, organizationID string) (*securitypolicy.Catalog, error) {
 	records, err := s.repo.List(ctx, organizationID)
 	if err != nil {

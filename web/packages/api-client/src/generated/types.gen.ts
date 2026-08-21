@@ -697,6 +697,16 @@ export type ForgeV1RevokeApiTokenResponse = {
     [key: string]: unknown;
 };
 
+export type ForgeV1RevokeDataExportRequest = {
+    artifactId?: string;
+    reason?: string;
+};
+
+export type ForgeV1RevokeDataExportResponse = {
+    artifactId?: string;
+    status?: string;
+};
+
 export type ForgeV1RevokeEmergencyAccessRequest = {
     grantId?: string;
     reason?: string;
@@ -1280,6 +1290,24 @@ export type PlatformServiceDownloadDataExportResponses = {
 };
 
 export type PlatformServiceDownloadDataExportResponse = PlatformServiceDownloadDataExportResponses[keyof PlatformServiceDownloadDataExportResponses];
+
+export type PlatformServiceRevokeDataExportData = {
+    body: ForgeV1RevokeDataExportRequest;
+    path: {
+        artifactId: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/data-exports/{artifactId}/revoke';
+};
+
+export type PlatformServiceRevokeDataExportResponses = {
+    /**
+     * OK
+     */
+    200: ForgeV1RevokeDataExportResponse;
+};
+
+export type PlatformServiceRevokeDataExportResponse = PlatformServiceRevokeDataExportResponses[keyof PlatformServiceRevokeDataExportResponses];
 
 export type PlatformServiceListDataFieldPoliciesData = {
     body?: never;

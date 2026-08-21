@@ -488,6 +488,18 @@ service PlatformService {
       ]
     };
   }
+  rpc RevokeDataExport(RevokeDataExportRequest) returns (RevokeDataExportResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/admin/data-exports/{artifact_id}/revoke"
+      body: "*"
+    };
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}, {name: "CsrfToken" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
   rpc ListDataDeletionEvidence(ListDataDeletionEvidenceRequest) returns (ListDataDeletionEvidenceResponse) {
     option (google.api.http) = {get: "/api/v1/admin/data-retention/evidence"};
     option (openapi.v3.operation) = {
@@ -1166,6 +1178,15 @@ message DownloadDataExportResponse {
   string content_type = 2;
   string filename = 3;
   string sha256 = 4;
+}
+
+message RevokeDataExportRequest {
+  string artifact_id = 1;
+  string reason = 2;
+}
+message RevokeDataExportResponse {
+  string artifact_id = 1;
+  string status = 2;
 }
 
 message ListDataDeletionEvidenceRequest {}

@@ -354,6 +354,34 @@ paths:
             security:
                 - SessionCookie: []
                 - BearerAuth: []
+    /api/v1/admin/data-exports/{artifactId}/revoke:
+        post:
+            tags:
+                - PlatformService
+            operationId: PlatformService_RevokeDataExport
+            parameters:
+                - name: artifactId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/forge.v1.RevokeDataExportRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/forge.v1.RevokeDataExportResponse'
+            security:
+                - SessionCookie: []
+                  CsrfToken: []
+                - BearerAuth: []
     /api/v1/admin/data-policies:
         get:
             tags:
@@ -2975,6 +3003,20 @@ components:
         forge.v1.RevokeApiTokenResponse:
             type: object
             properties: {}
+        forge.v1.RevokeDataExportRequest:
+            type: object
+            properties:
+                artifactId:
+                    type: string
+                reason:
+                    type: string
+        forge.v1.RevokeDataExportResponse:
+            type: object
+            properties:
+                artifactId:
+                    type: string
+                status:
+                    type: string
         forge.v1.RevokeEmergencyAccessRequest:
             type: object
             properties:

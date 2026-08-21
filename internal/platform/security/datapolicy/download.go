@@ -185,29 +185,40 @@ func (c *DownloadController) Open(ctx context.Context, organizationID, artifactI
 // failure leaves a non-downloadable CleanupPending record for an operator or
 // scheduled cleanup job to retry; it never reopens access to the artifact.
 func (c *DownloadController) Revoke(ctx context.Context, organizationID, artifactID, actorID, reason string) error {
-	artifact, err := c.registry.Revoke(ctx, strings.TrimSpace(organizationID), strings.TrimSpace(artifactID), strings.TrimSpace(actorID), strings.TrimSpace(reason), c.now().UTC())
+	artifact, err := c.RevokeState(ctx, organizationID, artifactID, actorID, reason)
 	if err != nil {
 		return err
 	}
-	if err := c.objects.Delete(ctx, artifact.ObjectKey); err != nil {
-		if _, markErr := c.registry.MarkCleanupPending(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); markErr != nil {
-			return fmt.Errorf("delete revoked export object: %w; mark cleanup pending: %v", err, markErr)
-		}
-		return fmt.Errorf("delete revoked export object; cleanup pending: %w", err)
-	}
-	return nil
+	return c.cleanupArtifact(ctx, artifact)
 }
 
 func (c *DownloadController) Expire(ctx context.Context, organizationID, artifactID string) error {
-	artifact, err := c.registry.Expire(ctx, strings.TrimSpace(organizationID), strings.TrimSpace(artifactID), c.now().UTC())
+	artifact, err := c.ExpireState(ctx, organizationID, artifactID)
 	if err != nil {
 		return err
 	}
+	return c.cleanupArtifact(ctx, artifact)
+}
+
+func (c *DownloadController) RevokeState(ctx context.Context, organizationID, artifactID, actorID, reason string) (DownloadArtifact, error) {
+	return c.registry.Revoke(ctx, strings.TrimSpace(organizationID), strings.TrimSpace(artifactID), strings.TrimSpace(actorID), strings.TrimSpace(reason), c.now().UTC())
+}
+
+func (c *DownloadController) ExpireState(ctx context.Context, organizationID, artifactID string) (DownloadArtifact, error) {
+	return c.registry.Expire(ctx, strings.TrimSpace(organizationID), strings.TrimSpace(artifactID), c.now().UTC())
+}
+
+func (c *DownloadController) cleanupArtifact(ctx context.Context, artifact DownloadArtifact) error {
 	if err := c.objects.Delete(ctx, artifact.ObjectKey); err != nil {
 		if _, markErr := c.registry.MarkCleanupPending(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); markErr != nil {
-			return fmt.Errorf("delete expired export object: %w; mark cleanup pending: %v", err, markErr)
+			return fmt.Errorf("delete export object: %w; mark cleanup pending: %v", err, markErr)
 		}
-		return fmt.Errorf("delete expired export object; cleanup pending: %w", err)
+		return fmt.Errorf("delete export object; cleanup pending: %w", err)
+	}
+	if artifact.Status == DownloadArtifactCleanup {
+		if _, err := c.registry.CompleteCleanup(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); err != nil {
+			return fmt.Errorf("complete export cleanup: %w", err)
+		}
 	}
 	return nil
 }
@@ -219,16 +230,10 @@ func (c *DownloadController) Cleanup(ctx context.Context, organizationID, artifa
 	if err != nil {
 		return err
 	}
-	if artifact.Status != DownloadArtifactCleanup {
+	if artifact.Status != DownloadArtifactCleanup && artifact.Status != DownloadArtifactRevoked && artifact.Status != DownloadArtifactExpired {
 		return ErrDownloadArtifactInvalid
 	}
-	if err := c.objects.Delete(ctx, artifact.ObjectKey); err != nil {
-		return fmt.Errorf("retry delete export object: %w", err)
-	}
-	if _, err := c.registry.CompleteCleanup(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); err != nil {
-		return fmt.Errorf("complete export cleanup: %w", err)
-	}
-	return nil
+	return c.cleanupArtifact(ctx, artifact)
 }
 
 // memoryArtifactRegistry is intentionally test-only. Production composition

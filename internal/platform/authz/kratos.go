@@ -80,6 +80,7 @@ func PlatformRules() map[string][]string {
 		forgev1.OperationPlatformServiceUpsertDataFieldPolicy:      {"system.data_policy.manage"},
 		forgev1.OperationPlatformServiceAuthorizeDataExport:        {"system.data.export"},
 		forgev1.OperationPlatformServiceDownloadDataExport:         {"system.data.export"},
+		forgev1.OperationPlatformServiceRevokeDataExport:           {"system.data.export"},
 		forgev1.OperationPlatformServiceListDataDeletionEvidence:   {"system.data.retention.read"},
 		forgev1.OperationPlatformServiceRecordDataDeletionEvidence: {"system.data.retention.manage"},
 		forgev1.OperationPlatformServiceUpdateRolePermissions:      {"system.role.manage"},
