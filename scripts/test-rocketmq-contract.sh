@@ -23,6 +23,7 @@ TOPIC=${FORGE_ROCKETMQ_TOPIC:-forge-contract-${PROJECT##*-}}
 GROUP=${FORGE_ROCKETMQ_GROUP:-forge-contract-group-${PROJECT##*-}}
 RUNTIME_GOARCH=${FORGE_ROCKETMQ_RUNTIME_GOARCH:-$(go env GOARCH)}
 EVIDENCE_FILE=${FORGE_ROCKETMQ_EVIDENCE_FILE:-}
+MIDDLEWARE_EVIDENCE_FILE=${FORGE_MIDDLEWARE_EVIDENCE_FILE:-}
 
 export ROCKETMQ_IMAGE="$FORGE_ROCKETMQ_IMAGE"
 
@@ -233,6 +234,15 @@ payload = {
 }
 pathlib.Path(path).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 PY
+fi
+
+if [[ -n "$MIDDLEWARE_EVIDENCE_FILE" ]]; then
+  FORGE_MIDDLEWARE_EVIDENCE_FILE="$MIDDLEWARE_EVIDENCE_FILE" \
+  FORGE_MIDDLEWARE_PROVIDER=rocketmq \
+  FORGE_MIDDLEWARE_IMAGE="$FORGE_ROCKETMQ_IMAGE" \
+  FORGE_MIDDLEWARE_ENDPOINT="$RUNTIME_ENDPOINT" \
+  FORGE_MIDDLEWARE_CHECKS='{"nameserver-broker-ready":"passed","unique-topic-created":"passed","nameserver-topic-route-visible":"passed","sdk-produce-consume-ack":"passed"}' \
+  python3 scripts/write-middleware-evidence.py
 fi
 
 printf 'RocketMQ runtime contract passed: image=%s\n' "$FORGE_ROCKETMQ_IMAGE"

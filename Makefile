@@ -13,6 +13,7 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 .PHONY: crypto-evidence-check crypto-evidence-check-certified
 .PHONY: database-evidence-check database-evidence-check-certified
 .PHONY: s3-evidence-check s3-evidence-check-certified
+.PHONY: middleware-evidence-check middleware-evidence-check-certified
 .PHONY: redis-tls-runtime-contract
 
 help:
@@ -46,6 +47,7 @@ help:
 	@echo "  make mysql-runtime-contract  Start MySQL and run the migration/schema contract"
 	@echo "  make mysql-backup-restore-contract  Run local MySQL backup and restore contract"
 	@echo "  make kafka-runtime-contract  Start Kafka and run the franz-go stream contract"
+	@echo "  make middleware-evidence-check  Validate optional standard middleware runtime evidence"
 	@echo "  make s3-local-advanced-contract  Run generic S3 advanced capability contract locally"
 	@echo "  make apisix-runtime-contract  Run APISIX route and Admin API boundary contract"
 	@echo "  make postgres-backup-restore-contract  Run local PostgreSQL backup and restore contract"
@@ -246,7 +248,7 @@ supply-chain-evidence: ci-policy
 release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
-verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
+verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check middleware-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-build:
 	bash scripts/build-offline-package.sh
@@ -277,6 +279,15 @@ crypto-evidence-check-certified:
 	@test -n "$(FORGE_CRYPTO_EVIDENCE_FILE)" || (echo "FORGE_CRYPTO_EVIDENCE_FILE is required" >&2; exit 1)
 	@test -n "$(FORGE_CRYPTO_EVIDENCE_ROOT)" || (echo "FORGE_CRYPTO_EVIDENCE_ROOT is required" >&2; exit 1)
 	python3 scripts/check-crypto-evidence.py --file "$(FORGE_CRYPTO_EVIDENCE_FILE)" --evidence-root "$(FORGE_CRYPTO_EVIDENCE_ROOT)" --require-target-tested
+
+middleware-evidence-check:
+	python3 scripts/check-middleware-evidence_test.py
+	python3 scripts/check-middleware-evidence.py
+
+middleware-evidence-check-certified:
+	@test -n "$(FORGE_MIDDLEWARE_EVIDENCE_FILE)" || (echo "FORGE_MIDDLEWARE_EVIDENCE_FILE is required" >&2; exit 1)
+	@test -n "$(FORGE_MIDDLEWARE_EVIDENCE_ROOT)" || (echo "FORGE_MIDDLEWARE_EVIDENCE_ROOT is required" >&2; exit 1)
+	python3 scripts/check-middleware-evidence.py --file "$(FORGE_MIDDLEWARE_EVIDENCE_FILE)" --evidence-root "$(FORGE_MIDDLEWARE_EVIDENCE_ROOT)" --require-target-tested
 
 database-evidence-check:
 	python3 scripts/check-database-evidence_test.py
