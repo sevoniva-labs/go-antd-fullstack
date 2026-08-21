@@ -7,6 +7,7 @@ KAFKA_IMAGE="${FORGE_KAFKA_IMAGE:?FORGE_KAFKA_IMAGE must be set to an immutable 
 COMPOSE_CMD="${FORGE_COMPOSE_CMD:-docker compose}"
 RUNTIME_GOARCH="${FORGE_KAFKA_GOARCH:-$(go env GOARCH)}"
 EVIDENCE_FILE="${FORGE_KAFKA_EVIDENCE_FILE:-}"
+MIDDLEWARE_EVIDENCE_FILE="${FORGE_MIDDLEWARE_EVIDENCE_FILE:-}"
 PROJECT="${FORGE_KAFKA_COMPOSE_PROJECT:-forge-kafka-contract}"
 TOPIC="forge-contract-$(date +%s)-$$"
 GROUP="forge-contract-group-$(date +%s)-$$"
@@ -121,6 +122,15 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
   "franz_go_produce_consume": true
 }
 EOF
+fi
+
+if [[ -n "$MIDDLEWARE_EVIDENCE_FILE" ]]; then
+  FORGE_MIDDLEWARE_EVIDENCE_FILE="$MIDDLEWARE_EVIDENCE_FILE" \
+  FORGE_MIDDLEWARE_PROVIDER=kafka \
+  FORGE_MIDDLEWARE_IMAGE="$KAFKA_IMAGE" \
+  FORGE_MIDDLEWARE_ENDPOINT=kafka:9092 \
+  FORGE_MIDDLEWARE_CHECKS='{"broker-ready":"passed","unique-topic-created":"passed","franz-go-produce-consume":"passed"}' \
+  python3 "$ROOT/scripts/write-middleware-evidence.py"
 fi
 
 echo "Kafka runtime contract passed: image=$KAFKA_IMAGE"

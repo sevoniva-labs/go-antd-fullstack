@@ -8,6 +8,7 @@ COMPOSE_CMD="${FORGE_COMPOSE_CMD:-docker compose}"
 HTTP_PORT="${FORGE_OTEL_HTTP_PORT:-14318}"
 HEALTH_PORT="${FORGE_OTEL_HEALTH_PORT:-13133}"
 EVIDENCE_FILE="${FORGE_OTEL_EVIDENCE_FILE:-}"
+MIDDLEWARE_EVIDENCE_FILE="${FORGE_MIDDLEWARE_EVIDENCE_FILE:-}"
 CONFIG_FILE="$(mktemp "$ROOT/otel-contract-config.XXXXXX")"
 RESPONSE_FILE="$(mktemp "$ROOT/otel-contract-response.XXXXXX")"
 
@@ -91,6 +92,15 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
   "otlp_http_trace_status": ${HTTP_STATUS}
 }
 EOF
+fi
+
+if [[ -n "$MIDDLEWARE_EVIDENCE_FILE" ]]; then
+  FORGE_MIDDLEWARE_EVIDENCE_FILE="$MIDDLEWARE_EVIDENCE_FILE" \
+  FORGE_MIDDLEWARE_PROVIDER=otel \
+  FORGE_MIDDLEWARE_IMAGE="$OTEL_IMAGE" \
+  FORGE_MIDDLEWARE_ENDPOINT="http://127.0.0.1:${HTTP_PORT}/v1/traces" \
+  FORGE_MIDDLEWARE_CHECKS='{"health-check":"passed","otlp-http-trace-accepted":"passed"}' \
+  python3 "$ROOT/scripts/write-middleware-evidence.py"
 fi
 
 echo "OTel runtime contract passed: image=$OTEL_IMAGE"

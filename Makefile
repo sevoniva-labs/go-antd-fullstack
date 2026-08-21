@@ -12,6 +12,9 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 .PHONY: help run worker migrate test fmt tidy web-install web-api-generate web-api-check web-dev web-build web-budget web-e2e-install-cn build check contract module-boundaries proto-tools proto-lint proto-generate proto-breaking proto-check storage-s3-contract storage-cos-contract storage-cos-advanced-contract s3-local-advanced-contract apisix-runtime-contract identity-compose-config identity-runtime-contract nacos-runtime-contract redis-runtime-contract rocketmq-runtime-contract otel-runtime-contract mysql-runtime-contract mysql-backup-restore-contract kafka-runtime-contract postgres-backup-restore-contract offline-build offline-check offline-check-certified disaster-check disaster-check-certified docker-build compose-up compose-down init ai-governance apisix-policy ci-policy ci-go ci-web ci-web-e2e ci-deploy security-tools supply-chain-evidence release-evidence verify
 .PHONY: crypto-evidence-check crypto-evidence-check-certified
 .PHONY: database-evidence-check database-evidence-check-certified
+.PHONY: s3-evidence-check s3-evidence-check-certified
+.PHONY: middleware-evidence-check middleware-evidence-check-certified
+.PHONY: redis-tls-runtime-contract
 
 help:
 	@echo "Sevoniva Forge"
@@ -38,11 +41,13 @@ help:
 	@echo "  make identity-runtime-contract  Start and probe the local LDAP/SSO contract overlay"
 	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
 	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
+	@echo "  make redis-tls-runtime-contract  Verify local Redis TLS and ACL contract"
 	@echo "  make rocketmq-runtime-contract  Start and probe the local RocketMQ 5 contract overlay"
 	@echo "  make otel-runtime-contract  Start and probe the local OTel Collector contract overlay"
 	@echo "  make mysql-runtime-contract  Start MySQL and run the migration/schema contract"
 	@echo "  make mysql-backup-restore-contract  Run local MySQL backup and restore contract"
 	@echo "  make kafka-runtime-contract  Start Kafka and run the franz-go stream contract"
+	@echo "  make middleware-evidence-check  Validate optional standard middleware runtime evidence"
 	@echo "  make s3-local-advanced-contract  Run generic S3 advanced capability contract locally"
 	@echo "  make apisix-runtime-contract  Run APISIX route and Admin API boundary contract"
 	@echo "  make postgres-backup-restore-contract  Run local PostgreSQL backup and restore contract"
@@ -153,6 +158,9 @@ nacos-runtime-contract:
 redis-runtime-contract:
 	bash scripts/test-redis-contract.sh
 
+redis-tls-runtime-contract:
+	bash scripts/test-redis-tls-contract.sh
+
 rocketmq-runtime-contract:
 	bash scripts/test-rocketmq-contract.sh
 
@@ -240,7 +248,7 @@ supply-chain-evidence: ci-policy
 release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
-verify: offline-check disaster-check crypto-evidence-check database-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
+verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check middleware-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-build:
 	bash scripts/build-offline-package.sh
@@ -272,6 +280,15 @@ crypto-evidence-check-certified:
 	@test -n "$(FORGE_CRYPTO_EVIDENCE_ROOT)" || (echo "FORGE_CRYPTO_EVIDENCE_ROOT is required" >&2; exit 1)
 	python3 scripts/check-crypto-evidence.py --file "$(FORGE_CRYPTO_EVIDENCE_FILE)" --evidence-root "$(FORGE_CRYPTO_EVIDENCE_ROOT)" --require-target-tested
 
+middleware-evidence-check:
+	python3 scripts/check-middleware-evidence_test.py
+	python3 scripts/check-middleware-evidence.py
+
+middleware-evidence-check-certified:
+	@test -n "$(FORGE_MIDDLEWARE_EVIDENCE_FILE)" || (echo "FORGE_MIDDLEWARE_EVIDENCE_FILE is required" >&2; exit 1)
+	@test -n "$(FORGE_MIDDLEWARE_EVIDENCE_ROOT)" || (echo "FORGE_MIDDLEWARE_EVIDENCE_ROOT is required" >&2; exit 1)
+	python3 scripts/check-middleware-evidence.py --file "$(FORGE_MIDDLEWARE_EVIDENCE_FILE)" --evidence-root "$(FORGE_MIDDLEWARE_EVIDENCE_ROOT)" --require-target-tested
+
 database-evidence-check:
 	python3 scripts/check-database-evidence_test.py
 	python3 scripts/check-database-evidence.py
@@ -280,6 +297,15 @@ database-evidence-check-certified:
 	@test -n "$(FORGE_DATABASE_EVIDENCE_FILE)" || (echo "FORGE_DATABASE_EVIDENCE_FILE is required" >&2; exit 1)
 	@test -n "$(FORGE_DATABASE_EVIDENCE_ROOT)" || (echo "FORGE_DATABASE_EVIDENCE_ROOT is required" >&2; exit 1)
 	python3 scripts/check-database-evidence.py --file "$(FORGE_DATABASE_EVIDENCE_FILE)" --evidence-root "$(FORGE_DATABASE_EVIDENCE_ROOT)" --require-target-tested
+
+s3-evidence-check:
+	python3 scripts/check-s3-evidence_test.py
+	python3 scripts/check-s3-evidence.py
+
+s3-evidence-check-certified:
+	@test -n "$(FORGE_S3_EVIDENCE_FILE)" || (echo "FORGE_S3_EVIDENCE_FILE is required" >&2; exit 1)
+	@test -n "$(FORGE_S3_EVIDENCE_ROOT)" || (echo "FORGE_S3_EVIDENCE_ROOT is required" >&2; exit 1)
+	python3 scripts/check-s3-evidence.py --file "$(FORGE_S3_EVIDENCE_FILE)" --evidence-root "$(FORGE_S3_EVIDENCE_ROOT)" --require-target-tested
 
 docker-build:
 	@for value in "$$FORGE_NODE_IMAGE" "$$FORGE_GO_IMAGE" "$$FORGE_RUNTIME_IMAGE"; do \

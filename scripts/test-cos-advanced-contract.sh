@@ -25,6 +25,8 @@ REQUIRE_ADVANCED=${FORGE_COS_REQUIRE_ADVANCED:-false}
 ALLOW_MUTATING=${FORGE_COS_ALLOW_MUTATING_ADVANCED:-false}
 PREFIX=${FORGE_COS_PREFIX:-forge-advanced-$(date -u +%Y%m%dT%H%M%SZ)-$$}
 EVIDENCE_FILE=${FORGE_COS_ADVANCED_EVIDENCE_FILE:-}
+COMPATIBILITY_EVIDENCE_FILE=${FORGE_S3_COMPATIBILITY_EVIDENCE_FILE:-}
+COMPATIBILITY_EVIDENCE_LEVEL=${FORGE_S3_EVIDENCE_LEVEL:-Not certified}
 TMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/forge-cos-advanced.XXXXXX")
 CREATED_KEYS=()
 FAILURES=()
@@ -62,6 +64,17 @@ PY
   rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
+
+if [[ -n "$COMPATIBILITY_EVIDENCE_FILE" ]]; then
+  : "${FORGE_S3_PROVIDER:?FORGE_S3_PROVIDER is required for compatibility evidence}"
+  : "${FORGE_S3_TARGET_PRODUCT:?FORGE_S3_TARGET_PRODUCT is required for compatibility evidence}"
+  : "${FORGE_S3_TARGET_VERSION:?FORGE_S3_TARGET_VERSION is required for compatibility evidence}"
+  : "${FORGE_S3_TARGET_ARCHITECTURE:?FORGE_S3_TARGET_ARCHITECTURE is required for compatibility evidence}"
+  : "${FORGE_S3_TARGET_OS:?FORGE_S3_TARGET_OS is required for compatibility evidence}"
+  : "${FORGE_S3_TARGET_RUNTIME:?FORGE_S3_TARGET_RUNTIME is required for compatibility evidence}"
+  : "${FORGE_S3_TARGET_DRIVER:?FORGE_S3_TARGET_DRIVER is required for compatibility evidence}"
+  : "${EVIDENCE_FILE:?FORGE_COS_ADVANCED_EVIDENCE_FILE is required for compatibility evidence}"
+fi
 
 aws_cmd() {
   AWS_PAGER='' aws s3api "$@" --endpoint-url "$FORGE_COS_ENDPOINT" --region "$FORGE_COS_REGION"
@@ -242,6 +255,93 @@ payload = {
     "capabilities": {"checksum": checksum, "multipart_recovery": multipart, "constrained_presign": presign, "sse_kms": sse_kms, "object_lock": object_lock, "retention": retention, "legal_hold": legal_hold, "temporary_credential": temporary},
 }
 pathlib.Path(path).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+PY
+fi
+
+if [[ -n "$COMPATIBILITY_EVIDENCE_FILE" ]]; then
+  compatibility_ref=${FORGE_S3_EVIDENCE_REF:-$(basename "$EVIDENCE_FILE")}
+  compatibility_digest=$(shasum -a 256 "$EVIDENCE_FILE" | awk '{print $1}')
+  mkdir -p "$(dirname "$COMPATIBILITY_EVIDENCE_FILE")"
+  python3 - "$COMPATIBILITY_EVIDENCE_FILE" "$FORGE_S3_PROVIDER" "$COMPATIBILITY_EVIDENCE_LEVEL" "$FORGE_S3_TARGET_PRODUCT" "$FORGE_S3_TARGET_VERSION" "$FORGE_S3_TARGET_ARCHITECTURE" "$FORGE_S3_TARGET_OS" "$FORGE_S3_TARGET_RUNTIME" "$FORGE_S3_TARGET_DRIVER" "$FORGE_COS_ENDPOINT" "$FORGE_COS_REGION" "$FORGE_COS_BUCKET" "$compatibility_ref" "$compatibility_digest" "${STATUS[basic_object_write]:-not-tested}" "${STATUS[checksum]:-not-tested}" "${STATUS[multipart_recovery]:-not-tested}" "${STATUS[constrained_presign]:-not-tested}" "${STATUS[sse_kms]:-not-tested}" "${STATUS[object_lock]:-not-tested}" "${STATUS[retention]:-not-tested}" "${STATUS[legal_hold]:-not-tested}" "${STATUS[temporary_credential]:-not-tested}" <<'PY'
+import json
+import pathlib
+import sys
+from datetime import datetime, timezone
+
+(
+    path,
+    provider,
+    level,
+    product,
+    version,
+    architecture,
+    operating_system,
+    runtime,
+    driver,
+    endpoint,
+    region,
+    bucket,
+    evidence_ref,
+    evidence_digest,
+    basic,
+    checksum,
+    multipart,
+    presign,
+    sse_kms,
+    object_lock,
+    retention,
+    legal_hold,
+    temporary,
+) = sys.argv[1:]
+
+def state(value):
+    if value == "passed":
+        return "passed"
+    if value == "failed":
+        return "failed"
+    return "not_tested"
+
+raw = {
+    "basic_object_io": basic,
+    "checksum": checksum,
+    "multipart_recovery": multipart,
+    "constrained_presign": presign,
+    "sse_kms": sse_kms,
+    "object_lock": object_lock,
+    "retention": retention,
+    "legal_hold": legal_hold,
+    "temporary_credential": temporary,
+}
+capabilities = {}
+claims = []
+for name, value in raw.items():
+    capability_state = state(value)
+    capabilities[name] = {"state": capability_state}
+    if capability_state == "passed":
+        capabilities[name]["evidence_ref"] = evidence_ref
+        claims.append(name)
+
+document = {
+    "kind": "forge-s3-compatibility-evidence",
+    "level": level,
+    "provider": provider,
+    "target": {
+        "product": product,
+        "version": version,
+        "architecture": architecture,
+        "os": operating_system,
+        "runtime": runtime,
+        "driver": driver,
+        "endpoint": endpoint,
+        "region": region,
+        "bucket": bucket,
+    },
+    "tested_at": datetime.now(timezone.utc).isoformat(),
+    "tested_capabilities": claims,
+    "capabilities": capabilities,
+    "evidence": {evidence_ref: evidence_digest},
+}
+pathlib.Path(path).write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 PY
 fi
 

@@ -110,7 +110,8 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 ## Redis runtime contract evidence (2026-08-21)
 
 - `scripts/test-redis-contract.sh` provides a disposable Redis runtime contract using an approved immutable image digest and a local-only password. It validates authenticated `PING`, rejection of unauthenticated `PING`, authenticated `SET`/`GET`, and a positive key TTL.
-- 2026-08-21: the exact local Redis image `docker.m.daocloud.io/library/redis@sha256:fbdbaea47b9ae4ecc2082ecdb4e1cea81e32176ffb1dcf643d422ad07427e5d9` was pulled from the domestic mirror and the standalone runtime contract passed with a temporary local password. Sentinel, Cluster, TLS, ACL rotation, persistence recovery, and production failover remain unverified until their target evidence is executed.
+- 2026-08-21: the exact local Redis image `docker.m.daocloud.io/library/redis@sha256:fbdbaea47b9ae4ecc2082ecdb4e1cea81e32176ffb1dcf643d422ad07427e5d9` was pulled from the domestic mirror and the standalone runtime contract passed with a temporary local password, including appendonly configuration and value recovery across a container restart. Sentinel, Cluster, TLS, ACL rotation, and production failover remain unverified until their target evidence is executed.
+- The opt-in `make redis-tls-runtime-contract` generates short-lived test certificates, runs the same immutable image with plaintext disabled, and verifies the certificate chain, password authentication, ACL key scope, and value recovery after restart. This is local TLS/ACL evidence only; it does not certify Sentinel, Cluster, mTLS policy, ACL rotation, or production failover.
 - Run `make redis-runtime-contract` with a temporary local password and set `FORGE_REDIS_EVIDENCE_FILE` for a non-secret JSON record. This is standalone development evidence only, not Redis topology, production, Xinchuang, or regulatory certification.
 
 ## RocketMQ runtime contract evidence (2026-08-21)
@@ -142,6 +143,7 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 ## Local generic S3 advanced contract evidence (2026-08-21)
 
 - `scripts/test-s3-local-advanced-contract.sh` starts a disposable domestic MinIO S3-compatible endpoint, creates a versioned Object Lock bucket, and delegates to `scripts/test-cos-advanced-contract.sh` with generic S3 endpoint settings. It exercises checksum, multipart abort/recovery, constrained presign, versioning, and approved legal-hold mutation where the endpoint supports them.
+- Set `FORGE_S3_LOCAL_COMPATIBILITY_EVIDENCE_FILE` together with the non-secret `FORGE_S3_LOCAL_TARGET_*` metadata to emit the standard `forge-s3-compatibility-evidence` document; validate it with `FORGE_S3_EVIDENCE_ROOT` and `make s3-evidence-check-certified`. The result is generic S3-compatible evidence only.
 - The exact domestic mirror image used for the local capability contract is `docker.m.daocloud.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e`.
 - Run `make s3-local-advanced-contract` with temporary local `FORGE_S3_LOCAL_ACCESS_KEY` and `FORGE_S3_LOCAL_SECRET_KEY` values and optionally set `FORGE_S3_LOCAL_EVIDENCE_FILE`. This is generic S3-compatible capability evidence only; it does not certify Tencent COS, another vendor's KMS/STS/Object Lock semantics, production retention policy, or regulatory compliance.
 
@@ -153,3 +155,4 @@ OFFLINE_BUNDLE_DIR=/path/to/approved-bundle make offline-check
 - This evidence proves only the disposable standalone route/Admin API contract for the tested digests. Production mTLS, controller admission, HA, rate-limit topology, upgrade rehearsal, and regulatory/Xinchuang certification remain unverified; the broader APISIX target remains `Not certified`.
 
 - `make database-evidence-check` validates the non-secret database compatibility evidence contract. The checked-in example remains `Not certified`; certified mode requires real target evidence and digest verification.
+- `make s3-evidence-check` validates the provider-neutral S3 compatibility evidence contract. The checked-in example remains `Not certified`; certified mode requires exact target metadata, real capability reports, and digest verification.
