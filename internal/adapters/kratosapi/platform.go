@@ -835,6 +835,8 @@ func serviceError(err error) error {
 		return kratoserrors.Conflict("AUDIT_INTEGRITY_FAILED", "audit log integrity verification failed")
 	case errors.Is(err, securitypolicy.ErrDownloadArtifactNotFound):
 		return kratoserrors.NotFound("EXPORT_NOT_FOUND", "export artifact not found")
+	case errors.Is(err, securitypolicy.ErrDownloadArtifactActor):
+		return kratoserrors.Forbidden("EXPORT_ACCESS_DENIED", "export artifact access is not permitted")
 	case errors.Is(err, securitypolicy.ErrDownloadArtifactExpired), errors.Is(err, securitypolicy.ErrDownloadArtifactRevoked), errors.Is(err, securitypolicy.ErrDownloadArtifactConsumed):
 		return kratoserrors.Conflict("EXPORT_UNAVAILABLE", "export artifact is no longer downloadable")
 	case errors.Is(err, securitypolicy.ErrDownloadArtifactChecksum):

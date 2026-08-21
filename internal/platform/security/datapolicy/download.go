@@ -30,6 +30,7 @@ var (
 	ErrDownloadArtifactExpired  = errors.New("download artifact has expired")
 	ErrDownloadArtifactRevoked  = errors.New("download artifact has been revoked")
 	ErrDownloadArtifactConsumed = errors.New("download artifact has already been downloaded")
+	ErrDownloadArtifactActor    = errors.New("download artifact actor mismatch")
 	ErrDownloadArtifactInvalid  = errors.New("download artifact is invalid")
 	ErrDownloadArtifactChecksum = errors.New("download artifact checksum mismatch")
 )
@@ -148,6 +149,9 @@ func (c *DownloadController) Open(ctx context.Context, organizationID, artifactI
 	}
 	if artifact.Status == DownloadArtifactDownloaded || artifact.Downloads >= artifact.MaxDownloads {
 		return artifact, nil, ErrDownloadArtifactConsumed
+	}
+	if strings.TrimSpace(actorID) == "" || artifact.ActorID != strings.TrimSpace(actorID) {
+		return artifact, nil, ErrDownloadArtifactActor
 	}
 	if c.now().UTC().After(artifact.ExpiresAt) {
 		return artifact, nil, ErrDownloadArtifactExpired
