@@ -479,6 +479,15 @@ service PlatformService {
       ]
     };
   }
+  rpc DownloadDataExport(DownloadDataExportRequest) returns (DownloadDataExportResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/data-exports/{artifact_id}"};
+    option (openapi.v3.operation) = {
+      security: [
+        {additional_properties: [{name: "SessionCookie" value: {value: []}}]},
+        {additional_properties: [{name: "BearerAuth" value: {value: []}}]}
+      ]
+    };
+  }
   rpc ListDataDeletionEvidence(ListDataDeletionEvidenceRequest) returns (ListDataDeletionEvidenceResponse) {
     option (google.api.http) = {get: "/api/v1/admin/data-retention/evidence"};
     option (openapi.v3.operation) = {
@@ -1147,6 +1156,16 @@ message AuthorizeDataExportResponse {
   bool authorized = 1;
   string purpose = 2;
   string watermark = 3;
+}
+
+message DownloadDataExportRequest {
+  string artifact_id = 1;
+}
+message DownloadDataExportResponse {
+  bytes content = 1;
+  string content_type = 2;
+  string filename = 3;
+  string sha256 = 4;
 }
 
 message ListDataDeletionEvidenceRequest {}

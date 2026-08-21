@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"strings"
 	"time"
 
@@ -20,13 +21,20 @@ var (
 	ErrInvalidPolicy        = errors.New("invalid data field policy")
 	ErrNoExportFields       = errors.New("at least one data field is required for export")
 	ErrOrganizationRequired = errors.New("organization is required")
+	ErrExportDownloadUnavailable = errors.New("export download control is unavailable")
+	ErrExportActorRequired       = errors.New("interactive export actor is required")
 )
 
 type Service struct {
-	repo *repository.DataPolicyRepo
+	repo      *repository.DataPolicyRepo
+	downloads *securitypolicy.DownloadController
 }
 
 func NewService(repo *repository.DataPolicyRepo) *Service { return &Service{repo: repo} }
+
+func (s *Service) ConfigureDownloadController(controller *securitypolicy.DownloadController) {
+	s.downloads = controller
+}
 
 func (s *Service) List(ctx context.Context, actor identitydomain.Principal) ([]securitypolicy.Record, error) {
 	if actor.OrganizationID == "" {
@@ -84,6 +92,52 @@ func (s *Service) RenderExport(ctx context.Context, actor identitydomain.Princip
 		return securitypolicy.ExportArtifact{}, err
 	}
 	return catalog.RenderExport(options, rows)
+}
+
+// PublishExport renders an explicit server-side projection and creates a
+// one-time download ticket. Domain modules must obtain rows through their own
+// authorized query path; this method never accepts client-provided records.
+func (s *Service) PublishExport(ctx context.Context, actor identitydomain.Principal, options securitypolicy.ExportOptions, rows []securitypolicy.ExportRow, expiresAt time.Time) (securitypolicy.DownloadArtifact, error) {
+	if actor.OrganizationID == "" {
+		return securitypolicy.DownloadArtifact{}, ErrOrganizationRequired
+	}
+	if actor.UserID == "" {
+		return securitypolicy.DownloadArtifact{}, ErrExportActorRequired
+	}
+	if s.downloads == nil {
+		return securitypolicy.DownloadArtifact{}, ErrExportDownloadUnavailable
+	}
+	artifact, err := s.RenderExport(ctx, actor, options, rows)
+	if err != nil {
+		return securitypolicy.DownloadArtifact{}, err
+	}
+	return s.downloads.Publish(ctx, actor.OrganizationID, actor.UserID, options.ApprovalID, artifact.ContentType, artifact.Content, expiresAt)
+}
+
+func (s *Service) OpenExport(ctx context.Context, actor identitydomain.Principal, artifactID string) (securitypolicy.DownloadArtifact, io.ReadCloser, error) {
+	if actor.OrganizationID == "" {
+		return securitypolicy.DownloadArtifact{}, nil, ErrOrganizationRequired
+	}
+	if actor.UserID == "" {
+		return securitypolicy.DownloadArtifact{}, nil, ErrExportActorRequired
+	}
+	if s.downloads == nil {
+		return securitypolicy.DownloadArtifact{}, nil, ErrExportDownloadUnavailable
+	}
+	return s.downloads.Open(ctx, actor.OrganizationID, artifactID, actor.UserID)
+}
+
+func (s *Service) RevokeExport(ctx context.Context, actor identitydomain.Principal, artifactID, reason string) error {
+	if actor.OrganizationID == "" {
+		return ErrOrganizationRequired
+	}
+	if actor.UserID == "" {
+		return ErrExportActorRequired
+	}
+	if s.downloads == nil {
+		return ErrExportDownloadUnavailable
+	}
+	return s.downloads.Revoke(ctx, actor.OrganizationID, artifactID, actor.UserID, reason)
 }
 
 func (s *Service) catalog(ctx context.Context, organizationID string) (*securitypolicy.Catalog, error) {
