@@ -138,7 +138,7 @@ func (r *DownloadArtifactRepo) ListCleanupPending(ctx context.Context, limit int
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	items := make([]securitypolicy.DownloadArtifact, 0, limit)
 	for rows.Next() {
 		item, scanErr := r.scan(rows)
@@ -164,7 +164,7 @@ func (r *DownloadArtifactRepo) ListExpiredReady(ctx context.Context, now time.Ti
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	items := make([]securitypolicy.DownloadArtifact, 0, limit)
 	for rows.Next() {
 		item, scanErr := r.scan(rows)
