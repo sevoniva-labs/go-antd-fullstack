@@ -11,12 +11,15 @@ IMAGE='docker.m.daocloud.io/axllent/mailpit@sha256:81370195cd4a0eab9604d17c2617a
 
 mkdir -p "$(dirname "$EVIDENCE_FILE")"
 compose=(docker compose --project-name "$PROJECT_NAME" -f "$COMPOSE_FILE")
+compose() {
+  FORGE_MAIL_IMAGE="$IMAGE" "${compose[@]}" "$@"
+}
 cleanup() {
-  "${compose[@]}" down --volumes --remove-orphans >/dev/null 2>&1 || true
+  compose down --volumes --remove-orphans >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-"${compose[@]}" up -d --quiet-pull
+compose up -d --quiet-pull
 ready=false
 for _ in $(seq 1 60); do
   if curl --fail --silent --show-error --max-time 2 "http://127.0.0.1:${UI_PORT}/api/v1/info" >/dev/null; then

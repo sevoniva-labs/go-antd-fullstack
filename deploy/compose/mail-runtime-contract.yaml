@@ -1,6 +1,6 @@
 services:
   mail:
-    image: docker.m.daocloud.io/axllent/mailpit@sha256:81370195cd4a0eab9604d17c2617a7525b0486f9365555253b6c5376c6350f1a
+    image: ${FORGE_MAIL_IMAGE:?set FORGE_MAIL_IMAGE to an approved immutable Mailpit image digest}
     environment:
       MP_MAX_MESSAGES: "100"
     ports:
