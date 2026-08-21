@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS data_export_artifacts (
     CONSTRAINT fk_data_export_artifacts_org FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_data_export_artifacts_org_status_expiry ON data_export_artifacts(organization_id, status, expires_at);
+CREATE INDEX idx_data_export_artifacts_status_expiry ON data_export_artifacts(status, expires_at, id);
+CREATE INDEX idx_data_export_artifacts_status_updated ON data_export_artifacts(status, updated_at, id);
 
 -- +goose Down
 DROP TABLE IF EXISTS data_export_artifacts;

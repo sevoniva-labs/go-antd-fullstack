@@ -153,6 +153,32 @@ func (r *DownloadArtifactRepo) ListCleanupPending(ctx context.Context, limit int
 	return items, nil
 }
 
+func (r *DownloadArtifactRepo) ListExpiredReady(ctx context.Context, now time.Time, limit int) ([]securitypolicy.DownloadArtifact, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 1000 {
+		limit = 1000
+	}
+	rows, err := r.db.QueryContext(ctx, r.db.Rebind(downloadArtifactSelect+` WHERE status=? AND expires_at<=? ORDER BY expires_at,id LIMIT ?`), securitypolicy.DownloadArtifactReady, now.UTC(), limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]securitypolicy.DownloadArtifact, 0, limit)
+	for rows.Next() {
+		item, scanErr := r.scan(rows)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const downloadArtifactSelect = `SELECT id,organization_id,actor_id,approval_id,object_key,content_type,sha256,size_bytes,status,max_downloads,downloads,expires_at,created_at,updated_at,downloaded_at,revoked_at,revoked_reason FROM data_export_artifacts`
 
 type downloadArtifactScanner interface{ Scan(...any) error }

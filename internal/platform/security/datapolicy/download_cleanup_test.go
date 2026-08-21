@@ -90,6 +90,28 @@ func TestDownloadDeletesObjectAndRetriesWhenStorageIsUnavailable(t *testing.T) {
 	}
 }
 
+func TestExpirePendingClosesAndDeletesExpiredTicket(t *testing.T) {
+	registry := newMemoryArtifactRegistry()
+	objects := &cleanupTestStore{}
+	controller, err := NewDownloadController(registry, objects, 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	artifact, err := controller.Publish(context.Background(), "org-1", "user-1", "approval-1", "text/csv", []byte("id,name\n1,Alice\n"), time.Now().UTC().Add(time.Hour))
+	if err != nil {
+		t.Fatal(err)
+	}
+	controller.now = func() time.Time { return time.Now().UTC().Add(2 * time.Hour) }
+	count, err := controller.ExpirePending(context.Background(), 10)
+	if err != nil || count != 1 {
+		t.Fatalf("expected one expired ticket, got count=%d err=%v", count, err)
+	}
+	closed, err := registry.Get(context.Background(), "org-1", artifact.ID)
+	if err != nil || closed.Status != DownloadArtifactExpired || !objects.deleted {
+		t.Fatalf("expected expired artifact and deleted object, got %+v, deleted=%v, err=%v", closed, objects.deleted, err)
+	}
+}
+
 func TestDownloadCleanupClosesAccessBeforeRetryingObjectDeletion(t *testing.T) {
 	registry := newMemoryArtifactRegistry()
 	objects := &cleanupTestStore{}

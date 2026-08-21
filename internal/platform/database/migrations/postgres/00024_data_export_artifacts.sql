@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS data_export_artifacts (
     CONSTRAINT chk_data_export_artifacts_max_downloads CHECK (max_downloads > 0)
 );
 CREATE INDEX IF NOT EXISTS idx_data_export_artifacts_org_status_expiry ON data_export_artifacts(organization_id, status, expires_at);
+CREATE INDEX IF NOT EXISTS idx_data_export_artifacts_status_expiry ON data_export_artifacts(status, expires_at, id);
+CREATE INDEX IF NOT EXISTS idx_data_export_artifacts_status_updated ON data_export_artifacts(status, updated_at, id);
 
 -- +goose Down
 DROP TABLE IF EXISTS data_export_artifacts;

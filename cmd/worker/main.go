@@ -71,9 +71,16 @@ func run(ctx context.Context) error {
 	defer func() { _ = lockCache.Close() }()
 	cleanupRunner := scheduler.New(lock.New(lockCache), log)
 	go cleanupRunner.RunDistributed(ctx, "governed-export-cleanup", time.Minute, 2*time.Minute, func(jobCtx context.Context) error {
+		expired, expireErr := cleanupController.ExpirePending(jobCtx, 100)
+		if expired > 0 {
+			log.Info("governed export tickets expired", "count", expired)
+		}
 		cleaned, cleanupErr := cleanupController.CleanupPending(jobCtx, 100)
 		if cleaned > 0 {
 			log.Info("governed export objects cleaned", "count", cleaned)
+		}
+		if expireErr != nil {
+			return expireErr
 		}
 		return cleanupErr
 	})

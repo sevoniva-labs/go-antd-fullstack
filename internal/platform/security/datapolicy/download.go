@@ -79,6 +79,7 @@ type ArtifactRegistry interface {
 	MarkCleanupPending(context.Context, string, string, time.Time) (DownloadArtifact, error)
 	CompleteCleanup(context.Context, string, string, time.Time) (DownloadArtifact, error)
 	ListCleanupPending(context.Context, int) ([]DownloadArtifact, error)
+	ListExpiredReady(context.Context, time.Time, int) ([]DownloadArtifact, error)
 }
 
 type DownloadController struct {
@@ -272,6 +273,41 @@ func (c *DownloadController) CleanupPending(ctx context.Context, limit int) (int
 		cleaned++
 	}
 	return cleaned, firstErr
+}
+
+// ExpirePending closes tickets that reached their deadline without waiting
+// for a download request to discover the expiry.
+func (c *DownloadController) ExpirePending(ctx context.Context, limit int) (int, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 1000 {
+		limit = 1000
+	}
+	now := c.now().UTC()
+	items, err := c.registry.ListExpiredReady(ctx, now, limit)
+	if err != nil {
+		return 0, err
+	}
+	expired := 0
+	var firstErr error
+	for _, artifact := range items {
+		closed, expireErr := c.ExpireState(ctx, artifact.OrganizationID, artifact.ID)
+		if expireErr != nil {
+			if firstErr == nil {
+				firstErr = expireErr
+			}
+			continue
+		}
+		if cleanupErr := c.cleanupArtifact(ctx, closed); cleanupErr != nil {
+			if firstErr == nil {
+				firstErr = cleanupErr
+			}
+			continue
+		}
+		expired++
+	}
+	return expired, firstErr
 }
 
 // memoryArtifactRegistry is intentionally test-only. Production composition
