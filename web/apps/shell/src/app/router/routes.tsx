@@ -131,7 +131,7 @@ export function routeByPath(path: string) {
 
 
 export function buildMenuRoutes(me?: Principal, catalog?: Menu[]) {
-  const visible = appRoutes.filter((route) => route.menu && routeAllowed(route, me))
+  const visible = appRoutes.filter((route) => route.menu && (!me?.must_change_password || route.path === '/account/security') && routeAllowed(route, me))
   const useCatalog = catalog !== undefined
   const catalogByRoute = new Map((catalog ?? []).filter((item) => item.status === 'ACTIVE' && item.route).map((item) => [item.route, item]))
   const catalogNames = new Map((catalog ?? []).map((item) => [item.key, item.name]))

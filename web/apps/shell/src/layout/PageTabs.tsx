@@ -27,6 +27,7 @@ export function PageTabs() {
     if (!me) return
     setTabs((current) => {
       const allowed = current.filter((item) => {
+        if (me.must_change_password && item.path !== '/account/security') return false
         const route = routeByPath(item.path)
         return Boolean(route && routeAllowed(route, me))
       })
@@ -37,7 +38,7 @@ export function PageTabs() {
 
   useEffect(() => {
     const route = routeByPath(location.pathname)
-    if (!route || !routeAllowed(route, me)) return
+    if (!route || !me || (me.must_change_password && route.path !== '/account/security') || !routeAllowed(route, me)) return
     setTabs((current) => {
       const next = current.some((item) => item.path === location.pathname)
         ? current

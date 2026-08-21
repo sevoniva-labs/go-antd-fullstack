@@ -10,7 +10,7 @@ export function GlobalSearch() {
   const navigate = useNavigate()
   const me = useMe().data
   const options = useMemo(() => appRoutes
-    .filter((route) => route.menu && routeAllowed(route, me))
+    .filter((route) => route.menu && (!me?.must_change_password || route.path === '/account/security') && routeAllowed(route, me))
     .map((route) => ({ value: route.path, label: `${route.group ? `${route.group} / ` : ''}${route.name}` })), [me])
 
   useEffect(() => {

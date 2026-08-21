@@ -11,8 +11,8 @@ import {
 } from '@ant-design/icons'
 import { ProLayout } from '@ant-design/pro-components'
 import { App, Avatar, Button, Dropdown, Space, Tag, Tooltip } from 'antd'
-import { Suspense, useEffect, useState } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, queryKeys, type Menu } from '@forge/api-client'
 import { environmentTone, runtimeConfig } from '../app/config/runtime'
@@ -31,11 +31,11 @@ export function AppLayout() {
   const queryClient = useQueryClient()
   const { message } = App.useApp()
   const me = useMe().data
-  const menus = useQuery({ queryKey: queryKeys.menus, queryFn: api.menus, enabled: Boolean(me && can(me, 'system.menu.read')) })
+  const menus = useQuery({ queryKey: queryKeys.menus, queryFn: api.menus, enabled: Boolean(me && !me.must_change_password && can(me, 'system.menu.read')) })
   const { mode, compact, toggleMode, setCompact } = useThemeMode()
   const [fullscreen, setFullscreen] = useState(Boolean(document.fullscreenElement))
   const catalog: Menu[] | undefined = menus.data ? menus.data.menus ?? menus.data.items ?? [] : undefined
-  const routes = buildMenuRoutes(me, catalog)
+  const routes = useMemo(() => buildMenuRoutes(me, catalog), [catalog, me])
 
   useEffect(() => {
     const sync = () => setFullscreen(Boolean(document.fullscreenElement))
@@ -72,9 +72,10 @@ export function AppLayout() {
       route={{ routes }}
       location={{ pathname: location.pathname }}
       menu={{ type: 'group', autoClose: false }}
-      menuItemRender={(item, dom) => (
-        <div onClick={() => item.path && !item.path.startsWith('/group/') && navigate(item.path)}>{dom}</div>
-      )}
+      menuItemRender={(item, dom) => {
+        if (!item.path || item.path.startsWith('/group/')) return dom
+        return <Link to={item.path} onClick={item.onClick}>{dom}</Link>
+      }}
       actionsRender={() => [
         runtimeConfig.showEnvironmentBadge ? <Tag key="env" color={environmentTone()} className="environment-badge">{runtimeConfig.environment}</Tag> : null,
         <GlobalSearch key="search" />,
