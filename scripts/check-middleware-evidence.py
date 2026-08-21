@@ -13,7 +13,7 @@ import sys
 from typing import Any
 
 ALLOWED_LEVELS = {"Adapter slot", "Experimental", "Target-tested", "Not certified"}
-ALLOWED_PROVIDERS = {"kafka", "nacos", "otel", "rocketmq"}
+ALLOWED_PROVIDERS = {"kafka", "nacos", "otel", "prometheus", "rocketmq"}
 ALLOWED_STATES = {"failed", "not_tested", "observed", "passed"}
 REQUIRED_TARGET = ("product", "version", "architecture", "os", "runtime", "driver", "image")
 SENSITIVE_KEY = re.compile(

@@ -1,0 +1,10 @@
+# DEVELOPMENT/CONTRACT TEST ONLY.
+services:
+  prometheus:
+    image: ${PROMETHEUS_IMAGE:?set PROMETHEUS_IMAGE to an approved immutable Prometheus image digest}
+    platform: ${PROMETHEUS_PLATFORM:-linux/arm64}
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
+    volumes:
+      - ../observability/prometheus-contract.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${PROMETHEUS_PORT:-19090}:9090"

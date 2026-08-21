@@ -1,0 +1,7 @@
+# DEVELOPMENT/CONTRACT TEST ONLY.
+services:
+  clamav:
+    image: ${CLAMAV_IMAGE:?set CLAMAV_IMAGE to an approved immutable ClamAV image digest}
+    platform: ${CLAMAV_PLATFORM:-linux/amd64}
+    ports:
+      - "${CLAMAV_PORT:-13310}:3310"
