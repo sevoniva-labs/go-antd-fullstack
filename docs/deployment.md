@@ -8,15 +8,32 @@
 
 - `minimal.yaml`：PostgreSQL + API
 - `mysql.yaml`：MySQL + API
-- `standard.yaml`：PostgreSQL + Redis + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）
-- `full.yaml`：PostgreSQL + Redis + RocketMQ 5 + Elasticsearch + S3-compatible 对象存储（可替换为 COS/OSS/MinIO/Ceph 等）+ Worker
+- `standard.yaml`：PostgreSQL + Redis + 外部 S3-compatible 对象存储（COS/OSS/MinIO/Ceph/AWS S3 等均通过统一 S3 API 接入）
+- `full.yaml`：PostgreSQL + Redis + RocketMQ 5 + Elasticsearch + 外部 S3-compatible 对象存储 + Worker
+- `local-s3-minio.yaml`：显式叠加的本地 MinIO 开发环境，不是生产默认路径
 - `kafka-streaming-dev.yaml`：叠加到 `full.yaml` 的可选 Kafka 流处理环境，不替代 RocketMQ 业务消息
 - `oceanbase-external.yaml`：外部 OceanBase MySQL mode
 - `nacos-dev.yaml`：本地 Nacos 3 开发辅助，不是生产 Nacos 集群模板
 - `observability-dev.yaml`：本地 Prometheus/OTel Collector 辅助
 
-如果使用外部 S3 兼容对象存储并由平台统一创建 bucket，可在 compose 使用前设置
-`S3_BUCKET_AUTO_CREATE=false`（标准/全量场景都支持），避免 `mc` 在非 MinIO 平台执行初始化导致启动阻塞。
+`standard.yaml` 和 `full.yaml` 不启动对象存储容器，也不调用 MinIO mc。使用前必须设置外部端点、区域、bucket、访问凭据和路径风格，并由对象存储平台预先创建 bucket。需要本地 MinIO 时，显式叠加 `local-s3-minio.yaml`，只在开发环境执行一次 bucket 初始化：
+
+~~~bash
+export FORGE_STORAGE_ENDPOINT=http://s3:9000
+export FORGE_STORAGE_PATH_STYLE=true
+export FORGE_STORAGE_TLS=false
+docker compose -f deploy/compose/standard.yaml -f deploy/compose/local-s3-minio.yaml run --rm s3-init
+docker compose -f deploy/compose/standard.yaml -f deploy/compose/local-s3-minio.yaml up -d
+~~~
+
+外部 S3 例子：
+
+~~~bash
+export FORGE_STORAGE_ENDPOINT=https://s3.example.internal
+export FORGE_STORAGE_PATH_STYLE=false
+export FORGE_STORAGE_TLS=true
+docker compose -f deploy/compose/standard.yaml up -d
+~~~
 
 Compose 只用于开发/验证。生产中间件建议使用组织已有 HA 服务，不把开发 Compose 直接搬进生产。
 

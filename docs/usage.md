@@ -64,14 +64,30 @@ make verify
 开发基础设施可以使用对应的 Compose 文件：
 
 ```bash
+FORGE_STORAGE_ENDPOINT=https://s3.example.internal \
+FORGE_STORAGE_PATH_STYLE=false \
+FORGE_STORAGE_TLS=true \
 docker compose -f deploy/compose/standard.yaml up -d
 ```
+
+本地需要 MinIO 时必须显式叠加开发 overlay；这不会改变后端的通用 S3 API：
+
+~~~bash
+export FORGE_STORAGE_ENDPOINT=http://s3:9000
+export FORGE_STORAGE_PATH_STYLE=true
+export FORGE_STORAGE_TLS=false
+docker compose -f deploy/compose/standard.yaml -f deploy/compose/local-s3-minio.yaml run --rm s3-init
+docker compose -f deploy/compose/standard.yaml -f deploy/compose/local-s3-minio.yaml up -d
+~~~
 
 `configs/minimal.yaml` 仅为本地开发保留 `database.auto_migrate: true`。所有生产 profile 均强制关闭它；生产发布必须先由同版本镜像中的 `forge-migrate` 一次性执行迁移，确认后才滚动 API/Worker。环境变量也不能在生产中重新打开该开关。
 
 完整依赖环境：
 
 ```bash
+FORGE_STORAGE_ENDPOINT=https://s3.example.internal \
+FORGE_STORAGE_PATH_STYLE=false \
+FORGE_STORAGE_TLS=true \
 docker compose -f deploy/compose/full.yaml up -d
 ```
 
