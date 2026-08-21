@@ -29,7 +29,7 @@ export interface RuntimeConfig {
 const defaults: RuntimeConfig = {
   appName: 'Sevoniva Forge',
   appShortName: 'Forge',
-  description: 'Enterprise Go + React Application Foundation',
+  description: '企业统一管理平台',
   environment: 'DEV',
   apiBaseUrl: '/api/v1',
   localLoginEnabled: true,

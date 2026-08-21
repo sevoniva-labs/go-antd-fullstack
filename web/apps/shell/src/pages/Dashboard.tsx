@@ -29,14 +29,14 @@ export function DashboardPage() {
   }
 
   const quick = [
-    { title: '用户管理', desc: '账号、角色与初始密码治理', path: '/admin/users', icon: <TeamOutlined />, show: can(me, 'system.user.read') },
+    { title: '用户管理', desc: '账号与角色管理', path: '/admin/users', icon: <TeamOutlined />, show: can(me, 'system.user.read') },
     { title: '审计日志', desc: '查看关键管理和安全操作', path: '/admin/audit-logs', icon: <AuditOutlined />, show: can(me, 'system.audit.read') },
-    { title: '安全基线', desc: '应用层安全能力与合规边界', path: '/security', icon: <SafetyCertificateOutlined />, show: true },
-    { title: '系统状态', desc: '运行时 Provider 与健康检查', path: '/ops/system', icon: <CloudServerOutlined />, show: true },
+    { title: '安全基线', desc: '安全策略与合规控制', path: '/security', icon: <SafetyCertificateOutlined />, show: true },
+    { title: '系统状态', desc: '服务状态与健康检查', path: '/ops/system', icon: <CloudServerOutlined />, show: true },
   ].filter((item) => item.show)
 
   return (
-    <AppPageContainer title={`你好，${me?.display_name || me?.login_name || '用户'}`} subTitle="统一应用基座运行概览">
+    <AppPageContainer title="工作台" subTitle="系统运行概览">
       {ready.data?.status === 'DOWN' && (
         <Alert
           type="error"
@@ -73,7 +73,7 @@ export function DashboardPage() {
                 >
                   <List.Item.Meta
                     title={item.name}
-                    description={item.provider ? `Provider · ${item.provider}` : 'Provider 详情在生产环境可能被隐藏'}
+                    description={item.provider ? `服务：${item.provider}` : '服务信息在生产环境可能被隐藏'}
                   />
                 </List.Item>
               )}
@@ -94,15 +94,15 @@ export function DashboardPage() {
         </Col>
       </Row>
 
-      <Card title="当前运行 Profile" style={{ marginTop: 16 }}>
+      <Card title="当前运行配置" style={{ marginTop: 16 }}>
         <Space wrap>
           <Tag color="blue">{info.data?.environment || '-'}</Tag>
           <Tag>{info.data?.compliance_profile || 'default'}</Tag>
-          <Tag>DB · {info.data?.providers.database || '-'}</Tag>
-          <Tag>Cache · {info.data?.providers.cache || '-'}</Tag>
-          <Tag>MQ · {info.data?.providers.messaging || '-'}</Tag>
-          <Tag>Search · {info.data?.providers.search || '-'}</Tag>
-          <Tag>Storage · {info.data?.providers.storage || '-'}</Tag>
+          <Tag>数据库 · {info.data?.providers.database || '-'}</Tag>
+          <Tag>缓存 · {info.data?.providers.cache || '-'}</Tag>
+          <Tag>消息 · {info.data?.providers.messaging || '-'}</Tag>
+          <Tag>检索 · {info.data?.providers.search || '-'}</Tag>
+          <Tag>对象存储 · {info.data?.providers.storage || '-'}</Tag>
         </Space>
       </Card>
     </AppPageContainer>

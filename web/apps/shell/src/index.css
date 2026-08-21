@@ -107,10 +107,7 @@ button, input, select, textarea { font: inherit; }
   flex-direction: column;
   justify-content: center;
   color: #fff;
-  background:
-    radial-gradient(circle at 15% 18%, rgba(255,255,255,.18), transparent 24%),
-    radial-gradient(circle at 78% 80%, rgba(105,177,255,.28), transparent 32%),
-    linear-gradient(145deg, #061d4f 0%, #0b3b8f 48%, var(--forge-primary, #1677ff) 100%);
+  background: #1677ff;
 }
 .login-visual::after {
   content: "";
@@ -158,24 +155,13 @@ button, input, select, textarea { font: inherit; }
   color: rgba(255,255,255,.9);
 }
 .login-capabilities .anticon { margin-right: 8px; }
-.login-env {
-  position: absolute;
-  bottom: 40px;
-  left: clamp(48px, 7vw, 96px);
-  font-size: 12px;
-  letter-spacing: .14em;
-  color: rgba(255,255,255,.55);
-  text-transform: uppercase;
-}
 .login-form-side {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px;
-  background:
-    radial-gradient(circle at 80% 20%, rgba(22,119,255,.07), transparent 30%),
-    #f8fafc;
+  background: #f8fafc;
 }
 .login-card {
   width: min(100%, 500px);

@@ -19,8 +19,8 @@ export function AccountSecurityPage() {
   const refreshMfa = () => queryClient.invalidateQueries({ queryKey: queryKeys.mfa })
 
   return (
-    <AppPageContainer title="账号安全" subTitle="管理个人密码和多因素认证。敏感变更会撤销其他会话并写入审计日志。">
-      {me?.must_change_password && <Alert type="warning" showIcon message="当前账号必须修改初始密码后才能继续使用受保护功能。" style={{ marginBottom: 16 }} />}
+    <AppPageContainer title="账号安全" subTitle="管理密码和多因素认证。敏感变更会记录审计日志。">
+      {me?.must_change_password && <Alert type="warning" showIcon message="请先修改初始密码。" style={{ marginBottom: 16 }} />}
       <Card title="账号信息" style={{ marginBottom: 16 }}>
         <Descriptions column={{ xs: 1, md: 2 }}>
           <Descriptions.Item label="登录名">{me?.login_name || '-'}</Descriptions.Item>
@@ -37,13 +37,13 @@ export function AccountSecurityPage() {
         extra={mfa.data?.enabled ? <Tag color="success">已启用</Tag> : <Tag>未启用</Tag>}
       >
         <Typography.Paragraph type="secondary">
-          TOTP 秘钥在服务端使用部署配置的标准或国密算法加密。启用后，每次本地账号登录都必须提供动态验证码或一次性恢复码。
+          启用后，本地账号登录需要提供动态验证码或恢复码。
         </Typography.Paragraph>
         {mfa.data?.enabled && <Alert
           type={me?.authentication_level === 'MFA' ? 'success' : 'warning'}
           showIcon
           message={me?.authentication_level === 'MFA' ? '当前会话已通过多因素认证' : '特权写操作需要近期多因素认证'}
-          description="授权、组织治理和其他高风险操作要求最近十分钟内完成 MFA；验证超时后需重新执行二次认证。"
+          description="授权、组织治理等高风险操作需要近期完成二次认证。"
           style={{ marginBottom: 16 }}
         />}
         {mfa.data?.enabled && <ModalForm<{ current_password: string; mfa_code?: string; recovery_code?: string }>
@@ -103,7 +103,7 @@ export function AccountSecurityPage() {
           <ProFormText.Password
             name="new_password"
             label="新密码"
-            extra="默认至少 12 位；实际复杂度以服务端安全配置为准。"
+            extra="至少 12 位，需包含大小写字母、数字和特殊字符。"
             rules={[{ required: true, min: 12 }]}
           />
           <ProFormText.Password
@@ -150,7 +150,7 @@ export function AccountSecurityPage() {
         cancelButtonProps={{ style: { display: 'none' } }}
         onOk={() => setRecoveryCodes([])}
       >
-        <Alert type="warning" showIcon message="这些恢复码仅展示一次，每枚只能使用一次。请存入组织批准的密码管理工具。" style={{ marginBottom: 16 }} />
+        <Alert type="warning" showIcon message="恢复码仅显示一次，每枚只能使用一次，请妥善保管。" style={{ marginBottom: 16 }} />
         <List bordered dataSource={recoveryCodes} renderItem={(code) => <List.Item><Typography.Text code copyable>{code}</Typography.Text></List.Item>} />
       </Modal>
     </AppPageContainer>

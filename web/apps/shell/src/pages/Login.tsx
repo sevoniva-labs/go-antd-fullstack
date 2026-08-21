@@ -27,22 +27,21 @@ export function LoginPage() {
           <BrandMark />
           <Typography.Title level={2}>{runtimeConfig.appName}</Typography.Title>
         </div>
-        <Typography.Title className="login-hero-title">面向企业生产环境的统一应用基座</Typography.Title>
+        <Typography.Title className="login-hero-title">统一业务管理平台</Typography.Title>
         <Typography.Paragraph className="login-hero-copy">
-          React + Ant Design + Go，默认纳入认证授权、审计、可观测、配置治理、中间件 Provider、容器化与信创扩展边界。
+          提供统一认证、权限管理、操作审计与系统治理能力。
         </Typography.Paragraph>
         <Space direction="vertical" size={12} className="login-capabilities">
-          <span><SafetyCertificateOutlined /> 安全基线与三员分立</span>
-          <span><SafetyCertificateOutlined /> 统一 API / 日志 / Trace / Metrics</span>
-          <span><SafetyCertificateOutlined /> Docker / Kubernetes / 信创 Profile</span>
+          <span><SafetyCertificateOutlined /> 认证与权限管理</span>
+          <span><SafetyCertificateOutlined /> 操作审计与安全控制</span>
+          <span><SafetyCertificateOutlined /> 容器化部署与国产化适配</span>
         </Space>
-        <div className="login-env">Environment · {runtimeConfig.environment}</div>
       </section>
 
       <section className="login-form-side">
         <Card className="login-card" bordered={false}>
           <div className="login-card-heading">
-            <Typography.Title level={3}>欢迎登录</Typography.Title>
+            <Typography.Title level={3}>登录</Typography.Title>
             <Typography.Text type="secondary">{runtimeConfig.description}</Typography.Text>
           </div>
 
@@ -66,7 +65,7 @@ export function LoginPage() {
                   if (error instanceof ApiError) {
                     if (error.errorCode === 'MFA_REQUIRED') {
                       setMfaRequired(true)
-                      message.info('密码验证通过，请输入动态验证码或一次性恢复码')
+                      message.info('请输入动态验证码或恢复码')
                       return false
                     }
                     message.error(`${error.message}${error.requestId ? ` · Request ID ${error.requestId}` : ''}`)
@@ -99,9 +98,6 @@ export function LoginPage() {
             </>
           )}
 
-          <Typography.Paragraph type="secondary" className="login-security-tip">
-            初始管理员通过部署 Secret 注入。生产环境禁止在镜像、前端配置或 YAML 中保存默认口令。
-          </Typography.Paragraph>
         </Card>
       </section>
     </main>

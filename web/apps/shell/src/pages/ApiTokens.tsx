@@ -49,12 +49,12 @@ export function ApiTokensPage() {
   if (list.isError) return <AppPageContainer title="API Token"><ErrorState error={list.error} onRetry={() => void list.refetch()} /></AppPageContainer>
 
   return (
-    <AppPageContainer title="API Token" subTitle="用于 CI/CD、服务间调用和自动化。Token 原文只在创建成功时返回一次。">
+    <AppPageContainer title="API Token" subTitle="用于持续集成、服务调用和自动化任务。密钥仅在创建时显示一次。">
       <Alert
         type="info"
         showIcon
         message="机器身份与浏览器身份分离"
-        description="API Token 使用 Bearer 认证，不复用浏览器 Session/CSRF；最终权限同时受 Token scope 与账号 RBAC 约束。"
+        description="Token 与浏览器会话隔离，权限由授权范围和账号权限共同决定。"
         style={{ marginBottom: 16 }}
       />
       <AppProTable<ApiToken>
@@ -89,7 +89,7 @@ export function ApiTokensPage() {
             }}
           >
             <ProFormText name="name" label="名称" rules={[{ required: true }]} />
-            <ProFormSelect name="scopes" label="Scopes" fieldProps={{ mode: 'multiple' }} options={scopeOptions} />
+            <ProFormSelect name="scopes" label="权限范围" fieldProps={{ mode: 'multiple' }} options={scopeOptions} />
             <ProFormDigit name="expires_days" label="有效天数" initialValue={90} min={1} max={365} />
           </ModalForm>,
         ]}
