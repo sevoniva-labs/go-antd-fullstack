@@ -22,3 +22,10 @@ overlay at `deploy/compose/mail-runtime-contract.yaml`, submits one message over
 SMTP, verifies it through the local HTTP API, and writes an `Experimental`
 evidence record. The overlay is explicitly for development and contract tests;
 it must not be used as a production mail relay.
+
+For business-triggered mail, use `notificationdelivery.EmailQueue.EnqueueEmailTx`
+inside the business transaction and register `EmailHandler.MessageHandler()` in
+the existing `messageworker`. The payload binds a stable notification ID and
+rejects mismatched envelopes. The worker provides retry, lease recovery, and
+dead-letter behavior, so the delivery contract is at-least-once; a target mail
+system or downstream consumer must tolerate duplicate delivery.
