@@ -16,3 +16,9 @@ deployment must still provide an approved SMTP/enterprise mail target, sender
 authorization, TLS/mTLS and CA evidence, anti-spam policy, bounce handling,
 template review, delivery audit, retention, and rate/quota controls. No mail
 vendor is `Target-tested` by the local test.
+
+`make mail-runtime-contract` starts the disposable domestic-source Mailpit
+overlay at `deploy/compose/mail-runtime-contract.yaml`, submits one message over
+SMTP, verifies it through the local HTTP API, and writes an `Experimental`
+evidence record. The overlay is explicitly for development and contract tests;
+it must not be used as a production mail relay.
