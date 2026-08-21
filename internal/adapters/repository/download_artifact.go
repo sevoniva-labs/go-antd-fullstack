@@ -112,7 +112,7 @@ func (r *DownloadArtifactRepo) Expire(ctx context.Context, organizationID, artif
 }
 
 func (r *DownloadArtifactRepo) MarkCleanupPending(ctx context.Context, organizationID, artifactID string, now time.Time) (securitypolicy.DownloadArtifact, error) {
-	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE data_export_artifacts SET status=?,updated_at=? WHERE organization_id=? AND id=? AND status IN (?,?)`), securitypolicy.DownloadArtifactCleanup, now.UTC(), organizationID, artifactID, securitypolicy.DownloadArtifactRevoked, securitypolicy.DownloadArtifactExpired)
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE data_export_artifacts SET status=?,updated_at=? WHERE organization_id=? AND id=? AND status IN (?,?,?)`), securitypolicy.DownloadArtifactCleanup, now.UTC(), organizationID, artifactID, securitypolicy.DownloadArtifactRevoked, securitypolicy.DownloadArtifactExpired, securitypolicy.DownloadArtifactDownloaded)
 	if err != nil {
 		return securitypolicy.DownloadArtifact{}, err
 	}
@@ -120,7 +120,7 @@ func (r *DownloadArtifactRepo) MarkCleanupPending(ctx context.Context, organizat
 }
 
 func (r *DownloadArtifactRepo) CompleteCleanup(ctx context.Context, organizationID, artifactID string, now time.Time) (securitypolicy.DownloadArtifact, error) {
-	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE data_export_artifacts SET status=CASE WHEN revoked_at IS NOT NULL THEN ? ELSE ? END,updated_at=? WHERE organization_id=? AND id=? AND status=?`), securitypolicy.DownloadArtifactRevoked, securitypolicy.DownloadArtifactExpired, now.UTC(), organizationID, artifactID, securitypolicy.DownloadArtifactCleanup)
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE data_export_artifacts SET status=CASE WHEN revoked_at IS NOT NULL THEN ? WHEN downloaded_at IS NOT NULL THEN ? ELSE ? END,updated_at=? WHERE organization_id=? AND id=? AND status=?`), securitypolicy.DownloadArtifactRevoked, securitypolicy.DownloadArtifactDownloaded, securitypolicy.DownloadArtifactExpired, now.UTC(), organizationID, artifactID, securitypolicy.DownloadArtifactCleanup)
 	if err != nil {
 		return securitypolicy.DownloadArtifact{}, err
 	}

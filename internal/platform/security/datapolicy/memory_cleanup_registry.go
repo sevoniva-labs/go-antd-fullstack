@@ -12,7 +12,7 @@ func (r *memoryArtifactRegistry) MarkCleanupPending(_ context.Context, organizat
 	if !ok || item.OrganizationID != organizationID {
 		return DownloadArtifact{}, ErrDownloadArtifactNotFound
 	}
-	if item.Status != DownloadArtifactRevoked && item.Status != DownloadArtifactExpired {
+	if item.Status != DownloadArtifactRevoked && item.Status != DownloadArtifactExpired && item.Status != DownloadArtifactDownloaded {
 		return DownloadArtifact{}, ErrDownloadArtifactInvalid
 	}
 	item.Status = DownloadArtifactCleanup
@@ -31,10 +31,12 @@ func (r *memoryArtifactRegistry) CompleteCleanup(_ context.Context, organization
 	if item.Status != DownloadArtifactCleanup {
 		return DownloadArtifact{}, ErrDownloadArtifactInvalid
 	}
-	if item.RevokedAt.IsZero() {
-		item.Status = DownloadArtifactExpired
-	} else {
+	if !item.RevokedAt.IsZero() {
 		item.Status = DownloadArtifactRevoked
+	} else if !item.DownloadedAt.IsZero() {
+		item.Status = DownloadArtifactDownloaded
+	} else {
+		item.Status = DownloadArtifactExpired
 	}
 	item.UpdatedAt = now.UTC()
 	r.items[artifactID] = item

@@ -58,6 +58,38 @@ func TestDownloadRejectsWrongActorBeforeReadingObject(t *testing.T) {
 	}
 }
 
+func TestDownloadDeletesObjectAndRetriesWhenStorageIsUnavailable(t *testing.T) {
+	registry := newMemoryArtifactRegistry()
+	objects := &cleanupTestStore{failDeletes: true}
+	controller, err := NewDownloadController(registry, objects, 1024)
+	if err != nil {
+		t.Fatal(err)
+	}
+	artifact, err := controller.Publish(context.Background(), "org-1", "user-1", "approval-1", "text/csv", []byte("id,name\n1,Alice\n"), time.Now().UTC().Add(time.Hour))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, body, err := controller.Open(context.Background(), "org-1", artifact.ID, "user-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := io.ReadAll(body); err != nil {
+		t.Fatal(err)
+	}
+	pending, err := registry.Get(context.Background(), "org-1", artifact.ID)
+	if err != nil || pending.Status != DownloadArtifactCleanup {
+		t.Fatalf("expected downloaded object cleanup pending, got %+v, %v", pending, err)
+	}
+	objects.failDeletes = false
+	if err := controller.Cleanup(context.Background(), "org-1", artifact.ID); err != nil {
+		t.Fatal(err)
+	}
+	closed, err := registry.Get(context.Background(), "org-1", artifact.ID)
+	if err != nil || closed.Status != DownloadArtifactDownloaded || !objects.deleted {
+		t.Fatalf("expected consumed artifact after cleanup, got %+v, deleted=%v, err=%v", closed, objects.deleted, err)
+	}
+}
+
 func TestDownloadCleanupClosesAccessBeforeRetryingObjectDeletion(t *testing.T) {
 	registry := newMemoryArtifactRegistry()
 	objects := &cleanupTestStore{}

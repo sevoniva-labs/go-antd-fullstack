@@ -182,6 +182,12 @@ func (c *DownloadController) Open(ctx context.Context, organizationID, artifactI
 	if err != nil {
 		return artifact, nil, err
 	}
+	if err := c.objects.Delete(ctx, claimed.ObjectKey); err != nil {
+		if _, markErr := c.registry.MarkCleanupPending(ctx, claimed.OrganizationID, claimed.ID, c.now().UTC()); markErr != nil {
+			return claimed, nil, fmt.Errorf("delete downloaded export object: %w; mark cleanup pending: %v", err, markErr)
+		}
+		return claimed, io.NopCloser(bytes.NewReader(payload)), nil
+	}
 	return claimed, io.NopCloser(bytes.NewReader(payload)), nil
 }
 
