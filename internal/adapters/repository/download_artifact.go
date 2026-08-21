@@ -111,6 +111,22 @@ func (r *DownloadArtifactRepo) Expire(ctx context.Context, organizationID, artif
 	return result, err
 }
 
+func (r *DownloadArtifactRepo) MarkCleanupPending(ctx context.Context, organizationID, artifactID string, now time.Time) (securitypolicy.DownloadArtifact, error) {
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE data_export_artifacts SET status=?,updated_at=? WHERE organization_id=? AND id=? AND status IN (?,?)`), securitypolicy.DownloadArtifactCleanup, now.UTC(), organizationID, artifactID, securitypolicy.DownloadArtifactRevoked, securitypolicy.DownloadArtifactExpired)
+	if err != nil {
+		return securitypolicy.DownloadArtifact{}, err
+	}
+	return r.Get(ctx, organizationID, artifactID)
+}
+
+func (r *DownloadArtifactRepo) CompleteCleanup(ctx context.Context, organizationID, artifactID string, now time.Time) (securitypolicy.DownloadArtifact, error) {
+	_, err := r.db.ExecContext(ctx, r.db.Rebind(`UPDATE data_export_artifacts SET status=CASE WHEN revoked_at IS NOT NULL THEN ? ELSE ? END,updated_at=? WHERE organization_id=? AND id=? AND status=?`), securitypolicy.DownloadArtifactRevoked, securitypolicy.DownloadArtifactExpired, now.UTC(), organizationID, artifactID, securitypolicy.DownloadArtifactCleanup)
+	if err != nil {
+		return securitypolicy.DownloadArtifact{}, err
+	}
+	return r.Get(ctx, organizationID, artifactID)
+}
+
 const downloadArtifactSelect = `SELECT id,organization_id,actor_id,approval_id,object_key,content_type,sha256,size_bytes,status,max_downloads,downloads,expires_at,created_at,updated_at,downloaded_at,revoked_at,revoked_reason FROM data_export_artifacts`
 
 type downloadArtifactScanner interface{ Scan(...any) error }

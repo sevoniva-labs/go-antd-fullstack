@@ -75,6 +75,8 @@ type ArtifactRegistry interface {
 	ClaimDownload(context.Context, string, string, string, time.Time) (DownloadArtifact, error)
 	Revoke(context.Context, string, string, string, string, time.Time) (DownloadArtifact, error)
 	Expire(context.Context, string, string, time.Time) (DownloadArtifact, error)
+	MarkCleanupPending(context.Context, string, string, time.Time) (DownloadArtifact, error)
+	CompleteCleanup(context.Context, string, string, time.Time) (DownloadArtifact, error)
 }
 
 type DownloadController struct {
@@ -141,6 +143,9 @@ func (c *DownloadController) Open(ctx context.Context, organizationID, artifactI
 	if artifact.Status == DownloadArtifactRevoked {
 		return artifact, nil, ErrDownloadArtifactRevoked
 	}
+	if artifact.Status == DownloadArtifactCleanup {
+		return artifact, nil, ErrDownloadArtifactInvalid
+	}
 	if artifact.Status == DownloadArtifactDownloaded || artifact.Downloads >= artifact.MaxDownloads {
 		return artifact, nil, ErrDownloadArtifactConsumed
 	}
@@ -185,7 +190,10 @@ func (c *DownloadController) Revoke(ctx context.Context, organizationID, artifac
 		return err
 	}
 	if err := c.objects.Delete(ctx, artifact.ObjectKey); err != nil {
-		return fmt.Errorf("delete revoked export object: %w", err)
+		if _, markErr := c.registry.MarkCleanupPending(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); markErr != nil {
+			return fmt.Errorf("delete revoked export object: %w; mark cleanup pending: %v", err, markErr)
+		}
+		return fmt.Errorf("delete revoked export object; cleanup pending: %w", err)
 	}
 	return nil
 }
@@ -196,7 +204,29 @@ func (c *DownloadController) Expire(ctx context.Context, organizationID, artifac
 		return err
 	}
 	if err := c.objects.Delete(ctx, artifact.ObjectKey); err != nil {
-		return fmt.Errorf("delete expired export object: %w", err)
+		if _, markErr := c.registry.MarkCleanupPending(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); markErr != nil {
+			return fmt.Errorf("delete expired export object: %w; mark cleanup pending: %v", err, markErr)
+		}
+		return fmt.Errorf("delete expired export object; cleanup pending: %w", err)
+	}
+	return nil
+}
+
+// Cleanup retries an object deletion after Revoke or Expire failed. The
+// database record remains non-downloadable throughout the retry.
+func (c *DownloadController) Cleanup(ctx context.Context, organizationID, artifactID string) error {
+	artifact, err := c.registry.Get(ctx, strings.TrimSpace(organizationID), strings.TrimSpace(artifactID))
+	if err != nil {
+		return err
+	}
+	if artifact.Status != DownloadArtifactCleanup {
+		return ErrDownloadArtifactInvalid
+	}
+	if err := c.objects.Delete(ctx, artifact.ObjectKey); err != nil {
+		return fmt.Errorf("retry delete export object: %w", err)
+	}
+	if _, err := c.registry.CompleteCleanup(ctx, artifact.OrganizationID, artifact.ID, c.now().UTC()); err != nil {
+		return fmt.Errorf("complete export cleanup: %w", err)
 	}
 	return nil
 }
