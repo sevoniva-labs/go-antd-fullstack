@@ -12,15 +12,21 @@ import (
 	"github.com/sevoniva-labs/forge/internal/adapters/auditsink"
 	"github.com/sevoniva-labs/forge/internal/adapters/mailer"
 	"github.com/sevoniva-labs/forge/internal/adapters/notificationdelivery"
+	"github.com/sevoniva-labs/forge/internal/adapters/repository"
 	"github.com/sevoniva-labs/forge/internal/app/audit"
 	"github.com/sevoniva-labs/forge/internal/app/notification"
+	"github.com/sevoniva-labs/forge/internal/platform/cache"
 	"github.com/sevoniva-labs/forge/internal/platform/config"
 	"github.com/sevoniva-labs/forge/internal/platform/database"
 	"github.com/sevoniva-labs/forge/internal/platform/idempotency"
+	"github.com/sevoniva-labs/forge/internal/platform/lock"
 	"github.com/sevoniva-labs/forge/internal/platform/logx"
 	"github.com/sevoniva-labs/forge/internal/platform/messageworker"
 	"github.com/sevoniva-labs/forge/internal/platform/messaging"
 	"github.com/sevoniva-labs/forge/internal/platform/reliablemsg"
+	"github.com/sevoniva-labs/forge/internal/platform/scheduler"
+	securitydatapolicy "github.com/sevoniva-labs/forge/internal/platform/security/datapolicy"
+	"github.com/sevoniva-labs/forge/internal/platform/storage"
 	"github.com/sevoniva-labs/forge/internal/platform/tlsx"
 )
 
@@ -46,6 +52,31 @@ func run(ctx context.Context) error {
 		return err
 	}
 	defer func() { _ = db.Close() }()
+	objectStore, err := storage.New(ctx, cfg.Storage)
+	if err != nil {
+		return err
+	}
+	cleanupController, err := securitydatapolicy.NewDownloadController(repository.NewDownloadArtifactRepo(db), objectStore, 0)
+	if err != nil {
+		return err
+	}
+	lockConfig := cfg.Cache
+	if lockConfig.Provider == "disabled" {
+		lockConfig.Provider = "memory"
+	}
+	lockCache, err := cache.New(lockConfig)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = lockCache.Close() }()
+	cleanupRunner := scheduler.New(lock.New(lockCache), log)
+	go cleanupRunner.RunDistributed(ctx, "governed-export-cleanup", time.Minute, 2*time.Minute, func(jobCtx context.Context) error {
+		cleaned, cleanupErr := cleanupController.CleanupPending(jobCtx, 100)
+		if cleaned > 0 {
+			log.Info("governed export objects cleaned", "count", cleaned)
+		}
+		return cleanupErr
+	})
 	bus, err := messaging.New(cfg.Messaging)
 	if err != nil {
 		return err

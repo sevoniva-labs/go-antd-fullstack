@@ -78,6 +78,7 @@ type ArtifactRegistry interface {
 	Expire(context.Context, string, string, time.Time) (DownloadArtifact, error)
 	MarkCleanupPending(context.Context, string, string, time.Time) (DownloadArtifact, error)
 	CompleteCleanup(context.Context, string, string, time.Time) (DownloadArtifact, error)
+	ListCleanupPending(context.Context, int) ([]DownloadArtifact, error)
 }
 
 type DownloadController struct {
@@ -244,6 +245,33 @@ func (c *DownloadController) Cleanup(ctx context.Context, organizationID, artifa
 		return ErrDownloadArtifactInvalid
 	}
 	return c.cleanupArtifact(ctx, artifact)
+}
+
+// CleanupPending processes a bounded batch. A single storage failure does not
+// prevent other tenants' pending records from being attempted.
+func (c *DownloadController) CleanupPending(ctx context.Context, limit int) (int, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	if limit > 1000 {
+		limit = 1000
+	}
+	pending, err := c.registry.ListCleanupPending(ctx, limit)
+	if err != nil {
+		return 0, err
+	}
+	cleaned := 0
+	var firstErr error
+	for _, artifact := range pending {
+		if err := c.Cleanup(ctx, artifact.OrganizationID, artifact.ID); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
+		}
+		cleaned++
+	}
+	return cleaned, firstErr
 }
 
 // memoryArtifactRegistry is intentionally test-only. Production composition
