@@ -18,9 +18,9 @@ import (
 )
 
 var (
-	ErrInvalidPolicy        = errors.New("invalid data field policy")
-	ErrNoExportFields       = errors.New("at least one data field is required for export")
-	ErrOrganizationRequired = errors.New("organization is required")
+	ErrInvalidPolicy             = errors.New("invalid data field policy")
+	ErrNoExportFields            = errors.New("at least one data field is required for export")
+	ErrOrganizationRequired      = errors.New("organization is required")
 	ErrExportDownloadUnavailable = errors.New("export download control is unavailable")
 	ErrExportActorRequired       = errors.New("interactive export actor is required")
 )
