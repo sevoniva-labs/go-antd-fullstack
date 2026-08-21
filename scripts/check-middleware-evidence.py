@@ -31,7 +31,9 @@ def fail(message: str) -> int:
 def ensure_safe(value: Any, path: str = "record") -> None:
     if isinstance(value, dict):
         for key, child in value.items():
-            if SENSITIVE_KEY.search(str(key)):
+            # Check names are control labels and may legitimately describe an
+            # authentication-token policy; target and metadata keys may not.
+            if not path.startswith("record.checks") and SENSITIVE_KEY.search(str(key)):
                 raise ValueError(f"sensitive field is not allowed: {path}.{key}")
             ensure_safe(child, f"{path}.{key}")
     elif isinstance(value, list):

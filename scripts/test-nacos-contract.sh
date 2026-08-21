@@ -16,6 +16,7 @@ COMPOSE_FILE=${FORGE_NACOS_COMPOSE_FILE:-deploy/compose/nacos-dev.yaml}
 BASE_URL=${FORGE_NACOS_BASE_URL:-http://127.0.0.1:8848}
 CONSOLE_BASE_URL=${FORGE_NACOS_CONSOLE_BASE_URL:-http://127.0.0.1:18080}
 EVIDENCE_FILE=${FORGE_NACOS_EVIDENCE_FILE:-}
+MIDDLEWARE_EVIDENCE_FILE=${FORGE_MIDDLEWARE_EVIDENCE_FILE:-}
 NACOS_USERNAME=${FORGE_NACOS_USERNAME:-}
 NACOS_PASSWORD=${FORGE_NACOS_PASSWORD:-}
 
@@ -187,6 +188,29 @@ payload = {
 }
 pathlib.Path(path).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 PY
+fi
+
+if [[ -n "$MIDDLEWARE_EVIDENCE_FILE" ]]; then
+  middleware_checks=$(python3 - "$config_round_trip" <<'PY'
+import json
+import sys
+
+checks = {
+    "console-readiness": "passed",
+    "server-readiness": "passed",
+    "anonymous-config-rejected": "passed",
+    "base64-auth-token-minimum-32-bytes": "passed",
+    "authenticated-config-round-trip": sys.argv[1] if sys.argv[1] in {"passed", "not_tested"} else "failed",
+}
+print(json.dumps(checks, separators=(",", ":")))
+PY
+  )
+  FORGE_MIDDLEWARE_EVIDENCE_FILE="$MIDDLEWARE_EVIDENCE_FILE" \
+  FORGE_MIDDLEWARE_PROVIDER=nacos \
+  FORGE_MIDDLEWARE_IMAGE="$FORGE_NACOS_IMAGE" \
+  FORGE_MIDDLEWARE_ENDPOINT="$BASE_URL" \
+  FORGE_MIDDLEWARE_CHECKS="$middleware_checks" \
+  python3 scripts/write-middleware-evidence.py
 fi
 
 printf 'Nacos runtime contract passed: image=%s\n' "$FORGE_NACOS_IMAGE"
