@@ -1,0 +1,34 @@
+# DEVELOPMENT ONLY.
+# This explicit overlay is the only Compose path that starts MinIO. The
+# application still talks through the generic S3 API; production must use an
+# approved external S3-compatible endpoint and a pre-created bucket.
+services:
+  s3:
+    image: ${S3_IMAGE:?set S3_IMAGE to an approved immutable local S3 image digest}
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${FORGE_STORAGE_ACCESS_KEY:?set FORGE_STORAGE_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${FORGE_STORAGE_SECRET_KEY:?set FORGE_STORAGE_SECRET_KEY in .env}
+    ports:
+      - "9001:9001"
+    volumes:
+      - s3_data:/data
+
+  s3-init:
+    image: ${S3_MC_IMAGE:?set S3_MC_IMAGE to an approved immutable S3 client image digest}
+    environment:
+      FORGE_STORAGE_ENDPOINT: http://s3:9000
+      FORGE_STORAGE_BUCKET: ${FORGE_STORAGE_BUCKET:-forge}
+      MINIO_ROOT_USER: ${FORGE_STORAGE_ACCESS_KEY:?set FORGE_STORAGE_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${FORGE_STORAGE_SECRET_KEY:?set FORGE_STORAGE_SECRET_KEY in .env}
+    depends_on:
+      - s3
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        until mc alias set local "$$FORGE_STORAGE_ENDPOINT" "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do sleep 2; done;
+        mc mb --ignore-existing local/$$FORGE_STORAGE_BUCKET
+    restart: "no"
+
+volumes:
+  s3_data:

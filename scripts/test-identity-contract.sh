@@ -76,6 +76,8 @@ if [[ -n "${FORGE_IDENTITY_EVIDENCE_FILE:-}" ]]; then
   mkdir -p "$(dirname "$FORGE_IDENTITY_EVIDENCE_FILE")"
   python3 - "$FORGE_IDENTITY_EVIDENCE_FILE" "$PROJECT" "$FORGE_LDAP_IMAGE" "$FORGE_SSO_IMAGE" "$(git rev-parse HEAD)" <<'PY'
 import json
+import os
+import platform
 import pathlib
 import sys
 from datetime import datetime, timezone
@@ -84,6 +86,9 @@ path, project, ldap_image, sso_image, commit = sys.argv[1:]
 payload = {
     "kind": "identity-runtime-contract",
     "status": "passed",
+    "level": "Experimental",
+    "profile": os.environ.get("FORGE_IDENTITY_PROFILE", "local-disposable"),
+    "architecture": platform.machine(),
     "project": project,
     "ldap_image": ldap_image,
     "sso_image": sso_image,
