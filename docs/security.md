@@ -44,6 +44,7 @@
 - 长期留存、防篡改、WORM/SIEM 由生产日志平台实现，不建议用单一业务数据库承担全部网络日志归档。
 - 业务审计日志包含事务内完整性链和校验接口；清理前必须由 WORM 归档适配器写入 Object Lock/Retention/Checksum/VersionId 证据，并在本地事务持久化 receipt 和 chain anchor。未配置或未验证适配器时 fail-closed。
 - 审计可靠汇聚使用本地 `reliable_messages` outbox 与审计记录同事务写入；只有 RocketMQ allowlist 明确包含 `audit-events` 时才启用转发，发布失败进入重试/死信，不静默降级。
+- SIEM 出口提供无厂商绑定的 `audit.SIEMSink` 与 CEF over TLS `auditsink.CEFClient` 适配槽；事件使用 RFC 6587 长度帧、TLS 1.2+ 证书校验和详情 SHA-256 摘要。它必须由可靠消息消费者调用，不能在业务审计事务内同步直发；具体 SIEM 的双向 TLS、ACL、HA、留存和机构验收仍是 `Adapter slot` / `Not certified`。
 
 ## 多实例与可靠性安全
 
