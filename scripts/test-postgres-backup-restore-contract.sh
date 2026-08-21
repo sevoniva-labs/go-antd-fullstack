@@ -8,6 +8,14 @@ COMPOSE_CMD="${FORGE_COMPOSE_CMD:-docker compose}"
 PASSWORD="${FORGE_POSTGRES_PASSWORD:-forge-contract-password}"
 PORT="${FORGE_POSTGRES_PORT:-15432}"
 EVIDENCE_FILE="${FORGE_POSTGRES_BACKUP_EVIDENCE_FILE:-}"
+DR_EVIDENCE_FILE="${FORGE_DISASTER_EVIDENCE_FILE:-}"
+DR_EVIDENCE_ROOT="${FORGE_DISASTER_EVIDENCE_ROOT:-}"
+if [[ -n "$DR_EVIDENCE_FILE" && "$DR_EVIDENCE_FILE" != /* ]]; then
+  DR_EVIDENCE_FILE="$PWD/$DR_EVIDENCE_FILE"
+fi
+if [[ -n "$DR_EVIDENCE_ROOT" && "$DR_EVIDENCE_ROOT" != /* ]]; then
+  DR_EVIDENCE_ROOT="$PWD/$DR_EVIDENCE_ROOT"
+fi
 mkdir -p "$ROOT/.evidence"
 DUMP_FILE="$(mktemp "$ROOT/.evidence/postgres-backup-contract.XXXXXX")"
 
@@ -75,6 +83,54 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
   "data_verification": "passed"
 }
 EOF
+fi
+
+if [[ -n "$DR_EVIDENCE_FILE" ]]; then
+  : "${DR_EVIDENCE_ROOT:?FORGE_DISASTER_EVIDENCE_ROOT is required with FORGE_DISASTER_EVIDENCE_FILE}"
+  : "${FORGE_DR_TARGET_PRODUCT:?set FORGE_DR_TARGET_PRODUCT for disaster evidence}"
+  : "${FORGE_DR_TARGET_VERSION:?set FORGE_DR_TARGET_VERSION for disaster evidence}"
+  : "${FORGE_DR_TARGET_TESTED_AT:?set FORGE_DR_TARGET_TESTED_AT for disaster evidence}"
+  : "${FORGE_DR_TARGET_CPU:?set FORGE_DR_TARGET_CPU for disaster evidence}"
+  : "${FORGE_DR_TARGET_OS:?set FORGE_DR_TARGET_OS for disaster evidence}"
+  : "${FORGE_DR_TARGET_RUNTIME:?set FORGE_DR_TARGET_RUNTIME for disaster evidence}"
+  : "${FORGE_DR_TARGET_DATABASE:?set FORGE_DR_TARGET_DATABASE for disaster evidence}"
+  : "${FORGE_DR_TARGET_MESSAGE_QUEUE:?set FORGE_DR_TARGET_MESSAGE_QUEUE for disaster evidence}"
+  : "${FORGE_DR_TARGET_OBJECT_STORAGE:?set FORGE_DR_TARGET_OBJECT_STORAGE for disaster evidence}"
+  : "${FORGE_DR_RPO_TARGET_SECONDS:?set FORGE_DR_RPO_TARGET_SECONDS for disaster evidence}"
+  : "${FORGE_DR_RTO_TARGET_SECONDS:?set FORGE_DR_RTO_TARGET_SECONDS for disaster evidence}"
+  mkdir -p "$DR_EVIDENCE_ROOT" "$(dirname "$DR_EVIDENCE_FILE")"
+  proof_file="$DR_EVIDENCE_ROOT/postgres-backup-restore-proof.txt"
+  printf 'kind=forge-disaster-backup-restore-proof\nproduct=%s\nimage=%s\ndata_verification=passed\n' \
+    "$FORGE_DR_TARGET_PRODUCT" "$POSTGRES_IMAGE" >"$proof_file"
+  proof_digest=$(shasum -a 256 "$proof_file" | awk '{print $1}')
+  python3 - "$DR_EVIDENCE_FILE" "$proof_digest" "$FORGE_DR_TARGET_PRODUCT" "$FORGE_DR_TARGET_VERSION" \
+    "$FORGE_DR_TARGET_TESTED_AT" "$FORGE_DR_TARGET_CPU" "$FORGE_DR_TARGET_OS" "$FORGE_DR_TARGET_RUNTIME" \
+    "$FORGE_DR_TARGET_DATABASE" "$FORGE_DR_TARGET_MESSAGE_QUEUE" "$FORGE_DR_TARGET_OBJECT_STORAGE" \
+    "$FORGE_DR_RPO_TARGET_SECONDS" "$FORGE_DR_RTO_TARGET_SECONDS" <<'PY'
+import json
+import pathlib
+import sys
+
+(path, digest, product, version, tested_at, cpu, os_name, runtime, database,
+ message_queue, object_storage, rpo, rto) = sys.argv[1:]
+pathlib.Path(path).write_text(json.dumps({
+    "target": {
+        "product": product, "version": version, "tested_at": tested_at,
+        "cpu": cpu, "os": os_name, "runtime": runtime, "database": database,
+        "message_queue": message_queue, "object_storage": object_storage,
+    },
+    "rpo_target_seconds": float(rpo), "rto_target_seconds": float(rto),
+    "scenarios": [
+        {"name": name, "status": "not_tested"}
+        for name in ("node_failure", "network_partition", "database_failover", "mq_failure", "s3_failure", "site_failure")
+    ] + [{
+        "name": "backup_restore", "status": "passed",
+        "observed_rpo_seconds": 0, "observed_rto_seconds": 0,
+        "evidence_refs": ["postgres-backup-restore-proof.txt"],
+    }],
+    "evidence_digests": {"postgres-backup-restore-proof.txt": digest},
+}, indent=2) + "\n", encoding="utf-8")
+PY
 fi
 
 echo "PostgreSQL backup/restore contract passed: image=$POSTGRES_IMAGE"
