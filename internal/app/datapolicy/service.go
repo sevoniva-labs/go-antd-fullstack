@@ -61,15 +61,7 @@ func (s *Service) AuthorizeExport(ctx context.Context, actor identitydomain.Prin
 	if len(keys) == 0 {
 		return ErrNoExportFields
 	}
-	records, err := s.repo.List(ctx, actor.OrganizationID)
-	if err != nil {
-		return err
-	}
-	policies := make([]securitypolicy.FieldPolicy, 0, len(records))
-	for _, record := range records {
-		policies = append(policies, record.FieldPolicy)
-	}
-	catalog, err := securitypolicy.NewCatalog(policies)
+	catalog, err := s.catalog(ctx, actor.OrganizationID)
 	if err != nil {
 		return err
 	}
@@ -77,6 +69,33 @@ func (s *Service) AuthorizeExport(ctx context.Context, actor identitydomain.Prin
 		keys[i] = strings.TrimSpace(keys[i])
 	}
 	return catalog.AuthorizeExport(keys, request)
+}
+
+// RenderExport loads the actor's organization-scoped catalog before rendering
+// an explicit business projection. The caller remains responsible for applying
+// data-scope authorization to rows and for binding options to a one-time
+// approval execution record.
+func (s *Service) RenderExport(ctx context.Context, actor identitydomain.Principal, options securitypolicy.ExportOptions, rows []securitypolicy.ExportRow) (securitypolicy.ExportArtifact, error) {
+	if actor.OrganizationID == "" {
+		return securitypolicy.ExportArtifact{}, ErrOrganizationRequired
+	}
+	catalog, err := s.catalog(ctx, actor.OrganizationID)
+	if err != nil {
+		return securitypolicy.ExportArtifact{}, err
+	}
+	return catalog.RenderExport(options, rows)
+}
+
+func (s *Service) catalog(ctx context.Context, organizationID string) (*securitypolicy.Catalog, error) {
+	records, err := s.repo.List(ctx, organizationID)
+	if err != nil {
+		return nil, err
+	}
+	policies := make([]securitypolicy.FieldPolicy, 0, len(records))
+	for _, record := range records {
+		policies = append(policies, record.FieldPolicy)
+	}
+	return securitypolicy.NewCatalog(policies)
 }
 
 func (s *Service) ListDeletionEvidence(ctx context.Context, actor identitydomain.Principal) ([]securitypolicy.DeletionEvidence, error) {

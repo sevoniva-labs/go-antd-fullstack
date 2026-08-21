@@ -1,0 +1,8 @@
+services:
+  mail:
+    image: ${FORGE_MAIL_IMAGE:?set FORGE_MAIL_IMAGE to an approved immutable Mailpit image digest}
+    environment:
+      MP_MAX_MESSAGES: "100"
+    ports:
+      - "${FORGE_MAIL_SMTP_PORT:-1025}:1025"
+      - "${FORGE_MAIL_UI_PORT:-8025}:8025"

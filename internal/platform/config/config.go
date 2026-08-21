@@ -31,6 +31,8 @@ type Config struct {
 	Resilience    Resilience    `yaml:"resilience"`
 	Compliance    Compliance    `yaml:"compliance"`
 	Features      Features      `yaml:"features"`
+	Notification  Notification  `yaml:"notification"`
+	SIEM          SIEM          `yaml:"siem"`
 }
 
 type App struct {
@@ -281,6 +283,8 @@ func Default() Config {
 		Resilience:    Resilience{DependencyTimeout: 10 * time.Second, RetryMaxAttempts: 3, RetryBaseDelay: 100 * time.Millisecond, CircuitFailureThreshold: 5, CircuitOpenDuration: 30 * time.Second, BulkheadConcurrency: 100},
 		Compliance:    Compliance{Profile: "standard", AuditRetentionDays: 365, NetworkLogRetentionDays: 183, SensitiveDataMasking: true, DisableDebugEndpoints: true},
 		Features:      Features{Flags: map[string]bool{}},
+		Notification:  Notification{Provider: "disabled", SMTPTLSMode: "starttls", Topic: "forge.notification.email"},
+		SIEM:          SIEM{Provider: "disabled", Topic: "forge.audit.events"},
 	}
 }
 
@@ -546,6 +550,7 @@ func ApplyEnvironment(cfg *Config) {
 	overrideInt(&cfg.Compliance.NetworkLogRetentionDays, "FORGE_NETWORK_LOG_RETENTION_DAYS")
 	overrideBool(&cfg.Compliance.SensitiveDataMasking, "FORGE_SENSITIVE_DATA_MASKING")
 	overrideBool(&cfg.Compliance.DisableDebugEndpoints, "FORGE_DISABLE_DEBUG_ENDPOINTS")
+	applyDeliveryEnvironment(cfg)
 }
 
 func normalizeStorageProvider(value string) string {
@@ -788,6 +793,7 @@ func (c Config) Validate() error {
 	if isProduction(c.App.Environment) && c.Database.AutoMigrate {
 		errs = append(errs, "database.auto_migrate must be false in production; run forge-migrate as a one-shot release job")
 	}
+	errs = append(errs, validateDelivery(c)...)
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, "; "))
 	}

@@ -16,7 +16,8 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 .PHONY: middleware-evidence-check middleware-evidence-check-certified
 .PHONY: identity-evidence-check identity-evidence-check-certified
 .PHONY: compose-storage-policy-check
-.PHONY: malware-evidence-check malware-evidence-check-certified clamav-runtime-contract prometheus-runtime-contract
+.PHONY: malware-evidence-check malware-evidence-check-certified clamav-runtime-contract prometheus-runtime-contract mail-runtime-contract
+.PHONY: mail-evidence-check mail-evidence-check-certified
 .PHONY: redis-tls-runtime-contract
 
 help:
@@ -46,6 +47,7 @@ help:
 	@echo "  make compose-storage-policy-check  Enforce generic external S3 Compose defaults"
 	@echo "  make clamav-runtime-contract  Run the disposable ClamAV malware scan contract"
 	@echo "  make prometheus-runtime-contract  Run the disposable Prometheus query contract"
+	@echo "  make mail-runtime-contract  Start and probe the local test mail service"
 	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
 	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
 	@echo "  make redis-tls-runtime-contract  Verify local Redis TLS and ACL contract"
@@ -183,6 +185,16 @@ clamav-runtime-contract:
 prometheus-runtime-contract:
 	bash scripts/test-prometheus-contract.sh
 
+mail-runtime-contract:
+	bash scripts/test-mail-contract.sh
+
+mail-evidence-check:
+	python3 scripts/check-mail-evidence_test.py
+	python3 scripts/check-mail-evidence.py --evidence-root .evidence
+
+mail-evidence-check-certified:
+	python3 scripts/check-mail-evidence.py --file "$(FORGE_MAIL_EVIDENCE_FILE)" --require-target-tested
+
 nacos-runtime-contract:
 	bash scripts/test-nacos-contract.sh
 
@@ -279,7 +291,7 @@ supply-chain-evidence: ci-policy
 release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
-verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check middleware-evidence-check identity-evidence-check malware-evidence-check compose-storage-policy-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
+verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check middleware-evidence-check identity-evidence-check malware-evidence-check mail-evidence-check compose-storage-policy-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-build:
 	bash scripts/build-offline-package.sh
