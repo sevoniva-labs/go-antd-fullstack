@@ -72,3 +72,5 @@ The contract starts the disposable overlay, verifies the LDAP test-user bind/sea
 ## Evidence boundary
 
 The scaffold provides the adapter and policy boundary. It does not certify a commercial IAM, OIDC issuer, LDAP/AD version, CA chain, browser fleet, or high-availability topology. Each target must record discovery, code exchange, nonce/state replay, TLS failure, directory timeout, disabled-account, unmapped-subject, MFA step-up, failover, and audit evidence before being labeled `Target-tested`.
+
+Validate the generated record with the `identity-evidence-check` make target. The disposable contract records `Experimental` because it proves only directory lookup, management readiness, and discovery. It does not prove TLS/StartTLS, authorization-code exchange, nonce/state replay, disabled-account behavior, unmapped-subject rejection, MFA step-up, failover, backup/restore, or a production topology. Those checks are required before any target is labeled `Target-tested`.

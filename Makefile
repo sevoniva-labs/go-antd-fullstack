@@ -14,6 +14,7 @@ PROTO_TOOLS = .tools/bin/buf .tools/bin/protoc-gen-go .tools/bin/protoc-gen-go-g
 .PHONY: database-evidence-check database-evidence-check-certified
 .PHONY: s3-evidence-check s3-evidence-check-certified
 .PHONY: middleware-evidence-check middleware-evidence-check-certified
+.PHONY: identity-evidence-check identity-evidence-check-certified
 .PHONY: redis-tls-runtime-contract
 
 help:
@@ -39,6 +40,7 @@ help:
 	@echo "  make storage-cos-advanced-contract  Run opt-in advanced S3 capability contract"
 	@echo "  make identity-compose-config  Render the local LDAP/SSO contract overlay"
 	@echo "  make identity-runtime-contract  Start and probe the local LDAP/SSO contract overlay"
+	@echo "  make identity-evidence-check  Validate optional identity runtime evidence"
 	@echo "  make nacos-runtime-contract  Start and probe the local Nacos 3 contract overlay"
 	@echo "  make redis-runtime-contract  Start and probe the local Redis contract overlay"
 	@echo "  make redis-tls-runtime-contract  Verify local Redis TLS and ACL contract"
@@ -152,6 +154,13 @@ identity-compose-config:
 identity-runtime-contract:
 	bash scripts/test-identity-contract.sh
 
+identity-evidence-check:
+	python3 scripts/check-identity-evidence_test.py
+	python3 scripts/check-identity-evidence.py --evidence-root .evidence
+
+identity-evidence-check-certified:
+	python3 scripts/check-identity-evidence.py --file "$(FORGE_IDENTITY_EVIDENCE_FILE)" --require-target-tested
+
 nacos-runtime-contract:
 	bash scripts/test-nacos-contract.sh
 
@@ -248,7 +257,7 @@ supply-chain-evidence: ci-policy
 release-evidence: supply-chain-evidence
 	bash scripts/verify-image-supply-chain.sh
 
-verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check middleware-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
+verify: offline-check disaster-check crypto-evidence-check database-evidence-check s3-evidence-check middleware-evidence-check identity-evidence-check ci-go ci-web ci-deploy security-tools supply-chain-evidence
 
 offline-build:
 	bash scripts/build-offline-package.sh
